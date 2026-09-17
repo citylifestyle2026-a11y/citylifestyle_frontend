@@ -1,0 +1,151 @@
+/* Regular */
+:root {
+  /* Shared brand accent gradient — this is the exact gradient already
+     used on the Home page's "Join Community" button. Defined once here
+     so every page (public + private) can reference the same color via
+     var(--brand-gradient) instead of each file hard-coding its own
+     copy. Change it in this one place and it updates everywhere. */
+  --brand-gradient: linear-gradient(98.31deg, #C2977C 0%, #FFFFFF 66.28%, #C2977C 132.57%);
+
+  /* Admin (post-login) accent palette — same navy-blue used on the
+     Login page/logo. Every primary button, active tab, focus ring,
+     and link across the dashboard pages should reference these
+     instead of each file having its own one-off blue/teal/purple, so
+     changing the brand color means editing only these five lines. */
+  --admin-accent: #4A90C2;
+  --admin-accent-strong: #2F6F9E;
+  --admin-accent-dark: #0B2A44;
+  --admin-accent-gradient: linear-gradient(135deg, #2F6F9E, #0B2A44);
+  --admin-focus-ring: rgba(74, 144, 194, 0.35);
+}
+
+@font-face {
+  font-family: 'Poppins';
+  src: url('./assets/Font/Poppins/Poppins-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+/* Medium */
+@font-face {
+  font-family: 'Poppins';
+  src: url('./assets/Font/Poppins/Poppins-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+}
+
+/* SemiBold */
+@font-face {
+  font-family: 'Poppins';
+  src: url('./assets/Font/Poppins/Poppins-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+}
+
+/* Bold */
+@font-face {
+  font-family: 'Poppins';
+  src: url('./assets/Font/Poppins/Poppins-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+#root {
+  width: 100%;
+  max-width: 100%;
+  /* margin: 0 auto; */
+  /* min-height: 100svh; */
+  box-sizing: border-box;
+}
+body {
+  font-family: 'Poppins', sans-serif !important;
+  box-sizing: border-box !important;
+    margin: 0;
+  padding:0;
+  /* min-height (not a fixed height) — a fixed 100vh made the body
+     overflow by a few pixels on pages with little content (e.g. Admin
+     with only 1 row), forcing an unwanted page scrollbar even though
+     nothing actually needed scrolling. min-height still lets short
+     pages sit flush with the viewport, but grows (and scrolls) for
+     pages whose content is taller than the viewport. */
+  min-height: 100vh;
+}
+*{
+  box-sizing: border-box;
+}
+
+/* pagination css */
+.permissionPagePagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 20px;
+  font-size: 13.5px;
+  color: #6b7085;
+}
+
+.permissionPagePaginationInfo {
+  color: #6b7085;
+  font-size: 13.5px;
+  white-space: nowrap;
+}
+
+.permissionPagePaginationControls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.permissionPagePaginationArrow {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background-color: #f2f3f6;
+  color: #6b7085;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.2s ease;
+}
+
+.permissionPagePaginationArrow:hover:not(:disabled) {
+  background-color: #e5e6ec;
+}
+
+.permissionPagePaginationArrow:disabled {
+  cursor: not-allowed;
+  color: #c4c6d2;
+}
+
+.permissionPagePaginationBtn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background-color: transparent;
+  color: #6b7085;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.permissionPagePaginationBtn:hover {
+  background-color: #f2f3f6;
+}
+
+.permissionPagePaginationActive,
+.permissionPagePaginationActive:hover {
+  background-color: var(--admin-accent);
+  color: #ffffff;
+}
+input,select{
+  box-shadow: none !important;
+}

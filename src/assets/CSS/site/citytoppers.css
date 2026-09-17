@@ -1,0 +1,1883 @@
+/* ─── Reset & Base ─────────────────────────────────── */.ct-site *, .ct-site *::before, .ct-site *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* accent-gradient now comes from the single shared token in index.css
+     (--brand-gradient) so the Home page and Login page never drift out
+     of sync — change the color once in index.css, it updates both. */
+  --accent-gradient: var(--brand-gradient);
+  --font: 'Montserrat', sans-serif;
+  --page-px: 14%;
+}
+
+.ct-site {
+  font-family: var(--font);
+  background: #0a0a0a url('/assets/images/site/bgImg.png') repeat;
+  background-size: auto;
+  color: #fff;
+  min-height: 100vh;
+  /* Safety net: several sections use fixed pixel widths at their base
+     (desktop) size before the responsive rules below kick in — this
+     guarantees no accidental horizontal scrollbar on any viewport. */
+  overflow-x: hidden;
+  /* Header is `position: fixed` (see .site-header below) and so no
+     longer takes up space in normal flow — this padding reserves that
+     same space at the top of every page so the fixed header never
+     overlaps the hero/content under it. 160px ≈ desktop header's own
+     height (16px×2 nav padding + 120px logo) plus a small buffer;
+     overridden at each breakpoint below to match that breakpoint's
+     smaller nav padding/logo size. */
+  padding-top: 160px;
+}
+
+/* ─── NAVBAR ────────────────────────────────────────── */.ct-site .site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 100;
+  /* `sticky` was tried first but didn't stay put reliably, so this is
+     now a true `fixed` header — always pinned to the viewport, never
+     scrolls with the page. Because `fixed` takes the header out of
+     normal document flow entirely, `.ct-site` below gets matching
+     `padding-top` (one value per existing header breakpoint, mirroring
+     the .nav/.logo sizes already set for each) so the header never
+     overlaps/covers the hero or any section under it. Background/blur
+     kept so page content doesn't show through while scrolling under
+     it. */
+  background: rgba(10, 10, 10, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.ct-site .nav {
+  /* flex-direction: row is set explicitly to shield this from the admin
+     Sidebar's own unscoped ".nav" rule (src/assets/CSS/Sidebar.css),
+     which sets `flex-direction: column` and is always present in the
+     bundle since App.jsx statically imports every admin page. */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 16px var(--page-px);
+  gap: 0;
+}
+
+/* LOGO */.ct-site .logo img {
+  height: 120px;
+  width: 118px;
+  object-fit: contain;
+  display: block;
+}
+
+/* NAV LINKS — pushed to the right with margin-left auto */
+.ct-site .nav-links {
+  list-style: none;
+  display: flex;
+  gap: 36px;
+  margin-left: auto;
+}
+
+.ct-site .nav-links a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  opacity: 0.9;
+  transition: opacity 0.2s;
+}
+
+.ct-site .nav-links a:hover { opacity: 1; }
+
+/* JOIN COMMUNITY BUTTON */.ct-site .btn-join {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 36px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-family: var(--font);
+  font-size: 16px;
+  font-weight: 600;
+  background: var(--accent-gradient);
+  color: #111;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  margin-left: 28px;
+}
+
+.ct-site .btn-join:hover { opacity: 0.88; }
+
+/* LOGIN BUTTON — outlined variant sitting next to Join Community */
+.ct-site .btn-login {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 17px 30px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-family: var(--font);
+  font-size: 16px;
+  font-weight: 600;
+  background: transparent;
+  color: #fff;
+  border: 1px solid #C2977C;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  margin-left: 28px;
+}
+
+.ct-site .btn-login:hover { background: #C2977C; color: #111; }
+
+/* ─── HERO ──────────────────────────────────────────── */.ct-site .hero {
+  position: relative;
+  width: 100%;
+  height: 78vh;
+  min-height: 540px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* HERO BACKGROUND IMAGE
+   ▸ Replace assets/images/hero.svg with your photo (e.g. hero.jpg, hero.webp)
+   ▸ Recommended: 1600×900 px or larger, landscape orientation */.ct-site .hero-bg-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+}
+
+.ct-site .hero-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(90deg, rgba(102, 102, 102, 0) -16.04%, rgba(0, 0, 0, 0.8) 70.11%);
+}
+
+
+/* HERO TEXT CONTENT — right-aligned, matching screenshot */.ct-site .hero-content {
+  position: relative;
+  z-index: 3;
+  margin-left: 55%;
+  margin-right: var(--page-px);
+  max-width: 480px;
+  text-align: left;
+}
+
+.ct-site .hero-tagline {
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.ct-site .hero-title {
+  font-size: 70px;
+  font-weight: 500;
+  line-height: 1.0;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.ct-site .hero-subtitle {
+  font-size: 30px;
+  font-weight: 500;
+  /* letter-spacing: 3px; */
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.85);
+  margin-bottom: 32px;
+}
+
+.ct-site .hero-desc {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.8;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+}
+/* All slides overlap each other */.ct-site .hero-slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.8s ease;
+}
+
+/* Only active slide visible */.ct-site .hero-slide.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Content should remain above image */.ct-site .hero-slide .hero-content {
+  position: relative;
+  z-index: 3;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Slide 3 brand text */.ct-site .hero-brand-name {
+  margin: 0 0 12px;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+/* HERO BUTTONS */.ct-site .hero-buttons {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* sparkle page button */.ct-site .btn-sparkle {
+  background: #C7D9FF;
+  color: #111;
+  border: none;
+}
+
+/* parv page — pink theme */.ct-site .hero-title--parv {
+  color: #EC4899;
+  font-size: 90px;
+  line-height: 1;
+  margin-top: 14px;
+  margin-bottom: 8px;
+}
+
+/* parv subtitle — tighter to the title */.ct-site .hero-title--parv + .hero-subtitle {
+  margin-bottom: 0;
+}
+
+/* parv hero block — title group + tags with gap */.ct-site .parv-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 14px 0 24px;
+}
+
+.ct-site .parv-title-group .hero-title--parv {
+  margin: 0 0 -12px;
+  /* line-height: 0.8; */
+}
+
+.ct-site .parv-tags .hero-tagline--parv {
+  margin: 0;
+}
+
+.ct-site .hero-tagline--parv {
+  color: rgba(255,255,255,0.85);
+  margin-top: 14px;
+}
+
+.ct-site .btn-parv {
+  background: #EC4899;
+  color: #000000;
+  border: none;
+}
+
+/* shared base for all .btn variants */.ct-site .btn {
+  display: inline-block;
+  padding: 18px 36px;
+  border-radius: 10px;
+  font-family: var(--font);
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.ct-site .btn:hover { opacity: 0.88; }
+
+/* gradient fill button */.ct-site .btn-gradient {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent-gradient);
+  color: #111;
+  border: none;
+}
+
+.ct-site .btn-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+/* outline/ghost button ("Our Story") */.ct-site .btn-story {
+  background: transparent;
+  color: #fff;
+  border: 1px solid #FFFFFF;
+}
+
+/* ─── STATS BAR ─────────────────────────────────────── */.ct-site .stats {
+  display: flex;
+  justify-content: center;
+  gap: 55px;
+  padding: 60px var(--page-px) 48px;
+  position: relative;
+  margin-top: 0;
+  z-index: 10;
+}
+
+.ct-site .stat-card {
+  flex: 1;
+  width: 300px;
+  height: 183px;
+  background: rgba(58, 58, 58, 0.4);
+  border-radius: 20px;
+  padding: 28px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.ct-site .stat-num {
+  font-size: 60px;
+  font-weight: 400;
+  color: #FFE54F;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+
+.ct-site .stat-label {
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: 1.5px;
+  color: #ffffff;
+  text-transform: uppercase;
+}
+
+/* sparkle page — blue stat number */.ct-site .stat-num--blue {
+  color: #C7D9FF;
+}
+
+/* parv page — pink stat number */.ct-site .stat-num--pink {
+  color: #EC4899;
+}
+
+/* parv quote section */.ct-site .parv-quote-section {
+  padding: 80px var(--page-px) 40px;
+  text-align: center;
+}
+
+/* parv experience section */.ct-site .about-tag.about-tag--pink {
+  color: #EC4899;
+}
+
+.ct-site .about-bullets li .bullet-title {
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.ct-site .about-bullets li .bullet-text {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.60);
+  line-height: 1.6;
+  text-transform: uppercase;
+}
+
+.ct-site .about-bullets li {
+  align-items: flex-start;
+}
+
+/* parv experience — heading + child text (Figma spec) */.ct-site .parv-exp .about-bullets li .bullet-title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1.3;            /* 130% */
+  letter-spacing: -0.06em;     /* -6% */
+  vertical-align: middle;
+  font-variant: small-caps;
+  text-transform: none;        /* small-caps ko effective karne ke liye */
+}
+
+.ct-site .parv-exp .about-bullets li .bullet-text {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 15px;
+  line-height: 1.3;            /* 130% */
+  letter-spacing: -0.06em;     /* -6% */
+  vertical-align: middle;
+  font-variant: small-caps;
+  text-transform: none;
+}
+
+/* parv experience — section layout */.ct-site .parv-exp {
+  padding: 80px var(--page-px);
+}
+
+.ct-site .parv-exp .about-title {
+  margin-bottom: 40px;
+  max-width: 660px;
+}
+
+.ct-site .parv-exp-row {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+
+.ct-site .parv-exp-row .about-bullets {
+  flex: 1;
+  min-width: 0;
+}
+
+.ct-site .parv-exp-row .parv-exp-img-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+/* parv experience — bullet cards */.ct-site .parv-exp .about-bullets {
+  gap: 20px;
+}
+
+.ct-site .parv-exp .about-bullets li {
+  align-items: center;
+  gap: 40px;
+  height: 160px;
+  max-width: 660px;
+  padding: 0 40px;
+  border-radius: 20px;
+  border: 1px solid #EC4899;
+  background: rgba(58, 58, 58, 0.4);
+}
+
+/* parv experience — grey icon wrap (fixed 60×60, never deforms) */.ct-site .parv-exp .bullet-bg {
+  width: 60px;
+  height: 60px;
+  border-radius: 14px;
+  flex-shrink: 0;
+}
+
+.ct-site .parv-exp .bullet-bg img {
+  display: block;
+  object-fit: contain;
+}
+
+/* per-icon sizes (Figma spec) */.ct-site .parv-exp .about-bullets li:nth-child(1) .bullet-bg img { width: 30px;    height: 30px; }
+.ct-site .parv-exp .about-bullets li:nth-child(2) .bullet-bg img { width: 22px;    height: 22px; }
+.ct-site .parv-exp .about-bullets li:nth-child(3) .bullet-bg img { width: 22.52px; height: 22.52px; }
+.ct-site .parv-exp .about-bullets li:nth-child(4) .bullet-bg img { width: 24px;    height: 24px; }
+
+/* parv experience image + badges */.ct-site .parv-exp-img-wrap {
+  position: relative;
+}
+
+.ct-site .parv-exp-img {
+  width: 100%;
+  height: 660px;
+  border-radius: 30px;
+  object-fit: cover;
+}
+
+.ct-site .parv-exp-badge {
+  position: absolute;
+  top: -50px;
+  right: 24px;
+  background: #3A3A3A;
+  backdrop-filter: blur(6px);
+  border-radius: 12px;
+  padding: 28px 40px;
+  text-align: left;
+}
+
+/* badge text — Figma spec (24px → thoda less = 18px) */.ct-site .parv-exp-badge-title, .ct-site .parv-exp-badge-sub, .ct-site .parv-exp-badge-pink {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 18px;
+  line-height: 1;              /* 100% */
+  letter-spacing: -0.06em;     /* -6% */
+  vertical-align: middle;
+  font-variant: small-caps;
+  text-transform: none;
+}
+
+.ct-site .parv-exp-badge-title {
+  color: #fff;
+}
+
+.ct-site .parv-exp-badge-sub {
+  color: #fff;
+}
+
+.ct-site .parv-exp-badge-pink {
+  color: #EC4899;
+  margin-top: 4px;
+}
+
+.ct-site .about-badge.parv-exp-est {
+  position: absolute;
+  bottom: -20px;
+  left: 30px;
+  transform: none;
+  font-size: 14px;
+  padding: 10px 22px;
+}
+
+.ct-site .parv-quote {
+  font-size: 36px;
+  font-weight: 500;
+  text-transform: uppercase;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* ─── FEATURES (sparkle) ────────────────────────────── */.ct-site .features {
+  padding: 60px var(--page-px) 80px;
+}
+
+.ct-site .features-header {
+  text-align: center;
+  margin-bottom: 56px;
+}
+
+.ct-site .features-tag {
+  font-size: 20px;
+  font-weight: 500;
+  color: #C7D9FF;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.ct-site .features-title {
+  font-size: 54px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.ct-site .features-grid {
+  display: flex;
+  gap: 32px;
+}
+
+.ct-site .feature {
+  flex: 1;
+}
+
+.ct-site .feature-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  margin-bottom: 18px;
+  background: linear-gradient(0deg, rgba(217, 217, 217, 0.2), rgba(217, 217, 217, 0.2)),
+              linear-gradient(0deg, #3A3A3A, #3A3A3A);
+}
+
+.ct-site .feature-icon img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.ct-site .feature-name {
+  font-size: 28px;
+  font-weight: 400;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.ct-site .feature-desc {
+  font-size: 18px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+/* ─── RECENT MEETS (sparkle) ────────────────────────── */.ct-site .meets {
+  padding: 60px var(--page-px) 80px;
+}
+
+.ct-site .meets-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 40px;
+  margin-bottom: 40px;
+}
+
+.ct-site .meets-title {
+  font-size: 54px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.ct-site .meets-header-right {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  max-width: 560px;
+}
+
+.ct-site .meets-desc {
+  font-size: 20px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.ct-site .meets-arrows {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.ct-site .meets-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: #fff;
+  color: #111;
+  font-size: 18px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.ct-site .meets-arrow--active {
+  background: #C7D9FF;
+  color: #111;
+  border-color: #C7D9FF;
+}
+
+.ct-site .meets-arrow:hover { opacity: 0.8; }
+
+.ct-site .meets-viewport {
+  overflow: hidden;
+}
+
+.ct-site .meets-cards {
+  display: flex;
+  gap: 24px;
+  transition: transform 0.45s ease;
+}
+
+.ct-site .meets-cards .meet-card {
+  flex: 0 0 calc((100% - 24px) / 2);
+  max-width: none;
+}
+
+.ct-site .comm-sub-label.comm-sub-label--blue {
+  color: #C7D9FF;
+}
+
+.ct-site .meet-date {
+  font-size: 16px;
+  font-weight: 500;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+/* parv gallery — EVENINGS TO REMEMBER */.ct-site .gallery-tag--pink { color: #EC4899; }
+
+.ct-site .meets-arrows--center {
+  justify-content: center;
+  margin-top: 40px;
+}
+
+.ct-site .meets--gallery .meets-arrow--active {
+  background: #EC4899;
+  color: #fff;
+  border-color: #EC4899;
+}
+
+.ct-site .meets--gallery .gallery-tag {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 0.8;            /* 80% */
+  letter-spacing: -0.06em;     /* -6% */
+  text-align: center;
+  vertical-align: middle;
+  font-variant: small-caps;
+  color: rgba(236, 72, 153, 1);
+}
+
+.ct-site .meets--gallery .gallery-title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
+  font-size: clamp(32px, 6vw, 64px);
+  line-height: 1;
+  letter-spacing: -0.06em;     /* -6% */
+  text-align: center;
+  vertical-align: middle;
+  font-variant: small-caps;
+}
+
+/* gap between heading and carousel */.ct-site .meets--gallery .gallery-header {
+  margin-bottom: 72px;
+}
+
+/* smaller white card titles */.ct-site .meets--gallery .comm-card-title {
+  font-size: 24px;
+  line-height: 1.35;
+}
+/* Full screen modal */.ct-site .event-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.ct-site .event-modal.active {
+  display: flex;
+}
+
+/* Blur background */.ct-site .event-modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Only image box in center */.ct-site .event-modal-content {
+  position: relative;
+  z-index: 2;
+  width: min(900px, 78vw);
+  max-height: 85vh;
+}
+
+/* Image */.ct-site .event-gallery {
+  width: 100%;
+  height: 75vh;
+  max-height: 700px;
+  border-radius: 14px;
+  overflow: hidden;
+  /* background: #111; */
+}
+
+.ct-site .event-gallery img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+
+/* Close button: full body top-right */.ct-site .event-close {
+  position: fixed;
+  top: 25px;
+  right: 30px;
+  z-index: 10001;
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #111;
+  font-size: 34px;
+  cursor: pointer;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.35);
+  transition: 0.3s;
+}
+
+.ct-site .event-close:hover {
+  transform: rotate(90deg);
+}
+
+/* Previous / Next: body left-right */.ct-site .gallery-btn {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10001;
+  width: 55px;
+  height: 55px;
+  border: none;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #111;
+  font-size: 30px;
+  cursor: pointer;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.35);
+  transition: 0.3s;
+}
+
+.ct-site .gallery-btn:hover {
+  transform: translateY(-50%) scale(1.1);
+}
+
+.ct-site .gallery-prev {
+  left: 35px;
+}
+
+.ct-site .gallery-next {
+  right: 35px;
+}
+
+/* Event title and image count */.ct-site .gallery-info {
+  padding-top: 14px;
+  color: #fff;
+  text-align: center;
+}
+
+.ct-site .gallery-info h2 {
+  margin: 0 0 5px;
+  font-size: 22px;
+}
+
+.ct-site .gallery-info p {
+  margin: 0;
+  opacity: 0.8;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .ct-site .event-modal-content {
+    width: 88vw;
+  }
+
+  .ct-site .event-gallery {
+    height: 60vh;
+  }
+
+  .ct-site .event-close {
+    top: 15px;
+    right: 15px;
+    width: 30px;
+    height: 30px;
+    font-size: 29px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .ct-site .gallery-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 20px;
+  }
+
+  .ct-site .gallery-prev {
+    left: 12px;
+  }
+
+  .ct-site .gallery-next {
+    right: 12px;
+  }
+
+  .ct-site .gallery-info h2 {
+    font-size: 17px;
+  }
+}
+/* ─── GALLERY (sparkle) ─────────────────────────────── */.ct-site .gallery {
+  padding: 60px var(--page-px) 80px;
+}
+
+.ct-site .gallery-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.ct-site .gallery-tag {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: #C7D9FF;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.ct-site .gallery-title {
+  font-size: 44px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.ct-site .gallery-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+
+.ct-site .gallery-row {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
+.ct-site .gallery-img {
+  object-fit: cover;
+  border-radius: 30px;
+  display: block;
+  height: 446px;
+}
+
+/* first 4 images — fixed 456 wide */.ct-site .gallery-img--sm, .ct-site .gallery-img--lg {
+  width: 456px;
+}
+
+/* 5th image (bottom-right) — wide 928 */.ct-site .gallery-img--xl {
+  width: 928px;
+}
+
+/* ─── ABOUT ─────────────────────────────────────────── */.ct-site .about {
+  display: flex;
+  align-items: center;
+  gap: 60px;
+  padding: 80px var(--page-px);
+}
+
+/* LEFT */.ct-site .about-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.ct-site .about-tag {
+  font-size: 20px;
+  font-weight: 500;
+  color: #FFE54F;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.ct-site .about-title {
+  font-size: 54px;
+  font-weight: 500;
+  line-height: 1.1;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+.ct-site .about-desc {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.8;
+  text-transform: uppercase;
+  margin-bottom: 60px;
+}
+
+.ct-site .about-bullets {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.ct-site .about-bullets li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 16px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.ct-site .bullet-bg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  background: linear-gradient(0deg, rgba(217, 217, 217, 0.2), rgba(217, 217, 217, 0.2)),
+              linear-gradient(0deg, #3A3A3A, #3A3A3A);
+}
+
+.ct-site .bullet-icon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+/* RIGHT */.ct-site .about-right {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ct-site .about-img {
+  width: 100%;
+  border-radius: 16px;
+  object-fit: cover;
+  display: block;
+}
+
+.ct-site .about-img--top {
+  height: 300px;
+}
+
+.ct-site .about-img-bottom-wrap {
+  display: flex;
+  gap: 16px;
+  position: relative;
+}
+
+.ct-site .about-img--bl {
+  height: 200px;
+  width: 35%;
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+.ct-site .about-img-br-wrap {
+  position: relative;
+  flex: 1;
+}
+
+.ct-site .about-img--br {
+  height: 300px;
+  width: 100%;
+}
+
+.ct-site .about-badge {
+  position: absolute;
+  bottom: 20px;
+  left: 10%;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #3A3A3A;
+  border-radius: 20px;
+  padding: 14px 32px;
+  font-size: 24px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  color: #fff;
+}
+
+.ct-site .badge-icon {
+  width: 26px;
+  height: 22px;
+  object-fit: contain;
+}
+
+/* ─── COMMUNITY ─────────────────────────────────────── */.ct-site .community {
+  padding: 80px var(--page-px);
+}
+
+.ct-site .community-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.ct-site .community-tag {
+  font-size: 20px;
+  font-weight: 500;
+  color: #FFE54F;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.ct-site .community-title {
+  font-size: 54px;
+  font-weight: 500;
+  text-transform: uppercase;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.ct-site .community-cards {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+}
+
+.ct-site .comm-card {
+  flex: 1;
+  max-width: 676px;
+  height: 624px;
+  border-radius: 30px;
+  border: 1px solid #979797;
+  overflow: hidden;
+  position: relative;
+}
+
+.ct-site .comm-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ct-site .comm-card-body {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 120px 60px 60px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, #000000 100%);
+}
+
+.ct-site .comm-sub-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #FFE54F;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.ct-site .comm-card-title {
+  font-size: 36px;
+  font-weight: 500;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.ct-site .comm-card-desc {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.6;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  max-width: 320px;
+}
+
+.ct-site .btn-comm {
+  display: inline-block;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-family: var(--font);
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+  color: #fff;
+  border: 1.5px solid rgba(255,255,255,0.30);
+  transition: opacity 0.2s;
+}
+
+.ct-site .btn-comm:hover { opacity: 0.75; }
+
+/* View Event button — white bg (recent meets) */.ct-site .meet-card .btn-comm {
+  background: #fff;
+  color: #111;
+  border: none;
+  padding: 16px 36px;
+}
+
+/* ─── PHILOSOPHY ─────────────────────────────────────── */.ct-site .philosophy {
+  display: flex;
+  align-items: center;
+  gap: 60px;
+  padding: 80px var(--page-px);
+}
+
+.ct-site .philosophy-left {
+  flex: 1;
+}
+
+.ct-site .philosophy-img {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  border-radius: 20px;
+  display: block;
+}
+
+.ct-site .philosophy-right {
+  flex: 1;
+}
+
+.ct-site .philosophy-title {
+  font-size: 54px;
+  font-weight: 500;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+
+.ct-site .philosophy-desc {
+  font-size: 18px;
+  font-weight: 500;
+  text-transform: uppercase;
+  margin-bottom: 62px;
+}
+
+.ct-site .philosophy-quote {
+  border-left: 2px solid #D9D9D9;
+  padding-left: 20px;
+}
+
+.ct-site .quote-text {
+  font-size: 40px;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.ct-site .quote-sub {
+  font-size: 20px;
+  text-transform: uppercase;
+}
+
+/* ─── CTA ───────────────────────────────────────────── */.ct-site .cta {
+  padding: 60px var(--page-px) 100px;
+}
+
+.ct-site .cta-card {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+  background: rgba(58, 58, 58, 0.4);
+  border-radius: 24px;
+  padding: 56px 48px;
+}
+
+.ct-site .cta-title {
+  font-size: 40px;
+  font-weight: 500;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.ct-site .cta-highlight {
+  color: #FFE54F;
+}
+
+.ct-site .cta-desc {
+  font-size: 18px;
+  font-weight: 500;
+  text-transform: uppercase;
+  margin: 0 auto 32px;
+  max-width: 540px;
+}
+
+.ct-site .cta-btn {
+  margin-left: 0;
+}
+
+/* sparkle CTA — blue variants */.ct-site .cta-highlight--blue {
+  color: #C7D9FF;
+}
+
+.ct-site .cta-btn--blue {
+  background: #C7D9FF;
+  color: #111;
+}
+
+/* parv CTA — pink variants */.ct-site .cta-highlight--pink {
+  color: #EC4899;
+}
+
+.ct-site .cta-btn--pink {
+  background: #EC4899;
+  color: #111;
+}
+
+/* ─── FOOTER ────────────────────────────────────────── */.ct-site .footer {
+  /* display/color/font-size/border-top set explicitly (not just
+     padding) to shield this from the admin dashboard's own unscoped
+     ".footer" rule (src/assets/CSS/DashboardPage.css), which is always
+     present in the bundle since App.jsx statically imports every admin
+     page. Without this, that rule's `display: flex` + gray/small text +
+     border leaks in here for any property this rule doesn't set. */
+  display: block;
+  padding: 60px var(--page-px) 40px;
+  color: #fff;
+  font-size: 16px;
+  border-top: none;
+}
+
+.ct-site .footer-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 40px;
+  padding-bottom: 40px;
+}
+
+.ct-site .footer-brand {
+  flex: 0 1 320px;
+  min-width: 0;
+}
+
+.ct-site .footer-col {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.ct-site .footer-logo {
+  height: 118px;
+  width: 118px;
+  object-fit: contain;
+  margin-bottom: 16px;
+}
+
+.ct-site .footer-about {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.8;
+  text-transform: uppercase;
+  max-width: 280px;
+}
+
+.ct-site .footer-heading {
+  font-size: 32px;
+  font-weight: 500;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.ct-site .footer-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ct-site .footer-links li {
+  position: relative;
+  padding-left: 16px;
+}
+
+.ct-site .footer-links li::before {
+  content: '·';
+  position: absolute;
+  left: 0;
+    color: rgba(255,255,255,0.55);
+}
+
+.ct-site .footer-links a {
+  color: rgba(255,255,255,0.50);
+  text-decoration: none;
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+
+.ct-site .footer-links a:hover { color: #fff; }
+
+.ct-site .footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 28px;
+  border-top: 1px solid rgba(255,255,255,0.55);
+  font-size: 20px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+/* ─── HAMBURGER ─────────────────────────────────────── */.ct-site .hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  margin-left: auto;
+}
+
+.ct-site .hamburger span {
+  display: block;
+  width: 26px;
+  height: 2px;
+  background: #fff;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+/* X animation */.ct-site .hamburger.open {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 999;
+}
+.ct-site .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.ct-site .hamburger.open span:nth-child(2) { opacity: 0; }
+.ct-site .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* ─── MOBILE MENU ───────────────────────────────────── */.ct-site .mobile-menu {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 75%;
+  max-width: 300px;
+  height: 100vh;
+  z-index: 998;
+  background: #111;
+  border-left: 1px solid rgba(194,151,124,0.3);
+  padding: 100px 36px 40px;
+  transform: translateX(100%);
+  transition: transform 0.35s ease;
+}
+
+.ct-site .mobile-menu.open {
+  transform: translateX(0);
+}
+
+.ct-site .mobile-menu ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  width: 100%;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.ct-site .mobile-menu ul li {
+  width: 100%;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.ct-site .mobile-menu ul a {
+  display: block;
+  color: #fff;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  padding: 18px 0;
+  transition: color 0.2s;
+}
+
+.ct-site .mobile-menu ul a:hover { color: #C2977C; }
+
+.ct-site .mobile-join {
+  margin-left: 0;
+  margin-top: 32px;
+  width: 100%;
+  text-align: center;
+}
+
+.ct-site .mobile-login {
+  margin-left: 0;
+  margin-top: 16px;
+  width: 100%;
+  text-align: center;
+}
+
+/* ─── JOIN THE COMMUNITY CARD ───────────────────────── */.ct-site .join-section {
+  display: flex;
+  justify-content: center;
+  padding: 40px var(--page-px) 80px;
+}
+
+.ct-site .join-card {
+  position: relative;
+  width: 100%;
+  max-width: 620px;
+  background: #1b1b1b;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 28px;
+  padding: 44px;
+}
+
+/* close button (top-right) */.ct-site .join-close {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #2c2c2c;
+  color: #F4DD4E;
+  font-size: 22px;
+  line-height: 1;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.ct-site .join-close:hover { background: #383838; }
+
+/* star badge */.ct-site .join-badge {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: #2c2c2c;
+  color: #F4DD4E;
+  font-size: 22px;
+  margin-bottom: 24px;
+}
+
+.ct-site .join-title {
+  font-size: 48px;
+  font-weight: 800;
+  line-height: 1.0;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.ct-site .join-tagline {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #F4DD4E;
+  margin-bottom: 28px;
+  max-width: 320px;
+}
+
+/* form */.ct-site .join-form { display: flex; flex-direction: column; gap: 16px; }
+
+.ct-site .join-row { display: flex; gap: 16px; }
+.ct-site .join-row input { flex: 1; }
+
+.ct-site .join-form input, .ct-site .join-form textarea {
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: #fff;
+  background: #242424;
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 32px;
+  padding: 18px 24px;
+  width: 100%;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.ct-site .join-form textarea {
+  border-radius: 22px;
+  resize: vertical;
+  min-height: 120px;
+}
+
+.ct-site .join-form input::placeholder, .ct-site .join-form textarea::placeholder {
+  color: rgba(255,255,255,0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ct-site .join-form input:focus, .ct-site .join-form textarea:focus {
+  outline: none;
+  border-color: #F4DD4E;
+  background: #2a2a2a;
+}
+
+/* submit */.ct-site .join-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.ct-site .join-submit {
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 700;
+  color: #1b1b1b;
+  background: #F4DD4E;
+  border: none;
+  border-radius: 10px;
+  padding: 14px 26px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.ct-site .join-submit:hover { opacity: 0.9; }
+
+.ct-site .join-status {
+  margin-top: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #F4DD4E;
+  text-align: center;
+}
+
+/* small helper caption under an input (e.g. WhatsApp number's "+91 optional" note) */
+.ct-site .join-hint {
+  margin-top: 6px;
+  padding: 0 24px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: rgba(255,255,255,0.5);
+}
+
+/* dropdown (e.g. Profession / Role) styled to match .join-form's text inputs */
+.ct-site .join-form select {
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: #fff;
+  background: #242424;
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 32px;
+  padding: 18px 24px;
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' stroke='%23F4DD4E' stroke-width='2' fill='none' fill-rule='evenodd'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 24px center;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.ct-site .join-form select:focus {
+  outline: none;
+  border-color: #F4DD4E;
+  background-color: #2a2a2a;
+}
+
+/* Select's own option list uses the browser's native rendering (can't be
+   themed cross-browser), but a dark background at least keeps it from
+   flashing white against this dark UI in browsers that respect it. */
+.ct-site .join-form select option {
+  background: #242424;
+  color: #fff;
+}
+
+/* ─── INVITE REQUEST MODAL (Parv page CTA buttons) ─────
+   Same "Join Community" card (.join-card and everything inside it,
+   above) shown as an overlay on top of the current page instead of a
+   separate /contact route — reuses the same .event-modal fixed-overlay
+   pattern already used for the event image lightbox above, just under
+   its own class names so neither is affected by changes to the other. */
+.ct-site .invite-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 40px var(--page-px);
+}
+
+.ct-site .invite-modal.active { display: flex; }
+
+.ct-site .invite-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.ct-site .invite-modal-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 620px;
+  margin: auto;
+}
+
+/* ─── RESPONSIVE ────────────────────────────────────── */
+
+/* ═══════════ HEADER — TABLET & MOBILE (≤1200px) ═══════════
+   The full desktop nav (logo + 3 links + Login + Join Community, all at
+   their desktop sizes) needs roughly 1050-1100px of horizontal room to
+   avoid wrapping/overflowing. Below 1200px there isn't reliably enough
+   space for that everywhere (varies with actual rendered text width),
+   so the header switches to the hamburger + slide-in mobile menu here
+   instead of only at ≤900px. This is the ONLY thing gated at 1200px —
+   every other section keeps its existing 1024px/900px/480px content
+   breakpoints below, so this purely fixes the "no horizontal overflow /
+   correct tablet & desktop behavior" requirement for the navbar without
+   touching how the rest of each page stacks. */
+@media (max-width: 1280px) {
+  .ct-site { padding-top: 118px; } /* matches this breakpoint's smaller nav padding/logo below */
+  .ct-site .nav { padding: 14px 24px; gap: 12px; }
+  .ct-site .nav-links { display: none; }
+  .ct-site .nav .btn-join:not(.mobile-join) { display: none; }
+  .ct-site .nav .btn-login:not(.mobile-login) { display: none; }
+  .ct-site .hamburger { display: flex; }
+  .ct-site .logo img { height: 84px; width: 84px; }
+}
+
+/* ═══════════ TABLET (≤1024px) ═══════════ */
+@media (max-width: 1024px) {
+  :root { --page-px: 6%; }
+
+  .ct-site .hero-title { font-size: 56px; }
+  .ct-site .hero-subtitle { font-size: 24px; }
+
+  .ct-site .about-title, .ct-site .community-title, .ct-site .features-title, .ct-site .meets-title, .ct-site .gallery-title, .ct-site .philosophy-title { font-size: 40px; }
+
+  .ct-site .stat-num { font-size: 48px; }
+  .ct-site .stat-label { font-size: 16px; }
+
+  /* fixed-size gallery → fluid */.ct-site .gallery-img--sm, .ct-site .gallery-img--lg, .ct-site .gallery-img--xl { width: auto; flex: 1; }
+  .ct-site .gallery-img { height: 280px; }
+
+  .ct-site .comm-card { height: auto; }
+}
+
+/* ═══════════ MOBILE (≤900px) ═══════════ */
+@media (max-width: 900px) {
+  /* nav-links/btn-join/btn-login/hamburger display is already set by the
+     ≤1200px header block above; this just tightens spacing further for
+     phone-sized screens. */
+  .ct-site .nav { padding: 12px 20px; }
+  .ct-site .logo img { height: 80px; width: 80px; }
+  .ct-site { padding-top: 110px; } /* matches this breakpoint's smaller nav padding/logo above */
+
+  /* min-height kept (not 0) — the Home page's rotating hero slides are
+     position:absolute, so they contribute no height of their own. With
+     min-height:0 the box collapsed to ~padding-only, squashing the
+     background image and pushing the PARV text out of place. Standalone
+     hero pages (Parv/Sparkle) are unaffected since their content is
+     in-flow and will still grow past this via height:auto if needed. */
+  .ct-site .hero { height: auto; min-height: 560px; padding: 60px 0; }
+  .ct-site .hero-content { margin: 0 auto; text-align: center; padding: 0 20px; max-width: 100%; }
+  .ct-site .hero-tagline { font-size: 12px; }
+  .ct-site .hero-title { font-size: 44px; }
+  .ct-site .hero-title--parv { font-size: 64px; }
+  .ct-site .parv-quote-section { padding: 48px 20px 24px; }
+  .ct-site .parv-quote { font-size: 24px; }
+  .ct-site .parv-exp { padding: 48px 20px; }
+  .ct-site .parv-exp-row { flex-direction: column; }
+  .ct-site .parv-exp .about-bullets li { height: auto; padding: 22px 24px; }
+  .ct-site .parv-exp-img { height: 360px; }
+
+  /* parv badges — keep inside the image bounds on mobile */.ct-site .parv-exp-badge {
+    top: -28px;
+    right: 12px;
+    max-width: calc(100% - 24px);
+    padding: 12px 16px;
+    background-color: rgba(58, 58, 58, 1);
+  }
+  .ct-site .parv-exp-badge-title, .ct-site .parv-exp-badge-sub, .ct-site .parv-exp-badge-pink { font-size: 14px; }
+
+  .ct-site .about-badge.parv-exp-est {
+    bottom: -16px;
+    left: 16px;
+    right: 16px;
+    justify-content: center;
+    font-size: 13px;
+    padding: 9px 16px;
+  }
+  .ct-site .hero-subtitle { font-size: 20px; }
+  .ct-site .hero-desc { font-size: 12px; }
+  .ct-site .hero-buttons { justify-content: center; flex-wrap: wrap; }
+  .ct-site .btn { font-size: 14px; padding: 14px 28px; }
+  .ct-site .btn-join { font-size: 14px; padding: 14px 28px; }
+  .ct-site .btn-login { font-size: 14px; padding: 13px 28px; }
+  .ct-site .btn-comm, .ct-site .meet-card .btn-comm { font-size: 14px; padding: 12px 26px; }
+  .ct-site .meets-arrow { width: 36px; height: 36px; font-size: 16px; }
+
+  .ct-site .stats { flex-wrap: wrap; gap: 16px; margin-top: 20px; padding: 40px 20px; }
+  .ct-site .stat-card { flex: 1 1 40%; width: auto; height: auto; min-width: 140px; }
+  .ct-site .stat-num { font-size: 40px; }
+  .ct-site .stat-label { font-size: 13px; }
+
+  .ct-site .about { flex-direction: column; padding: 48px 20px; gap: 40px; }
+  .ct-site .about-tag { font-size: 14px; }
+  .ct-site .about-title { font-size: 30px; }
+  .ct-site .about-desc { font-size: 13px; }
+  .ct-site .about-bullets li { font-size: 13px; }
+  .ct-site .about-img--top, .ct-site .about-img--br { height: auto; }
+  .ct-site .about-img--bl { height: auto; }
+  .ct-site .about-badge { font-size: 16px; padding: 10px 20px; }
+
+  .ct-site .community { padding: 48px 20px; }
+  .ct-site .community-tag { font-size: 14px; }
+  .ct-site .community-title { font-size: 30px; }
+  .ct-site .community-cards { flex-direction: column; }
+  .ct-site .comm-card-title { font-size: 26px; }
+
+  .ct-site .philosophy { flex-direction: column; padding: 48px 20px; gap: 40px; }
+  .ct-site .philosophy-title { font-size: 36px; }
+  .ct-site .philosophy-desc { font-size: 12px; }
+  .ct-site .philosophy-img { height: auto; }
+  .ct-site .quote-text { font-size: 26px; }
+  .ct-site .quote-sub { font-size: 13px; }
+
+  .ct-site .features { padding: 40px 20px 60px; }
+  .ct-site .features-tag { font-size: 14px; }
+  .ct-site .features-title { font-size: 30px; }
+  .ct-site .features-grid { flex-wrap: wrap; gap: 24px; }
+  .ct-site .feature { flex: 1 1 45%; }
+  .ct-site .feature-name { font-size: 20px; }
+  .ct-site .feature-desc { font-size: 13px; }
+
+  .ct-site .meets { padding: 40px 20px 60px; }
+  .ct-site .meets-header { flex-direction: column; gap: 20px; }
+  .ct-site .meets-header-right { flex-direction: column; align-items: flex-start; }
+  .ct-site .meets-title { font-size: 30px; }
+  .ct-site .meets-desc { font-size: 13px; }
+  .ct-site .meets-cards .meet-card { flex: 0 0 100%; }
+
+  .ct-site .gallery { padding: 40px 20px 60px; }
+  .ct-site .gallery-tag { font-size: 14px; }
+  .ct-site .gallery-title { font-size: 30px; }
+  .ct-site .gallery-grid { width: 100%; }
+  .ct-site .gallery-row { flex-direction: column; width: 100%; }
+  .ct-site .gallery-img, .ct-site .gallery-img--sm, .ct-site .gallery-img--lg, .ct-site .gallery-img--xl {
+    width: 100%;
+    height: 220px;
+    flex: none;
+  }
+
+  .ct-site .cta { padding: 40px 20px 60px; }
+  .ct-site .cta-card { padding: 40px 24px; }
+  .ct-site .cta-title { font-size: 30px; }
+  .ct-site .cta-desc { font-size: 13px; }
+
+  .ct-site .footer-heading { font-size: 14px; }
+  .ct-site .footer-links a { font-size: 12px; }
+  .ct-site .footer-top { flex-direction: column; gap: 36px; }
+  .ct-site .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+}
+
+/* ═══════════ SMALL PHONE (≤480px) ═══════════ */
+@media (max-width: 480px) {
+  .ct-site .hero-title { font-size: 36px; }
+  .ct-site .hero-subtitle { font-size: 17px; }
+
+  .ct-site .about-title, .ct-site .community-title, .ct-site .features-title, .ct-site .meets-title, .ct-site .gallery-title { font-size: 24px; }
+  .ct-site .philosophy-title { font-size: 28px; }
+  .ct-site .quote-text { font-size: 22px; }
+  .ct-site .cta-title { font-size: 24px; }
+
+  .ct-site .stat-card { flex: 1 1 100%; }
+  .ct-site .stat-num { font-size: 36px; }
+
+  .ct-site .feature { flex: 1 1 100%; }
+
+  .ct-site .comm-card-title { font-size: 22px; }
+  .ct-site .about-badge { font-size: 14px; }
+
+  /* parv badges — tighter for small phones */.ct-site .parv-exp-badge {
+    top: -24px;
+    right: 8px;
+    max-width: calc(100% - 16px);
+    padding: 10px 12px;
+  }
+  .ct-site .parv-exp-badge-title, .ct-site .parv-exp-badge-sub, .ct-site .parv-exp-badge-pink { font-size: 12px; }
+
+  .ct-site .about-badge.parv-exp-est {
+    left: 10px;
+    right: 10px;
+    font-size: 11px;
+    padding: 8px 12px;
+    letter-spacing: 0.5px;
+  }
+  .ct-site .parv-exp-est .badge-icon { width: 20px; height: 17px; }
+
+  .ct-site .btn, .ct-site .btn-join { font-size: 13px; padding: 12px 24px; }
+  .ct-site .btn-comm, .ct-site .meet-card .btn-comm { font-size: 13px; padding: 11px 22px; }
+}

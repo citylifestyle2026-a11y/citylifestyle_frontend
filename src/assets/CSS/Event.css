@@ -1,0 +1,497 @@
+.Event__page {
+  min-height: 100vh;
+  background-color: #f7f7f9;
+  /* overflow-x: hidden; */
+}
+.EventPage__mainArea {
+  margin-left: 230px;
+  min-height: 100vh;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.eventList__wrapper {
+  padding: 28px 36px 0 36px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  /* overflow-x: hidden; */
+  min-width: 0;
+}
+
+.eventList__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 26px;
+}
+
+.eventList__title {
+  color: #1b2a4e;
+  font-size: 26px;
+  font-weight: 800;
+  margin: 0 0 6px 0;
+}
+
+.eventList__breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: #9a9ca8 !important;
+}
+
+.eventList__breadcrumbSep {
+  color: #9a9ca8;
+}
+
+.eventList__breadcrumbActive {
+  color: var(--admin-accent);
+}
+
+.eventList__createBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--admin-accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+  white-space: nowrap;
+}
+a{
+  text-decoration: none;
+}
+.eventList__createBtn:hover {
+  background-color: var(--admin-accent-strong);
+  transform: translateY(-1px);
+}
+
+.eventList__createBtnIcon {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.eventList__card {
+  position: relative;
+  background-color: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  padding: 28px;
+  /* min-width: 0; */
+  min-height: 200px;
+  overflow-x: auto;
+}
+
+.eventList__actionOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 15;
+}
+
+.eventList__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 26px;
+}
+
+.eventList__pageSizeSelect {
+  padding: 10px 14px;
+  border: none;
+  background-color: #f2f3f6;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #1b2a4e;
+  outline: none;
+  cursor: pointer;
+  min-width: 90px;
+}
+
+.eventList__searchBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #f2f3f6;
+  border-radius: 8px;
+  padding: 10px 16px;
+  width: 260px;
+}
+
+.eventList__searchIcon {
+  font-size: 13px;
+  opacity: 0.55;
+  flex-shrink: 0;
+}
+
+.eventList__searchInput {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 13.5px;
+  color: #1b2a4e;
+  width: 100%;
+}
+
+.eventList__searchInput::placeholder {
+  color: #a7abbd;
+}
+
+.eventList__tableWrap {
+  position: relative;
+ /* overflow-x: auto; */
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 80px; 
+  min-height: 120px;
+}
+
+.eventList__table {
+  width: 100%;
+  border-collapse: collapse;
+  /* table-layout:auto let the browser size columns purely from content,
+     which produced uneven/misaligned columns once cell content varied in
+     length (e.g. after adding the Created By column and the longer
+     formatted date/time strings). Switching to table-layout:fixed with an
+     explicit colgroup (below) gives every column a predictable width —
+     the same approach already used successfully in TicketType.css. */
+  table-layout: fixed;
+  /* Matches the sum of the colgroup widths below (50+220+175+175+160+130+90+110+140).
+     Below this width .eventList__tableWrap scrolls horizontally instead of
+     compressing columns. */
+  min-width: 1250px;
+}
+
+.eventList__colHash { width: 50px; }
+.eventList__colTitle { width: 220px; }
+.eventList__colStart { width: 175px; }
+.eventList__colEnd { width: 175px; }
+.eventList__colVenue { width: 160px; }
+.eventList__colCreatedBy { width: 130px; }
+.eventList__colActive { width: 90px; }
+.eventList__colCreatedOn { width: 110px; }
+.eventList__colAction { width: 140px; }
+
+.eventList__table thead th {
+  text-align: left;
+  font-size: 10px;
+  font-weight: 600;
+  color: #9a9ca8;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #eef0f2;
+  white-space: nowrap;
+   vertical-align: middle;
+       word-break: break-word;
+
+}
+
+
+.eventList__hashCol {
+  width: 44px;
+}
+
+.eventList__thContent {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.eventList__sortIcon {
+  font-size: 11px;
+  color: #c4c6d2;
+}
+
+.eventList__table tbody td {
+  padding: 16px 14px;
+  font-size: 11px;
+  color: #3a3d4d;
+  border-bottom: 1px solid #f2f3f6;
+  vertical-align: middle;
+  /* Only the Title cell (below) wraps. Every other column keeps its
+     content on one line — with table-layout:fixed + a wide colgroup,
+     letting every cell wrap made short values (dates, the isActive
+     toggle, "#") sit centered inside a tall, mostly-empty row, which
+     read as a big gap around the content. Single-line cells keep row
+     height consistent and the layout tight, especially in the
+     responsive/mobile view. */
+  white-space: nowrap;
+  word-break: break-word;
+}
+
+.eventList__table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.eventList__table tbody td.eventList__titleCell {
+  font-weight: 600;
+  color: #1b2a4e;
+  text-transform: uppercase;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
+.eventList__toggle {
+  display: inline-flex;
+  align-items: center;
+  width: 42px;
+  height: 24px;
+  border-radius: 999px;
+  background-color: #d7dae2;
+  padding: 3px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.eventList__toggleOn {
+  background-color: var(--admin-accent);
+  justify-content: flex-end;
+}
+
+.eventList__toggleKnob {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease;
+}
+
+.eventList__actionCol {
+  position: relative;
+  text-align: left;
+}
+
+.eventList__actionCell {
+  position: relative;
+}
+
+.eventList__actionWrapper {
+  position: relative;
+  z-index: 16;
+  display: inline-block;
+}
+
+.eventList__actionButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background-color: #f2f3f6;
+  color: #3a3d4d;
+  border: none;
+  border-radius: 8px;
+  height: 38px;
+  min-width: 96px;
+  padding: 0 16px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+}
+
+.eventList__actionButton:hover {
+  background-color: #e5e6ec;
+}
+
+.eventList__actionCaret {
+  font-size: 11px;
+}
+
+.eventList__actionMenu {
+  /* Root cause of the original clipping bug: .eventList__tableWrap needs
+     overflow-x:auto for horizontal scrolling on narrow screens, and CSS
+     has no way to make one axis scrollable while leaving the other
+     genuinely "visible" on the same element — so overflow-y ends up
+     clipping too, and z-index cannot override that (z-index only affects
+     stacking order, not whether an ancestor's overflow clips a
+     descendant). The fix is to not be a descendant of that clipped box at
+     all: the menu is rendered via a React portal straight into
+     document.body (see Event.jsx), positioned here as
+     `position: fixed` with per-instance `top`/`right` set inline from the
+     trigger button's own getBoundingClientRect(). z-index is high because
+     it now sits in its own stacking context directly under <body>. */
+  position: fixed;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 150px;
+  white-space: nowrap;
+  z-index: 99999;
+}
+
+.eventList__dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 9999;
+  min-width: 150px;
+}
+
+.eventList__actionItem {
+  padding: 11px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #4a4d5e;
+  cursor: pointer;
+  text-align: left;
+  background: transparent;
+  border: none;
+  transition: background-color 0.2s ease;
+}
+
+.eventList__actionItem:hover {
+  background-color: #f2f3f6;
+  width:100%;
+}
+
+.eventList__pagination {
+  margin-top: 26px;
+  font-size: 13.5px;
+  color: #6b7085;
+}
+
+.eventList__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: auto;
+  padding: 28px 0 20px 0;
+  color: #9a9ca8;
+  font-size: 13px;
+}
+
+.eventList__footerLinks {
+  display: flex;
+  gap: 22px;
+}
+
+.eventList__footerLinks span {
+  cursor: pointer;
+}
+
+/* ===== Responsive ===== */
+
+/* Tablet and below: table needs real width to stay legible,
+   so it scrolls horizontally inside eventList__tableWrap only */
+@media (max-width: 1024px) {
+  
+  .EventPage__mainArea{
+    margin: 0;
+  }
+}
+
+@media (max-width: 992px) {
+  .eventList__title {
+    font-size: 22px;
+  }
+
+  .eventList__card {
+    padding: 20px;
+  }
+
+  .eventList__table thead th,
+  .eventList__table tbody td {
+    padding: 12px 12px;
+  }
+}
+
+@media (max-width: 640px) {
+  .eventList__wrapper {
+    padding: 22px 18px 0 18px;
+    /* overflow-x: hidden; */
+  }
+
+  .eventList__title {
+    font-size: 19px;
+  }
+
+  .eventList__breadcrumb {
+    font-size: 12px;
+  }
+
+  /* Toolbar wrapping */
+  .eventList__toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .eventList__searchBox {
+    width: 100%;
+  }
+
+  /* Header stacks so the Create Event button can go full width */
+  .eventList__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .eventList__createBtn {
+    /* Was 50% — inconsistent with the equivalent Create button on the
+       Ticket Type page (.ticketType__createBtn), which already goes
+       full width at this breakpoint. */
+    width: 100%;
+    justify-content: center;
+  }
+  .eventList__tableWrap {
+    overflow-x: auto;
+    /* overflow-y: visible; */
+  }
+
+  .eventList__card {
+    padding: 16px;
+  }
+
+  /* Narrower columns + tighter padding for the responsive/mobile view —
+     the desktop widths (summing to 1250px) and 20px/16px cell padding
+     made every column look far apart once viewed on a small screen. */
+  .eventList__table {
+    min-width: 880px;
+  }
+
+  .eventList__table thead th,
+  .eventList__table tbody td {
+    padding: 10px 8px;
+  }
+
+  .eventList__colHash { width: 34px; }
+  .eventList__colTitle { width: 150px; }
+  .eventList__colStart { width: 130px; }
+  .eventList__colEnd { width: 130px; }
+  .eventList__colVenue { width: 110px; }
+  .eventList__colCreatedBy { width: 100px; }
+  .eventList__colActive { width: 70px; }
+  .eventList__colCreatedOn { width: 90px; }
+  .eventList__colAction { width: 110px; }
+
+  .eventList__footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 380px) {
+  .eventList__wrapper {
+    padding: 18px 14px 0 14px;
+  }
+
+  .eventList__card {
+    padding: 14px;
+  }
+}

@@ -1,0 +1,351 @@
+.permissionPageWrapper {
+  min-height: 100vh;
+  background-color: #f7f7f9;
+}
+
+.permissionPageMainArea {
+  margin-left: 240px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.permissionPageContent {
+  flex: 1;
+  padding: 28px 36px 50px 36px;
+}
+
+.permissionPageTopRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.permissionPageTitle {
+  color: #1b2a4e;
+  font-size: 24px;
+  font-weight: 800;
+  margin: 0 0 4px 0;
+}
+
+.permissionPageBreadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: #9a9ca8;
+}
+
+.permissionPageBreadcrumbActive {
+  color: var(--admin-accent);
+}
+
+.permissionPageCreateButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--admin-accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+  white-space: nowrap;
+}
+
+.permissionPageCreateButton:hover {
+  background-color: var(--admin-accent-strong);
+  transform: translateY(-1px);
+}
+
+.permissionPageTableCard {
+  background-color: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+  position: relative;
+}
+
+.permissionPageTableControls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+
+.permissionPageRowsSelect {
+  padding: 10px 14px;
+  border: none;
+  background-color: #f2f3f6;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #1b2a4e;
+  outline: none;
+  cursor: pointer;
+  min-width: 90px;
+  box-sizing: border-box;
+}
+
+.permissionPageSearchBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #f2f3f6;
+  border-radius: 8px;
+  padding: 10px 16px;
+  width: 260px;
+}
+
+.permissionPageSearchBox svg {
+  color: #9a9ca8;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.permissionPageSearchInput {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 13.5px;
+  color: #1b2a4e;
+  width: 100%;
+}
+
+.permissionPageSearchInput::placeholder {
+  color: #a7abbd;
+}
+
+.permissionPageTableWrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.permissionPageTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 820px;
+}
+
+.permissionPageTable thead th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9a9ca8;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #eef0f2;
+  white-space: nowrap;
+}
+
+.permissionPageCheckboxCell {
+  width: 44px;
+}
+
+.permissionPageThContent {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.permissionPageSortIcon {
+  font-size: 10px;
+  color: #c4c6d2;
+}
+
+.permissionPageTable tbody td {
+  padding: 16px 14px;
+  font-size: 14px;
+  color: #3a3d4d;
+  border-bottom: 1px solid #f2f3f6;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.permissionPageTable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.permissionPageRowCheckbox {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  accent-color: var(--admin-accent);
+}
+
+.permissionPageName {
+  font-weight: 600;
+  color: #1b2a4e;
+}
+
+.permissionPageActionCell {
+  position: relative;
+}
+
+.permissionPageActionButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #f2f3f6;
+  color: #3a3d4d;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.permissionPageActionButton:hover {
+  background-color: #e5e6ec;
+}
+
+.permissionPageActionButtonOpen {
+  background-color: rgba(74, 144, 194, 0.14);
+  color: var(--admin-accent);
+}
+
+.permissionPageActionMenu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 120px;
+  z-index: 20;
+}
+
+.permissionPageActionMenuItem {
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #3a3d4d;
+  cursor: pointer;
+  text-align: left;
+  background: transparent;
+  border: none;
+  transition: background-color 0.2s ease;
+}
+
+.permissionPageActionMenuItem:hover {
+  background-color: #f2f3f6;
+}
+
+.permissionPageActionOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 15;
+}
+
+/* .permissionPagePagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 20px;
+  font-size: 13.5px;
+  color: #6b7085;
+}
+
+.permissionPagePaginationInfo {
+  color: #6b7085;
+  font-size: 13.5px;
+  white-space: nowrap;
+}
+
+.permissionPagePaginationControls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.permissionPagePaginationArrow {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background-color: #f2f3f6;
+  color: #6b7085;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.2s ease;
+}
+
+.permissionPagePaginationArrow:hover:not(:disabled) {
+  background-color: #e5e6ec;
+}
+
+.permissionPagePaginationArrow:disabled {
+  cursor: not-allowed;
+  color: #c4c6d2;
+}
+
+.permissionPagePaginationBtn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background-color: transparent;
+  color: #6b7085;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.permissionPagePaginationBtn:hover {
+  background-color: #f2f3f6;
+}
+
+.permissionPagePaginationActive,
+.permissionPagePaginationActive:hover {
+  background-color: var(--admin-accent);
+  color: #ffffff;
+} */
+
+@media (max-width: 1023px) {
+  .permissionPageMainArea {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .permissionPageContent {
+    padding: 22px 18px 40px 18px;
+  }
+
+  .permissionPageSearchBox {
+    width: 100%;
+  }
+
+  .permissionPageTableControls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .permissionPagePagination {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

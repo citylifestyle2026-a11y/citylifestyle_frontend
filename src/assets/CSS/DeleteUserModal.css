@@ -1,0 +1,119 @@
+.userDelete__overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(30, 30, 40, 0.5);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2200;
+  padding: 20px;
+  opacity: 0;
+  animation: userDelete__overlayFadeIn 0.25s ease forwards;
+}
+
+@keyframes userDelete__overlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.userDelete__container {
+  background-color: #ffffff;
+  width: 100%;
+  max-width: 480px;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  padding: 44px 40px 36px 40px;
+  text-align: center;
+  opacity: 0;
+  transform: scale(0.94) translateY(10px);
+  animation: userDelete__popIn 0.28s ease forwards;
+  animation-delay: 0.05s;
+}
+
+@keyframes userDelete__popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.userDelete__iconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.userDelete__icon {
+  width: 70px;
+  height: 70px;
+}
+
+.userDelete__title {
+  color: #1b2a4e;
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 22px 0;
+}
+
+.userDelete__message {
+  color: #4a4d5e;
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0 0 30px 0;
+}
+
+.userDelete__highlight {
+  font-weight: 700;
+  color: #1b2a4e;
+}
+
+.userDelete__okayBtn {
+  background-color: var(--admin-accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 40px;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.userDelete__okayBtn:hover {
+  background-color: var(--admin-accent-strong);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 640px) {
+  .userDelete__overlay {
+    padding: 16px;
+  }
+
+  .userDelete__container {
+    width: 95%;
+    max-width: 95%;
+  }
+}
+
+@media (max-width: 480px) {
+  .userDelete__container {
+    width: 95%;
+    max-width: 95%;
+    padding: 36px 22px 28px 22px;
+  }
+
+  .userDelete__title {
+    font-size: 19px;
+  }
+
+  .userDelete__okayBtn {
+    width: 100%;
+  }
+}

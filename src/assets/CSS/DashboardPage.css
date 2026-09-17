@@ -1,0 +1,214 @@
+.dashboardPage {
+  min-height: 100vh;
+  background-color: #f4f4f7;
+  overflow-x: hidden;
+}
+
+.mainArea {
+  margin-left: 240px;
+  min-height: 100vh;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+  padding: 30px 36px 50px 36px;
+}
+
+.pageDashboardTitle {
+  color: #1b2a4e;
+  font-size: 26px;
+  font-weight: 800;
+  margin: 0 0 4px 0;
+}
+
+.pageSubtitle {
+  color: #9a9ca8;
+  font-size: 14px;
+  margin: 0 0 22px 0;
+}
+
+.dashboardPage-topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.dashboardPage-eventSelectWrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dashboardPage-eventSelectLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b6f80;
+  white-space: nowrap;
+}
+
+.dashboardPage-eventSelect {
+  padding: 10px 14px;
+  border: 1px solid #e9eaee;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #1b2a4e;
+  background-color: #ffffff;
+  outline: none;
+  cursor: pointer;
+  min-width: 220px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboardPage-eventSelect:focus {
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 4px var(--admin-focus-ring);
+}
+
+.banner {
+  display: inline-block;
+  background-color: var(--admin-accent);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 12px 22px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.dashboardErrorBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 16px 0;
+}
+
+.dashboardError {
+  color: #e0331e;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.dashboardRetryBtn {
+  background: none;
+  border: 1px solid #e0331e;
+  color: #e0331e;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.dashboardRetryBtn:hover {
+  background-color: #e0331e;
+  color: #ffffff;
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  align-items: stretch;
+}
+
+/* Belt-and-braces alongside .card's own min-width:0 (DashboardCard.css) —
+   any direct grid child (the fullWidth wrapper included) can otherwise
+   be held to its content's min-content width by the grid, which is
+   what was pushing the whole Dashboard page wider than the viewport
+   and showing a horizontal scrollbar. */
+.cardGrid > * {
+  min-width: 0;
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 36px;
+  color: #9a9ca8;
+  font-size: 13px;
+  border-top: 1px solid #e9eaef;
+}
+
+.footerLinks {
+  display: flex;
+  gap: 22px;
+}
+
+.footerLinks span {
+  cursor: pointer;
+}
+
+@media (max-width: 1023px) {
+  .mainArea {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .content {
+    padding: 26px 24px 40px 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .cardGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .content {
+    padding: 24px 18px 40px 18px;
+  }
+
+  .dashboardPage-topRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .dashboardPage-eventSelect {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .footer {
+    flex-direction: column;
+    gap: 10px;
+    padding: 18px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 380px) {
+  .content {
+    padding: 18px 14px 32px 14px;
+  }
+
+  .pageDashboardTitle {
+    font-size: 22px;
+  }
+
+  .banner {
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    padding: 12px 14px;
+  }
+
+  .cardGrid {
+    gap: 16px;
+  }
+}

@@ -1,0 +1,91 @@
+.ticketTypeDelete-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 20, 43, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1000;
+}
+
+.ticketTypeDelete-modal {
+  background: #ffffff;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 420px;
+  padding: 32px 28px 28px 28px;
+  box-shadow: 0 20px 50px rgba(20, 20, 43, 0.25);
+  text-align: center;
+}
+
+.ticketTypeDelete-title {
+  margin: 0 0 16px 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1c1f2b;
+}
+
+.ticketTypeDelete-message {
+  margin: 0 0 28px 0;
+  font-size: 14px;
+  color: #444a5a;
+  line-height: 1.6;
+}
+
+.ticketTypeDelete-ticketName {
+  color: #ff3d57;
+  font-weight: 700;
+}
+
+.ticketTypeDelete-footer {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+}
+
+.ticketTypeDelete-closeBtn {
+  border: none;
+  background: #eef0f5;
+  color: #444a5a;
+  border-radius: 8px;
+  padding: 12px 28px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ticketTypeDelete-closeBtn:hover {
+  background: #e2e5ec;
+}
+
+.ticketTypeDelete-deleteBtn {
+  border: none;
+  background: linear-gradient(180deg, #ff5f6d, #ff3d57);
+  color: #fff;
+  border-radius: 8px;
+  padding: 12px 32px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(255, 61, 87, 0.3);
+}
+
+.ticketTypeDelete-deleteBtn:hover {
+  background: linear-gradient(180deg, #ff4d5c, #ff2646);
+}
+
+@media (max-width: 480px) {
+  .ticketTypeDelete-modal {
+    padding: 26px 20px 22px 20px;
+  }
+
+  .ticketTypeDelete-footer {
+    flex-direction: column;
+  }
+
+  .ticketTypeDelete-closeBtn,
+  .ticketTypeDelete-deleteBtn {
+    width: 100%;
+  }
+}

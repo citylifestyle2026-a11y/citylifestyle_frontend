@@ -1,0 +1,141 @@
+.header {
+  width: 100%;
+  height: 70px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 30px;
+  border-bottom: 1px solid #eef0f2;
+  position: sticky;
+  top: 0;
+  z-index: 900;
+  box-sizing: border-box;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.scanQrButton {
+  height: 42px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 10px;
+  background: var(--admin-accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .25s ease;
+  box-shadow: 0 6px 18px rgba(74,144,194,.25);
+}
+
+.scanQrButton svg {
+  font-size: 18px;
+}
+
+.scanQrButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(74,144,194,.35);
+}
+
+.scanQrButton:active {
+  transform: scale(.98);
+}
+
+.logoutButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: #1b2a4e;
+  font-size: 20px;
+  cursor: pointer;
+  transition: background-color .2s ease, opacity .2s ease;
+}
+
+.logoutButton:hover {
+  background: #f4f4f7;
+}
+
+.logoutButton:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.hamburgerButton {
+  display: none;
+  background: transparent;
+  border: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #1b2a4e;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+}
+
+.hamburgerButton:hover {
+  background: #f4f4f7;
+}
+
+.pageTitle {
+  flex: 1;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1b2a4e;
+  display: none;
+}
+
+.profileWrap {
+  display: flex;
+  align-items: center;
+}
+
+.profileImage {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  /* border: 2px solid #17a2b8; */
+  cursor: pointer;
+}
+
+@media (max-width:1023px){
+
+  .header{
+    justify-content:space-between;
+    padding:0 16px;
+  }
+
+  .hamburgerButton{
+    display:flex;
+  }
+
+  .pageTitle{
+    display:block;
+  }
+
+  .scanQrButton span{
+    display:none;
+  }
+
+  .scanQrButton{
+    width:42px;
+    padding:0;
+    justify-content:center;
+  }
+
+}

@@ -1,0 +1,249 @@
+.ticketDetailsOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(60, 60, 60, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2200;
+  padding: 20px;
+  opacity: 0;
+  animation: ticketDetailsOverlayFadeIn 0.25s ease forwards;
+}
+
+@keyframes ticketDetailsOverlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.ticketDetailsContainer {
+  background-color: #ffffff;
+  width: 100%;
+  max-width: 560px;
+  max-height: 95vh;
+  overflow-y: auto;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  padding: 32px 40px 28px 40px;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  opacity: 0;
+  transform: scale(0.94) translateY(10px);
+  animation: ticketDetailsPopIn 0.28s ease forwards;
+  animation-delay: 0.05s;
+}
+
+@keyframes ticketDetailsPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.ticketDetailsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 26px;
+}
+
+.ticketDetailsTitle {
+  color: #1b2a4e;
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0;
+}
+
+.ticketDetailsCloseIconButton {
+  background: transparent;
+  border: none;
+  color: #9a9ca8;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.ticketDetailsCloseIconButton:hover {
+  background-color: #f2f3f6;
+  color: #1b2a4e;
+}
+
+.ticketDetailsProfileSection {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 26px;
+}
+
+.ticketDetailsPhotoCircle {
+  width: 84px;
+  height: 84px;
+  min-width: 84px;
+  border-radius: 50%;
+  background-color: #eceef2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.ticketDetailsProfileImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ticketDetailsAvatarIcon {
+  width: 40px;
+  height: 40px;
+  color: #c4c6d2;
+}
+
+.ticketDetailsProfileInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ticketDetailsProfileName {
+  color: #1b2a4e;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.ticketDetailsStatusBadge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.ticketDetailsStatus--active {
+  background-color: #e5f6ea;
+  color: #1e9e50;
+}
+
+.ticketDetailsStatus--used {
+  background-color: #e8eefc;
+  color: #1976d2;
+}
+
+.ticketDetailsStatus--cancelled {
+  background-color: #fde8e6;
+  color: #e0331e;
+}
+
+.ticketDetailsStatus--expired {
+  background-color: #f2f3f6;
+  color: #6b6f80;
+}
+
+.ticketDetailsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.ticketDetailsRow {
+  display: grid;
+  grid-template-columns: 140px 12px 1fr;
+  align-items: start;
+  font-size: 13.5px;
+}
+
+.ticketDetailsLabel {
+  color: #9a9ca8;
+  font-weight: 600;
+}
+
+.ticketDetailsColon {
+  color: #9a9ca8;
+}
+
+.ticketDetailsValue {
+  color: #1b2a4e;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.ticketDetailsQrSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 18px;
+  background-color: #f7f8fa;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+
+.ticketDetailsQrImage {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 6px;
+}
+
+.ticketDetailsQrPlaceholder {
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #eceef2;
+  color: #9a9ca8;
+  font-size: 12px;
+  border-radius: 8px;
+}
+
+.ticketDetailsFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.ticketDetailsCloseButton {
+  background-color: #eceef2;
+  color: #3a3d4d;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 30px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.ticketDetailsCloseButton:hover {
+  background-color: #dfe1e8;
+}
+
+@media (max-width: 480px) {
+  .ticketDetailsContainer {
+    width: 95%;
+    max-width: 95%;
+    padding: 26px 20px 22px 20px;
+  }
+
+  .ticketDetailsRow {
+    grid-template-columns: 120px 10px 1fr;
+  }
+}

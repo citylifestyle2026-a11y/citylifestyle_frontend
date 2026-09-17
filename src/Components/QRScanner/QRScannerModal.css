@@ -1,0 +1,681 @@
+/* =========================================================
+   QRScannerModal.css
+   Premium Event CRM — Google Pay / PhonePe inspired scanner
+   All classes are namespaced with the "crmQr" prefix to avoid
+   collisions with any other stylesheet in the app.
+   ========================================================= */
+
+/* ---------- Design tokens (scoped, not global :root) ---------- */
+.crmQrOverlay {
+  --crmQr-bg-dark: #0b0f14;
+  --crmQr-surface: #ffffff;
+  --crmQr-surface-soft: #f4f6f8;
+  --crmQr-text-primary: #101418;
+  --crmQr-text-muted: #6b7280;
+
+  --crmQr-accent-purple: #c22a17;
+  --crmQr-accent-purple-dark: #c22a17;
+  --crmQr-accent-blue: #1a73e8;
+  --crmQr-accent-green: #00c853;
+  --crmQr-accent-green-soft: rgba(0, 200, 83, 0.18);
+
+  /* Result-state palette — each outcome gets its own distinct hue */
+  --crmQr-invalid: #d93025;
+  /* red    — Invalid QR       */
+  --crmQr-invalid-soft: rgba(217, 48, 37, 0.12);
+  --crmQr-used: #f59e0b;
+  /* amber   — Ticket Used     */
+  --crmQr-used-soft: rgba(245, 158, 11, 0.14);
+  --crmQr-cancelled: #7c3aed;
+  /* violet  — Ticket Cancelled */
+  --crmQr-cancelled-soft: rgba(124, 58, 237, 0.12);
+  --crmQr-expired: #475569;
+  /* slate   — Event Expired   */
+  --crmQr-expired-soft: rgba(71, 85, 105, 0.14);
+  --crmQr-loading: var(--crmQr-accent-purple);
+  --crmQr-loading-soft: rgba(95, 37, 159, 0.12);
+
+  --crmQr-error: var(--crmQr-invalid);
+  --crmQr-error-soft: var(--crmQr-invalid-soft);
+
+  --crmQr-focus-ring: #1a73e8;
+  --crmQr-radius-lg: 24px;
+  --crmQr-radius-md: 14px;
+  --crmQr-radius-sm: 10px;
+  --crmQr-shadow-modal: 0 24px 60px rgba(15, 15, 20, 0.35);
+}
+
+/* ---------- Screen-reader-only utility ---------- */
+.crmQrSrOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Overlay backdrop ---------- */
+.crmQrOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: radial-gradient(circle at 50% 20%,
+      rgba(95, 37, 159, 0.35),
+      rgba(11, 15, 20, 0.85) 60%);
+  backdrop-filter: blur(6px);
+  font-family: var(--crmQr-font);
+  animation: crmQrFadeIn 0.22s ease-out;
+}
+
+@keyframes crmQrFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* ---------- Modal shell (desktop card) ---------- */
+.crmQrModal {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  max-height: min(720px, 92vh);
+  background: var(--crmQr-surface);
+  border-radius: var(--crmQr-radius-lg);
+  box-shadow: var(--crmQr-shadow-modal);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  animation: crmQrModalPop 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.crmQrModal:focus {
+  outline: none;
+}
+
+@keyframes crmQrModalPop {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ---------- Header ---------- */
+.crmQrHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  background: linear-gradient(135deg, #17a2b8, #0d7f91);
+  flex-shrink: 0;
+}
+
+.crmQrHeaderTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  color: #ffffff;
+}
+
+.crmQrHeaderSubtitle {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.crmQrCloseBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.crmQrCloseBtn:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.crmQrCloseBtn:active {
+  transform: scale(0.92);
+}
+
+.crmQrCloseBtn:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+/* ---------- Camera select ---------- */
+.crmQrCameraBar {
+  padding: 12px 20px 0;
+  background: var(--crmQr-surface);
+  flex-shrink: 0;
+}
+
+.crmQrCameraSelect {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-family: var(--crmQr-font);
+  color: var(--crmQr-text-primary);
+  background: var(--crmQr-surface-soft);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--crmQr-radius-sm);
+  appearance: none;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.crmQrCameraSelect:focus-visible {
+  outline: none;
+  border-color: var(--crmQr-accent-purple);
+  box-shadow: 0 0 0 3px rgba(95, 37, 159, 0.18);
+}
+
+.crmQrCameraSelect:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---------- Scanner viewport ---------- */
+.crmQrScannerWrapper {
+  position: relative;
+  margin: 18px 20px 0;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--crmQr-radius-md);
+  overflow: hidden;
+  background: var(--crmQr-bg-dark);
+  flex-shrink: 0;
+}
+
+/* html5-qrcode injects <video>/<canvas> directly into this node */
+.crmQrScannerRegion {
+  width: 100%;
+  height: 100%;
+}
+
+.crmQrScannerRegion video,
+.crmQrScannerRegion canvas {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+}
+
+/* Dark vignette so the green frame reads clearly over any feed */
+.crmQrScannerWrapper::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.45);
+}
+
+/* ---------- Viewfinder frame + corners ---------- */
+.crmQrFrame {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 66%;
+  aspect-ratio: 1 / 1;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.crmQrCorner {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--crmQr-accent-green);
+  filter: drop-shadow(0 0 6px var(--crmQr-accent-green-soft));
+}
+
+.crmQrCornerTl {
+  top: 0;
+  left: 0;
+  border-right: none;
+  border-bottom: none;
+  border-top-left-radius: 6px;
+}
+
+.crmQrCornerTr {
+  top: 0;
+  right: 0;
+  border-left: none;
+  border-bottom: none;
+  border-top-right-radius: 6px;
+}
+
+.crmQrCornerBl {
+  bottom: 0;
+  left: 0;
+  border-right: none;
+  border-top: none;
+  border-bottom-left-radius: 6px;
+}
+
+.crmQrCornerBr {
+  bottom: 0;
+  right: 0;
+  border-left: none;
+  border-top: none;
+  border-bottom-right-radius: 6px;
+}
+
+/* ---------- Animated scan line ---------- */
+.crmQrScanLine {
+  position: absolute;
+  left: 4%;
+  width: 92%;
+  height: 2px;
+  background: linear-gradient(90deg,
+      rgba(0, 200, 83, 0) 0%,
+      var(--crmQr-accent-green) 50%,
+      rgba(0, 200, 83, 0) 100%);
+  box-shadow: 0 0 8px 1px var(--crmQr-accent-green-soft);
+  animation: crmQrScanMove 2.1s ease-in-out infinite;
+}
+
+@keyframes crmQrScanMove {
+  0% {
+    top: 6%;
+    opacity: 0.4;
+  }
+
+  50% {
+    top: 94%;
+    opacity: 1;
+  }
+
+  100% {
+    top: 6%;
+    opacity: 0.4;
+  }
+}
+
+/* ---------- Generic status / helper text ---------- */
+.crmQrStatusText {
+  margin: 12px 20px 0;
+  font-size: 13px;
+  text-align: center;
+  color: var(--crmQr-text-muted);
+}
+
+/* ---------- Camera / permission error (pre-scan only) ---------- */
+.crmQrErrorBox {
+  margin: 14px 20px 0;
+  padding: 12px 14px;
+  background: var(--crmQr-error-soft);
+  border: 1px solid rgba(217, 48, 37, 0.25);
+  border-radius: var(--crmQr-radius-sm);
+  text-align: center;
+}
+
+.crmQrErrorText {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--crmQr-error);
+  font-weight: 500;
+}
+
+.crmQrErrorText:last-child {
+  margin-bottom: 0;
+}
+
+/* =========================================================
+   Result states — Loading / Invalid / Used / Cancelled / Expired
+   Each state gets a distinct pastel icon badge + accent color,
+   matching the Google Pay / PhonePe "outcome screen" pattern.
+   ========================================================= */
+.crmQrResultState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 36px 24px 8px;
+  animation: crmQrResultFadeIn 0.25s ease-out;
+}
+
+@keyframes crmQrResultFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.crmQrResultIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  margin-bottom: 18px;
+}
+
+.crmQrResultIconGlyph {
+  width: 34px;
+  height: 34px;
+}
+
+.crmQrResultTitle {
+  margin: 0 0 6px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--crmQr-text-primary);
+}
+
+.crmQrResultMessage {
+  margin: 0;
+  max-width: 280px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--crmQr-text-muted);
+}
+
+/* -- Loading -- */
+.crmQrResultIconLoading {
+  background: var(--crmQr-loading-soft);
+}
+
+.crmQrResultSpinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid rgba(95, 37, 159, 0.22);
+  border-top-color: var(--crmQr-loading);
+  border-radius: 50%;
+  animation: crmQrSpin 0.7s linear infinite;
+}
+
+@keyframes crmQrSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* -- Invalid QR (red) -- */
+.crmQrResultIconInvalid {
+  background: var(--crmQr-invalid-soft);
+  color: var(--crmQr-invalid);
+}
+
+/* -- Ticket Already Used (amber) -- */
+.crmQrResultIconUsed {
+  background: var(--crmQr-used-soft);
+  color: var(--crmQr-used);
+}
+
+/* -- Ticket Cancelled (violet) -- */
+.crmQrResultIconCancelled {
+  background: var(--crmQr-cancelled-soft);
+  color: var(--crmQr-cancelled);
+}
+
+/* -- Event Expired (slate) -- */
+.crmQrResultIconExpired {
+  background: var(--crmQr-expired-soft);
+  color: var(--crmQr-expired);
+}
+
+/* -- Entry Allowed Successfully (green) -- */
+.crmQrResultIconSuccess {
+  background: var(--crmQr-accent-green-soft);
+  color: #0a7a3c;
+}
+
+/* ---------- Verified ticket card ---------- */
+.crmQrCard {
+  margin: 18px 20px 0;
+  padding: 6px 4px;
+}
+
+.crmQrAvatarRow {
+  display: flex;
+  justify-content: center;
+  padding: 4px 4px 14px;
+}
+
+.crmQrAvatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--crmQr-accent-purple);
+  flex-shrink: 0;
+}
+
+.crmQrAvatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.crmQrAvatarIcon {
+  width: 34px;
+  height: 34px;
+}
+
+.crmQrCardRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 4px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.crmQrCardRow:last-child {
+  border-bottom: none;
+}
+
+.crmQrCardLabel {
+  font-size: 12.5px;
+  color: var(--crmQr-text-muted);
+  font-weight: 500;
+}
+
+.crmQrCardValue {
+  font-size: 13.5px;
+  color: var(--crmQr-text-primary);
+  font-weight: 600;
+  text-align: right;
+  max-width: 60%;
+  word-break: break-word;
+}
+
+.crmQrStatusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #0a7a3c;
+  background: var(--crmQr-accent-green-soft);
+  border-radius: 999px;
+}
+
+/* ---------- Success (check-in) state ---------- */
+.crmQrSuccessBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 14px 20px 0;
+  padding: 16px 14px;
+  background: var(--crmQr-accent-green-soft);
+  border: 1px solid rgba(0, 200, 83, 0.3);
+  border-radius: var(--crmQr-radius-sm);
+  text-align: center;
+}
+
+.crmQrSuccessIcon {
+  width: 30px;
+  height: 30px;
+  margin-bottom: 8px;
+  color: var(--crmQr-accent-green);
+}
+
+.crmQrSuccessText {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0a7a3c;
+}
+
+/* ---------- Buttons ---------- */
+.crmQrActions {
+  display: flex;
+  gap: 10px;
+  padding: 20px;
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+.crmQrBtn {
+  flex: 1;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--crmQr-font);
+  border-radius: var(--crmQr-radius-sm);
+  border: none;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+}
+
+.crmQrBtn:active {
+  transform: scale(0.97);
+}
+
+.crmQrBtn:focus-visible {
+  outline: 2px solid var(--crmQr-focus-ring);
+  outline-offset: 2px;
+}
+
+.crmQrBtnPrimary {
+  color: #ffffff;
+  background: linear-gradient(135deg, #17a2b8, #0d7f91);
+  box-shadow: 0 8px 18px rgba(95, 37, 159, 0.28);
+}
+
+.crmQrBtnPrimary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.crmQrBtnGhost {
+  color: var(--crmQr-text-primary);
+  background: var(--crmQr-surface-soft);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.crmQrBtnGhost:hover {
+  background: #ebedf0;
+}
+
+.crmQrBtnGhost:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   Responsive behaviour
+   Desktop: centered modal card
+   Tablet:  slightly narrower card, same layout
+   Mobile:  fullscreen edge-to-edge experience
+   ========================================================= */
+@media (max-width: 900px) {
+  .crmQrModal {
+    max-width: 360px;
+  }
+}
+
+@media (max-width: 640px) {
+  .crmQrOverlay {
+    padding: 0;
+    align-items: stretch;
+    justify-content: stretch;
+  }
+
+  .crmQrModal {
+    max-width: none;
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    border-radius: 0;
+  }
+
+  .crmQrHeader {
+    padding-top: calc(18px + env(safe-area-inset-top));
+  }
+
+  .crmQrScannerWrapper {
+    margin: 16px 16px 0;
+    flex: 1 1 auto;
+    aspect-ratio: auto;
+  }
+
+  .crmQrCameraBar {
+    padding: 12px 16px 0;
+  }
+
+  .crmQrStatusText,
+  .crmQrErrorBox,
+  .crmQrCard,
+  .crmQrSuccessBox {
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+
+  .crmQrResultState {
+    flex: 1 1 auto;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .crmQrActions {
+    padding: 14px 16px calc(16px + env(safe-area-inset-bottom));
+  }
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+
+  .crmQrOverlay,
+  .crmQrModal,
+  .crmQrScanLine,
+  .crmQrResultSpinner,
+  .crmQrResultState {
+    animation: none;
+  }
+}

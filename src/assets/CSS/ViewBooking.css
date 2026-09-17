@@ -1,0 +1,437 @@
+.bookingView-wrapper {
+  padding: 28px 36px 50px 36px;
+  min-height: calc(100vh - 70px);
+}
+
+.bookingView-header {
+  margin-bottom: 14px;
+}
+
+.bookingView-title {
+  color: #1b2a4e;
+  font-size: 24px;
+  font-weight: 800;
+  margin: 0 0 4px 0;
+}
+
+.bookingView-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: #9a9ca8;
+}
+
+.bookingView-breadcrumbSep {
+  color: #9a9ca8;
+}
+
+.bookingView-breadcrumbActive {
+  color: var(--admin-accent);
+}
+
+.bookingView-backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--admin-accent);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  margin-bottom: 20px;
+  transition: opacity 0.2s ease;
+}
+
+.bookingView-backLink:hover {
+  opacity: 0.8;
+}
+
+.bookingView-backArrow {
+  font-size: 15px;
+}
+
+.bookingView-stateError {
+  font-size: 14px;
+  font-weight: 500;
+  color: #e0331e;
+  margin: 0 0 14px 0;
+}
+
+.bookingView-stateRetryBtn {
+  background-color: #f2f3f6;
+  color: #1b2a4e;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.bookingView-stateRetryBtn:hover {
+  background-color: #e5e6ec;
+}
+
+.bookingView-content {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.bookingView-detailsCard {
+  background-color: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  padding: 28px;
+}
+
+.bookingView-detailsTitle {
+  color: #1b2a4e;
+  font-size: 20px;
+  font-weight: 800;
+  margin: 0 0 20px 0;
+}
+
+.bookingView-detailsList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.bookingView-detailsRow {
+  display: grid;
+  grid-template-columns: 100px 12px 1fr;
+  font-size: 14.5px;
+}
+
+.bookingView-detailsLabel {
+  color: #1b2a4e;
+  font-weight: 700;
+}
+
+.bookingView-detailsColon {
+  color: #1b2a4e;
+  font-weight: 700;
+}
+
+.bookingView-detailsValue {
+  color: #6b7085;
+}
+
+.bookingView-totalPayRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 18px;
+  border-top: 1px solid #eef0f2;
+}
+
+.bookingView-totalPayLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bookingView-totalPayLabel {
+  color: #1b2a4e;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.bookingView-totalPaySub {
+  color: var(--admin-accent);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.bookingView-discountNote {
+  color: #2f9e44;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.bookingView-totalPayValue {
+  color: #1b2a4e;
+  font-size: 20px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.bookingView-membersCard {
+  background-color: #ffffff;
+  border-radius: 14px;
+  padding: 4px 8px;
+    overflow: hidden;   /* AA ADD KAR */
+
+}
+
+.bookingView-tableWrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+
+  /* Hide scrollbar but keep scroll working */
+  scrollbar-width: none;      /* Firefox */
+  -ms-overflow-style: none;   /* IE & Edge */
+}
+
+.bookingView-tableWrap::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;              
+}
+  .bookingView-table {
+    width: 100%;
+    border-collapse: collapse;
+    /* min-width: 620px; */
+  }
+
+.bookingView-table thead th {
+  text-align: left;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1b2a4e;
+  padding: 10px 14px;
+  border-bottom: 1px solid #eef0f2;
+  white-space: nowrap;
+}
+
+.bookingView-hashCol {
+  width: 36px;
+}
+
+.bookingView-actionCol {
+  text-align: left;
+}
+
+.bookingView-table tbody td {
+  padding: 18px 14px;
+  font-size: 14px;
+  color: #6b7085;
+  border-bottom: 1px dashed #eef0f2;
+  vertical-align: middle;
+}
+
+.bookingView-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.bookingView-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: #c7cad3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.bookingView-avatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+
+.bookingView-avatarIcon {
+  width: 24px;
+  height: 24px;
+}
+
+.bookingView-qrIcon {
+  width: 40px;
+  height: 40px;
+}
+
+.bookingView-actionMenuBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background-color: #f2f3f6;
+  color: #6b7085;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  letter-spacing: 1px;
+  transition: background-color 0.2s ease;
+}
+
+.bookingView-actionMenuBtn:hover {
+  background-color: #e5e6ec;
+}
+
+/* ---------------------------------------------
+   Tablet: 768px - 1199px
+   Stack sections vertically, details full width,
+   table below, reduced padding/gaps.
+--------------------------------------------- */
+@media (max-width: 1199px) and (min-width: 768px) {
+  .bookingView-wrapper {
+    padding: 24px 24px 40px 24px;
+  }
+
+  .bookingView-content {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .bookingView-detailsCard {
+    padding: 22px;
+  }
+
+  .bookingView-detailsList {
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .bookingView-membersCard {
+    padding: 4px 6px;
+  }
+
+  .bookingView-table tbody td {
+    padding: 14px 12px;
+  }
+}
+
+/* ---------------------------------------------
+   Mobile: below 768px
+--------------------------------------------- */
+@media (max-width: 767px) {
+  .bookingView-wrapper {
+    padding: 20px 16px 36px 16px;
+  }
+
+  .bookingView-header {
+    margin-bottom: 12px;
+  }
+
+  .bookingView-title {
+    font-size: 20px;
+  }
+
+  .bookingView-breadcrumb {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+
+  
+  .bookingView-content {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .bookingView-detailsCard {
+    padding: 18px;
+    border-radius: 12px;
+  }
+
+  .bookingView-detailsTitle {
+    font-size: 18px;
+    margin-bottom: 14px;
+  }
+
+  .bookingView-detailsList {
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  /* Collapse label/colon/value into a 2-column layout */
+  .bookingView-detailsRow {
+    grid-template-columns: 92px 1fr;
+    column-gap: 8px;
+    font-size: 13.5px;
+  }
+
+  .bookingView-detailsColon {
+    display: none;
+  }
+
+  .bookingView-detailsLabel,
+  .bookingView-detailsValue {
+    min-width: 0;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  .bookingView-totalPayRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding-top: 14px;
+  }
+
+  .bookingView-totalPayValue {
+    font-size: 18px;
+  }
+
+  .bookingView-membersCard {
+    padding: 4px;
+    border-radius: 12px;
+  }
+
+  .bookingView-table {
+    min-width: 100%;
+  }
+
+  .bookingView-table thead th {
+    font-size: 12.5px;
+    padding: 8px 10px;
+  }
+
+  .bookingView-table tbody td {
+    padding: 12px 10px;
+    font-size: 13px;
+  }
+
+  .bookingView-avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .bookingView-avatarIcon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .bookingView-qrIcon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .bookingView-actionCol {
+    min-width: 56px;
+  }
+
+  .bookingView-actionMenuBtn {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+  }
+}
+
+/* ---------------------------------------------
+   Very small screens: below 480px
+--------------------------------------------- */
+@media (max-width: 479px) {
+  .bookingView-wrapper {
+    padding: 16px 12px 30px 12px;
+  }
+
+  .bookingView-detailsCard {
+    padding: 14px;
+  }
+
+  .bookingView-detailsRow {
+    grid-template-columns: 80px 1fr;
+  }
+
+  .bookingView-table {
+    min-width: 100%;
+  }
+}

@@ -1,0 +1,737 @@
+.bookingPage-wrapper {
+  min-height: 100vh;
+  background-color: #f7f7f9;
+}
+.bookingPageMainArea{
+    margin-left: 230px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.bookingPageContent {
+  flex: 1;
+  padding: 28px 36px 50px 36px;
+}
+.bookingPage-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.bookingPage-title {
+  color: #1b2a4e;
+  font-size: 24px;
+  font-weight: 800;
+  margin: 0 0 4px 0;
+}
+
+.bookingPage-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: #9a9ca8;
+}
+
+.bookingPage-breadcrumbSep {
+  color: #9a9ca8;
+}
+
+.bookingPage-breadcrumbActive {
+  color: var(--admin-accent);
+}
+/* css date */
+.bookingPage-dateWrap{
+  position:relative;
+  width:100%;
+}
+
+.bookingPage-dateOverlay{
+  position:fixed;
+  inset:0;
+  z-index:999;
+}
+
+.bookingPage-datePopup{
+  position:absolute;
+  top:calc(100% + 8px);
+  left:0;
+  z-index:1000;
+  background:#fff;
+  border-radius:16px;
+  box-shadow:0 20px 40px rgba(0,0,0,.15);
+  overflow:hidden;
+}
+
+.bookingPage-dateFooter{
+  display:flex;
+  justify-content:flex-end;
+  gap:12px;
+  padding:16px;
+  border-top:1px solid #eee;
+}
+
+.bookingPage-dateFooter button{
+  padding:10px 18px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.cancelBtn{
+  background:#f3f4f6;
+  color:#475467;
+}
+
+.applyBtn{
+  background:#22c55e;
+  color:#fff;
+}
+
+
+
+.bookingPage-createBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--admin-accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+  white-space: nowrap;
+}
+
+.bookingPage-createBtn:hover {
+  background-color: var(--admin-accent-strong);
+  transform: translateY(-1px);
+}
+
+.bookingPage-createBtnIcon {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.bookingPage-filterCard {
+  background-color: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.bookingPage-filterGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+.bookingPage-filterInput,
+.bookingPage-filterSelect {
+  padding: 13px 16px;
+  border: 1px solid #e9eaee;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #1b2a4e;
+  background-color: #ffffff;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+}
+
+.bookingPage-filterInput::placeholder {
+  color: #a7abbd;
+}
+
+.bookingPage-filterSelect {
+  cursor: pointer;
+}
+
+.bookingPage-filterInput:focus,
+.bookingPage-filterSelect:focus {
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 4px var(--admin-focus-ring);
+}
+
+.bookingPage-statusSelect {
+  color: #1b2a4e;
+  font-weight: 500;
+}
+
+.bookingPage-filterActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bookingPage-searchBtn {
+  background-color: var(--admin-accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 32px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.bookingPage-searchBtn:hover {
+  background-color: var(--admin-accent-strong);
+  transform: translateY(-1px);
+}
+
+.bookingPage-resetBtn {
+  background-color: #ffffff;
+  color: #3a3d4d;
+  border: 1px solid #e3e4ea;
+  border-radius: 8px;
+  padding: 12px 32px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.bookingPage-resetBtn:hover {
+  background-color: #f7f7f9;
+}
+
+.bookingPage-card {
+  background-color: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+}
+
+.bookingPage-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.bookingPage-toolbarLeft {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.bookingPage-pageSizeSelect {
+  padding: 10px 14px;
+  border: none;
+  background-color: #f2f3f6;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #1b2a4e;
+  outline: none;
+  cursor: pointer;
+  min-width: 90px;
+}
+
+.bookingPage-searchBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #f2f3f6;
+  border-radius: 8px;
+  padding: 10px 16px;
+  width: 260px;
+}
+
+.bookingPage-searchIcon {
+  font-size: 13px;
+  opacity: 0.55;
+  flex-shrink: 0;
+}
+
+.bookingPage-searchInput {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 13.5px;
+  color: #1b2a4e;
+  width: 100%;
+}
+
+.bookingPage-searchInput::placeholder {
+  color: #a7abbd;
+}
+
+.bookingPage-exportBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--admin-accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+  white-space: nowrap;
+}
+
+.bookingPage-exportBtn:hover {
+  background-color: var(--admin-accent-strong);
+  transform: translateY(-1px);
+}
+
+.bookingPage-exportBtnIcon {
+  font-size: 14px;
+}
+
+.bookingPage-tableWrap {
+  overflow-x: auto;    
+}
+
+.bookingPage-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1180px;
+}
+
+.bookingPage-table thead th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9a9ca8;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #eef0f2;
+  white-space: nowrap;
+}
+
+.bookingPage-hashCol {
+  width: 40px;
+}
+
+.bookingPage-thContent {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bookingPage-sortIcon {
+  font-size: 11px;
+  color: #c4c6d2;
+}
+
+.bookingPage-table tbody td {
+  padding: 16px 14px;
+  font-size: 14px;
+  color: #3a3d4d;
+  border-bottom: 1px solid #f2f3f6;
+  vertical-align: top;
+  font-size: 12px;
+}
+
+.bookingPage-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.bookingPage-stateCell {
+  text-align: center;
+  padding: 48px 16px !important;
+  border-bottom: none !important;
+}
+
+.bookingPage-stateWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.bookingPage-stateIcon {
+  fill: #000000;
+  margin-bottom: 6px;
+}
+
+.bookingPage-stateText {
+  font-size: 14px;
+  font-weight: 500;
+  color: #8b91a3;
+  margin: 0;
+}
+
+.bookingPage-stateText--error {
+  color: #e0331e;
+}
+
+.bookingPage-stateRetryBtn {
+  background-color: #f2f3f6;
+  color: #1b2a4e;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.bookingPage-stateRetryBtn:hover {
+  background-color: #e5e6ec;
+}
+
+.bookingPage-nameCell {
+  font-weight: 600;
+  color: #1b2a4e;
+  white-space: nowrap;
+}
+
+.bookingPage-eventCell {
+  color: #1b2a4e;
+  font-weight: 600;
+  max-width: 220px;
+  white-space: normal;
+}
+
+.bookingPage-createdCell {
+  color: #1b2a4e;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.bookingPage-actionCol {
+  position: relative;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.bookingPage-actionDropdownWrap {
+  position: relative;
+  display: inline-block;
+}
+
+.bookingPage-actionBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #f2f3f6;
+  color: #3a3d4d;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.bookingPage-actionBtn:hover {
+  background-color: #e5e6ec;
+}
+
+.bookingPage-actionCaret {
+  font-size: 11px;
+}
+
+.bookingPage-actionMenu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 120px;
+  /* Menu renders as position:fixed via inline style at click time, so it
+     can visually sit over the Sidebar (z-index: 1001) or Header
+     (z-index: 900). Needs to be above both or it renders invisibly
+     behind them despite being "open" in state. */
+  z-index: 1100;
+}
+
+.bookingPage-actionMenuItem {
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #3a3d4d;
+  cursor: pointer;
+  text-align: left;
+  background: transparent;
+  border: none;
+  transition: background-color 0.2s ease;
+}
+
+.bookingPage-actionMenuItem:hover {
+  background-color: #f2f3f6;
+}
+
+.bookingPage-table tfoot td {
+  padding: 16px 14px;
+  font-size: 14px;
+  border-top: 2px solid #eef0f2;
+}
+
+.bookingPage-totalLabel {
+  font-weight: 700;
+  color: #1b2a4e;
+}
+
+.bookingPage-totalValue {
+  font-weight: 700;
+  color: #1b2a4e;
+}
+
+.bookingPage-footerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.bookingPage-pagination {
+  font-size: 13.5px;
+  color: #6b7085;
+}
+
+.bookingPage-paginationNav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.bookingPage-pageArrow {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background-color: #f2f3f6;
+  color: #6b7085;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.bookingPage-pageArrow:hover {
+  background-color: #e5e6ec;
+}
+
+.bookingPage-pageNumber {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background-color: transparent;
+  color: #6b7085;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.bookingPage-pageNumber:hover {
+  background-color: #f2f3f6;
+}
+
+.bookingPage-pageNumberActive {
+  background-color: var(--admin-accent);
+  color: #ffffff;
+}
+
+.bookingPage-siteFooter {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 24px 0 18px 0;
+  color: #9a9ca8;
+  font-size: 13px;
+}
+
+.bookingPage-siteFooterLinks {
+  display: flex;
+  gap: 22px;
+}
+
+.bookingPage-siteFooterLinks span {
+  cursor: pointer;
+}
+@media (max-width: 1023px) {
+  .bookingPageMainArea {
+    margin-left: 0;
+  }
+  .bookingPage-datePopup{
+    left:50%;
+    transform:translateX(-50%);
+    width:min(95vw,720px);
+  }
+}
+
+/* Match the tiered scale used on Entry Report: title/card/table ease down
+   gradually instead of jumping straight from desktop to the mobile tier. */
+@media (max-width: 1200px) {
+  .bookingPageContent {
+    padding: 24px 24px 40px 24px;
+  }
+}
+
+@media (max-width: 992px) {
+  .bookingPage-title {
+    font-size: 22px;
+  }
+
+  .bookingPage-filterCard,
+  .bookingPage-card {
+    padding: 20px;
+  }
+
+  .bookingPage-table thead th,
+  .bookingPage-table tbody td {
+    padding: 12px 12px;
+  }
+}
+
+@media (max-width: 900px) {
+  .bookingPage-filterGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+/* MOBILE */
+@media (max-width:767px){
+  .bookingPage-datePopup{
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    width:calc(100vw - 24px);
+    max-width:360px;
+    max-height:85vh;
+    overflow-y:auto;
+    border-radius:18px;
+  }
+
+  .bookingPage-datePopup .rdrMonths{
+    flex-direction:column !important;
+  }
+
+  .bookingPage-dateFooter{
+    position:sticky;
+    bottom:0;
+    background:#fff;
+    padding:14px;
+  }
+
+  .bookingPage-dateFooter button{
+    flex:1;
+    padding:12px;
+  }
+}
+@media (max-width: 640px) {
+ 
+  .bookingPageContent{
+  padding: 22px 18px 40px 18px;
+  }
+
+  .bookingPage-title {
+    font-size: 19px;
+  }
+
+  .bookingPage-breadcrumb {
+    font-size: 12px;
+  }
+
+  .bookingPage-filterCard,
+  .bookingPage-card {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .bookingPage-table thead th {
+    font-size: 11px;
+    padding: 10px 10px;
+  }
+
+  .bookingPage-table tbody td {
+    font-size: 11px;
+    padding: 11px 10px;
+  }
+
+  .bookingPage-filterGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .bookingPage-filterActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bookingPage-searchBtn,
+  .bookingPage-resetBtn {
+    width: 100%;
+  }
+
+  .bookingPage-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bookingPage-toolbarLeft {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bookingPage-searchBox {
+    width: 100%;
+  }
+
+  .bookingPage-exportBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .bookingPage-footerRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .bookingPage-siteFooter {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 380px) {
+  .bookingPageContent {
+    padding: 18px 14px 32px 14px;
+  }
+
+  .bookingPage-filterCard,
+  .bookingPage-card {
+    padding: 14px;
+  }
+}

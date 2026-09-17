@@ -1,0 +1,590 @@
+/* Contact List page — mirrors the structure/scale of User.css
+   (userPage__ / userAction__) under the contactPage__ / contactAction__
+   prefixes, so this page matches the existing admin list pages exactly.
+   Pagination is intentionally NOT styled here: CommonPagination's default
+   permissionPagePagination* classes are already styled globally in
+   index.css, same as on every other list page. */
+
+.contactPage__page {
+  min-height: 100vh;
+  background-color: #f7f7f9;
+}
+
+.contactPage__mainArea {
+  margin-left: 240px;
+  min-height: 100vh;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.contactPage__content {
+  flex: 1;
+  min-width: 0;
+  padding: 28px 36px 50px 36px;
+}
+
+.contactPage__topRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.contactPage__pageTitle {
+  color: #1b2a4e;
+  font-size: 24px;
+  font-weight: 800;
+  margin: 0 0 4px 0;
+}
+
+.contactPage__breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: #9a9ca8;
+}
+
+.contactPage__breadcrumbActive {
+  color: var(--admin-accent);
+}
+
+.contactPage__headerActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Secondary (outline) treatment so it doesn't visually compete with the
+   solid, primary "Create Contact" button next to it. */
+.contactPage__exportButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #ffffff;
+  color: var(--admin-accent);
+  border: 1px solid var(--admin-accent);
+  border-radius: 8px;
+  padding: 12px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+  white-space: nowrap;
+}
+
+.contactPage__exportButton:hover:not(:disabled) {
+  background-color: #f2f6ff;
+  transform: translateY(-1px);
+}
+
+.contactPage__exportButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.contactPage__exportIcon {
+  flex-shrink: 0;
+}
+
+.contactPage__exportIcon--spinning {
+  animation: contactPage__spin 0.8s linear infinite;
+}
+
+@keyframes contactPage__spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.contactPage__createButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--admin-accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+  white-space: nowrap;
+}
+
+.contactPage__createButton:hover {
+  background-color: var(--admin-accent-strong);
+  transform: translateY(-1px);
+}
+
+.contactPage__tableCard {
+  background-color: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+  min-width: 0;
+  overflow: visible;
+}
+
+.contactPage__tableControls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+
+.contactPage__rowsSelect {
+  padding: 10px 14px;
+  border: none;
+  background-color: #f2f3f6;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #1b2a4e;
+  outline: none;
+  cursor: pointer;
+  min-width: 90px;
+}
+
+/* Same visual treatment as the rows-per-page select, just wider — the
+   category/reference values are full words rather than a two-digit
+   number. */
+.contactPage__filterSelect {
+  padding: 10px 14px;
+  border: none;
+  background-color: #f2f3f6;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #1b2a4e;
+  outline: none;
+  cursor: pointer;
+  min-width: 190px;
+  max-width: 240px;
+}
+
+.contactPage__searchBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #f2f3f6;
+  border-radius: 8px;
+  padding: 10px 16px;
+  width: 260px;
+}
+
+.contactPage__searchBox svg {
+  color: #9a9ca8;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.contactPage__searchInput {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 13.5px;
+  color: #1b2a4e;
+  width: 100%;
+}
+
+.contactPage__searchInput::placeholder {
+  color: #a7abbd;
+}
+
+/* Only this element scrolls horizontally on mobile. `overflow-x: auto`
+   (not `scroll`) so the horizontal scrollbar only appears when the
+   table actually overflows, instead of a permanent, mostly-empty
+   scrollbar track always being shown. `overflow-y: hidden` keeps a
+   phantom vertical scrollbar from appearing too — browsers compute a
+   non-"visible" overflow-y as "auto" whenever overflow-x isn't
+   "visible", so leaving overflow-y unset here silently turns on
+   vertical scrolling; `padding-bottom` still reserves room for the
+   last row's Action dropdown (position: absolute) so it stays fully
+   visible instead of being clipped. */
+.contactPage__tableWrapper {
+  width: 100%;
+  position: relative;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 160px; /* dropdown mate space — must fit the full 3-item Action menu (View/Edit/Delete), not just part of it */
+  box-sizing: border-box;
+}
+
+.contactPage__table {
+  width: 100%;
+  border-collapse: collapse;
+  /* min-width: 980px; */
+}
+
+.contactPage__table thead th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9a9ca8;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #eef0f2;
+  white-space: nowrap;
+}
+
+.contactPage__thContent {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.contactPage__sortIcon {
+  font-size: 10px;
+  color: #c4c6d2;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* The active sort column's arrow picks up the accent colour so the
+   current ordering is readable at a glance. */
+.contactPage__sortIconActive {
+  color: var(--admin-accent);
+}
+
+/* Interactive header for the server-sortable columns. Inherits the th's
+   own typography so a sortable header is visually identical to a plain
+   one apart from the cursor and the arrow state. */
+.contactPage__sortHeader {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+}
+
+.contactPage__sortHeader:hover {
+  color: #1b2a4e;
+}
+
+.contactPage__sortHeader:focus-visible {
+  outline: 2px solid var(--admin-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.contactPage__table tbody td {
+  padding: 16px 14px;
+  font-size: 14px;
+  color: #3a3d4d;
+  border-bottom: 1px solid #f2f3f6;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.contactPage__table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* "No contacts found" state — same icon + message shape as
+   CommonEmptyState already used on Event/Booking/Entry Report, so an
+   empty Contact List looks consistent with every other list page
+   instead of showing a bare line of text. */
+.contactPage__stateCell {
+  text-align: center;
+  padding: 48px 16px;
+  border-bottom: none;
+}
+
+.contactPage__stateWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.contactPage__stateText {
+  font-size: 14px;
+  font-weight: 500;
+  color: #8b91a3;
+  margin: 0;
+}
+
+.contactPage__contactName {
+  font-weight: 600;
+  color: #1b2a4e;
+}
+
+/* Address is the one free-text column long enough to need wrapping —
+   without this it would stretch the row far past the viewport. */
+.contactPage__addressCell {
+  white-space: normal;
+  max-width: 240px;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* A contact can hold several references (see models/contact.model.js), so
+   they render as wrapped chips rather than one long comma-joined line. */
+.contactPage__referenceCell {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: 240px;
+  white-space: normal;
+}
+
+.contactPage__referenceChip {
+  display: inline-flex;
+  align-items: center;
+  background-color: #f2f3f6;
+  color: #3a3d4d;
+  border-radius: 6px;
+  padding: 3px 9px;
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Reference Summary — a second card below the main Contact List
+   table/pagination, reusing the exact same tableCard/tableWrapper/table
+   classes so it matches the existing table styling exactly rather than
+   introducing a new visual style. Only the header row above it and the
+   spacing between the two cards are specific to this section. */
+.contactPage__referenceSummaryCard {
+  margin-top: 24px;
+}
+
+.contactPage__referenceSummaryHeader {
+  margin-bottom: 18px;
+}
+
+.contactPage__referenceSummaryTitle {
+  color: #1b2a4e;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+}
+
+@media (max-width: 1023px) {
+  .contactPage__mainArea {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 1200px) {
+  .contactPage__content {
+    padding: 24px 24px 40px 24px;
+  }
+}
+
+@media (max-width: 992px) {
+  .contactPage__pageTitle {
+    font-size: 22px;
+  }
+
+  .contactPage__tableCard {
+    padding: 20px;
+  }
+
+  .contactPage__table thead th,
+  .contactPage__table tbody td {
+    padding: 12px 12px;
+  }
+}
+
+/* Tablet: 768px - 1024px */
+@media (max-width: 1024px) and (min-width: 768px) {
+  .contactPage__tableControls {
+    flex-wrap: wrap;
+    row-gap: 12px;
+  }
+
+  .contactPage__rowsSelect {
+    flex: 0 1 140px;
+  }
+
+  .contactPage__searchBox {
+    flex: 1 1 220px;
+    min-width: 0;
+  }
+
+  .contactPage__filterSelect {
+    flex: 1 1 200px;
+    min-width: 0;
+    max-width: none;
+  }
+}
+
+/* Mobile: below 768px */
+@media (max-width: 767px) {
+  .contactPage__content {
+    padding: 22px 18px 40px 18px;
+  }
+
+  .contactPage__pageTitle {
+    font-size: 19px;
+  }
+
+  .contactPage__breadcrumb {
+    font-size: 12px;
+  }
+
+  .contactPage__tableCard {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .contactPage__table thead th {
+    font-size: 11px;
+    padding: 10px 10px;
+  }
+
+  .contactPage__table tbody td {
+    font-size: 13px;
+    padding: 11px 10px;
+  }
+
+  .contactPage__topRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .contactPage__headerActions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .contactPage__createButton,
+  .contactPage__exportButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .contactPage__pageTitle,
+  .contactPage__breadcrumb {
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  .contactPage__tableControls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .contactPage__rowsSelect {
+    width: 100%;
+  }
+
+  .contactPage__searchBox {
+    width: 100%;
+  }
+
+  .contactPage__filterSelect {
+    width: 100%;
+    max-width: none;
+  }
+
+  .contactPage__table td,
+  .contactPage__table th {
+    overflow-wrap: break-word;
+  }
+}
+
+@media (max-width: 380px) {
+  .contactPage__content {
+    padding: 18px 14px 32px 14px;
+  }
+
+  .contactPage__tableCard {
+    padding: 14px;
+  }
+}
+
+/* ===== Action Dropdown (contactAction__ prefix) ===== */
+
+.contactAction__wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.contactAction__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #ffffff;
+  color: #3a3d4d;
+  border: 1px solid #e2e5eb;
+  border-radius: 8px;
+  height: 38px;
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.contactAction__button:hover {
+  background-color: #f8fafc;
+  border-color: #d7dae1;
+}
+
+.contactAction__icon {
+  font-size: 11px;
+  color: #9a9ca8;
+}
+
+.contactAction__menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 140px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 6px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+  z-index: 99999;
+}
+
+.contactAction__menuOpen {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.contactAction__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 9px 10px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #3a3d4d;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  white-space: nowrap;
+}
+
+.contactAction__item:hover {
+  background-color: #f8fafc;
+}

@@ -1,0 +1,704 @@
+/* Entry Report Page — scoped with erPage__ prefix */
+
+.erPage__container {
+  padding: 28px 32px 48px;
+  background: #f4f5f9;
+  min-height: 100%;
+  box-sizing: border-box;
+}
+
+.erPage__container * {
+  box-sizing: border-box;
+}
+.erPage_wrapper {
+  min-height: 100vh;
+  background-color: #f7f7f9;
+}
+.erPageMainArea {
+  margin-left: 230px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+/* Title + Breadcrumb */
+
+.erPage__titleBlock {
+  margin-bottom: 20px;
+}
+
+.erPage__title {
+  margin: 0 0 4px 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e2432;
+}
+
+.erPage__breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #9aa1b1;
+}
+
+.erPage__breadcrumbItem--active {
+  color: var(--admin-accent);
+  font-weight: 500;
+}
+
+.erPage__breadcrumbSep {
+  color: #c3c8d4;
+}
+
+/* Card */
+
+.erPage__card {
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 2px 10px rgba(20, 24, 40, 0.05);
+  padding: 24px;
+  margin-bottom: 24px;
+  /* overflow-x: scroll; */
+}
+
+/* Filters */
+
+.erPage__filtersRow {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.erPage__filtersRow:last-child {
+  margin-bottom: 0;
+}
+
+/* Desktop (default): Row 1 & 2 = 3 equal columns of filter fields */
+.erPage__filtersRow--fields {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* Row 3 = just Search + Reset, left-aligned, auto-sized — same pattern as
+   Booking.jsx's .bookingPage-filterActions (a flex row, not a grid; the
+   buttons no longer share a row with any input). */
+.erPage__filtersRow--actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.erPage__input {
+  width: 100%;
+  min-width: 0;
+  padding: 12px 16px;
+  border: 1px solid #e3e6ee;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #4a4f5c;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.erPage__input::placeholder {
+  color: #a6abb8;
+}
+
+.erPage__input:focus {
+  border-color: var(--admin-accent);
+}
+
+/* Event dropdown — deliberately just .erPage__input plus this. Removing
+   native select chrome (appearance) is required so every browser renders
+   the exact same box height/padding as the text-input filters instead of
+   its own OS-styled select sizing; the custom arrow keeps it reading as
+   a dropdown. No other filter styles are duplicated or overridden. */
+.erPage__eventSelect {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  padding-right: 36px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%234a4f5c'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+}
+
+.erPage__btn {
+  padding: 12px 28px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  transition: opacity 0.15s ease, background-color 0.15s ease;
+}
+
+.erPage__btn:hover {
+  opacity: 0.9;
+}
+
+.erPage__btn--search {
+  background: var(--admin-accent);
+  color: #ffffff;
+}
+
+.erPage__btn--reset {
+  background: #ffffff;
+  color: #1e2432;
+  border: 1px solid #1e2432;
+}
+
+/* Table toolbar */
+
+.erPage__tableToolbar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.erPage__toolbarLeft {
+  display: flex;
+  align-items: center;
+  justify-self: start;
+}
+
+.erPage__toolbarCenter {
+  display: flex;
+  /* justify-content: center; */
+  justify-self: center;
+  width: 100%;
+}
+
+.erPage__toolbarRight {
+  display: flex;
+  align-items: center;
+  justify-self: end;
+}
+
+.erPage__pageSizeSelect {
+      padding: 10px 14px;
+    border: none;
+    background-color: #f2f3f6;
+    border-radius: 8px;
+    font-size: 13.5px;
+    color: #1b2a4e;
+    outline: none;
+    cursor: pointer;
+    min-width: 90px;
+    margin-right: 20px;
+}
+
+.erPage__searchBox {
+  width: 100%;
+  max-width: 260px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f4f5f9;
+  border-radius: 8px;
+   /* margin-left: 20px; */
+  padding: 10px 16px;
+}
+
+.erPage__searchIcon {
+  color: #a6abb8;
+  flex-shrink: 0;
+}
+
+.erPage__searchInput {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 14px;
+  color: #4a4f5c;
+}
+
+.erPage__searchInput::placeholder {
+  color: #a6abb8;
+}
+
+.erPage__btn--export {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--admin-accent);
+  color: #ffffff;
+}
+
+.erPage__exportIcon {
+  flex-shrink: 0;
+}
+
+.erPage__btn--export:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.erPage__exportIcon--spinning {
+  animation: erPage__spin 0.8s linear infinite;
+}
+
+@keyframes erPage__spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Pagination */
+
+.erPage__paginationBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #eceef4;
+}
+
+.erPage__paginationInfo {
+  font-size: 13px;
+  color: #8b91a3;
+}
+
+.erPage__paginationControls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.erPage__paginationControls .erPage__btn {
+  padding: 10px 20px;
+}
+
+.erPage__paginationControls .erPage__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.erPage__btn--active {
+  background: var(--admin-accent);
+  color: #ffffff;
+  border-color: var(--admin-accent);
+}
+
+/* Table */
+
+.erPage__tableWrap {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+
+
+.erPage__tableWrap::-webkit-scrollbar-thumb {
+  background: #d7dbe6;
+  border-radius: 999px;
+}
+
+
+.erPage__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.erPage__th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: #8b91a3;
+  padding: 0 16px 14px;
+  border-bottom: 1px solid #eceef4;
+  white-space: nowrap;
+}
+
+.erPage__tr {
+  border-bottom: 1px solid #f2f3f8;
+}
+
+.erPage__tr:hover {
+  background: #fafbfd;
+}
+
+.erPage__td {
+  padding: 14px 16px;
+  font-size: 14px;
+  color: #4a4f5c;
+  white-space: nowrap;
+}
+
+.erPage__profileAvatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(74, 144, 194, 0.14);
+  color: var(--admin-accent);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  overflow: hidden;
+}
+
+.erPage__profileAvatar--img {
+  padding: 0;
+  background: rgba(74, 144, 194, 0.14);
+}
+
+.erPage__profileAvatarImg {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.erPage__profileAvatarIcon {
+  color: var(--admin-accent);
+}
+
+/* Empty state */
+
+.erPage__emptyCell {
+  padding: 0;
+}
+
+.erPage__emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 20px 48px;
+  color: #1e2432;
+  text-align: center;
+}
+
+.erPage__emptyIcon {
+  width: 96px;
+  height: 96px;
+  margin-bottom: 18px;
+  color: #c7cbe0;
+  flex-shrink: 0;
+}
+
+.erPage__emptyText {
+  font-size: 14px;
+  color: #9aa1b1;
+  margin: 0;
+}
+
+/* Date Range popup */
+
+.erPage__dateRangeWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.erPage__dateRangeOverlay {
+  /* Full-viewport click-catcher — same approach as Booking.jsx's date
+     popup. Anywhere outside the popup itself is this overlay, so no
+     separate mousedown/ref-based outside-click handling is needed. */
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+}
+
+.erPage__dateRangePopup {
+  /* Anchored to .erPage__dateRangeWrapper (position: relative, above)
+     instead of viewport-fixed pixel math — same as Booking.jsx's
+     .bookingPage-datePopup. Opens directly below the Date Range input by
+     construction, so it can never drift over the Event dropdown or the
+     filter rows above it, and never needs JS to measure/re-clamp itself. */
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 1000;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.erPage__dateRangePopup .rdrCalendarWrapper {
+  padding: 2px;
+}
+.erPage__dateRangeFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 8px 4px;
+  border-top: 1px solid #eceef4;
+  margin-top: 8px;
+}
+
+.erPage__dateRangeDisplay {
+  font-size: 13px;
+  color: #4a4f5c;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.erPage__dateRangeActions {
+  display: flex;
+  gap: 10px;
+}
+
+.erPage__dateRangeActions .erPage__btn {
+  padding: 10px 20px;
+}
+
+.erPage__btn--apply {
+  background: #22c55e;
+  color: #ffffff;
+}
+
+/* Responsive */
+/* Laptop: sidebar (230px) + container padding leaves noticeably less
+   content width at common 1200-1366px laptop resolutions, so the toolbar
+   and search box get a little more room to breathe before the tablet
+   breakpoint below reflows things more drastically. */
+@media (max-width: 1200px) {
+  .erPage__container {
+    padding: 24px 24px 40px;
+  }
+
+  .erPage__searchBox {
+    max-width: 220px;
+  }
+
+  .erPage__pageSizeSelect {
+    margin-right: 12px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .erPageMainArea {
+    margin-left: 0;
+  }
+}
+/* Tablet: 2 columns for all filter fields (both rows) */
+@media (max-width: 992px) {
+  .erPage__card {
+    padding: 20px;
+  }
+
+  .erPage__title {
+    font-size: 22px;
+  }
+
+  .erPage__filtersRow--fields {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .erPage__input {
+    min-width: 0;
+  }
+
+  .erPage__filtersRow--actions .erPage__btn {
+    flex: 1;
+    padding: 12px 16px;
+  }
+
+  .erPage__tableWrap {
+    max-width: 100%;
+  }
+
+  .erPage__table {
+    min-width: 860px;
+  }
+
+  .erPage__th,
+  .erPage__td {
+    padding: 12px 14px;
+  }
+
+  .erPage__emptyState {
+    padding: 48px 20px 36px;
+  }
+
+  .erPage__emptyIcon {
+    width: 76px;
+    height: 76px;
+  }
+
+  .erPage__dateRangePopup {
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(95vw, 720px);
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+}
+
+/* Tablet-narrow: the 3-part table toolbar (rows-per-page / search / export)
+   gets cramped in one row well before the mobile breakpoint below, so it
+   stacks here already; the filter grid itself still works fine as 2
+   columns (set in the 992px block above) down to this width. */
+@media (max-width: 768px) {
+  .erPage__tableToolbar {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .erPage__toolbarLeft,
+  .erPage__toolbarCenter,
+  .erPage__toolbarRight {
+    justify-self: stretch;
+    width: 100%;
+  }
+
+  .erPage__pageSizeSelect {
+    width: 100%;
+    margin-right: 0;
+  }
+
+  .erPage__searchBox {
+    width: 100%;
+    max-width: none;
+  }
+
+  .erPage__btn--export {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Mobile: all fields full width, single column */
+@media (max-width: 576px) {
+  .erPage__container {
+    padding: 16px 12px 28px;
+  }
+
+  .erPage__title {
+    font-size: 19px;
+  }
+
+  .erPage__breadcrumb {
+    font-size: 12px;
+  }
+
+  .erPage__card {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .erPage__filtersRow--fields {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .erPage__filtersRow--actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .erPage__input {
+    width: 100%;
+    padding: 11px 14px;
+    font-size: 13px;
+  }
+
+  .erPage__filtersRow--actions .erPage__btn {
+    width: 100%;
+    padding: 11px 16px;
+    font-size: 13px;
+  }
+
+  .erPage__btn--export {
+    padding: 11px 16px;
+    font-size: 13px;
+  }
+
+  .erPage__table {
+    min-width: 720px;
+  }
+
+  .erPage__th {
+    font-size: 11px;
+    padding: 0 12px 12px;
+  }
+
+  .erPage__td {
+    font-size: 13px;
+    padding: 11px 12px;
+  }
+
+  .erPage__profileAvatar {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+
+  .erPage__emptyState {
+    padding: 36px 16px 28px;
+  }
+
+  .erPage__emptyIcon {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 14px;
+  }
+
+  .erPage__emptyText {
+    font-size: 13px;
+  }
+
+  .erPage__dateRangePopup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: calc(100vw - 24px);
+    max-width: 360px;
+    max-height: 85vh;
+    overflow-y: auto;
+    border-radius: 18px;
+  }
+
+  .erPage__dateRangePopup .rdrMonths {
+    flex-direction: column !important;
+  }
+
+  .erPage__dateRangeFooter {
+    flex-wrap: wrap;
+    position: sticky;
+    bottom: 0;
+    background: #fff;
+  }
+
+  .erPage__dateRangeActions {
+    width: 100%;
+  }
+
+  .erPage__dateRangeActions .erPage__btn {
+    flex: 1;
+  }
+
+  .erPage__paginationBar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .erPage__paginationControls {
+    justify-content: stretch;
+  }
+
+  .erPage__paginationControls .erPage__btn {
+    flex: 1;
+  }
+}

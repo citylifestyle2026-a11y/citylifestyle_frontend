@@ -1,0 +1,140 @@
+.permissionDeleteOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(20, 22, 30, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+}
+
+.permissionDeleteModal {
+  background-color: #ffffff;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 620px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  animation: permissionDeletePopIn 0.18s ease;
+}
+
+@keyframes permissionDeletePopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.permissionDeleteHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 26px 30px 0 30px;
+}
+
+.permissionDeleteTitle {
+  color: #1b2a4e;
+  font-size: 20px;
+  font-weight: 800;
+  margin: 0;
+}
+
+.permissionDeleteCloseIcon {
+  background: transparent;
+  border: none;
+  color: #9a9ca8;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.permissionDeleteCloseIcon:hover {
+  background-color: #f2f3f6;
+  color: #3a3d4d;
+}
+
+.permissionDeleteBody {
+  padding: 40px 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 90px;
+}
+
+.permissionDeleteMessage {
+  font-size: 16px;
+  color: #1b2a4e;
+  margin: 0;
+  text-align: center;
+}
+
+.permissionDeleteHighlight {
+  color: #e0335e;
+  font-weight: 700;
+}
+
+.permissionDeleteFooter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 30px 26px 30px;
+}
+
+.permissionDeleteCloseButton {
+  background-color: #f2f3f6;
+  color: #3a3d4d;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 26px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.permissionDeleteCloseButton:hover {
+  background-color: #e5e6ec;
+}
+
+.permissionDeleteConfirmButton {
+  background-color: #e0335e;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 26px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.permissionDeleteConfirmButton:hover {
+  background-color: #c22a4e;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 640px) {
+  .permissionDeleteModal {
+    max-width: 100%;
+  }
+
+  .permissionDeleteFooter {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .permissionDeleteCloseButton,
+  .permissionDeleteConfirmButton {
+    width: 100%;
+    text-align: center;
+  }
+}

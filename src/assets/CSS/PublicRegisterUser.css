@@ -1,0 +1,458 @@
+/* Mobile-first: this page is opened from a WhatsApp link, so the base
+   (unqueried) styles below target small screens, and layout only widens
+   for larger viewports via the min-width query at the bottom. */
+
+.publicRegister-page {
+  min-height: 100vh;
+  background-color: #f4f4f7;
+}
+
+.publicRegister-hero {
+  background-color: #2b2b38;
+  padding: 36px 20px 70px 20px;
+}
+
+.publicRegister-title {
+  color: #ffffff;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.publicRegister-wave {
+  display: inline-block;
+}
+
+.publicRegister-content {
+  padding: 0 16px 40px 16px;
+  margin-top: -46px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.publicRegister-card {
+  width: 100%;
+  max-width: 420px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  padding: 28px 22px 24px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.publicRegister-photoWrap {
+  position: relative;
+  width: 92px;
+  height: 92px;
+  margin-bottom: 12px;
+}
+
+.publicRegister-photoCircle {
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  background-color: #d7d9e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.publicRegister-avatarIcon {
+  width: 44px;
+  height: 44px;
+}
+
+.publicRegister-editBtn {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.publicRegister-editIcon {
+  width: 14px;
+  height: 14px;
+}
+
+.publicRegister-photoPreviewImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.publicRegister-uploadText {
+  color: #9a9ca8;
+  font-size: 13px;
+  margin-bottom: 22px;
+}
+
+.publicRegister-fieldGroup {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+/* One field (input + its own inline error) per wrap, so the error text
+   sits directly below its input instead of being spaced out by the
+   fieldGroup's inter-field gap above. */
+.publicRegister-fieldWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.publicRegister-fieldError {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: #e0331e;
+}
+
+/* 16px input font size (not 13.5px like the desktop-oriented
+   RegisterUsers.css) avoids the automatic zoom-on-focus that iOS Safari
+   triggers on inputs below 16px — important since this page is opened
+   almost exclusively on phones. */
+.publicRegister-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #e3e4ea;
+  border-radius: 8px;
+  font-size: 16px;
+  color: #1b2a4e;
+  background-color: #ffffff;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.publicRegister-input::placeholder {
+  color: #a7abbd;
+}
+
+.publicRegister-input:focus {
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 4px var(--admin-focus-ring);
+}
+
+.publicRegister-input:disabled {
+  background-color: #f4f4f7;
+  color: #9a9ca8;
+}
+
+.publicRegister-submitBtn {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 8px;
+  background-color: var(--admin-accent);
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.publicRegister-submitBtn:disabled {
+  background-color: #c9cbd3;
+  cursor: not-allowed;
+}
+
+.publicRegister-successCard {
+  align-items: center;
+  text-align: center;
+  padding: 40px 24px;
+}
+
+.publicRegister-successIcon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background-color: #22b07d;
+  color: #ffffff;
+  font-size: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.publicRegister-successTitle {
+  color: #1b2a4e;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 6px 0;
+}
+
+.publicRegister-successText {
+  color: #6b7085;
+  font-size: 14px;
+  margin: 0;
+}
+
+.publicRegister-statusText {
+  color: #ffffff;
+  font-size: 14px;
+  text-align: center;
+  margin: 0;
+}
+
+.publicRegister-summary {
+  width: 100%;
+  max-width: 420px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  padding: 18px 22px;
+  margin-bottom: 16px;
+}
+
+.publicRegister-summaryRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  padding: 7px 0;
+  border-bottom: 1px solid #eef0f4;
+}
+
+.publicRegister-summaryRow:last-child {
+  border-bottom: none;
+}
+
+.publicRegister-summaryLabel {
+  color: #9a9ca8;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.publicRegister-summaryValue {
+  color: #1b2a4e;
+  font-size: 13.5px;
+  font-weight: 600;
+  text-align: right;
+}
+
+.publicRegister-errorCard,
+.publicRegister-alreadyCard {
+  align-items: center;
+  text-align: center;
+  padding: 40px 24px;
+}
+
+/* Registered-slot card — mirrors RegisterUsers.css's
+   .bookingRegister-registeredCard so an already-registered slot on the
+   public page looks the same as the authenticated Private Registration
+   page, per the requirement to reuse that UI wherever possible. */
+.publicRegister-registeredCard {
+  width: 100%;
+  max-width: 420px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  padding: 20px 22px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.publicRegister-registeredAvatar {
+  width: 56px;
+  height: 56px;
+  min-width: 56px;
+  border-radius: 50%;
+  background-color: #d7d9e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.publicRegister-registeredAvatarIcon {
+  width: 28px;
+  height: 28px;
+}
+
+.publicRegister-registeredAvatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.publicRegister-registeredInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.publicRegister-registeredName {
+  color: #1b2a4e;
+  font-weight: 700;
+  font-size: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.publicRegister-registeredMobile {
+  color: var(--admin-accent);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+/* Shown under the grid/slot once every ticket on this booking is
+   registered — same message as RegisterUsers.jsx, styled for this
+   page's light content area rather than the dark hero. */
+.publicRegister-completeText {
+  color: #1b2a4e;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  margin: 24px 0 0 0;
+}
+
+.publicRegister-errorIcon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background-color: #e5484d;
+  color: #ffffff;
+  font-size: 26px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.publicRegister-errorTitle {
+  color: #1b2a4e;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 6px 0;
+}
+
+.publicRegister-errorText {
+  color: #6b7085;
+  font-size: 14px;
+  margin: 0;
+}
+
+.publicRegister-alreadyCard .publicRegister-successIcon {
+  background-color: #6b7085;
+}
+
+/* ================= MULTI-SLOT REGISTRATION (quantity > 1) ================= */
+/* Single-slot (quantity = 1) wrapper: identical visual result to before
+   this card had no wrapper at all. */
+.publicRegister-singleWrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Mobile-first, one column by default; widens to 2 then 3 equal-width
+   columns via the media queries below. A proper CSS Grid (not flex) so
+   every row's cards share the exact same column width automatically —
+   "Registration 1/2/3" on one row, "Registration 4/5/6" on the next,
+   etc. `minmax(0, 1fr)` (not `1fr` alone) is what stops a long
+   name/email value or input from stretching its column past the grid
+   track and causing horizontal overflow. */
+.publicRegister-grid {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.publicRegister-slot {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Locked slot (a later registration whose earlier slot isn't filled
+   yet) — same card shell as an active/registered slot so grid rows stay
+   aligned, just quieter since there's nothing to interact with here. */
+.publicRegister-lockedCard {
+  align-items: center;
+  text-align: center;
+  padding: 40px 24px;
+  min-height: 220px;
+  justify-content: center;
+}
+
+.publicRegister-lockedText {
+  color: #9a9ca8;
+  font-size: 14px;
+  margin: 0;
+}
+
+.publicRegister-slotLabel {
+  align-self: flex-start;
+  display: block;
+  color: #6b7085;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+/* Tablet: 2 registration cards per row. */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .publicRegister-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Desktop: 3 registration cards per row. */
+@media (min-width: 1200px) {
+  .publicRegister-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Wider screens: a little more breathing room, matching the visual
+   language of RegisterUsers.css's hero without changing that file. */
+@media (min-width: 480px) {
+  .publicRegister-hero {
+    padding: 48px 32px 90px 32px;
+  }
+
+  .publicRegister-title {
+    font-size: 34px;
+  }
+
+  .publicRegister-content {
+    padding: 0 24px 50px 24px;
+    margin-top: -56px;
+  }
+
+  .publicRegister-card {
+    padding: 32px 28px 28px 28px;
+  }
+}

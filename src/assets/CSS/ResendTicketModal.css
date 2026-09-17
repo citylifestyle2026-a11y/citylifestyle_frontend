@@ -1,0 +1,125 @@
+.bookingResendOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(30, 30, 40, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2200;
+  padding: 20px;
+  opacity: 0;
+  animation: bookingResendOverlayFadeIn 0.25s ease forwards;
+}
+
+@keyframes bookingResendOverlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.bookingResendContainer {
+  background-color: #ffffff;
+  width: 100%;
+  max-width: 480px;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  padding: 44px 40px 36px 40px;
+  text-align: center;
+  opacity: 0;
+  transform: scale(0.94) translateY(10px);
+  animation: bookingResendPopIn 0.28s ease forwards;
+  animation-delay: 0.05s;
+}
+
+@keyframes bookingResendPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.bookingResendIconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.bookingResendIcon {
+  width: 70px;
+  height: 70px;
+}
+
+.bookingResendTitle {
+  color: #1b2a4e;
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 22px 0;
+}
+
+.bookingResendMessage {
+  color: #4a4d5e;
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0 0 30px 0;
+}
+
+.bookingResendMobile {
+  font-weight: 600;
+  color: #1b2a4e;
+}
+
+/* The multi-ticket picker (CommonSelect) previously rendered with no
+   className, so it fell back to the browser's bare, unstyled <select> —
+   looking out of place inside this styled modal. Matches the input style
+   already used for selects elsewhere (see Booking.css's
+   .bookingPage-filterSelect). */
+.bookingResendSelect {
+  width: 100%;
+  padding: 13px 16px;
+  border: 1px solid #e3e4ea;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #1b2a4e;
+  background-color: #ffffff;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bookingResendSelect:focus {
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 4px var(--admin-focus-ring);
+}
+
+.bookingResendOkayBtn {
+  background-color: var(--admin-accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 40px;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.bookingResendOkayBtn:hover {
+  background-color: var(--admin-accent-strong);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 480px) {
+  .bookingResendContainer {
+    width: 95%;
+    max-width: 95%;
+    padding: 36px 24px 28px 24px;
+  }
+
+  .bookingResendOkayBtn {
+    width: 100%;
+  }
+}

@@ -1,0 +1,411 @@
+.userPage__page {
+  min-height: 100vh;
+  background-color: #f7f7f9;
+  /* overflow-x: hidden; */
+}
+
+.userPage__mainArea {
+  margin-left: 240px;
+  min-height: 100vh;
+  min-width: 0;
+  /* overflow: hidden; */
+  display: flex;
+  flex-direction: column;
+}
+
+.userPage__content {
+  flex: 1;
+  min-width: 0;
+  padding: 28px 36px 50px 36px;
+}
+
+.userPage__topRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.userPage__pageTitle {
+  color: #1b2a4e;
+  font-size: 24px;
+  font-weight: 800;
+  margin: 0 0 4px 0;
+}
+
+.userPage__breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: #9a9ca8;
+}
+
+.userPage__breadcrumbActive {
+  color: var(--admin-accent);
+}
+
+.userPage__createButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--admin-accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+  white-space: nowrap;
+}
+
+.userPage__createButton:hover {
+  background-color: var(--admin-accent-strong);
+  transform: translateY(-1px);
+}
+
+.userPage__tableCard {
+  background-color: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+  min-width: 0;
+  overflow: visible;
+}
+
+.userPage__tableControls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+
+.userPage__rowsSelect {
+  padding: 10px 14px;
+  border: none;
+  background-color: #f2f3f6;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #1b2a4e;
+  outline: none;
+  cursor: pointer;
+  min-width: 90px;
+}
+
+.userPage__searchBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #f2f3f6;
+  border-radius: 8px;
+  padding: 10px 16px;
+  width: 260px;
+}
+
+.userPage__searchBox svg {
+  color: #9a9ca8;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.userPage__searchInput {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 13.5px;
+  color: #1b2a4e;
+  width: 100%;
+}
+
+.userPage__searchInput::placeholder {
+  color: #a7abbd;
+}
+
+/* Only this element scrolls horizontally on mobile */
+.userPage__tableWrapper {
+  width: 100%;
+  position: relative;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  min-height: fit-content;
+  height: auto;
+  padding-bottom: 72px; /* dropdown mate space */
+  box-sizing: border-box;
+}
+
+.userPage__table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 820px;
+}
+
+.userPage__table thead th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9a9ca8;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #eef0f2;
+  white-space: nowrap;
+}
+
+.userPage__thContent {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.userPage__sortIcon {
+  font-size: 10px;
+  color: #c4c6d2;
+}
+
+.userPage__table tbody td {
+  padding: 16px 14px;
+  font-size: 14px;
+  color: #3a3d4d;
+  border-bottom: 1px solid #f2f3f6;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.userPage__table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.userPage__avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  text-align: left;
+}
+
+.userPage__userName {
+  font-weight: 600;
+  color: #1b2a4e;
+}
+
+@media (max-width: 1023px) {
+  .userPage__mainArea {
+    margin-left: 0;
+  }
+}
+
+/* Match the tiered scale used on Entry Report: title/card/table ease down
+   gradually instead of jumping straight from desktop to the mobile tier. */
+@media (max-width: 1200px) {
+  .userPage__content {
+    padding: 24px 24px 40px 24px;
+  }
+}
+
+@media (max-width: 992px) {
+  .userPage__pageTitle {
+    font-size: 22px;
+  }
+
+  .userPage__tableCard {
+    padding: 20px;
+  }
+
+  .userPage__table thead th,
+  .userPage__table tbody td {
+    padding: 12px 12px;
+  }
+}
+
+/* Tablet: 768px - 1024px */
+@media (max-width: 1024px) and (min-width: 768px) {
+  .userPage__tableControls {
+    flex-wrap: wrap;
+    row-gap: 12px;
+  }
+
+  .userPage__rowsSelect {
+    flex: 0 1 140px;
+  }
+
+  .userPage__searchBox {
+    flex: 1 1 220px;
+    min-width: 0;
+  }
+}
+
+/* Mobile: below 768px */
+@media (max-width: 767px) {
+  .userPage__content {
+    padding: 22px 18px 40px 18px;
+  }
+
+  .userPage__pageTitle {
+    font-size: 19px;
+  }
+
+  .userPage__breadcrumb {
+    font-size: 12px;
+  }
+
+  .userPage__tableCard {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .userPage__table thead th {
+    font-size: 11px;
+    padding: 10px 10px;
+  }
+
+  .userPage__table tbody td {
+    font-size: 13px;
+    padding: 11px 10px;
+  }
+
+  .userPage__topRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .userPage__createButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .userPage__pageTitle,
+  .userPage__breadcrumb {
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  .userPage__tableControls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .userPage__rowsSelect {
+    width: 100%;
+  }
+
+  .userPage__searchBox {
+    width: 100%;
+  }
+
+  .userPage__table td,
+  .userPage__table th {
+    overflow-wrap: break-word;
+  }
+}
+
+@media (max-width: 380px) {
+  .userPage__content {
+    padding: 18px 14px 32px 14px;
+  }
+
+  .userPage__tableCard {
+    padding: 14px;
+  }
+}
+
+/* ===== Action Dropdown (userAction__ prefix, already unique) ===== */
+
+.userAction__wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.userAction__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #ffffff;
+  color: #3a3d4d;
+  border: 1px solid #e2e5eb;
+  border-radius: 8px;
+  height: 38px;
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.userAction__button:hover {
+  background-color: #f8fafc;
+  border-color: #d7dae1;
+}
+
+.userAction__icon {
+  font-size: 11px;
+  color: #9a9ca8;
+}
+
+.userAction__menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 140px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 6px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+  z-index: 99999;
+}
+
+.userAction__menuOpen {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.userAction__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 9px 10px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #3a3d4d;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  white-space: nowrap;
+}
+
+.userAction__item:hover {
+  background-color: #f8fafc;
+}
+
+.userAction__itemIcon {
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.userAction__itemIconEdit {
+  color: var(--admin-accent);
+}
+
+.userAction__itemIconDelete {
+  color: #e0331e;
+}
+
+.userAction__divider {
+  height: 1px;
+  background-color: #f0f1f4;
+  margin: 4px 2px;
+}

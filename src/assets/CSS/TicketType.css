@@ -1,0 +1,537 @@
+/* ==========================================================================
+   TicketType page styles
+   All classes prefixed with ticketType__ to avoid collisions
+   ========================================================================== */
+
+.ticketType__layout,
+.ticketType__layout *,
+.ticketType__layout *::before,
+.ticketType__layout *::after {
+  box-sizing: border-box;
+}
+
+.ticketType__layout {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  
+  /* overflow-x: hidden; safety net: guarantees no page-level horizontal scrollbar */
+}
+
+.ticketType__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* prevents flex child from forcing horizontal overflow */
+  /* overflow-x: hidden; */
+  margin-left: 230px;
+}
+
+.ticketType__page {
+  padding: 28px 32px 48px;
+  width: 100%;
+  max-width: 100%;
+  /* overflow-x: hidden; */
+}
+
+/* ---------- Top row: title + create button ---------- */
+
+.ticketType__topRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.ticketType__titleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ticketType__title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1f2430;
+  line-height: 1.3;
+}
+
+.ticketType__breadcrumb {
+  font-size: 13px;
+  color: #9aa1ac;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.ticketType__breadcrumbSep {
+  color: #c3c8d1;
+}
+
+.ticketType__breadcrumbActive {
+  color: var(--admin-accent);
+}
+
+.ticketType__createBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--admin-accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 4px 10px rgba(240, 86, 63, 0.25);
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.ticketType__createBtn:hover {
+  background: var(--admin-accent-strong);
+}
+
+.ticketType__createBtn:active {
+  transform: translateY(1px);
+}
+
+.ticketType__createBtn:focus-visible {
+  outline: 2px solid var(--admin-accent);
+  outline-offset: 2px;
+}
+
+.ticketType__createBtnIcon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* ---------- Back link ---------- */
+
+.ticketType__backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 18px 0;
+  font-size: 14px;
+  color: var(--admin-accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.ticketType__backLink:hover {
+  text-decoration: underline;
+}
+
+.ticketType__backLink:focus-visible {
+  outline: 2px solid var(--admin-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.ticketType__backArrow {
+  font-size: 15px;
+}
+
+/* ---------- Card container ---------- */
+
+.ticketType__card {
+  margin-top: 18px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(20, 20, 43, 0.06);
+  padding: 20px;
+  width: 100%;
+  /* overflow-x: hidden; card itself never scrolls; only the inner table wrapper may */
+}
+
+/* ---------- Toolbar ---------- */
+
+.ticketType__toolbar {
+  display: flex;
+  align-items: center;
+  /* justify-content: space-between; */
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 26px;
+}
+
+.ticketType__pageSizeWrap {
+  min-width: 180px;
+}
+
+.ticketType__pageSizeSelect {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #e3e6eb;
+  background: #ffffff;
+  color: #6b7280;
+  font-size: 14px;
+  outline: none;
+  cursor: pointer;
+}
+
+.ticketType__pageSizeSelect:focus {
+  border-color: var(--admin-accent);
+}
+
+.ticketType__pageSizeSelect:focus-visible {
+  outline: 2px solid var(--admin-accent);
+  outline-offset: 1px;
+}
+
+.ticketType__searchWrap {
+  position: relative;
+  flex: 1;
+  max-width: 320px;
+  min-width: 200px;
+}
+
+.ticketType__searchIcon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.ticketType__searchInput {
+  width: 100%;
+  padding: 10px 14px 10px 36px;
+  border-radius: 8px;
+  border: 1px solid #e3e6eb;
+  font-size: 14px;
+  outline: none;
+  color: #1f2430;
+}
+
+.ticketType__searchInput:focus {
+  border-color: var(--admin-accent);
+}
+
+.ticketType__searchInput:focus-visible {
+  outline: 2px solid var(--admin-accent);
+  outline-offset: 1px;
+}
+
+.ticketType__searchInput::placeholder {
+  color: #b6bcc6;
+}
+
+/* ---------- Table wrapper: hidden overflow on desktop, scrolls only on tablet/mobile ---------- */
+
+.ticketType__tableWrapper {
+ position: relative;
+ overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 80px; 
+  min-height: 120px;
+}
+
+/* Desktop: fixed layout + colgroup percentages guarantee the table always
+   fits the card width, wrapping long text instead of overflowing. */
+.ticketType__table {
+  width: 100%;
+  min-width: 850px;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+/* 
+.ticketType__colIndex {
+  width: 5%;
+}
+
+.ticketType__colName {
+  width: 19%;
+}
+
+.ticketType__colDayCount {
+  width: 11%;
+}
+
+.ticketType__colAmount {
+  width: 10%;
+}
+
+.ticketType__colDate {
+  width: 23%;
+}
+
+.ticketType__colAvailable {
+  width: 11%;
+}
+
+.ticketType__colCreated {
+  width: 13%;
+}
+
+.ticketType__colAction {
+  width: 8%;
+} */
+
+.ticketType__th {
+  text-align: left;
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #9aa1ac;
+  font-weight: 600;
+  padding: 12px 16px;
+  border-bottom: 1px solid #eceef2;
+}
+
+.ticketType__thAction {
+  text-align: right;
+}
+
+.ticketType__tr {
+  border-bottom: 1px solid #f1f2f5;
+}
+
+.ticketType__tr:last-child {
+  border-bottom: none;
+}
+
+.ticketType__td {
+  padding: 16px;
+  font-size: 14px;
+  color: #1f2430;
+  vertical-align: top;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.ticketType__tdName {
+  font-weight: 600;
+}
+
+.ticketType__tdDate {
+  color: var(--admin-accent);
+}
+
+.ticketType__tdAction {
+  text-align: right;
+  position: relative; /* containing block for the absolutely positioned dropdown */
+  white-space: nowrap;
+  overflow: visible; /* dropdown must never be clipped by its own cell */
+}
+
+.ticketType__emptyRow {
+  text-align: center;
+  color: #9aa1ac;
+  padding: 32px 16px;
+}
+
+/* ---------- Action dropdown ---------- */
+
+.ticketType__actionDropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.ticketType__actionBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(74, 144, 194, 0.14);
+  color: var(--admin-accent);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ticketType__actionBtn:focus-visible {
+  outline: 2px solid var(--admin-accent);
+  outline-offset: 2px;
+}
+
+.ticketType__caret {
+  font-size: 11px;
+}
+
+/* Overlay dropdown: absolutely positioned so it never affects table/column
+   width, always sits to the right edge of the trigger, and renders above
+   every other element on the page. */
+.ticketType__actionMenu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(20, 20, 43, 0.15);
+  min-width: 130px;
+  z-index: 9999;
+  overflow: hidden;
+  text-align: left;
+}
+
+.ticketType__actionMenuItem {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #1f2430;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ticketType__actionMenuItem:hover {
+  background: #f4f5f7;
+}
+
+.ticketType__actionMenuItem:focus-visible {
+  outline: 2px solid var(--admin-accent);
+  outline-offset: -2px;
+}
+
+.ticketType__actionMenuItemDelete {
+  color: #e5484d;
+}
+.ticketTypeCreate-fieldError{
+  color: #dc3545;
+  font-size: 0.85rem;
+      margin-top: 4px;
+    margin-bottom: 0px;
+}
+/* ---------- Footer ---------- */
+
+.ticketType__footer {
+  margin-top: 16px;
+  font-size: 13px;
+  color: #9aa1ac;
+}
+
+/* ==========================================================================
+   Responsive rules
+   ========================================================================== */
+
+/* Tablet: allow table wrapper to scroll horizontally, everything else fits.
+   Below this breakpoint the table switches back to natural (auto) sizing
+   with a min-width, since fixed percentage columns become too cramped to
+   read comfortably at these widths. */
+@media (max-width: 1024px) {
+  .ticketType__main{
+    margin-left: 0;
+  }
+  .ticketType__page {
+    padding: 22px 24px 40px;
+  }
+
+  .ticketType__tableWrapper {
+    overflow-x: auto;
+  }
+
+  .ticketType__table {
+    table-layout: auto;
+    min-width: 850px;
+  }
+
+  .ticketType__td,
+  .ticketType__th {
+    white-space: nowrap;
+  }
+
+  .ticketType__tdName {
+    min-width: 200px;
+    white-space: normal;
+  }
+
+  .ticketType__tdDate {
+    min-width: 240px;
+    white-space: normal;
+  }
+}
+
+/* Match the tiered scale used on Entry Report: title/card ease down
+   gradually instead of jumping straight from desktop to the mobile tier. */
+@media (max-width: 992px) {
+  .ticketType__title {
+    font-size: 20px;
+  }
+
+  .ticketType__card {
+    padding: 18px;
+  }
+}
+
+/* Mobile: toolbar stacks vertically, table still scrolls within wrapper only */
+@media (max-width: 640px) {
+  .ticketType__page {
+    padding: 16px;
+  }
+
+  .ticketType__topRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ticketType__createBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .ticketType__title {
+    font-size: 18px;
+  }
+
+  .ticketType__breadcrumb {
+    font-size: 12px;
+  }
+
+  .ticketType__card {
+    padding: 14px;
+  }
+
+  .ticketType__toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ticketType__pageSizeWrap,
+  .ticketType__searchWrap {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .ticketType__tableWrapper {
+    overflow-x: auto;
+  }
+
+  .ticketType__table {
+    min-width: 720px;
+  }
+
+  .ticketType__th {
+    font-size: 11px;
+    padding: 10px 12px;
+  }
+
+  .ticketType__td {
+    font-size: 13px;
+    padding: 12px;
+  }
+}
+
+@media (max-width: 380px) {
+  .ticketType__page {
+    padding: 14px;
+  }
+
+  .ticketType__card {
+    padding: 12px;
+  }
+}

@@ -1,0 +1,570 @@
+/* ============================================================
+   Login page — restyled to match the public Home page's black
+   theme (see assets/CSS/site/citytoppers.css) for a consistent
+   look between the marketing site and the admin sign-in screen.
+   Only visual rules changed here: colors, borders, spacing,
+   focus states, typography. No selectors were added/removed and
+   no JSX/markup changed, so all existing behavior is untouched.
+   ============================================================ */
+
+:root {
+  --login-bg: #0a0a0a;
+  --login-surface: #141414;
+  --login-surface-2: #1b1b1b;
+  --login-border: rgba(255, 255, 255, 0.10);
+  --login-border-strong: rgba(255, 255, 255, 0.18);
+  --login-text: #ffffff;
+  --login-text-muted: rgba(255, 255, 255, 0.60);
+  --login-text-faint: rgba(255, 255, 255, 0.45);
+  /* Navy-blue palette pulled from the logo (light steel-blue for
+     highlights/focus states, deep navy for the gradient's dark end)
+     so the page reads as one brand with the logo, instead of the
+     previous tan/beige accent. */
+  --login-accent: #4A90C2;
+  --login-accent-strong: #0B2A44;
+  --login-accent-gradient: linear-gradient(135deg, #2F6F9E, #0B2A44);
+  --login-error: #ff6b6b;
+}
+
+.emsLogin__page {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--login-bg) url('/assets/images/site/bgImg.png') repeat;
+  overflow-y: auto;
+  font-family: 'Montserrat', 'Poppins', sans-serif;
+}
+
+.emsLogin__container {
+  min-height: 100vh;
+}
+
+/* ===== Left branding panel (desktop) ===== */
+.emsLogin__left {
+  background:
+    radial-gradient(circle at 25% 15%, rgba(74, 144, 194, 0.22), transparent 55%),
+    radial-gradient(circle at 85% 85%, rgba(74, 144, 194, 0.12), transparent 50%),
+    #0f0f0f;
+  border-right: 1px solid var(--login-border);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  padding: 40px;
+  box-sizing: border-box;
+}
+
+.emsLogin__illustrationWrapper {
+  width: 100%;
+  max-width: 460px;
+  color: #fff;
+}
+
+/* Brand logo — the logo's own navy circle sits close in value to the
+   near-black page background, so a soft warm-tinted ring (using the
+   same accent as the rest of the page) is added to lift it off the
+   background instead of changing the logo itself. */
+.emsLogin__logo {
+  display: block;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 22px;
+  box-shadow:
+    0 0 0 3px rgba(74, 144, 194, 0.28),
+    0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.emsLogin__illustration {
+  text-align: center;
+  padding: 0 0 30px;
+}
+
+.emsLogin__brandTitle {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--login-accent);
+  opacity: 1;
+  margin-bottom: 14px !important;
+}
+
+.emsLogin__brandTagline {
+  font-weight: 700 !important;
+  font-size: 30px !important;
+  line-height: 1.3 !important;
+  margin-bottom: 16px !important;
+  color: #fff;
+}
+
+.emsLogin__brandSubTitle {
+  color: var(--login-accent) !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 14px !important;
+}
+
+.emsLogin__brandDescription {
+  line-height: 1.8;
+  color: var(--login-text-muted);
+  opacity: 1;
+  margin-bottom: 32px !important;
+  font-size: 15px;
+}
+
+.emsLogin__featureGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.emsLogin__featureCard {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--login-border);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  transition: transform 0.25s ease, background-color 0.25s ease, border-color 0.25s ease;
+}
+
+.emsLogin__featureCard:hover {
+  transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(74, 144, 194, 0.4);
+}
+
+.emsLogin__featureIcon {
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  color: var(--login-accent);
+}
+
+/* ===== Right side / form ===== */
+.emsLogin__right {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 24px;
+  box-sizing: border-box;
+}
+
+.emsLogin__card {
+  width: 100%;
+  max-width: 460px;
+  padding: 50px 40px !important;
+  border-radius: 20px !important;
+  background: var(--login-surface) !important;
+  border: 1px solid var(--login-border);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45) !important;
+  box-sizing: border-box;
+}
+
+/* Compact brand mark shown only when the branding panel is hidden */
+.emsLogin__mobileBrand {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: #ffffff;
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+.emsLogin__mobileLogo {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 2px rgba(74, 144, 194, 0.35);
+}
+
+.emsLogin__title {
+  font-weight: 700 !important;
+  color: #ffffff !important;
+}
+
+.emsLogin__subtitle {
+  margin-top: 10px !important;
+  color: var(--login-text-muted) !important;
+  margin-bottom: 35px !important;
+}
+
+.emsLogin__form {
+  margin-top: 25px;
+}
+
+.emsLogin__optionRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px 0;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* "Remember Me" checkbox label — MUI's default text color is dark and
+   would be unreadable on this dark card, so it's recolored here. */
+.emsLogin__optionRow .MuiFormControlLabel-label {
+  color: var(--login-text-muted) !important;
+  font-size: 14px;
+}
+
+.emsLogin__optionRow .MuiCheckbox-root {
+  color: rgba(255, 255, 255, 0.35) !important;
+}
+
+.emsLogin__optionRow .MuiCheckbox-root.Mui-checked {
+  color: var(--login-accent) !important;
+}
+
+/* Forgot Password link row (login form) and Back-to-Sign-In row
+   (forgot-password screens). */
+.emsLogin__optionRow--end {
+  justify-content: flex-end;
+}
+
+.emsLogin__optionRow--center {
+  justify-content: center;
+  margin-top: 18px;
+}
+
+.emsLogin__forgotLink {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--login-accent);
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.emsLogin__forgotLink:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+.emsLogin__button {
+  height: 52px !important;
+  border-radius: 10px !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  background: var(--login-accent-gradient) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+  transition: opacity 0.2s ease !important;
+}
+
+.emsLogin__button:hover {
+  opacity: 0.88;
+  box-shadow: none !important;
+}
+
+.emsLogin__button:focus-visible {
+  outline: 2px solid var(--login-accent);
+  outline-offset: 2px;
+}
+
+.emsLogin__button.Mui-disabled {
+  opacity: 0.6;
+  color: #ffffff !important;
+}
+
+/* Backend/general error alert — kept legible on the dark card. */
+.emsLogin__form .MuiAlert-standardError {
+  background-color: rgba(255, 107, 107, 0.12) !important;
+  color: #ffb3b3 !important;
+  border: 1px solid rgba(255, 107, 107, 0.35);
+  border-radius: 10px !important;
+}
+
+.emsLogin__form .MuiAlert-standardError .MuiAlert-icon {
+  color: var(--login-error) !important;
+}
+
+/* Backend/general success alert — same treatment as the error alert
+   above, but green, so success messages (e.g. "Password reset
+   successfully") are visually distinct from errors on the dark card. */
+.emsLogin__form .MuiAlert-standardSuccess {
+  background-color: rgba(76, 217, 123, 0.12) !important;
+  color: #a8f0c0 !important;
+  border: 1px solid rgba(76, 217, 123, 0.35);
+  border-radius: 10px !important;
+}
+
+.emsLogin__form .MuiAlert-standardSuccess .MuiAlert-icon {
+  color: #4cd97b !important;
+}
+
+/* ===== Email / Mobile field (plain HTML, replacing MUI TextField) =====
+   Same approach as the password field below: mirrors an outlined
+   field's look with a plain <input>, restyled for the dark theme. */
+.emsLogin__mobileField {
+  margin: 16px 0 8px;
+}
+
+.emsLogin__mobileLabel {
+  display: block;
+  font-size: 12px;
+  color: var(--login-text-muted);
+  margin-bottom: 6px;
+}
+
+.emsLogin__mobileInputWrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--login-border-strong);
+  border-radius: 10px;
+  padding: 0 14px;
+  height: 56px;
+  box-sizing: border-box;
+  background: var(--login-surface-2);
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.emsLogin__mobileInputWrapper:focus-within {
+  border-color: var(--login-accent);
+  border-width: 2px;
+  padding: 0 13px; /* compensate for the extra 1px border so it doesn't shift */
+  background: #202020;
+}
+
+.emsLogin__mobileInputWrapper--error {
+  border-color: var(--login-error);
+}
+
+.emsLogin__mobileInputWrapper--error:focus-within {
+  border-color: var(--login-error);
+}
+
+.emsLogin__mobileStartIcon {
+  color: var(--login-text-faint);
+  flex-shrink: 0;
+  font-size: 20px !important;
+}
+
+.emsLogin__mobileInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  color: #ffffff;
+  background: transparent;
+  height: 100%;
+  min-width: 0;
+}
+
+/* Chrome/Edge/Safari force a light background + dark text on
+   autofilled inputs and ignore normal background/color rules.
+   This tricks it into painting the field's own dark surface
+   color instead, using a huge inset shadow (the standard
+   workaround, since -webkit-autofill has no direct background
+   property). Text color is forced the same way via
+   -webkit-text-fill-color. The long transition-delay stops the
+   yellow/light flash Chrome briefly shows on autofill. */
+.emsLogin__mobileInput:-webkit-autofill,
+.emsLogin__mobileInput:-webkit-autofill:hover,
+.emsLogin__mobileInput:-webkit-autofill:focus,
+.emsLogin__mobileInput:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px var(--login-surface-2) inset;
+  -webkit-text-fill-color: #ffffff;
+  caret-color: #ffffff;
+  transition: background-color 600000s ease-in-out 0s;
+}
+
+.emsLogin__mobileErrorText {
+  display: block;
+  margin-top: 4px;
+  margin-left: 14px;
+  font-size: 12px;
+  color: var(--login-error);
+}
+
+/* ===== Password field (plain HTML, replacing MUI TextField) =====
+   Mirrors an outlined field's look — label, rounded border, height,
+   focus/error states — restyled for the dark theme. */
+.emsLogin__passwordField {
+  margin: 16px 0 8px;
+}
+
+.emsLogin__passwordLabel {
+  display: block;
+  font-size: 12px;
+  color: var(--login-text-muted);
+  margin-bottom: 6px;
+}
+
+.emsLogin__passwordInputWrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--login-border-strong);
+  border-radius: 10px;
+  padding: 0 14px;
+  height: 56px;
+  box-sizing: border-box;
+  background: var(--login-surface-2);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.emsLogin__passwordInputWrapper:focus-within {
+  border-color: var(--login-accent);
+  border-width: 2px;
+  padding: 0 13px; /* compensate for the extra 1px border so it doesn't shift */
+  background: #202020;
+}
+
+.emsLogin__passwordInputWrapper--error {
+  border-color: var(--login-error);
+}
+
+.emsLogin__passwordInputWrapper--error:focus-within {
+  border-color: var(--login-error);
+}
+
+.emsLogin__passwordStartIcon {
+  color: var(--login-text-faint);
+  flex-shrink: 0;
+  font-size: 20px !important;
+}
+
+.emsLogin__passwordInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  color: #ffffff;
+  background: transparent;
+  height: 100%;
+  min-width: 0;
+}
+
+.emsLogin__passwordInput:-webkit-autofill,
+.emsLogin__passwordInput:-webkit-autofill:hover,
+.emsLogin__passwordInput:-webkit-autofill:focus,
+.emsLogin__passwordInput:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px var(--login-surface-2) inset;
+  -webkit-text-fill-color: #ffffff;
+  caret-color: #ffffff;
+  transition: background-color 600000s ease-in-out 0s;
+}
+
+.emsLogin__passwordToggleBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 8px;
+  margin: 0 -8px 0 0;
+  border-radius: 50%;
+  color: var(--login-text-faint);
+  font-size: 20px;
+  flex-shrink: 0;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.emsLogin__passwordToggleBtn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+
+.emsLogin__passwordErrorText {
+  display: block;
+  margin-top: 4px;
+  margin-left: 14px;
+  font-size: 12px;
+  color: var(--login-error);
+}
+
+/* ===== Responsive ===== */
+
+/* Tablet portrait / small laptop: branding panel hidden by the Grid's
+   md breakpoint already; this just tidies spacing at that width. */
+@media (max-width: 1023px) {
+  .emsLogin__mobileBrand {
+    display: flex;
+  }
+
+  .emsLogin__right {
+    padding: 32px 20px;
+  }
+
+}
+@media (max-width: 900px) {
+  .emsLogin__left {
+    display: none;
+  }
+}
+/* 768px */
+@media (max-width: 768px) {
+  .emsLogin__card {
+    padding: 40px 30px !important;
+    border-radius: 16px !important;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45) !important;
+  }
+}
+
+/* 425px and below */
+@media (max-width: 425px) {
+  .emsLogin__right {
+    padding: 24px 14px;
+  }
+
+  .emsLogin__card {
+    padding: 32px 22px !important;
+    border-radius: 14px !important;
+    box-shadow: none !important;
+    border: 1px solid var(--login-border);
+  }
+
+  .emsLogin__title {
+    font-size: 22px !important;
+  }
+
+  .emsLogin__subtitle {
+    margin-bottom: 24px !important;
+    font-size: 14px;
+  }
+
+  .emsLogin__optionRow {
+    margin: 14px 0;
+  }
+}
+
+/* 375px and below */
+@media (max-width: 375px) {
+  .emsLogin__card {
+    padding: 26px 16px !important;
+  }
+}
+
+/* 320px floor */
+@media (max-width: 320px) {
+  .emsLogin__right {
+    padding: 18px 10px;
+  }
+
+  .emsLogin__card {
+    padding: 22px 14px !important;
+  }
+
+  .emsLogin__optionRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

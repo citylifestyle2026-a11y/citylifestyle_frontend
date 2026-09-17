@@ -1,0 +1,511 @@
+/*
+  Color notes:
+  - #1b2a4e (dark text) and #eef0f2 (border) are pulled directly from
+    Header.css, so headings/borders on this page match the header exactly.
+  - Buttons/links/focus states use var(--admin-accent) (the same
+    navy-blue used on the Login page and logo) instead of the old
+    default Keenthemes/Metronic blue, so this page matches the rest
+    of the admin panel.
+*/
+
+/* ===== Breadcrumb ===== */
+.profileBreadcrumbWrap {
+  margin-bottom: 24px;
+}
+
+.profilePageTitle {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1b2a4e;
+}
+
+.profileBreadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #99a1b7;
+}
+
+.breadcrumbDivider {
+  color: #c7cad1;
+}
+
+.breadcrumbActive {
+  color: var(--admin-accent);
+  font-weight: 600;
+}
+
+/* ===== Profile summary ===== */
+.profileSummary {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.profileSummaryAvatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profileSummaryName {
+  margin: 0 0 6px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1b2a4e;
+}
+
+.profileSummaryMeta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: #99a1b7;
+  font-size: 14px;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ===== Card ===== */
+.profileCard {
+  background: #ffffff;
+  border: 1px solid #eef0f2;
+  border-radius: 10px;
+  padding: 24px 28px;
+  margin-bottom: 24px;
+}
+
+.profileCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.profileCardHeader h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1b2a4e;
+}
+
+/* ===== Buttons ===== */
+.primaryButton {
+  height: 40px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 8px;
+  background: var(--admin-accent);
+  color: #ffffff;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.primaryButton:hover {
+  background: var(--admin-accent-strong);
+}
+
+.textButton {
+  height: 40px;
+  padding: 0 14px;
+  border: none;
+  background: transparent;
+  color: #99a1b7;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.textButton:hover {
+  color: #6c7293;
+}
+
+/* ===== Profile Details rows ===== */
+.profileDetailsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.detailRow {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  align-items: center;
+}
+
+.detailLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #99a1b7;
+  font-size: 14px;
+}
+
+.detailLabelIcon {
+  font-size: 14px;
+}
+
+.detailValue {
+  color: #1b2a4e;
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+/* ===== Sign-in method / password ===== */
+.passwordRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.passwordInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.passwordMask {
+  color: #1b2a4e;
+  font-size: 16px;
+  letter-spacing: 2px;
+}
+
+.passwordEditGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px 24px;
+}
+
+.passwordField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.passwordField label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #1b2a4e;
+}
+
+.passwordInputWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.passwordInputWrap input {
+  width: 100%;
+  height: 42px;
+  border: 1px solid #eef0f2;
+  border-radius: 8px;
+  padding: 0 40px 0 14px;
+  font-size: 14px;
+  color: #1b2a4e;
+  box-sizing: border-box;
+  background: #f9f9fb;
+}
+
+.passwordInputWrap input:focus {
+  outline: none;
+  border-color: var(--admin-accent);
+  background: #ffffff;
+}
+
+.pwdToggle {
+  position: absolute;
+  right: 12px;
+  background: transparent;
+  border: none;
+  color: #99a1b7;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.passwordHint {
+  margin: 0;
+  font-size: 12px;
+  color: #99a1b7;
+}
+
+.passwordEditActions {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* ===== Footer ===== */
+.profileFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 4px 0;
+  font-size: 13px;
+  color: #99a1b7;
+}
+
+.profileFooterLinks {
+  display: flex;
+  gap: 18px;
+}
+
+.profileFooterLinks a {
+  color: #99a1b7;
+  text-decoration: none;
+}
+
+.profileFooterLinks a:hover {
+  color: var(--admin-accent);
+}
+
+/* ===== Edit Profile modal ===== */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 17, 17, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.modalCard {
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 28px 32px 32px;
+  box-sizing: border-box;
+}
+
+.modalTitle {
+  margin: 0 0 20px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1b2a4e;
+}
+
+.modalInnerCard {
+  border: 1px solid #eef0f2;
+  border-radius: 10px;
+  padding: 22px 24px;
+}
+
+.modalInnerTitle {
+  margin: 0 0 20px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1b2a4e;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #eef0f2;
+}
+
+.modalFormGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.modalFormRow {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  align-items: start;
+}
+
+.modalFormRow label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1b2a4e;
+  padding-top: 10px;
+}
+
+.requiredStar {
+  color: #f1416c;
+}
+
+.modalFieldError {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: #f1416c;
+}
+
+.roleIcon {
+  font-size: 14px;
+  color: #99a1b7;
+}
+
+.roleValue {
+  color: var(--admin-accent);
+  font-weight: 600;
+  font-size: 14px;
+  padding-top: 10px;
+}
+
+.modalInput {
+  height: 42px;
+  border: 1px solid #eef0f2;
+  border-radius: 8px;
+  padding: 0 14px;
+  font-size: 14px;
+  color: #1b2a4e;
+  background: #f9f9fb;
+  box-sizing: border-box;
+}
+
+.modalInput:focus {
+  outline: none;
+  border-color: var(--admin-accent);
+  background: #ffffff;
+}
+
+.avatarEditWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.avatarEditImage {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+
+.avatarEditImage img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatarEditPencil {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid #eef0f2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: #1b2a4e;
+  cursor: pointer;
+}
+
+.avatarEditRemove {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #f1416c;
+  border: 2px solid #ffffff;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.avatarHint {
+  margin: 0;
+  font-size: 12px;
+  color: #99a1b7;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+/* ===== Loading / Error states (new — Step 3) ===== */
+.profileStateWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 80px 20px;
+  color: #99a1b7;
+  font-size: 14px;
+}
+
+.profileStateError p {
+  color: #f1416c;
+  font-weight: 600;
+  margin: 0;
+  text-align: center;
+}
+/* create profile modal css */
+.modalCard {
+  position: relative;
+}
+
+.profilemodalCloseButton {
+  position: absolute;
+  top: 20px;
+  right:22px;
+  /* width: 36px;
+  height: 20px; */
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  border-radius: 6px;
+}
+
+
+/* ===== Responsive ===== */
+@media (max-width: 767px) {
+  .detailRow {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .passwordEditGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .modalFormRow {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .profileSummary {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .profileFooter {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}

@@ -1,0 +1,434 @@
+/* ================= LAYOUT PARITY WITH PublicRegisterUser.css =================
+   This file intentionally mirrors PublicRegisterUser.css's structure,
+   spacing and breakpoints class-for-class (bookingRegister- prefix instead
+   of publicRegister-), per the requirement that Private Registration and
+   Public Registration share the same design/layout. Only genuinely
+   Private-specific additions are kept: the MEMBER label text/size (same
+   style as Public's slot label, different wording), the registered-ticket
+   QR thumbnail (staff-only, not shown on the public flow), and the
+   unavailable-slot text for a ticket the booking doesn't actually have.
+   Mobile-first, same as Public: base (unqueried) styles target small
+   screens, widening via the min-width queries at the bottom. */
+
+.bookingRegister-page {
+  min-height: 100vh;
+  background-color: #f4f4f7;
+}
+
+.bookingRegister-hero {
+  background-color: #2b2b38;
+  padding: 36px 20px 70px 20px;
+}
+
+.bookingRegister-title {
+  color: #ffffff;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.bookingRegister-wave {
+  display: inline-block;
+}
+
+.bookingRegister-content {
+  padding: 0 16px 40px 16px;
+  margin-top: -46px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.bookingRegister-card {
+  width: 100%;
+  max-width: 420px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  padding: 28px 22px 24px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.bookingRegister-photoWrap {
+  position: relative;
+  width: 92px;
+  height: 92px;
+  margin-bottom: 12px;
+}
+
+.bookingRegister-photoCircle {
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  background-color: #d7d9e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.bookingRegister-avatarIcon {
+  width: 44px;
+  height: 44px;
+}
+
+.bookingRegister-editBtn {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.bookingRegister-editBtn:hover {
+  transform: scale(1.08);
+}
+
+.bookingRegister-editIcon {
+  width: 14px;
+  height: 14px;
+}
+
+.bookingRegister-photoPreviewImage {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.bookingRegister-uploadText {
+  color: #9a9ca8;
+  font-size: 13px;
+  margin-bottom: 22px;
+}
+
+.bookingRegister-fieldGroup {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+/* One field (input + its own inline error) per wrap, so the error text
+   sits directly below its input instead of being spaced out by the
+   fieldGroup's inter-field gap above. */
+.bookingRegister-fieldWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bookingRegister-fieldError {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: #e0331e;
+}
+
+/* 16px input font size (not the old 13.5px) avoids the automatic
+   zoom-on-focus that iOS Safari triggers on inputs below 16px — same
+   reasoning as PublicRegisterUser.css, since this page can just as
+   easily be opened on a staff member's phone. */
+.bookingRegister-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #e3e4ea;
+  border-radius: 8px;
+  font-size: 16px;
+  color: #1b2a4e;
+  background-color: #ffffff;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bookingRegister-input::placeholder {
+  color: #a7abbd;
+}
+
+.bookingRegister-input:focus {
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 4px var(--admin-focus-ring);
+}
+
+.bookingRegister-input:disabled {
+  background-color: #f4f4f7;
+  color: #9a9ca8;
+}
+
+/* Base color is always the active accent — same as Public — and the
+   grey/disabled look comes purely from :disabled below (submitting OR
+   the slot's own fields not yet valid), not from a separately toggled
+   modifier class. */
+.bookingRegister-submitBtn {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 8px;
+  background-color: var(--admin-accent);
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.bookingRegister-submitBtn:disabled {
+  background-color: #c9cbd3;
+  cursor: not-allowed;
+}
+
+.bookingRegister-statusText {
+  color: #ffffff;
+  font-size: 14px;
+  text-align: center;
+  margin: 0;
+}
+
+.bookingRegister-summary {
+  width: 100%;
+  max-width: 420px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  padding: 18px 22px;
+  margin-bottom: 16px;
+}
+
+.bookingRegister-summaryRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  padding: 7px 0;
+  border-bottom: 1px solid #eef0f4;
+}
+
+.bookingRegister-summaryRow:last-child {
+  border-bottom: none;
+}
+
+.bookingRegister-summaryLabel {
+  color: #9a9ca8;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.bookingRegister-summaryValue {
+  color: #1b2a4e;
+  font-size: 13.5px;
+  font-weight: 600;
+  text-align: right;
+}
+
+.bookingRegister-errorCard {
+  align-items: center;
+  text-align: center;
+  padding: 40px 24px;
+}
+
+.bookingRegister-errorIcon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background-color: #e5484d;
+  color: #ffffff;
+  font-size: 26px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.bookingRegister-errorTitle {
+  color: #1b2a4e;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 6px 0;
+}
+
+.bookingRegister-errorText {
+  color: #6b7085;
+  font-size: 14px;
+  margin: 0;
+}
+
+.bookingRegister-unavailableText {
+  color: #9a9ca8;
+  font-size: 13.5px;
+  margin: 0;
+  text-align: center;
+}
+
+/* Shown under the grid/slot once every ticket on this booking is
+   registered — same message/style as PublicRegisterUser.css. */
+.bookingRegister-completeText {
+  color: #1b2a4e;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  margin: 24px 0 0 0;
+}
+
+/* ================= MULTI-SLOT REGISTRATION (quantity > 1) ================= */
+/* Single-slot (quantity = 1) wrapper. */
+.bookingRegister-singleWrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Mobile-first, one column by default; widens to 2 then 3 equal-width
+   columns via the media queries below. A proper CSS Grid (not flex) so
+   every row's cards share the exact same column width automatically.
+   `minmax(0, 1fr)` (not `1fr` alone) is what stops a long name/email
+   value or input from stretching its column past the grid track and
+   causing horizontal overflow. */
+.bookingRegister-grid {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.bookingRegister-slot {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.bookingRegister-memberLabel {
+  align-self: flex-start;
+  display: block;
+  color: #6b7085;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+/* Tablet: 2 cards per row. */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .bookingRegister-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Desktop: 3 cards per row. */
+@media (min-width: 1200px) {
+  .bookingRegister-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Wider screens: a little more breathing room — same values as
+   PublicRegisterUser.css's equivalent breakpoint. */
+@media (min-width: 480px) {
+  .bookingRegister-hero {
+    padding: 48px 32px 90px 32px;
+  }
+
+  .bookingRegister-title {
+    font-size: 34px;
+  }
+
+  .bookingRegister-content {
+    padding: 0 24px 50px 24px;
+    margin-top: -56px;
+  }
+
+  .bookingRegister-card {
+    padding: 32px 28px 28px 28px;
+  }
+}
+
+/* ============== Registered-slot card ============== */
+/* Same shell as PublicRegisterUser.css's .publicRegister-registeredCard,
+   plus the QR thumbnail — staff need to see it at a glance here; the
+   public/attendee-facing flow deliberately doesn't show it. */
+.bookingRegister-registeredCard {
+  width: 100%;
+  max-width: 420px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  padding: 20px 22px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.bookingRegister-registeredAvatar {
+  width: 56px;
+  height: 56px;
+  min-width: 56px;
+  border-radius: 50%;
+  background-color: #d7d9e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.bookingRegister-registeredAvatarIcon {
+  width: 28px;
+  height: 28px;
+}
+
+.bookingRegister-registeredAvatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bookingRegister-registeredInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.bookingRegister-registeredName {
+  color: #1b2a4e;
+  font-weight: 700;
+  font-size: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bookingRegister-registeredMobile {
+  color: var(--admin-accent);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.bookingRegister-registeredQr {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  object-fit: contain;
+}

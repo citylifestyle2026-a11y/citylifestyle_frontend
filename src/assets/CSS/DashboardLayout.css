@@ -1,0 +1,38 @@
+/*
+  This is the one piece I had to add rather than reuse, since Sidebar.css
+  positions the sidebar with `position: fixed`, which means something has
+  to push page content out of its way — that rule wasn't in Header.css or
+  Sidebar.css, so it wasn't defined anywhere else yet.
+
+  Values are taken directly from Sidebar.css so they always stay in sync:
+  - 240px matches .sidebar { width: 240px }
+  - 1023px matches the same breakpoint Sidebar.css already collapses at
+*/
+
+.dashboardLayout {
+  min-height: 100vh;
+  background: #ffffff;
+}
+
+.dashboardMain {
+  margin-left: 240px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboardContent {
+  flex: 1;
+  padding: 28px 30px 40px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 1023px) {
+  .dashboardMain {
+    margin-left: 0;
+  }
+
+  .dashboardContent {
+    padding: 20px 16px 32px;
+  }
+}

@@ -1,0 +1,276 @@
+.contactModalOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+  opacity: 0;
+  animation: contactModalOverlayFadeIn 0.25s ease forwards;
+}
+
+@keyframes contactModalOverlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.createContactModal {
+  background-color: #ffffff;
+  width: 100%;
+  max-width: 620px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  padding: 32px 36px 28px 36px;
+  opacity: 0;
+  transform: scale(0.94) translateY(10px);
+  animation: contactModalPopIn 0.28s ease forwards;
+  animation-delay: 0.05s;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@keyframes contactModalPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 26px;
+}
+
+.modalTitle {
+  color: #1b2a4e;
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0;
+}
+
+.closeIconButton {
+  background: transparent;
+  border: none;
+  color: #9a9ca8;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.closeIconButton:hover {
+  background-color: #f2f3f6;
+  color: #1b2a4e;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 24px;
+  margin-bottom: 8px;
+  box-sizing: border-box;
+}
+
+/* Address and Reference span both columns — they're free text/lists
+   rather than the short paired fields the rest of the grid holds. */
+.fieldGroupFull {
+  grid-column: 1 / -1;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fieldLabel {
+  color: #1b2a4e;
+  font-size: 13.5px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.required {
+  color: #e0331e;
+}
+
+.fieldInput,
+.fieldSelect {
+  padding: 12px 14px;
+  border: 1px solid #e3e4ea;
+  border-radius: 10px;
+  font-size: 13.5px;
+  color: #1b2a4e;
+  background-color: #ffffff;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.fieldSelect {
+  cursor: pointer;
+}
+
+.fieldInput::placeholder {
+  color: #a7abbd;
+}
+
+.fieldInput:focus,
+.fieldSelect:focus {
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 4px var(--admin-focus-ring);
+}
+
+/* ===== Reference add/remove (chip) UI ===== */
+
+.referenceInputRow {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.referenceInputRow .fieldInput {
+  flex: 1;
+}
+
+.referenceAddButton {
+  background-color: #eceef2;
+  color: #1b2a4e;
+  border: none;
+  border-radius: 10px;
+  padding: 0 20px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+}
+
+.referenceAddButton:hover {
+  background-color: #dfe1e8;
+}
+
+.referenceChipList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.referenceChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #f2f3f6;
+  color: #1b2a4e;
+  border-radius: 999px;
+  padding: 6px 8px 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.referenceChipRemove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: #dfe1e8;
+  color: #6b6f80;
+  border: none;
+  font-size: 9px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.referenceChipRemove:hover {
+  background-color: #e0331e;
+  color: #ffffff;
+}
+
+.modalFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+.modalCloseButton {
+  background-color: #eceef2;
+  color: #3a3d4d;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 26px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.modalCreateButton {
+  background-color: var(--admin-accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 30px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.modalCreateButton:hover {
+  background-color: var(--admin-accent-strong);
+  transform: translateY(-1px);
+}
+
+.fieldError {
+  color: #dc3545;
+  font-size: 0.85rem;
+  margin-top: 4px;
+  margin-bottom: 0px;
+}
+
+@media (max-width: 560px) {
+  .createContactModal {
+    padding: 26px 22px 22px 22px;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .referenceInputRow {
+    flex-direction: column;
+  }
+
+  .referenceAddButton {
+    padding: 12px 20px;
+  }
+
+  .modalFooter {
+    justify-content: stretch;
+  }
+
+  .modalCreateButton,
+  .modalCloseButton {
+    flex: 1;
+  }
+}

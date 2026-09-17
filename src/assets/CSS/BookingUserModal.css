@@ -1,0 +1,278 @@
+.bookingUserOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(60, 60, 60, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2200;
+  padding: 20px;
+  opacity: 0;
+  animation: bookingUserOverlayFadeIn 0.25s ease forwards;
+}
+
+@keyframes bookingUserOverlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.bookingUserContainer {
+  background-color: #ffffff;
+  width: 100%;
+  max-width: 620px;
+  max-height: 95vh;
+  overflow-y: auto;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  padding: 32px 40px 28px 40px;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  opacity: 0;
+  transform: scale(0.94) translateY(10px);
+  animation: bookingUserPopIn 0.28s ease forwards;
+  animation-delay: 0.05s;
+}
+
+@keyframes bookingUserPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.bookingUserHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 26px;
+}
+
+.bookingUserTitle {
+  color: #1b2a4e;
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0;
+}
+
+.bookingUserCloseIconButton {
+  background: transparent;
+  border: none;
+  color: #9a9ca8;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.bookingUserCloseIconButton:hover {
+  background-color: #f2f3f6;
+  color: #1b2a4e;
+}
+
+.bookingUserProfileSection {
+  display: grid;
+  /* grid-template-columns: 100px 1fr; */
+  align-items: start;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.bookingUserProfileLabel {
+  color: #1b2a4e;
+  font-size: 14px;
+  font-weight: 600;
+  padding-top: 8px;
+}
+
+.bookingUserPhotoBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.bookingUserPhotoCircleWrap {
+  position: relative;
+  width: 110px;
+  height: 110px;
+}
+
+.bookingUserPhotoCircle {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background-color: #eceef2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.bookingUserAvatarIcon {
+  width: 52px;
+  height: 52px;
+  color: #c4c6d2;
+}
+
+.bookingUserEditPhotoButton,
+.bookingUserRemovePhotoButton {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: transform 0.15s ease;
+}
+
+.bookingUserEditPhotoButton {
+  top: 4px;
+  right: 2px;
+  color: #3a3d4d;
+}
+
+.bookingUserRemovePhotoButton {
+  bottom: -4px;
+  right: 26px;
+  color: #9a9ca8;
+}
+
+.bookingUserEditPhotoButton:hover,
+.bookingUserRemovePhotoButton:hover {
+  transform: scale(1.08);
+}
+
+.bookingUserPhotoHint {
+  color: #9a9ca8;
+  font-size: 12.5px;
+  margin: 0;
+}
+
+.bookingUserGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 24px;
+  margin-bottom: 8px;
+}
+
+.bookingUserFullRow {
+  grid-column: 1 / -1;
+}
+
+.bookingUserFieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bookingUserLabel {
+  color: #1b2a4e;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.bookingUserRequired {
+  color: #e0331e;
+}
+
+.bookingUserInput {
+  padding: 13px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #1b2a4e;
+  background-color: #f2f3f6;
+  outline: none;
+  transition: box-shadow 0.2s ease;
+  width: 100%;
+}
+
+.bookingUserInput::placeholder {
+  color: #a7abbd;
+}
+
+.bookingUserInput:focus {
+  box-shadow: 0 0 0 4px var(--admin-focus-ring);
+}
+
+.bookingUserFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.bookingUserCloseButton {
+  background-color: #eceef2;
+  color: #3a3d4d;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 26px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.bookingUserCloseButton:hover {
+  background-color: #dfe1e8;
+}
+
+.bookingUserCreateButton {
+  background-color: var(--admin-accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 30px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.bookingUserCreateButton:hover {
+  background-color: var(--admin-accent-strong);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 700px) {
+  .bookingUserProfileSection {
+    grid-template-columns: 1fr;
+  }
+
+  .bookingUserGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .bookingUserContainer {
+    width: 95%;
+    max-width: 95%;
+    padding: 26px 20px 22px 20px;
+  }
+
+  .bookingUserFooter {
+    justify-content: stretch;
+  }
+
+  .bookingUserCloseButton,
+  .bookingUserCreateButton {
+    flex: 1;
+  }
+}

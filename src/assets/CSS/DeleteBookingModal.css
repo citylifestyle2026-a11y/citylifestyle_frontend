@@ -1,0 +1,157 @@
+.bookingDeleteOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(60, 60, 60, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2200;
+  padding: 20px;
+  opacity: 0;
+  animation: bookingDeleteOverlayFadeIn 0.25s ease forwards;
+}
+
+@keyframes bookingDeleteOverlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.bookingDeleteContainer {
+  background-color: #ffffff;
+  width: 100%;
+  max-width: 720px;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  padding: 32px 40px 28px 40px;
+  opacity: 0;
+  transform: scale(0.94) translateY(10px);
+  animation: bookingDeletePopIn 0.28s ease forwards;
+  animation-delay: 0.05s;
+}
+
+@keyframes bookingDeletePopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.bookingDeleteTitle {
+  color: #1b2a4e;
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0 0 30px 0;
+}
+
+.bookingDeleteMessage {
+  color: #1b2a4e;
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0 0 26px 0;
+}
+
+.bookingDeleteHighlight {
+  color: #e0335e;
+  font-weight: 700;
+}
+
+.bookingDeleteFieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.bookingDeleteLabel {
+  color: #1b2a4e;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.bookingDeleteRequired {
+  color: #e0335e;
+}
+
+.bookingDeleteTextarea {
+  padding: 13px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #1b2a4e;
+  background-color: #f2f3f6;
+  outline: none;
+  transition: box-shadow 0.2s ease;
+  width: 100%;
+  resize: vertical;
+  min-height: 48px;
+}
+
+.bookingDeleteTextarea::placeholder {
+  color: #a7abbd;
+}
+
+.bookingDeleteTextarea:focus {
+  box-shadow: 0 0 0 4px var(--admin-focus-ring);
+}
+
+.bookingDeleteFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+.bookingDeleteCloseBtn {
+  background-color: #eceef2;
+  color: #3a3d4d;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 30px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.bookingDeleteCloseBtn:hover {
+  background-color: #dfe1e8;
+}
+
+.bookingDeleteDeleteBtn {
+  background-color: #e0335e;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 30px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.bookingDeleteDeleteBtn:hover {
+  background-color: #c22a4e;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 480px) {
+  .bookingDeleteContainer {
+    width: 95%;
+    max-width: 95%;
+    padding: 26px 22px 22px 22px;
+  }
+
+  .bookingDeleteFooter {
+    flex-direction: column-reverse;
+  }
+
+  .bookingDeleteCloseBtn,
+  .bookingDeleteDeleteBtn {
+    width: 100%;
+  }
+}

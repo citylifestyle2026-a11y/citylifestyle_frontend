@@ -1,0 +1,244 @@
+.roleModalOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+  opacity: 0;
+  animation: roleModalOverlayFadeIn 0.25s ease forwards;
+}
+
+@keyframes roleModalOverlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.roleModalContainer {
+  background-color: #ffffff;
+  width: 100%;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  padding: 32px 36px 28px 36px;
+  opacity: 0;
+  transform: scale(0.94) translateY(10px);
+  animation: roleModalPopIn 0.28s ease forwards;
+  animation-delay: 0.05s;
+  -ms-overflow-style: none;  
+  scrollbar-width: none;   
+}
+
+@keyframes roleModalPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.roleModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 26px;
+}
+
+.roleModalTitle {
+  color: #1b2a4e;
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0;
+}
+
+.roleModalCloseIconButton {
+  background: transparent;
+  border: none;
+  color: #9a9ca8;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.roleModalCloseIconButton:hover {
+  background-color: #f2f3f6;
+  color: #1b2a4e;
+}
+
+.roleModalBody {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.roleModalFieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.roleModalLabel {
+  color: #1b2a4e;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.roleModalRequired {
+  color: #e0331e;
+}
+
+.roleModalInput {
+  padding: 12px 14px;
+  border: 1px solid #e3e4ea;
+  border-radius: 10px;
+  font-size: 13.5px;
+  color: #1b2a4e;
+  background-color: #ffffff;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+
+}
+
+.roleModalInput::placeholder {
+  color: #a7abbd;
+}
+
+.roleModalInput:focus {
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 4px var(--admin-focus-ring);
+}
+
+.roleModalCheckAllRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.roleModalCheckbox {
+  width: 17px;
+  height: 17px;
+  border-radius: 4px;
+  cursor: pointer;
+  accent-color: var(--admin-accent);
+  flex-shrink: 0;
+  /* background-color: #dddee0; */
+}
+
+.roleModalCheckAllLabel {
+  color: #1b2a4e;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.roleModalGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px 20px;
+}
+
+.roleModalPermissionItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.roleModalPermissionLabel {
+  color: #3a3d4d;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.roleModalFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.roleModalCloseButton {
+  background-color: #eceef2;
+  color: #3a3d4d;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 26px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.roleModalCloseButton:hover {
+  background-color: #dfe1e8;
+}
+
+.roleModalCreateButton {
+  background-color: var(--admin-accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 30px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.roleModalCreateButton:hover {
+  background-color: var(--admin-accent-strong);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 1023px) {
+  .roleModalContainer {
+    max-width: 640px;
+  }
+}
+
+@media (max-width: 700px) {
+  .roleModalGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .roleModalOverlay {
+    padding: 10px;
+  }
+
+  .roleModalContainer {
+    width: 95%;
+    max-width: 95%;
+    padding: 26px 20px 22px 20px;
+  }
+
+  .roleModalGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .roleModalFooter {
+    justify-content: stretch;
+  }
+
+  .roleModalCloseButton,
+  .roleModalCreateButton {
+    flex: 1;
+  }
+}

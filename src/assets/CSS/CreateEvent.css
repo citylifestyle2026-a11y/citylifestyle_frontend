@@ -1,0 +1,725 @@
+.createEvent__page,
+.createEvent__page *,
+.createEvent__page *::before,
+.createEvent__page *::after {
+  box-sizing: border-box;
+}
+
+.createEvent__page {
+  min-height: 100vh;
+  background-color: #f7f7f9;
+  padding: 28px 36px 50px 36px;
+  box-sizing: border-box;
+  /* overflow-x: hidden; */
+}
+
+.createEvent__container {
+  background-color: #ffffff;
+  border: 1px solid #e9eaee;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  /* overflow: hidden; */
+  max-width: 100%;
+}
+
+.createEvent__header {
+  padding: 24px 32px 20px 32px;
+  border-bottom: 1px solid #eef0f2;
+}
+
+.createEvent__title {
+  color: #1b2a4e;
+  font-size: 24px;
+  font-weight: 800;
+  margin: 0 0 4px 0;
+}
+
+.createEvent__breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: #9a9ca8;
+  margin-bottom: 14px;
+}
+
+.createEvent__breadcrumbSep {
+  color: #9a9ca8;
+}
+
+.createEvent__breadcrumbLink {
+  color: var(--admin-accent);
+}
+
+.createEvent__backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  color: var(--admin-accent);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s ease;
+}
+
+.createEvent__backLink:hover {
+  color: var(--admin-accent-strong);
+}
+
+.createEvent__body {
+  padding: 28px 32px 32px 32px;
+}
+
+.createEvent__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  min-width: 0;
+}
+
+.createEvent__column {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-width: 0;
+}
+
+.createEvent__fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.createEvent__fieldRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.createEvent__label {
+  color: #1b2a4e;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.createEvent__required {
+  color: #e0331e;
+}
+
+.createEvent__input {
+  padding: 13px 16px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #1b2a4e;
+  background-color: #f2f3f6;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+  cursor: text;
+}
+
+.createEvent__input::placeholder {
+  color: #a7abbd;
+}
+
+.createEvent__input:hover {
+  border-color: #d7dae1;
+}
+
+.createEvent__input:focus {
+  background-color: #ffffff;
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 3px var(--admin-focus-ring);
+}
+
+.createEvent__addressTextarea {
+  resize: vertical;
+  min-height: 52px;
+  line-height: 1.4;
+}
+
+.createEvent__inputIconWrap {
+  position: relative;
+}
+
+.createEvent__inputWithIcon {
+  padding-right: 42px;
+}
+
+.createEvent__inputIcon {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  color: #9a9ca8;
+  font-size: 15px;
+  pointer-events: none;
+}
+
+/* Date & Time fields use type="datetime-local"; the custom calendar icon
+   triggers the native picker, so the browser's own indicator is hidden
+   and the field is made clickable end-to-end. */
+input.createEvent__input[type="datetime-local"] {
+  cursor: pointer;
+  color-scheme: light;
+}
+
+input.createEvent__input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+input.createEvent__input[type="datetime-local"]::-webkit-datetime-edit {
+  color: #1b2a4e;
+}
+
+.createEvent__inputIconWrap .createEvent__inputIcon {
+  pointer-events: auto;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.createEvent__uploadBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 90px;
+  height: 90px;
+  border: 1.5px dashed rgba(74, 144, 194, 0.45);
+  border-radius: 10px;
+  background-color: rgba(74, 144, 194, 0.06);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.createEvent__uploadBox:hover {
+  border-color: var(--admin-accent);
+  background-color: rgba(74, 144, 194, 0.14);
+}
+
+.createEvent__uploadBox:focus-within {
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 3px var(--admin-focus-ring);
+}
+
+.createEvent__uploadInput {
+  display: none;
+}
+
+.createEvent__uploadIcon {
+  color: var(--admin-accent);
+  font-size: 22px;
+}
+
+.createEvent__uploadFileName {
+  display: block;
+  margin-top: 8px;
+  font-size: 12.5px;
+  color: #6b7085;
+  word-break: break-all;
+}
+
+.createEvent__uploadArea {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  min-width: 0;
+}
+
+.createEvent__uploadPreviewImg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.createEvent__uploadInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 2px;
+  min-width: 0;
+}
+
+.createEvent__uploadInfo .createEvent__uploadFileName {
+  margin-top: 0;
+}
+
+.createEvent__uploadActions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.createEvent__uploadActionBtn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.createEvent__uploadActionBtn--change {
+  color: var(--admin-accent);
+}
+
+.createEvent__uploadActionBtn--change:hover {
+  color: var(--admin-accent-strong);
+  text-decoration: underline;
+}
+
+.createEvent__uploadActionBtn--remove {
+  color: #e0331e;
+}
+
+.createEvent__uploadActionBtn--remove:hover {
+  color: #c22a17;
+  text-decoration: underline;
+}
+
+.createEvent__editor {
+  border: 1px solid #e9eaee;
+  border-radius: 10px;
+  /* overflow: hidden; */
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  min-width: 0;
+}
+
+.createEvent__editor:focus-within {
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 3px var(--admin-focus-ring);
+}
+
+.createEvent__editorToolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #eef0f2;
+  background-color: #ffffff;
+  flex-wrap: wrap;
+}
+
+.createEvent__editorIconBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 4px;
+  border: none;
+  background: transparent;
+  color: #3a3d4d;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.createEvent__editorIconBtn:hover {
+  background-color: #f2f3f6;
+  color: var(--admin-accent);
+}
+
+.createEvent__editorIconBtn.ql-active {
+  background-color: rgba(74, 144, 194, 0.14);
+  color: var(--admin-accent);
+}
+
+.createEvent__editorIconBtnWithCaret {
+  gap: 2px;
+}
+
+.createEvent__editorMiniCaret {
+  font-size: 8px;
+}
+
+.createEvent__editorFormatSelect {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid #e9eaee;
+  border-radius: 6px;
+  background-color: #ffffff;
+  color: #3a3d4d;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.createEvent__editorFormatSelectWrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+select.createEvent__editorFormatSelect {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 26px;
+}
+
+.createEvent__editorFormatSelectWrap .createEvent__editorFormatCaret {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.createEvent__editorFormatCaret {
+  font-size: 9px;
+  color: #9a9ca8;
+}
+
+.createEvent__editorDivider {
+  width: 1px;
+  height: 20px;
+  background-color: #eef0f2;
+  margin: 0 4px;
+}
+
+.createEvent__editorArea {
+  border: none;
+  background-color: #ffffff;
+  min-height: 260px;
+  width: 100%;
+  padding: 16px;
+  font-size: 14px;
+  color: #1b2a4e;
+  outline: none;
+  resize: vertical;
+  box-sizing: border-box;
+  cursor: text;
+}
+
+.createEvent__editorArea::placeholder {
+  color: #a7abbd;
+}
+
+/* React Quill (Description field) — override the snow theme so the editor
+   matches the createEvent__editor card design instead of Quill's defaults. */
+.createEvent__quill .ql-container.ql-snow {
+  border: none;
+  font-size: 14px;
+}
+
+.createEvent__quill {
+  max-width: 100%;
+}
+
+.createEvent__quill .ql-editor {
+  min-height: 260px;
+  padding: 16px;
+  color: #1b2a4e;
+  line-height: 1.5;
+  background-color: #ffffff;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.createEvent__quill .ql-editor img {
+  max-width: 100%;
+  height: auto;
+}
+
+.createEvent__quill .ql-editor iframe {
+  max-width: 100%;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto;
+}
+
+.createEvent__quill .ql-editor.ql-blank::before {
+  color: #a7abbd;
+  font-style: normal;
+  left: 16px;
+  right: 16px;
+}
+
+.createEvent__quill .ql-editor div.createEvent__quillTable {
+  margin: 12px 0;
+}
+
+.createEvent__quill .ql-editor div.createEvent__quillTable table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.createEvent__quill .ql-editor div.createEvent__quillTable td {
+  border: 1px solid #d7dae1;
+  padding: 8px;
+  min-width: 60px;
+  vertical-align: top;
+}
+
+.createEvent__quill .ql-editor div.createEvent__quillTable td:focus {
+  outline: 2px solid rgba(74, 144, 194, 0.45);
+  outline-offset: -2px;
+}
+
+.createEvent__quill .ql-tooltip {
+  border-radius: 8px;
+  border-color: #e9eaee;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  z-index: 6;
+}
+
+.createEvent__quill .ql-tooltip input[type="text"] {
+  border-radius: 4px;
+  border-color: #e9eaee;
+}
+
+.createEvent__quill .ql-tooltip a.ql-action::after,
+.createEvent__quill .ql-tooltip a.ql-remove::before {
+  color: var(--admin-accent);
+}
+
+.createEvent__editorMoreWrap {
+  position: relative;
+}
+
+.createEvent__editorMoreMenu {
+  position: absolute;
+  top: 36px;
+  right: 0;
+  background-color: #ffffff;
+  border: 1px solid #e9eaee;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  min-width: 170px;
+  z-index: 5;
+}
+
+.createEvent__editorMoreMenu button {
+  background: transparent;
+  border: none;
+  text-align: left;
+  padding: 8px 10px;
+  font-size: 13px;
+  color: #1b2a4e;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.createEvent__editorMoreMenu button:hover {
+  background-color: #f2f3f6;
+  color: var(--admin-accent);
+}
+
+.createEvent__inlineField {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.createEvent__inlineField .createEvent__input {
+  flex: 1;
+}
+
+.createEvent__addVideoButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  background-color: var(--admin-accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.createEvent__addVideoButton:hover {
+  background-color: var(--admin-accent-strong);
+  transform: translateY(-1px);
+}
+
+.createEvent__videoList {
+  list-style: none;
+  margin: 10px 0 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.createEvent__videoListItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  background-color: #f2f3f6;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #3a3d4d;
+}
+
+.createEvent__videoListItemText {
+  min-width: 0;
+  word-break: break-all;
+}
+
+.createEvent__videoListItemRemove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #9a9ca8;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.createEvent__videoListItemRemove:hover {
+  background-color: #fbe4e1;
+  color: #e0331e;
+}
+
+.createEvent__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.createEvent__closeButton {
+  background-color: #eceef2;
+  color: #3a3d4d;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 30px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.createEvent__closeButton:hover {
+  background-color: #dfe1e8;
+}
+
+.createEvent__createButton {
+  background-color: var(--admin-accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 34px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.createEvent__createButton:hover {
+  background-color: var(--admin-accent-strong);
+  transform: translateY(-1px);
+}
+
+/* Tablet: 768px - 1024px -> stacked columns with spacing */
+@media (max-width: 1024px) and (min-width: 768px) {
+  .createEvent__grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .createEvent__header {
+    padding: 22px 26px 18px 26px;
+  }
+
+  .createEvent__body {
+    padding: 26px;
+  }
+}
+
+/* Mobile: below 768px -> single column, full-width fields and buttons */
+@media (max-width: 767px) {
+  .createEvent__page {
+    padding: 18px 14px 40px 14px;
+  }
+
+  .createEvent__header {
+    padding: 18px 18px 16px 18px;
+  }
+
+  .createEvent__body {
+    padding: 20px 18px;
+  }
+
+  .createEvent__grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .createEvent__fieldRow {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .createEvent__inlineField {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .createEvent__addVideoButton {
+    width: 100%;
+  }
+
+  .createEvent__actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .createEvent__closeButton,
+  .createEvent__createButton {
+    width: 100%;
+    text-align: center;
+  }
+
+  .createEvent__editorArea {
+    min-height: 180px;
+  }
+
+  .createEvent__quill .ql-editor {
+    min-height: 180px;
+  }
+
+  .createEvent__uploadArea {
+    flex-wrap: wrap;
+  }
+}

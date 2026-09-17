@@ -1,0 +1,341 @@
+.rolePage {
+  min-height: 100vh;
+  background-color: #f7f7f9;
+}
+
+.mainArea {
+  margin-left: 240px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  flex: 1;
+  padding: 28px 36px 50px 36px;
+}
+
+.topRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.pageRoleTitle {
+  color: #1b2a4e;
+  font-size: 24px;
+  font-weight: 800;
+  margin: 0 0 4px 0;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: #9a9ca8;
+}
+
+.breadcrumb .active {
+  color: var(--admin-accent);
+}
+
+.createButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--admin-accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+  white-space: nowrap;
+}
+
+.createButton:hover {
+  background-color: var(--admin-accent-strong);
+  transform: translateY(-1px);
+}
+
+.tableCard {
+  background-color: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+}
+
+.tableControls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+
+.rowsSelect {
+  padding: 10px 14px;
+  border: none;
+  background-color: #f2f3f6;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #1b2a4e;
+  outline: none;
+  cursor: pointer;
+  min-width: 90px;
+}
+
+.searchRoleBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #f2f3f6;
+  border-radius: 8px;
+  padding: 10px 16px;
+  width: 260px;
+}
+
+.searchRoleBox svg {
+  color: #9a9ca8;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.searchRoleInput {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 13.5px;
+  color: #1b2a4e;
+  width: 100%;
+}
+
+.searchRoleInput::placeholder {
+  color: #a7abbd;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Only 2 real columns (Name, Permissions) render here. A full-width,
+   min-width:860px table with just those two columns let the browser's
+   auto table-layout dump all the leftover space between the two
+   columns, which is what created the huge visual gap. Letting the
+   table size itself to its own content (instead of forcing
+   width:100% / a large min-width) keeps Name and Permissions close
+   together like a normal 2-column row, with a fixed, comfortable gap
+   between them instead of one stretched across the full card width. */
+.roleTable {
+  border-collapse: collapse;
+  width: auto;
+  min-width: 320px;
+  max-width: 100%;
+}
+
+.roleTable th:first-child,
+.roleTable td:first-child {
+  min-width: 160px;
+  padding-right: 48px;
+}
+
+.roleTable thead th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9a9ca8;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #eef0f2;
+  white-space: nowrap;
+}
+
+.checkboxCell {
+  width: 44px;
+}
+
+.thContent {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sortIcon {
+  font-size: 10px;
+  color: #c4c6d2;
+}
+
+.roleTable tbody td {
+  padding: 16px 14px;
+  font-size: 14px;
+  color: #3a3d4d;
+  border-bottom: 1px solid #f2f3f6;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.roleTable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.rowCheckbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--admin-accent);
+  color-scheme: light;
+}
+.roleTable input[type="checkbox" i] {
+   background-color: #dddee0;
+}
+.roleName {
+  font-weight: 600;
+  color: #1b2a4e;
+  text-transform: capitalize;
+}
+
+.permissionLink {
+  color: var(--admin-accent);
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.actionCell {
+  position: relative;
+}
+
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #f2f3f6;
+  color: #3a3d4d;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.actionButton:hover {
+  background-color: #e5e6ec;
+}
+
+.actionButton.open {
+  background-color: rgba(74, 144, 194, 0.14);
+  color: var(--admin-accent);
+}
+
+.actionMenu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 120px;
+  z-index: 20;
+}
+
+.actionMenuItem {
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #3a3d4d;
+  cursor: pointer;
+  text-align: left;
+  background: transparent;
+  border: none;
+  transition: background-color 0.2s ease;
+}
+
+.actionMenuItem:hover {
+  background-color: #f2f3f6;
+}
+
+.tableFooter {
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+  font-size: 13.5px;
+  color: #6b7085;
+}
+
+@media (max-width: 1023px) {
+  .mainArea {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 992px) {
+  .pageRoleTitle {
+    font-size: 22px;
+  }
+
+  .tableCard {
+    padding: 20px;
+  }
+
+  .roleTable thead th,
+  .roleTable tbody td {
+    padding: 12px 12px;
+  }
+}
+
+@media (max-width: 640px) {
+  .content {
+    padding: 22px 18px 40px 18px;
+  }
+
+  .pageRoleTitle {
+    font-size: 19px;
+  }
+
+  .breadcrumb {
+    font-size: 12px;
+  }
+
+  .searchRoleBox {
+    width: 100%;
+  }
+
+  .tableControls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .tableCard {
+    padding: 18px;
+  }
+
+  .roleTable th:first-child,
+  .roleTable td:first-child {
+    min-width: 110px;
+    padding-right: 20px;
+  }
+}
+
+@media (max-width: 380px) {
+  .content {
+    padding: 18px 14px 32px 14px;
+  }
+
+  .tableCard {
+    padding: 14px;
+  }
+}

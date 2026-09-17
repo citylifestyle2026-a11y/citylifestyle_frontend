@@ -1,0 +1,313 @@
+.Useroverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+  opacity: 0;
+  animation: overlayFadeIn 0.25s ease forwards;
+}
+
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.createUserModal {
+  background-color: #ffffff;
+  width: 100%;
+  max-width: 620px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  padding: 32px 36px 28px 36px;
+  opacity: 0;
+  transform: scale(0.94) translateY(10px);
+  animation: modalPopIn 0.28s ease forwards;
+  animation-delay: 0.05s;
+  -ms-overflow-style: none;  
+  scrollbar-width: none;     
+}
+
+@keyframes modalPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 26px;
+}
+
+.modalTitle {
+  color: #1b2a4e;
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0;
+}
+
+.closeIconButton {
+  background: transparent;
+  border: none;
+  color: #9a9ca8;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.closeIconButton:hover {
+  background-color: #f2f3f6;
+  color: #1b2a4e;
+}
+
+.photoSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.photoLabel {
+  color: #1b2a4e;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+}
+
+.photoCircleWrap {
+  position: relative;
+  width: 110px;
+  height: 110px;
+}
+
+.photoCircle {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background-color: #eceef2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.photoCircle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photoPlaceholderIcon {
+  font-size: 52px;
+  color: #c4c6d2;
+}
+
+.editPhotoButton,
+.removePhotoButton {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+  transition: transform 0.15s ease;
+}
+
+.editPhotoButton {
+  top: 4px;
+  right: 2px;
+  background-color: #ffffff;
+  color: #3a3d4d;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.removePhotoButton {
+  bottom: -4px;
+  right: 26px;
+  background-color: #ffffff;
+  color: #9a9ca8;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.editPhotoButton:hover,
+.removePhotoButton:hover {
+  transform: scale(1.08);
+}
+
+.photoHint {
+  color: #9a9ca8;
+  font-size: 12.5px;
+  margin: 12px 0 0 0;
+}
+
+.userFormGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 24px;
+  margin-bottom: 8px;
+  box-sizing: border-box;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fieldLabel {
+  color: #1b2a4e;
+  font-size: 13.5px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.required {
+  color: #e0331e;
+}
+
+.fieldInput,
+.fieldSelect {
+  padding: 12px 14px;
+  border: 1px solid #e3e4ea;
+  border-radius: 10px;
+  font-size: 13.5px;
+  color: #1b2a4e;
+  background-color: #ffffff;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.fieldSelect {
+  cursor: pointer;
+  color: #a7abbd;
+}
+
+.fieldInput::placeholder {
+  color: #a7abbd;
+}
+
+.fieldInput:focus,
+.fieldSelect:focus {
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 4px var(--admin-focus-ring);
+}
+
+/* Password visibility toggle — minimal addition on top of the existing
+   .fieldInput styling above; only adds right-padding for the icon and
+   positions the button, nothing else about the input changes. */
+.fieldInputWrap {
+  position: relative;
+  display: flex;
+}
+
+.fieldInputWrap .fieldInput {
+  padding-right: 40px;
+}
+
+.fieldPasswordToggle {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: #9a9ca8;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.fieldPasswordToggle:hover {
+  color: #1b2a4e;
+}
+
+.modalFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+.modalCloseButton {
+  background-color: #eceef2;
+  color: #3a3d4d;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 26px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+/* 
+.modalCloseButton:hover {
+  background-color: #dfe1e8;
+} */
+
+.modalCreateButton {
+  background-color: var(--admin-accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 30px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.modalCreateButton:hover {
+  background-color: var(--admin-accent-strong);
+  transform: translateY(-1px);
+}
+.fieldError{
+  color: #dc3545;
+  font-size: 0.85rem;
+      margin-top: 4px;
+    margin-bottom: 0px;
+}
+@media (max-width: 560px) {
+  .createUserModal {
+    padding: 26px 22px 22px 22px;
+  }
+
+  .userFormGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .modalFooter {
+    justify-content: stretch;
+  }
+
+  .modalCreateButton,
+  .modalCloseButton {
+    flex: 1;
+  }
+}

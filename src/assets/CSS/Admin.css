@@ -1,0 +1,309 @@
+.adminPage__page {
+  min-height: 100vh;
+  background-color: #f7f7f9;
+}
+
+.adminPage__mainArea {
+  margin-left: 240px;
+  /* height (capped), not min-height — min-height let this grow past
+     the viewport with no ceiling, so any tiny extra height (font
+     rendering, the sticky header, etc.) leaked out and forced the
+     WHOLE browser window to show a vertical scrollbar, even on a
+     short page like Admin with just 1 row. Capping to height:100vh
+     and scrolling internally (below) keeps the scrollbar contained
+     to this area and only shows it when content genuinely needs it. */
+  height: 100vh;
+  overflow-y: auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.adminPage__content {
+  flex: 1;
+  min-width: 0;
+  padding: 28px 36px 50px 36px;
+}
+
+.adminPage__topRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.adminPage__pageTitle {
+  color: #1b2a4e;
+  font-size: 24px;
+  font-weight: 800;
+  margin: 0 0 4px 0;
+}
+
+.adminPage__breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: #9a9ca8;
+}
+
+.adminPage__createButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--admin-accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+  white-space: nowrap;
+}
+
+.adminPage__createButton:hover {
+  background-color: var(--admin-accent-strong);
+  transform: translateY(-1px);
+}
+
+.adminPage__breadcrumbActive {
+  color: var(--admin-accent);
+}
+
+.adminPage__tableCard {
+  background-color: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+  min-width: 0;
+  overflow: visible;
+}
+
+/* Only this element scrolls horizontally on mobile */
+.adminPage__tableWrapper {
+  width: 100%;
+  position: relative;
+  /* overflow-x: auto; */
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  min-height: fit-content;
+  height: auto;
+  box-sizing: border-box;
+}
+
+.adminPage__table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+
+.adminPage__table thead th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9a9ca8;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #eef0f2;
+  white-space: nowrap;
+}
+
+.adminPage__thContent {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.adminPage__sortIcon {
+  font-size: 10px;
+  color: #c4c6d2;
+}
+
+.adminPage__table tbody td {
+  padding: 16px 14px;
+  font-size: 14px;
+  color: #3a3d4d;
+  border-bottom: 1px solid #f2f3f6;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.adminPage__table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.adminPage__adminName {
+  font-weight: 600;
+  color: #1b2a4e;
+}
+
+.adminPage__nameCell {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.adminPage__youBadge {
+  display: inline-block;
+  background-color: var(--admin-focus-ring);
+  color: var(--admin-accent-strong);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.adminPage__statusBadge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 999px;
+  text-transform: capitalize;
+}
+
+.adminPage__statusActive {
+  background-color: #e6f7ee;
+  color: #1c9a5b;
+}
+
+.adminPage__statusInactive {
+  background-color: #fdeceb;
+  color: #d0341c;
+}
+
+.adminPage__noAction {
+  color: #c4c6d2;
+}
+
+/* ===== Action Dropdown (adminAction__ prefix) =====
+   Identical design to Pages/User.jsx's userAction__* dropdown (see
+   User.css) — same wrapper/button/menu/item structure and styling,
+   just scoped under a separate prefix since this is a different page. */
+
+.adminAction__wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.adminAction__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #ffffff;
+  color: #3a3d4d;
+  border: 1px solid #e2e5eb;
+  border-radius: 8px;
+  height: 38px;
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.adminAction__button:hover {
+  background-color: #f8fafc;
+  border-color: #d7dae1;
+}
+
+.adminAction__icon {
+  font-size: 11px;
+  color: #9a9ca8;
+}
+
+.adminAction__menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 140px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 6px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+  z-index: 99999;
+}
+
+.adminAction__menuOpen {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.adminAction__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 9px 10px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #3a3d4d;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  white-space: nowrap;
+}
+
+.adminAction__item:hover {
+  background-color: #f8fafc;
+}
+
+.adminAction__itemEdit {
+  color: var(--admin-accent);
+}
+
+.adminAction__itemDelete {
+  color: #e0331e;
+}
+
+@media (max-width: 1023px) {
+  .adminPage__mainArea {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 1200px) {
+  .adminPage__content {
+    padding: 24px 24px 40px 24px;
+  }
+}
+
+@media (max-width: 992px) {
+  .adminPage__pageTitle {
+    font-size: 22px;
+  }
+
+  .adminPage__tableCard {
+    padding: 20px;
+  }
+
+  .adminPage__table thead th,
+  .adminPage__table tbody td {
+    padding: 12px 12px;
+  }
+}
+
+@media (max-width: 767px) {
+  .adminPage__content {
+    padding: 22px 18px 40px 18px;
+  }
+
+  .adminPage__pageTitle {
+    font-size: 19px;
+  }
+}
