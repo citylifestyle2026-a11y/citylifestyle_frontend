@@ -34,7 +34,7 @@ export default function Home() {
       <section className="hero">
         {/* Slide 1 */}
         <div className={`hero-slide${activeSlide === 0 ? " active" : ""}`}>
-          <img src={`${IMG}/hero.png`} alt="City Topper's community gathering" className="hero-bg-img" />
+          <img src={`${IMG}/city toppers.png`} alt="City Topper's community gathering" className="hero-bg-img" />
           <div className="hero-overlay"></div>
 
           <div className="hero-content">
@@ -46,7 +46,7 @@ export default function Home() {
 
         {/* Slide 2 */}
         <div className={`hero-slide${activeSlide === 1 ? " active" : ""}`}>
-          <img src={`${IMG}/hero2.png`} alt="Cafe meet event" className="hero-bg-img" />
+          <img src={`${IMG}/city sparkle.png`} alt="Cafe meet event" className="hero-bg-img" />
           <div className="hero-overlay"></div>
 
           <div className="hero-content">
@@ -58,7 +58,7 @@ export default function Home() {
 
         {/* Slide 3 */}
         <div className={`hero-slide${activeSlide === 2 ? " active" : ""}`}>
-          <img src={`${IMG}/hero3.png`} alt="City Topper's event" className="hero-bg-img" />
+          <img src={`${IMG}/parav.png`} alt="City Topper's event" className="hero-bg-img" />
           <div className="hero-overlay"></div>
 
           <div className="hero-content">
@@ -112,11 +112,11 @@ export default function Home() {
               <span>INTIMATE CAFÉ-FORMAT MEETS, MAX 30 PER SESSION</span>
             </li>
             <li>
-              <div className="bullet-bg"><img src={`${IMG}/star.svg`} alt="" className="bullet-icon" /></div>
+              <div className="bullet-bg"><img src={`${IMG}/people.svg`} alt="" className="bullet-icon" /></div>
               <span>CURATED SPEAKERS FROM BUSINESS, ART &amp; LEADERSHIP</span>
             </li>
             <li>
-              <div className="bullet-bg"><img src={`${IMG}/people.svg`} alt="" className="bullet-icon" /></div>
+              <div className="bullet-bg"><img src={`${IMG}/star.svg`} alt="" className="bullet-icon" /></div>
               <span>PEER-TO-PEER LEARNING OVER FORMAL PRESENTATIONS</span>
             </li>
           </ul>
@@ -124,11 +124,11 @@ export default function Home() {
 
         {/* RIGHT */}
         <div className="about-right" data-aos="fade-left">
-          <img src={`${IMG}/group_top.png`} alt="Group photo" className="about-img about-img--top" />
+          <img src={`${IMG}/1.png`} alt="Group photo" className="about-img about-img--top" />
           <div className="about-img-bottom-wrap">
-            <img src={`${IMG}/group_bottom.png`} alt="Cafe gathering left" className="about-img about-img--bl" />
+            <img src={`${IMG}/3.png`} alt="Cafe gathering left" className="about-img about-img--bl" />
             <div className="about-img-br-wrap">
-              <img src={`${IMG}/group_bottom.png`} alt="Cafe gathering right" className="about-img about-img--br" />
+              <img src={`${IMG}/2.png`} alt="Cafe gathering right" className="about-img about-img--br" />
             </div>
             <div className="about-badge">
               <img src={`${IMG}/bag.svg`} alt="" className="badge-icon" />
@@ -172,7 +172,7 @@ export default function Home() {
       {/* ═══════════════════ PHILOSOPHY ═══════════════════ */}
       <section className="philosophy">
         <div className="philosophy-left" data-aos="fade-right">
-          <img src={`${IMG}/communityBottomLeft.png`} alt="Our Philosophy" className="philosophy-img" />
+          <img src={`${IMG}/pholisophy.png`} alt="Our Philosophy" className="philosophy-img" />
         </div>
         <div className="philosophy-right" data-aos="fade-left">
           <h2 className="philosophy-title">OUR<br />PHILOSOPHY</h2>

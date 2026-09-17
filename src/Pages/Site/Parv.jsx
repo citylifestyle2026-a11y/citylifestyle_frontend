@@ -95,7 +95,7 @@ export default function Parv() {
 
       {/* ═══════════════════ HERO ═══════════════════ */}
       <section className="hero">
-        <img src={`${IMG}/parvHero.png`} alt="Parv gathering" className="hero-bg-img" />
+        <img src={`${IMG}/parav_image.png`} alt="Parv gathering" className="hero-bg-img" />
         <div className="hero-overlay"></div>
         <div className="hero-content" data-aos="fade-up">
           <p className="hero-tagline">SUB BRAND BY CITY TOPPERS</p>
@@ -192,7 +192,7 @@ export default function Parv() {
 
           {/* RIGHT — image */}
           <div className="parv-exp-img-wrap" data-aos="fade-left">
-            <img src={`${IMG}/meets_purpose.png`} alt="Parv event" className="about-img parv-exp-img" />
+            <img src={`${IMG}/meet_purpose.png`} alt="Parv event" className="about-img parv-exp-img" />
             <div className="parv-exp-badge">
               <p className="parv-exp-badge-title">NEXT PARV</p>
               <p className="parv-exp-badge-sub">MONSOON EDITION</p>

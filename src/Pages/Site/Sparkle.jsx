@@ -81,7 +81,7 @@ export default function Sparkle() {
 
       {/* ═══════════════════ HERO ═══════════════════ */}
       <section className="hero">
-        <img src={`${IMG}/sparkleHero.png`} alt="City Sparkle gathering" className="hero-bg-img" />
+        <img src={`${IMG}/sparkle.png`} alt="City Sparkle gathering" className="hero-bg-img" />
         <div className="hero-overlay"></div>
         <div className="hero-content" data-aos="fade-up">
           <p className="hero-tagline">SUB BRAND BY CITY TOPPERS</p>
@@ -226,7 +226,7 @@ export default function Sparkle() {
           </div>
           <div className="gallery-row gallery-row--bottom">
             <img src={`${IMG}/moments_4.png`} alt="" className="gallery-img gallery-img--sm" data-aos="zoom-in" data-aos-delay="0" />
-            <img src={`${IMG}/moments_5.png`} alt="" className="gallery-img gallery-img--xl" data-aos="zoom-in" data-aos-delay="100" />
+            <img src={`${IMG}/moment.png`} alt="" className="gallery-img gallery-img--xl" data-aos="zoom-in" data-aos-delay="100" />
           </div>
         </div>
       </section>
