@@ -436,14 +436,24 @@ const sortedReferenceFilterOptions = useMemo(
   );
 
   const contactTableColumns = useMemo(() => {
-    const sortableColumn = (key, label, extra = {}) => ({
-      key,
-      label: SORTABLE_COLUMNS.includes(key)
-        ? renderSortableHeader(label, key)
-        : label,
-      sortable: false,
-      ...extra,
-    });
+    // Only fullName/whatsappNumber/companyName (SORTABLE_COLUMNS) are
+    // actually clickable — those keep their own custom header (icon +
+    // label, wired to handleSort) and are marked `sortable: false` so
+    // CommonTable doesn't stack a second icon on top of that one.
+    // Every other column is left at CommonTable's default (sortable
+    // left unset), so CommonTable renders its own built-in, static
+    // FaSort icon in front of the label — the same "icon before every
+    // column" look already used on the Entry Report table, even though
+    // clicking it does nothing for these non-sortable columns.
+    const sortableColumn = (key, label, extra = {}) => {
+      const isSortable = SORTABLE_COLUMNS.includes(key);
+      return {
+        key,
+        label: isSortable ? renderSortableHeader(label, key) : label,
+        ...(isSortable ? { sortable: false } : {}),
+        ...extra,
+      };
+    };
 
     return [
       sortableColumn("fullName", "Full Name", {

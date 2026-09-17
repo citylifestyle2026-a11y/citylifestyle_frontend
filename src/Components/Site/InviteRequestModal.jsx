@@ -40,11 +40,13 @@ const normalizeWhatsapp = (value) => {
  *
  * Fields, per what was asked:
  *  - Name
- *  - WhatsApp Number (accepts with/without +91)
- *  - Email Address
- *  - Location
- *  - How many people are you bringing to Parv?
- *  - Reference (optional — how they heard about it / who referred them)
+ *  - Profession
+ *  - Company/Brand Name (optional)
+ *  - Your Objective (optional — why they want to attend)
+ *  - Contact (phone number, accepts with/without +91)
+ *
+ * "How many people are you bringing?" and "Reference" fields have been
+ * removed per request.
  *
  * Submits to its OWN Google Sheet (PARV_REGISTER_SCRIPT_URL above) —
  * separate from the Join Community form's sheet.
@@ -85,6 +87,18 @@ export default function InviteRequestModal({ open, onClose }) {
     }
   }, [open]);
 
+  // Auto-hide the status message (success/error) 5 seconds after it
+  // appears. Re-triggers on every new message (e.g. "Sending..." ->
+  // "Thanks! ..."), so only the most recently shown message ever gets
+  // the full 5s before disappearing.
+  useEffect(() => {
+    if (!status.visible) return undefined;
+    const timer = setTimeout(() => {
+      setStatus((prev) => ({ ...prev, visible: false }));
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [status.visible, status.message]);
+
   if (!open) return null;
 
   const handleSubmit = async (e) => {
@@ -110,7 +124,7 @@ export default function InviteRequestModal({ open, onClose }) {
     setStatus({ visible: true, color: "#F4DD4E", message: "Sending your registration..." });
 
     const formData = new FormData(form);
-    formData.set("whatsapp", normalizeWhatsapp(formData.get("whatsapp")));
+    formData.set("contact", normalizeWhatsapp(formData.get("contact")));
 
     try {
       // no-cors: request reaches Google and the sheet gets the row.
@@ -150,45 +164,42 @@ export default function InviteRequestModal({ open, onClose }) {
 
           <div className="join-badge">&#9733;</div>
 
-          <h1 className="join-title">PARV RIGISTRATION FORM</h1>
-          <p className="join-tagline">
-            IF YOU'D LIKE TO ATTEND PARV, PLEASE TAKE A MOMENT TO FILL OUT THIS FORM.
-          </p>
-
+          <h1 className="join-title">पर्व — REQUEST YOUR INVITE</h1>
           <form className="join-form" ref={formRef} onSubmit={handleSubmit} noValidate>
             <input type="text" name="name" placeholder="NAME *" aria-label="Name" required />
 
-            <div>
-              <input
-                type="tel"
-                name="whatsapp"
-                placeholder="WHATSAPP NUMBER *"
-                aria-label="WhatsApp number"
-                required
-              />
-              <p className="join-hint">You can enter it with or without +91 — either way works.</p>
-            </div>
-
-            <input type="email" name="email" placeholder="EMAIL ADDRESS *" aria-label="Email address" required />
-
-            <input type="text" name="location" placeholder="LOCATION (CITY) *" aria-label="Location" required />
-
             <input
-              type="number"
-              name="peopleCount"
-              min="1"
-              step="1"
-              placeholder="HOW MANY PEOPLE ARE YOU BRINGING TO PARV? *"
-              aria-label="Number of people attending"
+              type="text"
+              name="profession"
+              placeholder="PROFESSION *"
+              aria-label="Profession"
               required
             />
 
             <input
               type="text"
-              name="reference"
-              placeholder="REFERENCE (HOW DID YOU HEAR ABOUT US?)"
-              aria-label="Reference"
+              name="companyName"
+              placeholder="COMPANY/BRAND NAME"
+              aria-label="Company or brand name"
             />
+
+            <input
+              type="text"
+              name="objective"
+              placeholder="YOUR OBJECTIVE"
+              aria-label="Your objective"
+            />
+
+            <div>
+              <input
+                type="tel"
+                name="contact"
+                placeholder="CONTACT NUMBER *"
+                aria-label="Contact number"
+                required
+              />
+              <p className="join-hint">You can enter it with or without +91 — either way works.</p>
+            </div>
 
             <div className="join-actions">
               <button type="submit" className="join-submit" disabled={submitting}>

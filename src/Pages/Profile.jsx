@@ -7,6 +7,7 @@ import DashboardLayout from "../Components/DashboardLayout";
 import EditProfileModal from "../Components/EditProfileModal";
 import { getProfile, resetPassword, resetPasswordState } from "../redux/auth/authSlice";
 import "../assets/CSS/Profile.css";
+import { Link } from "react-router-dom";
 
 // Same symbol rule already used by the backend's resetPasswordValidation,
 // mirrored here for instant feedback.
@@ -160,7 +161,7 @@ export default function Profile() {
       <div className="profileBreadcrumbWrap">
         <h1 className="profilePageTitle">Profile</h1>
         <div className="profileBreadcrumb">
-          <span>Dashboard</span>
+           <Link to="/dashboard"><span style={{color:"#9a9ca8"}}>Dashboard</span></Link>
           <span className="breadcrumbDivider">-</span>
           <span className="breadcrumbActive">Profile</span>
         </div>

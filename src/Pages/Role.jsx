@@ -5,6 +5,7 @@ import Header from "../Components/Header";
 import "../assets/CSS/Role.css";
 import PermissionModal from "../Components/PermissionModal";
 import { getRoleApi } from "../services/roleService";
+import { Link } from "react-router-dom";
 
 const columns = ["Name", "Permissions"];
 
@@ -63,7 +64,7 @@ export default function Role() {
             <div>
               <h1 className="pageRoleTitle">Role</h1>
               <div className="breadcrumb">
-                <span>Dashboard</span>
+                <Link to="/dashboard"><span style={{color:"#9a9ca8"}}>Dashboard</span></Link>
                 <span>-</span>
                 <span className="active">Role</span>
               </div>

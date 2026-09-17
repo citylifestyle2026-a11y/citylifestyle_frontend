@@ -1616,6 +1616,17 @@
   color: rgba(255,255,255,0.5);
 }
 
+/* closing note shown under the submit button ("We'll review and let you know...") */
+.ct-site .join-note {
+  margin-top: 16px;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: center;
+  color: rgba(255,255,255,0.6);
+}
+
 /* dropdown (e.g. Profession / Role) styled to match .join-form's text inputs */
 .ct-site .join-form select {
   font-family: var(--font);
@@ -1841,6 +1852,25 @@
   .ct-site .footer-links a { font-size: 12px; }
   .ct-site .footer-top { flex-direction: column; gap: 36px; }
   .ct-site .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+
+  /* JOIN THE COMMUNITY / PARV REGISTRATION — tablet & below.
+     These previously had zero responsive rules: the card's fixed 44px
+     padding + join-title's 48px font-size + join-row forcing two inputs
+     side-by-side left very little usable width once --page-px and the
+     modal's own padding were also subtracted, so text overflowed/wrapped
+     badly and the two-column name row got squeezed unreadably. */
+  .ct-site .join-section { padding: 24px var(--page-px) 60px; }
+  .ct-site .invite-modal { padding: 24px var(--page-px); }
+  .ct-site .join-card { padding: 32px 24px; border-radius: 20px; }
+  .ct-site .join-title { font-size: 32px; }
+  .ct-site .join-tagline { max-width: 100%; }
+  .ct-site .join-row { flex-direction: column; gap: 16px; }
+  .ct-site .join-form input, .ct-site .join-form textarea, .ct-site .join-form select {
+    padding: 14px 18px;
+    font-size: 12px;
+  }
+  .ct-site .join-actions { justify-content: stretch; }
+  .ct-site .join-submit { width: 100%; text-align: center; }
 }
 
 /* ═══════════ SMALL PHONE (≤480px) ═══════════ */
@@ -1880,4 +1910,18 @@
 
   .ct-site .btn, .ct-site .btn-join { font-size: 13px; padding: 12px 24px; }
   .ct-site .btn-comm, .ct-site .meet-card .btn-comm { font-size: 13px; padding: 11px 22px; }
+
+  /* JOIN THE COMMUNITY / PARV REGISTRATION — small phones. */
+  .ct-site .join-card { padding: 26px 16px; }
+  .ct-site .join-badge { width: 40px; height: 40px; font-size: 18px; margin-bottom: 18px; }
+  .ct-site .join-close { top: 16px; right: 16px; width: 32px; height: 32px; font-size: 18px; }
+  .ct-site .join-title { font-size: 26px; margin-bottom: 10px; }
+  .ct-site .join-tagline { font-size: 12px; margin-bottom: 20px; }
+  .ct-site .join-form { gap: 12px; }
+  .ct-site .join-form input, .ct-site .join-form textarea, .ct-site .join-form select {
+    padding: 13px 16px;
+    border-radius: 24px;
+  }
+  .ct-site .join-form textarea { border-radius: 18px; min-height: 96px; }
+  .ct-site .join-hint { padding: 0 16px; }
 }

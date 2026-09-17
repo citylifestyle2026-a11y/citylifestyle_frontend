@@ -11,6 +11,7 @@ import { getAllAdmins, deleteAdmin } from "../redux/admin/adminThunk";
 import { clearAdminState } from "../redux/admin/adminSlice";
 import { showError, showSuccess } from "../utilits/toast";
 import "../assets/CSS/Admin.css";
+import { Link } from "react-router-dom";
 
 export default function Admin() {
   const dispatch = useDispatch();
@@ -297,7 +298,7 @@ export default function Admin() {
         titleStyle={{ textAlign: "start", display: "block" }}
         breadcrumb={
           <div className="adminPage__breadcrumb">
-            <span>Dashboard</span>
+             <Link to="/dashboard"><span style={{color:"#9a9ca8"}}>Dashboard</span></Link>
             <span>-</span>
             <span className="adminPage__breadcrumbActive">Admin</span>
           </div>

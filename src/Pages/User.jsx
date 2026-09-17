@@ -15,6 +15,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { deleteUser, getUsers } from '../redux/user/userThunk';
 import { showError, showSuccess } from "../utilits/toast";
 import { clearUserState } from "../redux/user/userSlice";
+import { Link } from "react-router-dom";
 const LOGO_AVATAR = "https://ui-avatars.com/api/?name=SA&background=17a2b8&color=fff&bold=true";
 
 // Options for the "rows per page" select. Lives in the page (not inside
@@ -347,7 +348,7 @@ export default function User() {
         titleStyle={{ textAlign: "start", display: "block" }}
         breadcrumb={
           <div className="userPage__breadcrumb">
-            <span>Dashboard</span>
+              <Link to="/dashboard"><span style={{color:"#9a9ca8"}}>Dashboard</span></Link>
             <span>-</span>
             <span className="userPage__breadcrumbActive">User</span>
           </div>
