@@ -36,7 +36,7 @@ export default function SiteHeader() {
         </ul>
       
         <Link className="btn-join" to="/contact">Join Community</Link>
-          <Link className="btn-login" to="/login">Login</Link>
+          {/* <Link className="btn-login" to="/login">Login</Link> */}
         <button
           className={`hamburger${menuOpen ? " open" : ""}`}
           id="hamburger"
@@ -54,9 +54,9 @@ export default function SiteHeader() {
           <li><Link to="/city-sparkle" onClick={() => setMenuOpen(false)}>CITY SPARKLE</Link></li>
           <li><Link to="/parv" onClick={() => setMenuOpen(false)}>PARV</Link></li>
         </ul>
-        <Link className="btn-login mobile-login" to="/login" onClick={() => setMenuOpen(false)}>
+        {/* <Link className="btn-login mobile-login" to="/login" onClick={() => setMenuOpen(false)}>
           Login
-        </Link>
+        </Link> */}
         <Link className="btn-join mobile-join" to="/contact" onClick={() => setMenuOpen(false)}>
           Join Community
         </Link>

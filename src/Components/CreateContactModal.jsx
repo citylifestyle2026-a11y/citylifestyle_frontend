@@ -18,6 +18,7 @@ const EMPTY_FORM = {
   fullName: "",
   whatsappNumber: "",
   companyName: "",
+  designation: "",
   address: "",
   companyCategory: "",
 };
@@ -68,6 +69,7 @@ export default function CreateContactModal({
         fullName: editContactData.fullName || "",
         whatsappNumber: editContactData.whatsappNumber || "",
         companyName: editContactData.companyName || "",
+        designation: editContactData.designation || "",
         address: editContactData.address || "",
         // companyCategory arrives populated as { _id, name } (see
         // contact.service.js's .populate("companyCategory", "name")) —
@@ -167,6 +169,12 @@ export default function CreateContactModal({
     return [...references, singleValue];
   };
 
+  // Every field is compulsory EXCEPT Address — mirrors the backend's
+  // createContactValidation/updateContactValidation
+  // (validators/contact.validator.js). `references` counts a
+  // not-yet-"Add"ed value still sitting in the reference input box
+  // (see resolvePendingReferences above), so the admin isn't blocked
+  // just for not pressing "Add" before submitting.
   const validate = () => {
     const errors = {};
 
@@ -180,10 +188,30 @@ export default function CreateContactModal({
       errors.whatsappNumber = "Enter a valid 10-digit WhatsApp number.";
     }
 
+    if (!formData.companyName.trim()) {
+      errors.companyName = "Company Name is required.";
+    }
+
+    if (!formData.designation.trim()) {
+      errors.designation = "Designation is required.";
+    }
+
+    if (!formData.companyCategory) {
+      errors.companyCategory = "Company Category is required.";
+    }
+
+    if (resolvePendingReferences().length === 0) {
+      errors.references = "At least one Reference is required.";
+    }
+
     setFormErrors((prev) => ({
       ...prev,
       fullName: errors.fullName,
       whatsappNumber: errors.whatsappNumber,
+      companyName: errors.companyName,
+      designation: errors.designation,
+      companyCategory: errors.companyCategory,
+      references: errors.references,
     }));
 
     return Object.keys(errors).length === 0;
@@ -199,6 +227,7 @@ export default function CreateContactModal({
       fullName: formData.fullName.trim(),
       whatsappNumber: formData.whatsappNumber.trim(),
       companyName: formData.companyName.trim(),
+      designation: formData.designation.trim(),
       address: formData.address.trim(),
       references: resolvePendingReferences(),
       companyCategory: formData.companyCategory || null,
@@ -274,13 +303,13 @@ export default function CreateContactModal({
   return (
     <div className="contactModalOverlay" onClick={onClose}>
       <div className="createContactModal" onClick={(e) => e.stopPropagation()}>
-        <div className="modalHeader">
-          <h2 className="modalTitle">
+        <div className="contactModalHeader">
+          <h2 className="contactModalTitle">
             {isEditMode ? "Edit Contact" : "Create Contact"}
           </h2>
           <button
             type="button"
-            className="closeIconButton"
+            className="contactCloseIconButton"
             onClick={onClose}
             aria-label="Close modal"
           >
@@ -292,63 +321,84 @@ export default function CreateContactModal({
             WhatsApp Number field below, so a duplicate error (e.g.
             "WhatsApp Number already exists") isn't shown twice. */}
         {error && error !== formErrors.whatsappNumber && (
-          <p className="fieldError" style={{ textAlign: "center", marginTop: 8 }}>
+          <p className="contactFieldError" style={{ textAlign: "center", marginTop: 8 }}>
             {typeof error === "string" ? error : "Something went wrong. Please try again."}
           </p>
         )}
 
-        <div className="formGrid">
-          <div className="fieldGroup">
-            <label className="fieldLabel">
-              Full Name <span className="required">*</span>
+        <div className="contactFormGrid">
+          <div className="contactFieldGroup">
+            <label className="contactFieldLabel">
+              Full Name <span className="contactRequired">*</span>
             </label>
             <input
               type="text"
-              className="fieldInput"
+              className="contactFieldInput"
               placeholder="Full Name"
               name="fullName"
               value={formData.fullName}
               onChange={handleChange}
             />
-            {formErrors.fullName && <p className="fieldError">{formErrors.fullName}</p>}
+            {formErrors.fullName && <p className="contactFieldError">{formErrors.fullName}</p>}
           </div>
 
-          <div className="fieldGroup">
-            <label className="fieldLabel">
-              WhatsApp Number <span className="required">*</span>
+          <div className="contactFieldGroup">
+            <label className="contactFieldLabel">
+              WhatsApp Number <span className="contactRequired">*</span>
             </label>
             <input
               type="text"
-              className="fieldInput"
+              className="contactFieldInput"
               placeholder="WhatsApp Number"
               name="whatsappNumber"
               value={formData.whatsappNumber}
               onChange={handleChange}
             />
             {formErrors.whatsappNumber && (
-              <p className="fieldError">{formErrors.whatsappNumber}</p>
+              <p className="contactFieldError">{formErrors.whatsappNumber}</p>
             )}
           </div>
 
-          <div className="fieldGroup">
-            <label className="fieldLabel">Company Name</label>
+          <div className="contactFieldGroup">
+            <label className="contactFieldLabel">
+              Company Name <span className="contactRequired">*</span>
+            </label>
             <input
               type="text"
-              className="fieldInput"
+              className="contactFieldInput"
               placeholder="Company Name"
               name="companyName"
               value={formData.companyName}
               onChange={handleChange}
             />
             {formErrors.companyName && (
-              <p className="fieldError">{formErrors.companyName}</p>
+              <p className="contactFieldError">{formErrors.companyName}</p>
             )}
           </div>
 
-          <div className="fieldGroup">
-            <label className="fieldLabel">Company Category</label>
+          <div className="contactFieldGroup">
+            <label className="contactFieldLabel">
+              Designation <span className="contactRequired">*</span>
+            </label>
+            <input
+              type="text"
+              className="contactFieldInput"
+              placeholder="Designation"
+              name="designation"
+              value={formData.designation}
+              onChange={handleChange}
+            />
+            {formErrors.designation && (
+              <p className="contactFieldError">{formErrors.designation}</p>
+            )}
+          </div>
+
+          <div className="contactFieldGroup contactFieldGroupFull">
+            <label className="contactFieldLabel">
+              Company Category <span className="contactRequired">*</span>
+            </label>
             <select
-              className="fieldSelect"
+              className="contactFieldSelect"
               name="companyCategory"
               value={formData.companyCategory}
               onChange={handleChange}
@@ -361,29 +411,31 @@ export default function CreateContactModal({
               ))}
             </select>
             {formErrors.companyCategory && (
-              <p className="fieldError">{formErrors.companyCategory}</p>
+              <p className="contactFieldError">{formErrors.companyCategory}</p>
             )}
           </div>
 
-          <div className="fieldGroup fieldGroupFull">
-            <label className="fieldLabel">Address</label>
+          <div className="contactFieldGroup contactFieldGroupFull">
+            <label className="contactFieldLabel">Address</label>
             <input
               type="text"
-              className="fieldInput"
+              className="contactFieldInput"
               placeholder="Address"
               name="address"
               value={formData.address}
               onChange={handleChange}
             />
-            {formErrors.address && <p className="fieldError">{formErrors.address}</p>}
+            {formErrors.address && <p className="contactFieldError">{formErrors.address}</p>}
           </div>
 
-          <div className="fieldGroup fieldGroupFull">
-            <label className="fieldLabel">Reference</label>
+          <div className="contactFieldGroup contactFieldGroupFull">
+            <label className="contactFieldLabel">
+              Reference <span className="contactRequired">*</span>
+            </label>
             <div className="referenceInputRow">
               <input
                 type="text"
-                className="fieldInput"
+                className="contactFieldInput"
                 placeholder="Type a reference and press Add"
                 value={referenceInput}
                 onChange={(e) => setReferenceInput(e.target.value)}
@@ -417,15 +469,15 @@ export default function CreateContactModal({
             )}
 
             {formErrors.references && (
-              <p className="fieldError">{formErrors.references}</p>
+              <p className="contactFieldError">{formErrors.references}</p>
             )}
           </div>
         </div>
 
-        <div className="modalFooter">
+        <div className="contactModalFooter">
           <button
             type="button"
-            className="modalCloseButton"
+            className="contactModalCloseButton"
             onClick={onClose}
             disabled={loading}
           >
@@ -433,7 +485,7 @@ export default function CreateContactModal({
           </button>
           <button
             type="button"
-            className="modalCreateButton"
+            className="contactModalCreateButton"
             onClick={handleSubmit}
             disabled={loading}
           >

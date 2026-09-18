@@ -197,6 +197,7 @@ export default function CreateAdminModal({ onClose }) {
             <div className="fieldInputWrap">
               <input
                 type={showPassword ? "text" : "password"}
+                data-no-autocap="true"
                 className="fieldInput"
                 name="password"
                 autoComplete="new-password"
@@ -223,6 +224,7 @@ export default function CreateAdminModal({ onClose }) {
             <div className="fieldInputWrap">
               <input
                 type={showConfirmPassword ? "text" : "password"}
+                data-no-autocap="true"
                 className="fieldInput"
                 name="confirmPassword"
                 autoComplete="new-password"

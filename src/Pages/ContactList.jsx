@@ -53,7 +53,7 @@ const CATEGORY_FILTER_FETCH_LIMIT = 100;
 // services/contact.service.js). Columns outside this list render a plain,
 // non-interactive header rather than a sort affordance that the API would
 // silently ignore and fall back to `createdAt` for.
-const SORTABLE_COLUMNS = ["fullName", "whatsappNumber", "companyName"];
+const SORTABLE_COLUMNS = ["fullName", "whatsappNumber", "companyName", "designation"];
 
 export default function ContactList() {
   const dispatch = useDispatch();
@@ -465,6 +465,9 @@ const sortedReferenceFilterOptions = useMemo(
       }),
       sortableColumn("companyName", "Company Name", {
         render: (contact) => contact.companyName || "-",
+      }),
+      sortableColumn("designation", "Designation", {
+        render: (contact) => contact.designation || "-",
       }),
       sortableColumn("companyCategory", "Company Category", {
         // Populated by the backend as { _id, name } (see

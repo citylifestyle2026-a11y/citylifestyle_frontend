@@ -308,6 +308,7 @@ export default function EditAdminModal({ admin, onClose, isEditingSelf = true })
                   <div className="fieldInputWrap">
                     <input
                       type={showCurrentPwd ? "text" : "password"}
+                      data-no-autocap="true"
                       className="fieldInput"
                       placeholder="Password"
                       autoComplete="current-password"
@@ -336,6 +337,7 @@ export default function EditAdminModal({ admin, onClose, isEditingSelf = true })
                   <div className="fieldInputWrap">
                     <input
                       type={showNewPwd ? "text" : "password"}
+                      data-no-autocap="true"
                       className="fieldInput"
                       placeholder="Password"
                       autoComplete="new-password"
@@ -368,6 +370,7 @@ export default function EditAdminModal({ admin, onClose, isEditingSelf = true })
                   <div className="fieldInputWrap">
                     <input
                       type={showConfirmPwd ? "text" : "password"}
+                      data-no-autocap="true"
                       className="fieldInput"
                       placeholder="Password"
                       autoComplete="new-password"

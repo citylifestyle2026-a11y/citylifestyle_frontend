@@ -440,6 +440,7 @@ const Login = () => {
                       id="password"
                       name="password"
                       type={showPassword ? "text" : "password"}
+                      data-no-autocap="true"
                       value={formData.password}
                       onChange={handleChange}
                       autoComplete="current-password"
@@ -688,6 +689,7 @@ const Login = () => {
                       id="newPassword"
                       name="newPassword"
                       type={showNewPassword ? "text" : "password"}
+                      data-no-autocap="true"
                       value={resetData.newPassword}
                       onChange={handleResetChange}
                       autoComplete="new-password"
@@ -740,6 +742,7 @@ const Login = () => {
                       id="confirmPassword"
                       name="confirmPassword"
                       type={showConfirmPassword ? "text" : "password"}
+                      data-no-autocap="true"
                       value={resetData.confirmPassword}
                       onChange={handleResetChange}
                       autoComplete="new-password"

@@ -123,16 +123,19 @@ function ProfileAvatar({ src, name }) {
 }
 
 // Table columns mapped 1:1 to the real Entry Report API response fields.
+// Order: #, Profile, Name, Mobile Number, Scanned By, Scanned At first,
+// then every other existing field unchanged after that.
 const COLUMNS = [
   "#",
   "Profile",
+  "Name",
+  "Mobile Number",
+  "Scanned By",
+  "Scanned At",
   "Booking Id",
   "Ticket Id",
   "QR Code",
-  "Name",
-  "Mobile Number",
   "Pass Date",
-  "Scanned At"
 ];
 
 export default function EntryReport() {
@@ -995,6 +998,7 @@ export default function EntryReport() {
                   const qrImage = row?.qrImage ?? null;
                   const nameVal = row?.name ?? "-";
                   const mobileNumberVal = row?.mobileNumber ?? "-";
+                  const scannedByVal = row?.scannedBy ?? "-";
                   const passDate = row?.passDate
                     ? formatDateOnly(row.passDate)
                     : "-";
@@ -1008,6 +1012,10 @@ export default function EntryReport() {
                       <td className="erPage__td">
                         <ProfileAvatar src={profileImage} name={nameVal} />
                       </td>
+                      <td className="erPage__td">{nameVal}</td>
+                      <td className="erPage__td">{mobileNumberVal}</td>
+                      <td className="erPage__td">{scannedByVal}</td>
+                      <td className="erPage__td">{scannedAt}</td>
                       <td className="erPage__td">{bookingIdVal}</td>
                       <td className="erPage__td">{ticketIdVal}</td>
                       <td className="erPage__td">
@@ -1041,10 +1049,7 @@ export default function EntryReport() {
                           "-"
                         )}
                       </td>
-                      <td className="erPage__td">{nameVal}</td>
-                      <td className="erPage__td">{mobileNumberVal}</td>
                       <td className="erPage__td">{passDate}</td>
-                      <td className="erPage__td">{scannedAt}</td>
                     </tr>
                   );
                 })}

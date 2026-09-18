@@ -260,6 +260,7 @@ export default function Profile() {
               <div className="passwordInputWrap">
                 <input
                   type={showCurrentPwd ? "text" : "password"}
+                  data-no-autocap="true"
                   placeholder="Password"
                   value={passwordForm.currentPassword}
                   onChange={handlePasswordFieldChange("currentPassword")}
@@ -288,6 +289,7 @@ export default function Profile() {
               <div className="passwordInputWrap">
                 <input
                   type={showNewPwd ? "text" : "password"}
+                  data-no-autocap="true"
                   placeholder="Password"
                   value={passwordForm.newPassword}
                   onChange={handlePasswordFieldChange("newPassword")}
@@ -312,6 +314,7 @@ export default function Profile() {
               <div className="passwordInputWrap">
                 <input
                   type={showConfirmPwd ? "text" : "password"}
+                  data-no-autocap="true"
                   placeholder="Password"
                   value={passwordForm.confirmPassword}
                   onChange={handlePasswordFieldChange("confirmPassword")}

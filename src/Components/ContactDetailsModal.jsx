@@ -112,6 +112,14 @@ export default function ContactDetailsModal({ contact, onClose }) {
           </div>
 
           <div className="contactDetailsRow">
+            <span className="contactDetailsLabel">Designation</span>
+            <span className="contactDetailsColon">:</span>
+            <span className="contactDetailsValue">
+              {contact.designation || "-"}
+            </span>
+          </div>
+
+          <div className="contactDetailsRow">
             <span className="contactDetailsLabel">Company Category</span>
             <span className="contactDetailsColon">:</span>
             <span className="contactDetailsValue">

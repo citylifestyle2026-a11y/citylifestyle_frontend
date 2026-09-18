@@ -43,10 +43,22 @@ export default function EditProfileModal({ user, onClose }) {
 
   const handleAvatarChange = (e) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      setAvatar(URL.createObjectURL(file));
+    if (!file) return;
+
+    // ================= IMAGE SIZE LIMIT =================
+    // Admin profile photo: images up to 100 MB are now allowed, matching
+    // the backend's upload limit (middlewares/upload.middleware.js —
+    // PUT /api/auth/profile now uses the same 100 MB middleware as the
+    // Registration photo uploads). Only files over 100 MB are rejected
+    // here, before they're ever sent to the server.
+    if (file.size > 100 * 1024 * 1024) {
+      setFieldErrors((prev) => ({ ...prev, image: "Image size should be less than 100MB." }));
+      return;
     }
+
+    setFieldErrors((prev) => ({ ...prev, image: undefined }));
+    setImageFile(file);
+    setAvatar(URL.createObjectURL(file));
   };
 
   const handleRemoveAvatar = () => {
@@ -144,6 +156,9 @@ export default function EditProfileModal({ user, onClose }) {
                   )}
                 </div>
                 <p className="avatarHint">Allowed file types: png, jpg, jpeg, webp.</p>
+                {fieldErrors.image && (
+                  <p className="modalFieldError">{fieldErrors.image}</p>
+                )}
               </div>
             </div>
 

@@ -175,8 +175,16 @@ const RegisterUsers = () => {
       return;
     }
 
-    if (file.size > 2 * 1024 * 1024) {
-      showError("Image size should be less than 2MB.");
+    // ================= IMAGE SIZE LIMIT =================
+    // Private Registration attendee photo: raised from the previous
+    // stale 2 MB check to 100 MB, to match the backend's registration
+    // upload limit (middlewares/upload.middleware.js's
+    // `registrationPhotoUpload`, used by the PUT
+    // /booking-ticket/register-user/:ticketId endpoint) and the same
+    // 100 MB check already used by BookingUserModal.jsx for this same
+    // flow.
+    if (file.size > 100 * 1024 * 1024) {
+      showError("Image size should be less than 100MB.");
       return;
     }
 

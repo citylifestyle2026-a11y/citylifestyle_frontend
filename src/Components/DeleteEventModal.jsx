@@ -139,6 +139,7 @@ export default function DeleteEventModal({
           <div className="eventDeleteInputWrap">
             <input
               type={showPassword ? "text" : "password"}
+              data-no-autocap="true"
               className="eventDeleteInput"
               placeholder="Enter admin password"
               value={password}

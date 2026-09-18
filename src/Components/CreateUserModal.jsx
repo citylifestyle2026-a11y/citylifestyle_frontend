@@ -106,6 +106,17 @@ export default function CreateUserModal({
       return;
     }
 
+    // ================= IMAGE SIZE LIMIT =================
+    // User profile photo: images up to 100 MB are now allowed, matching
+    // the backend's upload limit (middlewares/upload.middleware.js —
+    // POST/PUT /api/user now uses the same 100 MB middleware as the
+    // Registration photo uploads). Only files over 100 MB are rejected
+    // here, before they're ever sent to the server.
+    if (file.size > 100 * 1024 * 1024) {
+      showError("Image size should be less than 100MB.");
+      return;
+    }
+
     setImageFile(file);
     setProfileImage(URL.createObjectURL(file));
   };
@@ -386,6 +397,7 @@ export default function CreateUserModal({
             <div className="fieldInputWrap">
               <input
                 type={showPassword ? "text" : "password"}
+                data-no-autocap="true"
                 className="fieldInput"
                 name="password"
                 autoComplete="new-password"
@@ -412,6 +424,7 @@ export default function CreateUserModal({
             <div className="fieldInputWrap">
               <input
                 type={showConfirmPassword ? "text" : "password"}
+                data-no-autocap="true"
                 className="fieldInput"
                 name="confirmPassword"
                 placeholder="Confirm Password"

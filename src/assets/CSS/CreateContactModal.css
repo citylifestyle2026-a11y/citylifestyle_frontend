@@ -44,21 +44,21 @@
   }
 }
 
-.modalHeader {
+.contactModalHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 26px;
 }
 
-.modalTitle {
+.contactModalTitle {
   color: #1b2a4e;
   font-size: 22px;
   font-weight: 800;
   margin: 0;
 }
 
-.closeIconButton {
+.contactCloseIconButton {
   background: transparent;
   border: none;
   color: #9a9ca8;
@@ -72,12 +72,12 @@
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.closeIconButton:hover {
+.contactCloseIconButton:hover {
   background-color: #f2f3f6;
   color: #1b2a4e;
 }
 
-.formGrid {
+.contactFormGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px 24px;
@@ -87,29 +87,29 @@
 
 /* Address and Reference span both columns — they're free text/lists
    rather than the short paired fields the rest of the grid holds. */
-.fieldGroupFull {
+.contactFieldGroupFull {
   grid-column: 1 / -1;
 }
 
-.fieldGroup {
+.contactFieldGroup {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.fieldLabel {
+.contactFieldLabel {
   color: #1b2a4e;
   font-size: 13.5px;
   font-weight: 600;
   text-align: left;
 }
 
-.required {
+.contactRequired {
   color: #e0331e;
 }
 
-.fieldInput,
-.fieldSelect {
+.contactFieldInput,
+.contactFieldSelect {
   padding: 12px 14px;
   border: 1px solid #e3e4ea;
   border-radius: 10px;
@@ -122,16 +122,16 @@
   box-sizing: border-box;
 }
 
-.fieldSelect {
+.contactFieldSelect {
   cursor: pointer;
 }
 
-.fieldInput::placeholder {
+.contactFieldInput::placeholder {
   color: #a7abbd;
 }
 
-.fieldInput:focus,
-.fieldSelect:focus {
+.contactFieldInput:focus,
+.contactFieldSelect:focus {
   border-color: var(--admin-accent);
   box-shadow: 0 0 0 4px var(--admin-focus-ring);
 }
@@ -144,7 +144,7 @@
   gap: 10px;
 }
 
-.referenceInputRow .fieldInput {
+.referenceInputRow .contactFieldInput {
   flex: 1;
 }
 
@@ -204,7 +204,7 @@
   color: #ffffff;
 }
 
-.modalFooter {
+.contactModalFooter {
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -212,7 +212,7 @@
   margin-top: 26px;
 }
 
-.modalCloseButton {
+.contactModalCloseButton {
   background-color: #eceef2;
   color: #3a3d4d;
   border: none;
@@ -224,7 +224,7 @@
   transition: background-color 0.2s ease;
 }
 
-.modalCreateButton {
+.contactModalCreateButton {
   background-color: var(--admin-accent);
   color: #ffffff;
   border: none;
@@ -236,12 +236,12 @@
   transition: background-color 0.2s ease, transform 0.15s ease;
 }
 
-.modalCreateButton:hover {
+.contactModalCreateButton:hover {
   background-color: var(--admin-accent-strong);
   transform: translateY(-1px);
 }
 
-.fieldError {
+.contactFieldError {
   color: #dc3545;
   font-size: 0.85rem;
   margin-top: 4px;
@@ -253,7 +253,7 @@
     padding: 26px 22px 22px 22px;
   }
 
-  .formGrid {
+  .contactFormGrid {
     grid-template-columns: 1fr;
   }
 
@@ -265,12 +265,12 @@
     padding: 12px 20px;
   }
 
-  .modalFooter {
+  .contactModalFooter {
     justify-content: stretch;
   }
 
-  .modalCreateButton,
-  .modalCloseButton {
+  .contactModalCreateButton,
+  .contactModalCloseButton {
     flex: 1;
   }
 }
