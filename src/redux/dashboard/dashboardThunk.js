@@ -1,5 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { getDashboardSummaryApi } from "../../services/dashboardService";
+import { getApiErrorMessage } from "../../utilits/apiError";
 
 // ================= GET DASHBOARD SUMMARY =================
 export const getDashboardSummary = createAsyncThunk(
@@ -9,7 +10,7 @@ export const getDashboardSummary = createAsyncThunk(
       return await getDashboardSummaryApi(eventId);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to fetch dashboard summary"
+        getApiErrorMessage(error, "Failed to fetch dashboard summary")
       );
     }
   }

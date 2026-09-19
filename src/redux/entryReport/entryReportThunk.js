@@ -5,6 +5,7 @@ import {
   getAllEntryReportApi,
   exportEntryReportApi,
 } from "../../services/entryReportService";
+import { getApiErrorMessage } from "../../utilits/apiError";
 
 // ================= GET ACTIVE EVENTS =================
 export const getActiveEvents = createAsyncThunk(
@@ -14,7 +15,7 @@ export const getActiveEvents = createAsyncThunk(
       return await getActiveEventsApi(params);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error?.response?.data?.message || "Failed to fetch active events"
+        getApiErrorMessage(error, "Failed to fetch active events")
       );
     }
   }
@@ -28,7 +29,7 @@ export const getAllEntryReport = createAsyncThunk(
       return await getAllEntryReportApi(params);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error?.response?.data?.message || "Failed to fetch entry report"
+        getApiErrorMessage(error, "Failed to fetch entry report")
       );
     }
   }
@@ -42,7 +43,7 @@ export const exportEntryReport = createAsyncThunk(
       return await exportEntryReportApi(params);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error?.response?.data?.message || "Failed to export entry report"
+        getApiErrorMessage(error, "Failed to export entry report")
       );
     }
   }

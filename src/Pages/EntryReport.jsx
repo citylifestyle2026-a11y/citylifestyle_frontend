@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { DateRange } from "react-date-range";
 import "react-date-range/dist/styles.css";
@@ -76,6 +76,31 @@ const formatDateOnly = (value) => {
   if (!value) return "-";
   const formatted = formatDate(value);
   return formatted || "-";
+};
+
+// The API sends pass dates as plain IST calendar days ("YYYY-MM-DD" — the
+// dates the ticket type allows entry on). These helpers convert between
+// that key format and the calendar's local Date cells without any
+// timezone shifting: a key and the calendar cell showing that same
+// day-of-month always map to each other.
+const dateKeyToDate = (key) => {
+  const [y, m, d] = String(key).split("-").map(Number);
+  return new Date(y, m - 1, d);
+};
+
+const formatDateKey = (key) => {
+  const [y, m, d] = String(key).split("-");
+  return `${d}-${m}-${y}`;
+};
+
+// Pass Date cell: every date the ticket's ticket type allows (e.g.
+// "14-08-2026, 15-08-2026"); falls back to the ticket's single stored
+// passDate for rows without ticket-type dates.
+const formatPassDates = (row) => {
+  if (Array.isArray(row?.passDates) && row.passDates.length > 0) {
+    return row.passDates.map(formatDateKey).join(", ");
+  }
+  return row?.passDate ? formatDateOnly(row.passDate) : "-";
 };
 
 // Formats any API date/time value as "DD-MM-YYYY, <local time>". Returns
@@ -175,6 +200,8 @@ export default function EntryReport() {
     event: entryReportEvent,
     activeEvents,
     activeEventsLoading,
+    activeEventsError,
+    allowedPassDates,
     loading,
     exportLoading,
     error,
@@ -183,32 +210,39 @@ export default function EntryReport() {
   const rows = entryReports ?? [];
 
   // The dropdown option matching the currently selected event, used as a
-  // fallback for the date bounds below before the entry-report API's own
-  // response (entryReportEvent) has arrived for that event.
+  // fallback for the event end time below before the entry-report API's
+  // own response (entryReportEvent) has arrived for that event.
   const selectedEventOption = activeEvents.find(
     (evt) => evt?._id === selectedEventId
   ) ?? null;
 
-  // Event date bounds for the date-range picker. The backend's own
-  // entry-report response (event.startDateTime / event.endDateTime) is the
-  // source of truth once available for the *currently selected* event;
-  // before that first response arrives for it, fall back to the matching
-  // entry in activeEvents (the same list the dropdown itself is built
-  // from), so the picker is always scoped to the one event the user
-  // actually selected. No other event-selection state is consulted, so
-  // inactive/unrelated events can never supply these dates.
-  const eventStartDate =
-    entryReportEvent?._id === selectedEventId && entryReportEvent?.startDateTime
-      ? new Date(entryReportEvent.startDateTime)
-      : selectedEventOption?.startDateTime
-        ? new Date(selectedEventOption.startDateTime)
-        : null;
+  // The selected event's end time — only used to auto-refetch when that
+  // event expires (useEventExpiryRefetch below). The Pass Date picker no
+  // longer uses the event's start/end range; it uses the ticket types'
+  // allowed dates (see passDateMin/passDateMax below).
   const eventEndDate =
     entryReportEvent?._id === selectedEventId && entryReportEvent?.endDateTime
       ? new Date(entryReportEvent.endDateTime)
       : selectedEventOption?.endDateTime
         ? new Date(selectedEventOption.endDateTime)
         : null;
+
+  // Pass Date picker: ONLY the dates the ticket types of the selected
+  // event scope allow (TicketType.allowDates) can be picked — every other
+  // day, including days inside the event's own range that no ticket type
+  // allows, is disabled. Works for "All Events" too (the union of every
+  // active event's ticket-type dates), which the old event-date-range
+  // based picker could not: it stayed disabled until one event was chosen.
+  const allowedDateKeys = useMemo(
+    () => new Set(allowedPassDates ?? []),
+    [allowedPassDates]
+  );
+  const passDateMin = allowedPassDates?.length
+    ? dateKeyToDate(allowedPassDates[0])
+    : null;
+  const passDateMax = allowedPassDates?.length
+    ? dateKeyToDate(allowedPassDates[allowedPassDates.length - 1])
+    : null;
 
   // Snapshot of the filters actually sent with the most recently
   // *dispatched* entry-report list request — i.e. exactly what the rows
@@ -449,34 +483,34 @@ export default function EntryReport() {
   const [committedRange, setCommittedRange] = useState(null);
   const [tempRange, setTempRange] = useState([
     {
-      startDate: eventStartDate || new Date(),
-      endDate: eventEndDate || new Date(),
+      startDate: passDateMin || new Date(),
+      endDate: passDateMax || new Date(),
       key: "selection",
     },
   ]);
 
-  // Once the entry-report API returns event.startDateTime/endDateTime,
-  // re-center the calendar on the event's own date range (unless the user
-  // has already committed a custom selection).
+  // Once the API returns the allowed pass dates for the selected event
+  // scope, re-center the calendar on them (unless the user has already
+  // committed a custom selection).
   useEffect(() => {
     if (committedRange) return;
-    if (!eventStartDate || !eventEndDate) return;
+    if (!passDateMin || !passDateMax) return;
     setTempRange([
       {
-        startDate: eventStartDate,
-        endDate: eventEndDate,
+        startDate: passDateMin,
+        endDate: passDateMax,
         key: "selection",
       },
     ]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [eventStartDate?.getTime(), eventEndDate?.getTime()]);
+  }, [passDateMin?.getTime(), passDateMax?.getTime()]);
 
   // date picker
   const toggleDatePicker = () => {
     // Never open an unrestricted calendar: only allow opening once the
-    // active event's own start/end dates are known, since minDate/maxDate
-    // (and therefore which dates are selectable) depend on them.
-    if (!eventStartDate || !eventEndDate) return;
+    // allowed pass dates are known, since which dates are selectable
+    // depends on them.
+    if (!passDateMin || !passDateMax) return;
 
     setShowDatePicker((prev) => {
       const next = !prev;
@@ -485,8 +519,8 @@ export default function EntryReport() {
         setTempRange(
           committedRange || [
             {
-              startDate: eventStartDate,
-              endDate: eventEndDate,
+              startDate: passDateMin,
+              endDate: passDateMax,
               key: "selection",
             },
           ]
@@ -536,9 +570,9 @@ export default function EntryReport() {
 
     // Reset the previously selected date range so a prior event's dates
     // are never carried over and applied against the newly selected
-    // event — the date picker re-centers on the new event's own bounds
-    // once its start/end dates are known (see the eventStartDate/
-    // eventEndDate effect below).
+    // event — the date picker re-centers on the new event's own allowed
+    // pass dates once they arrive (see the passDateMin/passDateMax
+    // effect below).
     setDateRange("");
     setApiStartDate("");
     setApiEndDate("");
@@ -590,8 +624,8 @@ export default function EntryReport() {
     setCommittedRange(null);
     setTempRange([
       {
-        startDate: eventStartDate || new Date(),
-        endDate: eventEndDate || new Date(),
+        startDate: passDateMin || new Date(),
+        endDate: passDateMax || new Date(),
         key: "selection",
       },
     ]);
@@ -681,6 +715,31 @@ export default function EntryReport() {
       : error
         ? "Failed to load entry reports. Please try again."
         : "";
+  // Show backend failures to the user as a toast as well (the table also
+  // shows its inline error state). The message is already the backend's own
+  // text, extracted by getApiErrorMessage in the thunks. Effects depend on
+  // the error value itself: pending resets it to null, so each new failure
+  // is announced once, and a retry that fails again is announced again.
+  useEffect(() => {
+    if (!error) return;
+    showError(
+      typeof error === "string"
+        ? error
+        : "Failed to load entry reports. Please try again."
+    );
+  }, [error]);
+
+  // The Event dropdown's own load failure was stored in the slice but never
+  // shown anywhere, so an empty dropdown gave no clue why.
+  useEffect(() => {
+    if (!activeEventsError) return;
+    showError(
+      typeof activeEventsError === "string"
+        ? activeEventsError
+        : "Failed to load events. Please try again."
+    );
+  }, [activeEventsError]);
+
   // Pagination
   const startIndex =
     totalRecords === 0 ? 0 : (currentPage - 1) * limit;
@@ -799,10 +858,15 @@ export default function EntryReport() {
             <input
               type="text"
               className="erPage__input"
-              placeholder="Pick date rage"
+              placeholder="Pass Date"
+              title={
+                passDateMin
+                  ? "Only dates allowed by the ticket types can be selected"
+                  : "No pass dates available"
+              }
               value={dateRange}
               readOnly
-              disabled={!eventStartDate || !eventEndDate}
+              disabled={!passDateMin || !passDateMax}
               onClick={toggleDatePicker}
             />
             {showDatePicker && (
@@ -824,8 +888,11 @@ export default function EntryReport() {
                     showMonthAndYearPickers={true}
                     showDateDisplay={false}
                     moveRangeOnFirstSelection={false}
-                    minDate={eventStartDate || undefined}
-                    maxDate={eventEndDate || undefined}
+                    minDate={passDateMin || undefined}
+                    maxDate={passDateMax || undefined}
+                    // Only ticket-type allowed dates are selectable; every
+                    // other day is greyed out and can't be clicked.
+                    disabledDay={(date) => !allowedDateKeys.has(formatDateForApi(date))}
                     rangeColors={["#4f7bff"]}
                   />
                   <div className="erPage__dateRangeFooter">
@@ -962,6 +1029,13 @@ export default function EntryReport() {
                   <td colSpan={COLUMNS.length} className="erPage__emptyCell">
                     <div className="erPage__emptyState">
                       <p className="erPage__emptyText">{errorMessage}</p>
+                      <button
+                        type="button"
+                        className="erPage__btn erPage__btn--search"
+                        onClick={handleSearch}
+                      >
+                        Retry
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -999,9 +1073,7 @@ export default function EntryReport() {
                   const nameVal = row?.name ?? "-";
                   const mobileNumberVal = row?.mobileNumber ?? "-";
                   const scannedByVal = row?.scannedBy ?? "-";
-                  const passDate = row?.passDate
-                    ? formatDateOnly(row.passDate)
-                    : "-";
+                  const passDate = formatPassDates(row);
                   const scannedAt = row?.scannedAt
                     ? formatDateTime(row.scannedAt)
                     : "-";

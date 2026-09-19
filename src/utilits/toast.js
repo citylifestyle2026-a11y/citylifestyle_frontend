@@ -11,6 +11,10 @@ export const showError = (message) => {
   toast.error(message, {
     position: "top-right",
     autoClose: 3000,
+    // The same error text (e.g. two requests failing with "Unable to reach
+    // the server") is shown once while it is on screen, instead of
+    // stacking identical toasts.
+    toastId: typeof message === "string" ? message : undefined,
   });
 };
 

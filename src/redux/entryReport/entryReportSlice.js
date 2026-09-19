@@ -11,6 +11,13 @@ const initialState = {
   pagination: null,
   event: null,
 
+  // IST "YYYY-MM-DD" list of every date the selected event scope's ticket
+  // types allow — the only dates the Pass Date picker offers. The scope
+  // (eventId, "" = All Events) it was loaded for is remembered so a stale
+  // list from a previously selected event is never reused.
+  allowedPassDates: [],
+  allowedPassDatesScope: "",
+
   activeEvents: [],
   activeEventsLoading: false,
   activeEventsError: null,
@@ -45,6 +52,8 @@ const entryReportSlice = createSlice({
       state.entryReports = [];
       state.pagination = null;
       state.event = null;
+      state.allowedPassDates = [];
+      state.allowedPassDatesScope = "";
     },
   },
 
@@ -71,9 +80,16 @@ const entryReportSlice = createSlice({
     // ================= GET ENTRY REPORT =================
 
     builder
-      .addCase(getAllEntryReport.pending, (state) => {
+      .addCase(getAllEntryReport.pending, (state, action) => {
         state.loading = true;
         state.error = null;
+
+        // Different event scope than the one the allowed dates were
+        // loaded for -> drop them until the new response arrives, so the
+        // picker can't offer another event's dates in the meantime.
+        if ((action.meta?.arg?.eventId || "") !== state.allowedPassDatesScope) {
+          state.allowedPassDates = [];
+        }
       })
       .addCase(getAllEntryReport.fulfilled, (state, action) => {
         state.loading = false;
@@ -81,6 +97,9 @@ const entryReportSlice = createSlice({
         state.entryReports = action.payload?.data?.rows ?? [];
         state.pagination = action.payload?.data?.pagination ?? null;
         state.event = action.payload?.data?.event ?? null;
+
+        state.allowedPassDates = action.payload?.data?.allowedPassDates ?? [];
+        state.allowedPassDatesScope = action.meta?.arg?.eventId || "";
 
         state.success = action.payload?.success ?? false;
         state.message = action.payload?.message ?? "";
