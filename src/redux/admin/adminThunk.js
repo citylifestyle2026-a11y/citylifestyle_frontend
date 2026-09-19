@@ -6,6 +6,7 @@ import {
   updateAdminByIdApi,
   deleteAdminApi,
 } from "../../services/adminService";
+import { getApiErrorMessage } from "../../utilits/apiError";
 
 // ==================== CREATE ADMIN ====================
 // `data` is always just { name, email, mobile, password } — no
@@ -19,7 +20,7 @@ export const createAdmin = createAsyncThunk(
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to create admin"
+        getApiErrorMessage(error, "Failed to create admin")
       );
     }
   }
@@ -34,7 +35,7 @@ export const getAllAdmins = createAsyncThunk(
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to fetch admins"
+        getApiErrorMessage(error, "Failed to fetch admins")
       );
     }
   }
@@ -52,7 +53,7 @@ export const updateOwnAdmin = createAsyncThunk(
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to update admin"
+        getApiErrorMessage(error, "Failed to update admin")
       );
     }
   }
@@ -71,7 +72,7 @@ export const updateAdminById = createAsyncThunk(
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to update admin"
+        getApiErrorMessage(error, "Failed to update admin")
       );
     }
   }
@@ -91,7 +92,7 @@ export const deleteAdmin = createAsyncThunk(
       return { id, ...response.data };
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to delete admin"
+        getApiErrorMessage(error, "Failed to delete admin")
       );
     }
   }

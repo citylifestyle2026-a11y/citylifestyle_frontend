@@ -6,6 +6,7 @@ import { createUser, updateUser, getUsers } from "../redux/user/userThunk";
 import { clearUserState } from "../redux/user/userSlice";
 import "../assets/CSS/CreateUserModal.css";
 import { showError, showSuccess } from "../utilits/toast";
+import { getErrorText } from "../utilits/apiError";
 
 export default function CreateUserModal({
   onClose,
@@ -252,11 +253,7 @@ export default function CreateUserModal({
 
       onClose();
     } catch (err) {
-      showError(
-        err?.message ||
-        err?.response?.data?.message ||
-        "Something went wrong"
-      );
+      showError(getErrorText(err, "Something went wrong"));
     }
   };
   return (

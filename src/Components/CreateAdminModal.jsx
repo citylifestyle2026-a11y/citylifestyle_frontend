@@ -6,6 +6,7 @@ import { createAdmin, getAllAdmins } from "../redux/admin/adminThunk";
 import { clearAdminState } from "../redux/admin/adminSlice";
 import "../assets/CSS/EditAdminModal.css";
 import { showError, showSuccess } from "../utilits/toast";
+import { getErrorText } from "../utilits/apiError";
 
 // Create-only modal for the Admin Management page — Super-Admin-only
 // (Pages/Admin.jsx only ever renders this for a logged-in admin whose
@@ -118,7 +119,7 @@ export default function CreateAdminModal({ onClose }) {
 
       onClose();
     } catch (err) {
-      showError(err?.message || err?.response?.data?.message || "Something went wrong");
+      showError(getErrorText(err, "Something went wrong"));
     }
   };
 

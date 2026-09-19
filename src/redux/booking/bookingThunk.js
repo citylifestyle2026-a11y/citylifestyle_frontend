@@ -8,6 +8,7 @@ import {
   deleteBookingApi,
   exportBookings,
 } from "../../services/bookingService";
+import { getApiErrorMessage, UPLOAD_NETWORK_MESSAGE } from "../../utilits/apiError";
 
 // ================= CREATE BOOKING =================
 export const createBooking = createAsyncThunk(
@@ -17,7 +18,7 @@ export const createBooking = createAsyncThunk(
       return await createBookingApi(data);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to create booking"
+        getApiErrorMessage(error, "Failed to create booking")
       );
     }
   }
@@ -37,7 +38,7 @@ export const importBookingsCsv = createAsyncThunk(
       return await importBookingsCsvApi(file);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to import bookings"
+        getApiErrorMessage(error, "Failed to import bookings", { networkMessage: UPLOAD_NETWORK_MESSAGE })
       );
     }
   }
@@ -80,9 +81,7 @@ export const getAllBookings = createAsyncThunk(
       return response;
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message ||
-          error.message ||
-          "Failed to load bookings"
+        getApiErrorMessage(error, "Failed to load bookings")
       );
     }
   }
@@ -96,7 +95,7 @@ export const getBookingById = createAsyncThunk(
       return await getBookingByIdApi(id);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to fetch booking"
+        getApiErrorMessage(error, "Failed to fetch booking")
       );
     }
   }
@@ -128,8 +127,7 @@ export const exportBookingReport = createAsyncThunk(
       return true;
     } catch (error) {
       return rejectWithValue(
-        error.response?.data?.message ||
-          "Failed to export bookings"
+        getApiErrorMessage(error, "Failed to export bookings")
       );
     }
   }
@@ -143,7 +141,7 @@ export const deleteBooking = createAsyncThunk(
       return await deleteBookingApi(id, { remark });
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to delete booking"
+        getApiErrorMessage(error, "Failed to delete booking")
       );
     }
   }

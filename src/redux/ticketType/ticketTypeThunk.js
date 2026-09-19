@@ -5,6 +5,7 @@ import {
   updateTicketTypeApi,
   deleteTicketTypeApi,
 } from "../../services/ticketTypeService";
+import { getApiErrorMessage } from "../../utilits/apiError";
 
 // ================= CREATE TICKET TYPE =================
 export const createTicketType = createAsyncThunk(
@@ -15,7 +16,7 @@ export const createTicketType = createAsyncThunk(
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to create ticket type"
+        getApiErrorMessage(error, "Failed to create ticket type")
       );
     }
   }
@@ -33,7 +34,7 @@ export const getAllTicketTypes = createAsyncThunk(
       });
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data || error.message
+        getApiErrorMessage(error, "Failed to fetch ticket types")
       );
     }
   }
@@ -47,7 +48,7 @@ export const updateTicketType = createAsyncThunk(
       return await updateTicketTypeApi(id, data);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to update ticket type"
+        getApiErrorMessage(error, "Failed to update ticket type")
       );
     }
   }
@@ -61,7 +62,7 @@ export const deleteTicketType = createAsyncThunk(
       return await deleteTicketTypeApi(id);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to delete ticket type"
+        getApiErrorMessage(error, "Failed to delete ticket type")
       );
     }
   }

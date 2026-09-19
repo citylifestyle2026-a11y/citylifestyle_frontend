@@ -6,6 +6,7 @@ import "../assets/CSS/Role.css";
 import PermissionModal from "../Components/PermissionModal";
 import { getRoleApi } from "../services/roleService";
 import { Link } from "react-router-dom";
+import { getApiErrorMessage } from "../utilits/apiError";
 
 const columns = ["Name", "Permissions"];
 
@@ -31,7 +32,7 @@ export default function Role() {
         }
       } catch (err) {
         if (isMounted) {
-          setError(err.response?.data?.message || "Failed to fetch role");
+          setError(getApiErrorMessage(err, "Failed to fetch role"));
         }
       } finally {
         if (isMounted) {

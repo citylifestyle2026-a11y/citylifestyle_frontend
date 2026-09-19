@@ -9,6 +9,7 @@ import {
   verifyResetOtpApi,
   resetPasswordWithOtpApi,
 } from "../../services/authService";
+import { getApiErrorMessage, UPLOAD_NETWORK_MESSAGE } from "../../utilits/apiError";
 
 // post api login
 export const login = createAsyncThunk(
@@ -24,22 +25,17 @@ export const login = createAsyncThunk(
       // to avoid leaking which credential was incorrect. The frontend
       // must never relabel that as something more specific (e.g.
       // "Invalid username") and must never guess based on its own logic.
-      const backendMessage = error.response?.data?.message;
-
-      if (backendMessage) {
-        return thunkAPI.rejectWithValue(backendMessage);
-      }
-
-      if (!error.response) {
-        // Request never reached the server (offline, DNS failure, CORS, etc.)
-        return thunkAPI.rejectWithValue(
-          "Network error. Please check your connection and try again."
-        );
-      }
-
-      // Server responded but without a usable message (e.g. bare 500)
+      // getApiErrorMessage returns that backend message untouched when there
+      // is one; only when there is none does it fall back to the texts below.
       return thunkAPI.rejectWithValue(
-        "Something went wrong while signing in. Please try again."
+        getApiErrorMessage(
+          error,
+          "Something went wrong while signing in. Please try again.",
+          {
+            networkMessage:
+              "Network error. Please check your connection and try again.",
+          }
+        )
       );
     }
   }
@@ -54,7 +50,7 @@ export const getProfile = createAsyncThunk(
       return await getProfileApi();
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message
+        getApiErrorMessage(error, "Failed to load profile")
       );
     }
   }
@@ -68,7 +64,7 @@ export const updateProfile = createAsyncThunk(
       return await updateProfileApi(data);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to update profile"
+        getApiErrorMessage(error, "Failed to update profile", { networkMessage: UPLOAD_NETWORK_MESSAGE })
       );
     }
   }
@@ -83,7 +79,7 @@ export const resetPassword = createAsyncThunk(
       return await resetPasswordApi(data);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to reset password"
+        getApiErrorMessage(error, "Failed to reset password")
       );
     }
   }
@@ -104,7 +100,7 @@ export const forgotPassword = createAsyncThunk(
       return await forgotPasswordApi(data);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to send reset OTP"
+        getApiErrorMessage(error, "Failed to send reset OTP")
       );
     }
   }
@@ -118,7 +114,7 @@ export const verifyResetOtp = createAsyncThunk(
       return await verifyResetOtpApi(data);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Invalid or expired OTP"
+        getApiErrorMessage(error, "Invalid or expired OTP")
       );
     }
   }
@@ -133,7 +129,7 @@ export const resetPasswordWithOtp = createAsyncThunk(
       return await resetPasswordWithOtpApi(data);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to reset password"
+        getApiErrorMessage(error, "Failed to reset password")
       );
     }
   }
@@ -151,7 +147,7 @@ export const logout = createAsyncThunk(
       return await logoutApi();
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Logout failed"
+        getApiErrorMessage(error, "Logout failed")
       );
     }
   }

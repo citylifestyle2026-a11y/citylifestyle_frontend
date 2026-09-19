@@ -5,6 +5,7 @@ import { createContact, updateContact, getAllContacts, getUniqueReferences, getR
 import { clearContactState } from "../redux/contact/contactSlice";
 import "../assets/CSS/CreateContactModal.css";
 import { showError, showSuccess } from "../utilits/toast";
+import { getErrorText } from "../utilits/apiError";
 
 // Same "10 digit mobile number" convention already used by
 // CreateUserModal.jsx/EditAdminModal.jsx's `mobile` field — the backend's
@@ -278,10 +279,7 @@ export default function CreateContactModal({
 
       onClose();
     } catch (err) {
-      const message =
-        err?.message ||
-        err?.response?.data?.message ||
-        (typeof err === "string" ? err : "Something went wrong");
+      const message = getErrorText(err, "Something went wrong");
 
       // Field-specific backend errors are shown directly below their
       // related input instead of as a toast — matches

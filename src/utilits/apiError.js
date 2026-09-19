@@ -20,10 +20,25 @@ const pickMessageFromBody = (data) => {
     return text && !text.startsWith("<") ? text : "";
   }
 
-  const firstFieldError =
-    Array.isArray(data.errors) && typeof data.errors[0]?.message === "string"
-      ? data.errors[0].message
-      : "";
+  // Field errors come as [{ field, message }] from validate.middleware.js
+  // and as express-validator's raw [{ path, msg }] from
+  // validators/event.validator.js — accept both.
+  const firstFieldError = Array.isArray(data.errors)
+    ? (typeof data.errors[0]?.message === "string" && data.errors[0].message) ||
+      (typeof data.errors[0]?.msg === "string" && data.errors[0].msg) ||
+      ""
+    : "";
+
+  // Some endpoints answer { message: "Internal Server Error", error: "<real
+  // reason>" } — the real reason is the useful part.
+  if (
+    typeof data.message === "string" &&
+    /^internal server error\.?$/i.test(data.message.trim()) &&
+    typeof data.error === "string" &&
+    data.error.trim()
+  ) {
+    return data.error;
+  }
 
   if (typeof data.message === "string" && data.message.trim()) {
     // Older backend builds only sent the generic text and put the real
@@ -41,9 +56,29 @@ const pickMessageFromBody = (data) => {
   return "";
 };
 
+// Messages for responses that carry NO JSON message (e.g. an nginx / proxy /
+// hosting error page, or a crashed server). Without these the caller's
+// generic fallback ("Failed to create event") hid the real reason.
+const STATUS_MESSAGES = {
+  413: "The file you are uploading is too large for the server. Please use a smaller file.",
+  429: "Too many requests. Please wait a moment and try again.",
+  502: "The server is temporarily unavailable (502 Bad Gateway). Please try again in a moment.",
+  503: "The server is temporarily unavailable (503). Please try again in a moment.",
+  504: "The server took too long to respond (504 Gateway Timeout). Please try again.",
+};
+
+// Shared "Network Error" text for requests that upload a file/image.
+export const UPLOAD_NETWORK_MESSAGE =
+  "Unable to reach the server. Please check your internet connection. If you are uploading an image or file, it may also be too large for the server.";
+
+// `options.networkMessage` lets a caller (e.g. an image upload) replace the
+// generic "unable to reach the server" text with something more specific,
+// because a proxy that rejects an oversized upload often answers without
+// CORS headers, which the browser reports as a bare "Network Error".
 export const getApiErrorMessage = (
   error,
-  fallback = "Something went wrong. Please try again."
+  fallback = "Something went wrong. Please try again.",
+  options = {}
 ) => {
   const fromServer = pickMessageFromBody(error?.response?.data);
   if (fromServer) return fromServer;
@@ -54,11 +89,61 @@ export const getApiErrorMessage = (
   }
 
   if (error && !error.response && (error.request || error.message === "Network Error")) {
-    return "Unable to reach the server. Please check your internet connection and try again.";
+    return (
+      options.networkMessage ||
+      "Unable to reach the server. Please check your internet connection and try again."
+    );
   }
 
-  if (error?.response?.status === 403) {
+  const status = error?.response?.status;
+
+  if (status === 403) {
     return "You do not have permission to do this.";
+  }
+
+  if (status && STATUS_MESSAGES[status]) {
+    return STATUS_MESSAGES[status];
+  }
+
+  // The server answered, but with no readable message — say so, and include
+  // the HTTP status so the real problem can be traced in the server logs.
+  if (status) {
+    return `${fallback} (server error ${status})`;
+  }
+
+  return fallback;
+};
+
+// Turns WHATEVER a caller caught into one readable string. Use this in
+// component `catch` blocks and on `result.payload` after dispatching a thunk.
+// The thunks reject with a plain string (see getApiErrorMessage above), and
+// `dispatch(...).unwrap()` re-throws that same string — so reading
+// `err.message` on it is `undefined` and used to end in a generic
+// "Something went wrong". This accepts every shape safely:
+//   - a string (thunk payload)         -> the string itself
+//   - an axios error                   -> getApiErrorMessage(...)
+//   - an object with message/errors    -> that message
+//   - a plain Error                    -> error.message
+//   - anything else (null, undefined)  -> the fallback
+export const getErrorText = (
+  err,
+  fallback = "Something went wrong. Please try again."
+) => {
+  if (!err) return fallback;
+
+  if (typeof err === "string") return err.trim() || fallback;
+
+  if (err.isAxiosError || err.response || err.request) {
+    return getApiErrorMessage(err, fallback);
+  }
+
+  if (typeof err === "object") {
+    const fromBody = pickMessageFromBody(err);
+    if (fromBody) return fromBody;
+
+    if (typeof err.message === "string" && err.message.trim()) {
+      return err.message;
+    }
   }
 
   return fallback;

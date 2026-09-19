@@ -6,6 +6,7 @@ import {
   getPublicRegistrationDetailsApi,
   submitPublicRegistrationApi,
 } from "../services/publicRegistrationService";
+import { getApiErrorMessage, UPLOAD_NETWORK_MESSAGE } from "../utilits/apiError";
 
 // Public, no-login registration page for a BOOKING, opened from a
 // WhatsApp link at /r/:token. The token is the ONLY ticket/booking
@@ -123,7 +124,10 @@ const getFriendlyErrorMessage = (error, fallback) => {
     case 500:
       return "Something went wrong on our end. Please try again shortly.";
     default:
-      return fallback;
+      // Network failures, timeouts, oversized uploads (413), 502/504 …
+      return getApiErrorMessage(error, fallback, {
+        networkMessage: UPLOAD_NETWORK_MESSAGE,
+      });
   }
 };
 

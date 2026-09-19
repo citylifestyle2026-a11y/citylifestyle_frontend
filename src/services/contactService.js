@@ -1,4 +1,5 @@
 import api from "../api/axios";
+import { normalizeBlobError } from "../utilits/apiError";
 
 // ================= CREATE CONTACT =================
 export const createContactApi = async (data) => {
@@ -24,12 +25,19 @@ export const getAllContactsApi = async (params) => {
 // page/limit, since every matching contact is exported). Must stay in
 // sync with the backend's GET /contacts/export route.
 export const exportContactsApi = async (params) => {
-  const response = await api.get("/contacts/export", {
-    params,
-    responseType: "blob",
-  });
+  try {
+    const response = await api.get("/contacts/export", {
+      params,
+      responseType: "blob",
+    });
 
-  return response;
+    return response;
+  } catch (error) {
+    // With responseType "blob" the server's JSON error arrives as a Blob —
+    // unwrap it so the real message reaches the thunk (same approach as
+    // entryReportService.js).
+    throw await normalizeBlobError(error);
+  }
 };
 
 // ================= GET CONTACT BY ID =================

@@ -9,6 +9,7 @@ import {
   getUniqueReferencesApi,
   getReferenceSummaryApi,
 } from "../../services/contactService";
+import { getApiErrorMessage } from "../../utilits/apiError";
 
 // ================= CREATE CONTACT =================
 export const createContact = createAsyncThunk(
@@ -18,7 +19,7 @@ export const createContact = createAsyncThunk(
       return await createContactApi(data);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to create contact"
+        getApiErrorMessage(error, "Failed to create contact")
       );
     }
   }
@@ -32,7 +33,7 @@ export const getAllContacts = createAsyncThunk(
       return await getAllContactsApi(params);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to fetch contacts"
+        getApiErrorMessage(error, "Failed to fetch contacts")
       );
     }
   }
@@ -68,7 +69,7 @@ export const exportContacts = createAsyncThunk(
       return true;
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to export contacts"
+        getApiErrorMessage(error, "Failed to export contacts")
       );
     }
   }
@@ -82,7 +83,7 @@ export const getContactById = createAsyncThunk(
       return await getContactByIdApi(id);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to fetch contact"
+        getApiErrorMessage(error, "Failed to fetch contact")
       );
     }
   }
@@ -96,7 +97,7 @@ export const updateContact = createAsyncThunk(
       return await updateContactApi(id, data);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to update contact"
+        getApiErrorMessage(error, "Failed to update contact")
       );
     }
   }
@@ -110,7 +111,7 @@ export const deleteContact = createAsyncThunk(
       return await deleteContactApi(id);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to delete contact"
+        getApiErrorMessage(error, "Failed to delete contact")
       );
     }
   }
@@ -124,7 +125,7 @@ export const getUniqueReferences = createAsyncThunk(
       return await getUniqueReferencesApi(params);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to fetch unique references"
+        getApiErrorMessage(error, "Failed to fetch unique references")
       );
     }
   }
@@ -142,7 +143,7 @@ export const getReferenceSummary = createAsyncThunk(
       return await getReferenceSummaryApi();
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to fetch reference summary"
+        getApiErrorMessage(error, "Failed to fetch reference summary")
       );
     }
   }

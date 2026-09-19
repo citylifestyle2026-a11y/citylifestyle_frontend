@@ -4,6 +4,7 @@ import {
   verifyQrApi,
   checkInQrApi,
 } from "../../services/qrService";
+import { getApiErrorMessage } from "../../utilits/apiError";
 
 /**
  * Builds a structured error object instead of a bare string, so the UI
@@ -23,7 +24,7 @@ const buildQrError = (error, fallback) => {
   if (error.response) {
     return {
       type: "SERVER",
-      message: error.response.data?.message || fallback,
+      message: getApiErrorMessage(error, fallback),
     };
   }
 

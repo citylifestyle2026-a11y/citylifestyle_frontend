@@ -1,4 +1,5 @@
 import api from "../api/axios";
+import { normalizeBlobError } from "../utilits/apiError";
 
 // ================= CREATE BOOKING =================
 export const createBookingApi = async (data) => {
@@ -38,12 +39,19 @@ export const getBookingByIdApi = async (id) => {
 
 // ================= EXPORT BOOKINGS =================
 export const exportBookings = async (params = {}) => {
-  const response = await api.get("/bookings/export", {
-    params,
-    responseType: "blob",
-  });
+  try {
+    const response = await api.get("/bookings/export", {
+      params,
+      responseType: "blob",
+    });
 
-  return response;
+    return response;
+  } catch (error) {
+    // With responseType "blob" the server's JSON error arrives as a Blob —
+    // unwrap it so the real message reaches the thunk (same approach as
+    // entryReportService.js).
+    throw await normalizeBlobError(error);
+  }
 };
 // ================= DELETE BOOKING =================
 export const deleteBookingApi = async (id, data) => {

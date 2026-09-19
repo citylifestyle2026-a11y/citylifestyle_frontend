@@ -10,6 +10,7 @@ import { clearAdminState } from "../redux/admin/adminSlice";
 import { resetPassword, resetPasswordState } from "../redux/auth/authSlice";
 import "../assets/CSS/EditAdminModal.css";
 import { showError, showSuccess } from "../utilits/toast";
+import { getErrorText } from "../utilits/apiError";
 
 // Same symbol rule used by Profile.jsx and the backend's
 // resetPasswordValidation, mirrored here for instant feedback.
@@ -204,7 +205,7 @@ export default function EditAdminModal({ admin, onClose, isEditingSelf = true })
 
       onClose();
     } catch (err) {
-      showError(err?.message || "Something went wrong");
+      showError(getErrorText(err, "Something went wrong"));
     }
   };
 

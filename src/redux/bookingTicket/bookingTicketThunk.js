@@ -4,6 +4,7 @@ import {
   updateRegisterUserApi,
   resendTicketApi,
 } from "../../services/bookingTicketService";
+import { getApiErrorMessage, UPLOAD_NETWORK_MESSAGE } from "../../utilits/apiError";
 
 // ================= GET REGISTER USER =================
 export const getRegisterUser = createAsyncThunk(
@@ -13,8 +14,7 @@ export const getRegisterUser = createAsyncThunk(
       return await getRegisterUserApi(ticketId);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message ||
-          "Failed to fetch register user"
+        getApiErrorMessage(error, "Failed to fetch register user")
       );
     }
   }
@@ -31,8 +31,7 @@ export const updateRegisterUser = createAsyncThunk(
       );
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message ||
-          "Failed to update register user"
+        getApiErrorMessage(error, "Failed to update register user", { networkMessage: UPLOAD_NETWORK_MESSAGE })
       );
     }
   }
@@ -46,8 +45,7 @@ export const resendTicket = createAsyncThunk(
       return await resendTicketApi(ticketId);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message ||
-          "Failed to resend ticket"
+        getApiErrorMessage(error, "Failed to resend ticket")
       );
     }
   }

@@ -9,6 +9,7 @@ import {
 import { clearCompanyCategoryState } from "../redux/companyCategory/companyCategorySlice";
 import "../assets/CSS/CreateCompanyCategoryModal.css";
 import { showError, showSuccess } from "../utilits/toast";
+import { getErrorText } from "../utilits/apiError";
 
 const EMPTY_FORM = {
   name: "",
@@ -124,10 +125,7 @@ export default function CreateCompanyCategoryModal({
 
       onClose();
     } catch (err) {
-      const message =
-        err?.message ||
-        err?.response?.data?.message ||
-        (typeof err === "string" ? err : "Something went wrong");
+      const message = getErrorText(err, "Something went wrong");
 
       // Field-specific backend errors are shown directly below their
       // related input instead of as a toast — matches

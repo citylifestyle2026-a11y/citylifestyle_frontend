@@ -16,6 +16,7 @@ import { deleteUser, getUsers } from '../redux/user/userThunk';
 import { showError, showSuccess } from "../utilits/toast";
 import { clearUserState } from "../redux/user/userSlice";
 import { Link } from "react-router-dom";
+import { getErrorText } from "../utilits/apiError";
 const LOGO_AVATAR = "https://ui-avatars.com/api/?name=SA&background=17a2b8&color=fff&bold=true";
 
 // Options for the "rows per page" select. Lives in the page (not inside
@@ -171,7 +172,7 @@ export default function User() {
 
       handleCloseDeleteModal();
     } catch (err) {
-      showError(err.message || "Failed to delete user");
+      showError(getErrorText(err, "Failed to delete user"));
     }
   };
 

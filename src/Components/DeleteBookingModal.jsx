@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import "../assets/CSS/DeleteBookingModal.css";
 import { deleteBooking } from "../redux/booking/bookingThunk";
 import { showError, showSuccess } from "../utilits/toast";
+import { getErrorText } from "../utilits/apiError";
 
 export default function DeleteBookingModal({ bookingId,
   userName,
@@ -39,7 +40,7 @@ export default function DeleteBookingModal({ bookingId,
       onClose();
       onSuccess?.();
     } else {
-      showError(result.payload?.message || "Failed to delete booking.");
+      showError(getErrorText(result.payload, "Failed to delete booking."));
     }
   };
 

@@ -7,6 +7,7 @@ import {
   updateEventApi,
   deleteEventApi,
 } from "../../services/eventService";
+import { getApiErrorMessage, UPLOAD_NETWORK_MESSAGE } from "../../utilits/apiError";
 
 // ================= CREATE EVENT =================
 export const createEvent = createAsyncThunk(
@@ -17,7 +18,7 @@ export const createEvent = createAsyncThunk(
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to create event"
+        getApiErrorMessage(error, "Failed to create event", { networkMessage: UPLOAD_NETWORK_MESSAGE })
       );
     }
   }
@@ -32,7 +33,7 @@ export const getEventById = createAsyncThunk(
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to fetch event"
+        getApiErrorMessage(error, "Failed to fetch event")
       );
     }
   }
@@ -45,7 +46,7 @@ export const getAllEvents = createAsyncThunk(
       return await getAllEventsApi(params);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to fetch events"
+        getApiErrorMessage(error, "Failed to fetch events")
       );
     }
   }
@@ -59,7 +60,7 @@ export const updateEvent = createAsyncThunk(
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to update event"
+        getApiErrorMessage(error, "Failed to update event", { networkMessage: UPLOAD_NETWORK_MESSAGE })
       );
     }
   }
@@ -76,7 +77,7 @@ export const deleteEvent = createAsyncThunk(
       return await deleteEventApi(id, { email, password });
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to delete event"
+        getApiErrorMessage(error, "Failed to delete event")
       );
     }
   }
@@ -90,7 +91,7 @@ export const changeEventStatus = createAsyncThunk(
       return await changeEventStatusApi(id);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to change status"
+        getApiErrorMessage(error, "Failed to change status")
       );
     }
   }

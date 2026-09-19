@@ -5,6 +5,7 @@ import {
   updateUserApi,
   deleteUserApi,
 } from "../../services/userService";
+import { getApiErrorMessage, UPLOAD_NETWORK_MESSAGE } from "../../utilits/apiError";
 
 // ==================== CREATE USER ====================
 export const createUser = createAsyncThunk(
@@ -15,9 +16,7 @@ export const createUser = createAsyncThunk(
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data || {
-          message: "Failed to create user",
-        }
+        getApiErrorMessage(error, "Failed to create user", { networkMessage: UPLOAD_NETWORK_MESSAGE })
       );
     }
   }
@@ -32,7 +31,7 @@ export const getUsers = createAsyncThunk(
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to fetch users"
+        getApiErrorMessage(error, "Failed to fetch users")
       );
     }
   }
@@ -47,7 +46,7 @@ export const updateUser = createAsyncThunk(
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to update user"
+        getApiErrorMessage(error, "Failed to update user", { networkMessage: UPLOAD_NETWORK_MESSAGE })
       );
     }
   }
@@ -62,7 +61,7 @@ export const deleteUser = createAsyncThunk(
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to delete user"
+        getApiErrorMessage(error, "Failed to delete user")
       );
     }
   }

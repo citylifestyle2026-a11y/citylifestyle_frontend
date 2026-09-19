@@ -6,6 +6,7 @@ import {
   updateCompanyCategoryApi,
   deleteCompanyCategoryApi,
 } from "../../services/companyCategoryService";
+import { getApiErrorMessage } from "../../utilits/apiError";
 
 // ================= CREATE COMPANY CATEGORY =================
 export const createCompanyCategory = createAsyncThunk(
@@ -15,7 +16,7 @@ export const createCompanyCategory = createAsyncThunk(
       return await createCompanyCategoryApi(data);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to create company category"
+        getApiErrorMessage(error, "Failed to create company category")
       );
     }
   }
@@ -29,7 +30,7 @@ export const getAllCompanyCategories = createAsyncThunk(
       return await getAllCompanyCategoriesApi(params);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to fetch company categories"
+        getApiErrorMessage(error, "Failed to fetch company categories")
       );
     }
   }
@@ -43,7 +44,7 @@ export const getCompanyCategoryById = createAsyncThunk(
       return await getCompanyCategoryByIdApi(id);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to fetch company category"
+        getApiErrorMessage(error, "Failed to fetch company category")
       );
     }
   }
@@ -57,7 +58,7 @@ export const updateCompanyCategory = createAsyncThunk(
       return await updateCompanyCategoryApi(id, data);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to update company category"
+        getApiErrorMessage(error, "Failed to update company category")
       );
     }
   }
@@ -71,7 +72,7 @@ export const deleteCompanyCategory = createAsyncThunk(
       return await deleteCompanyCategoryApi(id);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to delete company category"
+        getApiErrorMessage(error, "Failed to delete company category")
       );
     }
   }

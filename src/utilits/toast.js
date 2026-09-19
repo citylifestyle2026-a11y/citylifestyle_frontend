@@ -10,7 +10,9 @@ export const showSuccess = (message) => {
 export const showError = (message) => {
   toast.error(message, {
     position: "top-right",
-    autoClose: 3000,
+    // Real server messages are longer than the old fixed texts, so give
+    // them a little more time on screen than success toasts.
+    autoClose: 6000,
     // The same error text (e.g. two requests failing with "Unable to reach
     // the server") is shown once while it is on screen, instead of
     // stacking identical toasts.
