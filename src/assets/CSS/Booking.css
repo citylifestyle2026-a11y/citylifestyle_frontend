@@ -94,6 +94,13 @@
 
 
 
+.bookingPage-headerActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .bookingPage-createBtn {
   display: flex;
   align-items: center;
@@ -118,6 +125,27 @@
 .bookingPage-createBtnIcon {
   font-size: 15px;
   line-height: 1;
+}
+
+.bookingPage-importBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #ffffff;
+  color: var(--admin-accent);
+  border: 1.5px solid var(--admin-accent);
+  border-radius: 8px;
+  padding: 12px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+  white-space: nowrap;
+}
+
+.bookingPage-importBtn:hover {
+  background-color: #f4f2ff;
+  transform: translateY(-1px);
 }
 
 .bookingPage-filterCard {

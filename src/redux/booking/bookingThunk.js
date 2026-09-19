@@ -2,6 +2,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 
 import {
   createBookingApi,
+  importBookingsCsvApi,
   getAllBookingsApi,
   getBookingByIdApi,
   deleteBookingApi,
@@ -17,6 +18,26 @@ export const createBooking = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || "Failed to create booking"
+      );
+    }
+  }
+);
+
+// ================= BULK IMPORT BOOKINGS (CSV) =================
+// `file` is the raw browser File selected in BulkImportBookingModal.
+// Resolves with the backend's { totalRows, successCount, failureCount,
+// results } summary on both a fully- and a partially-successful import
+// (the API itself always responds 200 as long as the file/rows were
+// processed at all — a per-row failure is reported inside `results`,
+// not as an HTTP error), so the modal can render success/failure per row.
+export const importBookingsCsv = createAsyncThunk(
+  "booking/importBookingsCsv",
+  async (file, thunkAPI) => {
+    try {
+      return await importBookingsCsvApi(file);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Failed to import bookings"
       );
     }
   }

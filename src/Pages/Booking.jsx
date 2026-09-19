@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import '../assets/CSS/Booking.css';
 import CreateBookingModal from "../Components/CreateBookingModal";
+import BulkImportBookingModal from "../Components/BulkImportBookingModal";
 import ResendTicketModal from "../Components/ResendTicketModal";
 import DeleteBookingModal from "../Components/DeleteBookingModal";
 import { DateRange } from 'react-date-range';
@@ -100,6 +101,7 @@ const Booking = () => {
   const pinnedActionIdRef = useRef(null);
   const [activePage, setActivePage] = useState(1);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [resendTarget, setResendTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const { events } = useSelector((state) => state.event);
@@ -433,13 +435,22 @@ const Booking = () => {
           </div>
         }
         actions={
-          <button
-            type="button"
-            className="bookingPage-createBtn"
-            onClick={() => setIsCreateModalOpen(true)}
-          >
-            <span className="bookingPage-createBtnIcon">+</span> Create Booking
-          </button>
+          <div className="bookingPage-headerActions">
+            <button
+              type="button"
+              className="bookingPage-importBtn"
+              onClick={() => setIsImportModalOpen(true)}
+            >
+              Import CSV
+            </button>
+            <button
+              type="button"
+              className="bookingPage-createBtn"
+              onClick={() => setIsCreateModalOpen(true)}
+            >
+              <span className="bookingPage-createBtnIcon">+</span> Create Booking
+            </button>
+          </div>
         }
       />
       {/* booking filter */}
@@ -860,6 +871,23 @@ const Booking = () => {
                 }}
               >
                 <CreateBookingModal onSuccess={fetchBookings} onClose={() => setIsCreateModalOpen(false)} />
+              </div>
+            )}
+
+            {isImportModalOpen && (
+              <div
+                tabIndex={-1}
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") {
+                    setIsImportModalOpen(false);
+                  }
+                }}
+              >
+                <BulkImportBookingModal
+                  onSuccess={fetchBookings}
+                  onClose={() => setIsImportModalOpen(false)}
+                />
               </div>
             )}
 

@@ -1,0 +1,155 @@
+/* ================= BULK IMPORT BOOKING MODAL =================
+   Reuses CreateBookingModal.css's bookingCreate* classes for the
+   overlay/header/footer (imported alongside this file in
+   BulkImportBookingModal.jsx) so the two modals look consistent.
+   Only the pieces unique to CSV import — the drop zone, hints, and
+   per-row results list — live here. */
+
+.bulkImportContainer {
+  max-width: 560px;
+}
+
+.bulkImportHint {
+  margin: 4px 0 4px 0;
+  font-size: 13.5px;
+  color: #5b5f6b;
+  line-height: 1.5;
+}
+
+.bulkImportColumnsHint {
+  margin: 0 0 18px 0;
+  font-size: 12.5px;
+  color: #7a7e88;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.bulkImportColumnsHint code {
+  background-color: #f3f4f7;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #3a3d46;
+}
+
+.bulkImportDropZone {
+  border: 2px dashed #d7d9e0;
+  border-radius: 12px;
+  padding: 28px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+  position: relative;
+}
+
+.bulkImportDropZone:hover {
+  border-color: #6c63ff;
+  background-color: #f8f8ff;
+}
+
+.bulkImportDropIcon {
+  font-size: 28px;
+  color: #6c63ff;
+}
+
+.bulkImportDropText {
+  font-size: 14px;
+  color: #7a7e88;
+}
+
+.bulkImportFileName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2f3037;
+  word-break: break-all;
+  text-align: center;
+}
+
+.bulkImportFileInput {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.bulkImportResults {
+  margin-top: 18px;
+}
+
+.bulkImportSummary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 12px;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.bulkImportSummaryTotal {
+  color: #3a3d46;
+}
+
+.bulkImportSummarySuccess {
+  color: #1f8a4c;
+}
+
+.bulkImportSummaryFail {
+  color: #c62828;
+}
+
+.bulkImportSummaryDuplicate {
+  color: #b8860b;
+}
+
+.bulkImportResultList {
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid #ececf1;
+  border-radius: 10px;
+}
+
+.bulkImportResultRow {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 12px;
+  font-size: 12.5px;
+  border-bottom: 1px solid #f0f0f4;
+}
+
+.bulkImportResultRow:last-child {
+  border-bottom: none;
+}
+
+.bulkImportResultRow--success {
+  background-color: #f2fbf5;
+  color: #1f8a4c;
+}
+
+.bulkImportResultRow--fail {
+  background-color: #fdf3f3;
+  color: #c62828;
+}
+
+.bulkImportResultRow--duplicate {
+  background-color: #fdf8ec;
+  color: #9a6b00;
+}
+
+.bulkImportResultRowNumber {
+  font-weight: 700;
+}
+
+.bulkImportActions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  width: 100%;
+  flex-wrap: wrap;
+}
