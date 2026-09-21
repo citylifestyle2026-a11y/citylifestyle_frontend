@@ -7,6 +7,11 @@ import { clearAdminState } from "../redux/admin/adminSlice";
 import "../assets/CSS/EditAdminModal.css";
 import { showError, showSuccess } from "../utilits/toast";
 import { getErrorText } from "../utilits/apiError";
+import {
+  isValidMobileNumber,
+  toLocalMobileNumber,
+  LOCAL_MOBILE_ERROR_MESSAGE,
+} from "../utilits/mobileNumber";
 
 // Create-only modal for the Admin Management page — Super-Admin-only
 // (Pages/Admin.jsx only ever renders this for a logged-in admin whose
@@ -72,8 +77,8 @@ export default function CreateAdminModal({ onClose }) {
 
     if (!formData.mobile.trim()) {
       errors.mobile = "Mobile number is required.";
-    } else if (!/^\d{10}$/.test(formData.mobile.trim())) {
-      errors.mobile = "Enter a valid 10-digit mobile number.";
+    } else if (!isValidMobileNumber(formData.mobile)) {
+      errors.mobile = LOCAL_MOBILE_ERROR_MESSAGE;
     }
 
     if (!formData.password) {
@@ -104,7 +109,8 @@ export default function CreateAdminModal({ onClose }) {
         createAdmin({
           name: formData.name.trim(),
           email: formData.email.trim(),
-          mobile: formData.mobile.trim(),
+          // 10 digits, whether or not 91 / +91 was typed.
+          mobile: toLocalMobileNumber(formData.mobile),
           password: formData.password,
         })
       ).unwrap();
@@ -183,7 +189,7 @@ export default function CreateAdminModal({ onClose }) {
             <input
               type="text"
               className="fieldInput"
-              placeholder="Mobile Number"
+              placeholder="Mobile Number (91 optional)"
               name="mobile"
               value={formData.mobile}
               onChange={handleChange}

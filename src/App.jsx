@@ -51,6 +51,13 @@ const privateRoutes = [
   "/admin",
   "/contact-list",
   "/company-categories",
+  // Staff login page — City Lifestyle branding too.
+  "/login",
+  // Public ticket-registration link opened from WhatsApp (/r/:token).
+  // It is a public page, but it belongs to City Lifestyle (the event
+  // tickets), not City Toppers — so it gets the City Lifestyle favicon
+  // and title. The trailing slash keeps it from matching other routes.
+  "/r/",
 ];
 
 function SiteMetaHandler() {

@@ -4,7 +4,7 @@ import { FaTimes, FaFileCsv } from "react-icons/fa";
 import "../assets/CSS/BulkImportBookingModal.css";
 import { importBookingsCsv } from "../redux/booking/bookingThunk";
 import { clearImportResult } from "../redux/booking/bookingSlice";
-import { showError, showSuccess } from "../utilits/toast";
+import { showError, showSuccess, showWarning } from "../utilits/toast";
 
 // ================= BULK IMPORT BOOKING MODAL =================
 // Lets an admin pick a .csv file and import bookings from it, one row
@@ -69,11 +69,35 @@ export default function BulkImportBookingModal({ onClose, onSuccess }) {
         importBookingsCsv(selectedFile)
       ).unwrap();
 
-      showSuccess(response.message || "CSV processed successfully.");
+      // The API answers HTTP 200 even when rows were skipped/failed (the
+      // per-row outcome is in `data.results`), so the toast has to be
+      // chosen from the counts — showing "success" unconditionally told
+      // the admin everything was imported when nothing was.
+      const summary = response?.data || {};
+      const created = summary.successCount || 0;
+      const duplicates = summary.duplicateCount || 0;
+      const failedOther = (summary.failureCount || 0) - duplicates;
+      const message = response?.message || "CSV processed.";
 
-      // Refresh the bookings table behind the modal so newly created
-      // bookings show up immediately, same as CreateBookingModal does.
-      onSuccess();
+      if (created === 0) {
+        // Nothing was created: all rows are duplicates and/or invalid.
+        showError(
+          duplicates > 0 && failedOther === 0
+            ? `No bookings created — all ${duplicates} row(s) are duplicates. ${message}`
+            : message
+        );
+      } else if (duplicates > 0 || failedOther > 0) {
+        // Some rows created, some skipped/failed.
+        showWarning(message);
+      } else {
+        showSuccess(message);
+      }
+
+      // Refresh the bookings table behind the modal only when something
+      // was actually created.
+      if (created > 0) {
+        onSuccess();
+      }
     } catch (err) {
       showError(
         typeof err === "string" ? err : err?.message || "Failed to import bookings."
@@ -114,16 +138,19 @@ export default function BulkImportBookingModal({ onClose, onSuccess }) {
         <p className="bulkImportHint">
           Upload a CSV file to create bookings line by line. Each successful
           row also gets its registration link sent automatically, just like
-          a normal booking. If a row matches an existing booking (same
-          event, ticket type, mobile number, quantity &amp; amount) — including
-          re-uploading the same file — it is skipped automatically so
-          tickets are never duplicated.
+          a normal booking. If a row's mobile number already has a booking
+          for the same event &amp; ticket type — even with a different name,
+          and whether the number is written with or without 91 — it is
+          skipped as a duplicate (this includes re-uploading the same
+          file), so tickets are never duplicated.
         </p>
         <p className="bulkImportColumnsHint">
           Columns: <code>eventId</code> or <code>eventName</code>,{" "}
           <code>ticketTypeId</code> or <code>ticketTypeName</code>,{" "}
           <code>quantity, amount, name, mobileNumber, email, discount, remark</code>.
           Event/Ticket names must match exactly (not case-sensitive).{" "}
+          <code>mobileNumber</code> can be 10 digits or with 91 (e.g.{" "}
+          <code>9876543210</code> or <code>919876543210</code>).{" "}
           <code>amount</code>, <code>email</code>, <code>discount</code> and{" "}
           <code>remark</code> can be left blank — a blank amount is filled in
           automatically from the ticket price (× quantity, minus discount).

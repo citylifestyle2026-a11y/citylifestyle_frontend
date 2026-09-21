@@ -7,6 +7,12 @@ import { clearBookingState } from "../redux/booking/bookingSlice";
 import { getAllEvents } from '../redux/event/eventThunk';
 import { getAllTicketTypes } from '../redux/ticketType/ticketTypeThunk'
 import { showError, showSuccess } from "../utilits/toast";
+import {
+  isValidMobileNumber,
+  MOBILE_ERROR_MESSAGE,
+  normalizeMobileNumber,
+  sanitizeMobileInput,
+} from "../utilits/mobileNumber";
 const initialFormData = {
   eventId: "",
   ticketType: "",
@@ -59,8 +65,9 @@ export default function CreateBookingModal({ onClose, onSuccess }) {
       errors.name = "Name is invalid.";
     }
 
-    if (!/^[6-9]\d{9}$/.test(formData.mobile))
-      errors.mobile = "Please enter a valid mobile number.";
+    // Valid with OR without 91 (9876543210 / 919876543210).
+    if (!isValidMobileNumber(formData.mobile))
+      errors.mobile = MOBILE_ERROR_MESSAGE;
 
     if (
       formData.email &&
@@ -237,7 +244,8 @@ export default function CreateBookingModal({ onClose, onSuccess }) {
       quantity: Number(formData.qty),
       amount: Number(totalPay),
       name: formData.name.trim(),
-      mobileNumber: formData.mobile.trim(),
+      // Always "91" + 10 digits, whether or not the admin typed the 91.
+      mobileNumber: normalizeMobileNumber(formData.mobile),
       email: formData.email.trim(),
       discount: Number(formData.discount),
       remark: formData.remark.trim(),
@@ -413,11 +421,16 @@ export default function CreateBookingModal({ onClose, onSuccess }) {
               Mobile Number <span className="bookingCreateRequired">*</span>
             </label>
             <input
-              type="number"
+              type="tel"
+              inputMode="numeric"
               className="bookingCreateInput"
-              placeholder="Mobile Number"
+              placeholder="Mobile Number (91 optional)"
               value={formData.mobile}
-              onChange={handleChange("mobile")}
+              onChange={(e) =>
+                handleChange("mobile")({
+                  target: { value: sanitizeMobileInput(e.target.value) },
+                })
+              }
             />
             {fieldErrors.mobile && (
               <p className="bookingCreateFieldError">{fieldErrors.mobile}</p>

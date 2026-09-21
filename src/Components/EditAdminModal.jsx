@@ -11,6 +11,11 @@ import { resetPassword, resetPasswordState } from "../redux/auth/authSlice";
 import "../assets/CSS/EditAdminModal.css";
 import { showError, showSuccess } from "../utilits/toast";
 import { getErrorText } from "../utilits/apiError";
+import {
+  isValidMobileNumber,
+  toLocalMobileNumber,
+  LOCAL_MOBILE_ERROR_MESSAGE,
+} from "../utilits/mobileNumber";
 
 // Same symbol rule used by Profile.jsx and the backend's
 // resetPasswordValidation, mirrored here for instant feedback.
@@ -160,8 +165,8 @@ export default function EditAdminModal({ admin, onClose, isEditingSelf = true })
 
     if (!formData.mobile.trim()) {
       errors.mobile = "Mobile number is required.";
-    } else if (!/^\d{10}$/.test(formData.mobile.trim())) {
-      errors.mobile = "Enter a valid 10-digit mobile number.";
+    } else if (!isValidMobileNumber(formData.mobile)) {
+      errors.mobile = LOCAL_MOBILE_ERROR_MESSAGE;
     }
 
     if (!formData.email.trim()) {
@@ -185,7 +190,8 @@ export default function EditAdminModal({ admin, onClose, isEditingSelf = true })
       const payload = {
         name: formData.name.trim(),
         email: formData.email.trim(),
-        mobile: formData.mobile.trim(),
+        // 10 digits, whether or not 91 / +91 was typed.
+        mobile: toLocalMobileNumber(formData.mobile),
       };
 
       if (isEditingSelf) {
@@ -269,7 +275,7 @@ export default function EditAdminModal({ admin, onClose, isEditingSelf = true })
             <input
               type="text"
               className="fieldInput"
-              placeholder="Mobile Number"
+              placeholder="Mobile Number (91 optional)"
               name="mobile"
               value={formData.mobile}
               onChange={handleChange}

@@ -7,6 +7,12 @@ import {
   updateRegisterUser,
 } from "../redux/bookingTicket/bookingTicketThunk";
 import { showError, showSuccess } from "../utilits/toast";
+import {
+  isValidMobileNumber,
+  MOBILE_ERROR_MESSAGE,
+  normalizeMobileNumber,
+  sanitizeMobileInput,
+} from "../utilits/mobileNumber";
 import { getBookingById } from "../redux/booking/bookingThunk";
 
 export default function BookingUserModal({ onClose, ticketId, onSuccess }) {
@@ -101,8 +107,10 @@ export default function BookingUserModal({ onClose, ticketId, onSuccess }) {
     if (!/^[A-Za-z ]+$/.test(formData.name))
       return "Name is invalid.";
 
-    if (!/^[6-9]\d{9}$/.test(formData.mobileNumber))
-      return "Please enter valid mobile number.";
+    // Valid with OR without 91 — the saved attendee number comes back as
+    // 91XXXXXXXXXX, so the old 10-digit-only check rejected it on edit.
+    if (!isValidMobileNumber(formData.mobileNumber))
+      return MOBILE_ERROR_MESSAGE;
 
     if (
       formData.email &&
@@ -127,7 +135,7 @@ export default function BookingUserModal({ onClose, ticketId, onSuccess }) {
     payload.append("name", formData.name.trim());
     payload.append(
       "mobileNumber",
-      formData.mobileNumber.trim()
+      normalizeMobileNumber(formData.mobileNumber)
     );
     payload.append(
       "email",
@@ -251,14 +259,15 @@ export default function BookingUserModal({ onClose, ticketId, onSuccess }) {
               Mobile Number <span className="bookingUserRequired">*</span>
             </label>
             <input
-              type="text"
+              type="tel"
+              inputMode="numeric"
               className="bookingUserInput"
-              placeholder="Mobile Number"
+              placeholder="Mobile Number (91 optional)"
               value={formData.mobileNumber}
               onChange={(e) =>
                 setFormData((prev) => ({
                   ...prev,
-                  mobileNumber: e.target.value,
+                  mobileNumber: sanitizeMobileInput(e.target.value),
                 }))
               }
             />

@@ -5,6 +5,12 @@ import "../assets/CSS/RegisterUsers.css";
 import { getBookingById } from "../redux/booking/bookingThunk";
 import { updateRegisterUser } from "../redux/bookingTicket/bookingTicketThunk";
 import { showError, showSuccess } from "../utilits/toast";
+import {
+  isValidMobileNumber,
+  MOBILE_ERROR_MESSAGE,
+  normalizeMobileNumber,
+  sanitizeMobileInput,
+} from "../utilits/mobileNumber";
 
 // ================= LAYOUT PARITY WITH PublicRegisterUser.jsx =================
 // This component intentionally mirrors PublicRegisterUser.jsx's structure —
@@ -87,8 +93,9 @@ const getFieldErrors = (form) => {
     errors.name = "Name is invalid.";
   }
 
-  if (!/^[6-9]\d{9}$/.test(form.mobileNumber)) {
-    errors.mobileNumber = "Please enter valid mobile number.";
+  // Valid with OR without 91 (9876543210 / 919876543210).
+  if (!isValidMobileNumber(form.mobileNumber)) {
+    errors.mobileNumber = MOBILE_ERROR_MESSAGE;
   }
 
   if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
@@ -139,6 +146,11 @@ const RegisterUsers = () => {
   // Which ticket is currently submitting, so only that slot's Submit
   // button shows a loading state — other pending forms stay usable.
   const [submittingTicketId, setSubmittingTicketId] = useState(null);
+  // Which fields of each slot were already visited (left). The Submit
+  // button stays disabled while the form is invalid, so a submit-time
+  // error could never appear — errors are therefore also shown as soon
+  // as a field is left (or a mobile number is fully typed).
+  const [touchedByKey, setTouchedByKey] = useState({});
 
   useEffect(() => {
     if (id) {
@@ -149,6 +161,14 @@ const RegisterUsers = () => {
   const getFormState = (ticketId) => formStates[ticketId] || emptyForm;
   const getFieldErrorsForTicket = (ticketId) =>
     fieldErrorsByKey[ticketId] || {};
+
+  const markTouched = (ticketId, field) => {
+    setTouchedByKey((prev) =>
+      prev[ticketId]?.[field]
+        ? prev
+        : { ...prev, [ticketId]: { ...(prev[ticketId] || {}), [field]: true } }
+    );
+  };
 
   const updateFormField = (ticketId, field, value) => {
     setFormStates((prev) => ({
@@ -211,7 +231,9 @@ const RegisterUsers = () => {
 
     const payload = new FormData();
     payload.append("name", form.name.trim());
-    payload.append("mobileNumber", form.mobileNumber.trim());
+    // Always "91" + 10 digits, whether or not the user typed the 91
+    // (previously a typed 91 was prefixed a second time).
+    payload.append("mobileNumber", normalizeMobileNumber(form.mobileNumber));
     payload.append("email", form.email.trim());
     if (form.profileImage) {
       payload.append("profileImage", form.profileImage);
@@ -430,7 +452,21 @@ const RegisterUsers = () => {
 
               const form = getFormState(ticket._id);
               const fieldErrors = getFieldErrorsForTicket(ticket._id);
-              const isFormValid = Object.keys(getFieldErrors(form)).length === 0;
+              const liveErrors = getFieldErrors(form);
+              const isFormValid = Object.keys(liveErrors).length === 0;
+              const touched = touchedByKey[ticket._id] || {};
+              // Submit/server errors first, otherwise the live check once
+              // the field was left (mobile: also once 10+ digits typed).
+              const shownErrors = {
+                name: fieldErrors.name || (touched.name ? liveErrors.name : undefined),
+                mobileNumber:
+                  fieldErrors.mobileNumber ||
+                  (touched.mobileNumber || form.mobileNumber.length >= 10
+                    ? liveErrors.mobileNumber
+                    : undefined),
+                email:
+                  fieldErrors.email || (touched.email ? liveErrors.email : undefined),
+              };
               const isSubmitting = submittingTicketId === ticket._id;
               const photoInputId = `bookingRegister-photo-${ticket._id}`;
 
@@ -479,11 +515,12 @@ const RegisterUsers = () => {
                           onChange={(e) =>
                             updateFormField(ticket._id, "name", e.target.value)
                           }
+                          onBlur={() => markTouched(ticket._id, "name")}
                           disabled={isSubmitting}
                         />
-                        {fieldErrors.name && (
+                        {shownErrors.name && (
                           <p className="bookingRegister-fieldError">
-                            {fieldErrors.name}
+                            {shownErrors.name}
                           </p>
                         )}
                       </div>
@@ -493,21 +530,21 @@ const RegisterUsers = () => {
                           type="tel"
                           inputMode="numeric"
                           className="bookingRegister-input"
-                          placeholder="Mobile No."
+                          placeholder="Mobile No. (91 optional)"
                           value={form.mobileNumber}
-                          maxLength={10}
                           onChange={(e) =>
                             updateFormField(
                               ticket._id,
                               "mobileNumber",
-                              e.target.value.replace(/\D/g, "").slice(0, 10)
+                              sanitizeMobileInput(e.target.value)
                             )
                           }
+                          onBlur={() => markTouched(ticket._id, "mobileNumber")}
                           disabled={isSubmitting}
                         />
-                        {fieldErrors.mobileNumber && (
+                        {shownErrors.mobileNumber && (
                           <p className="bookingRegister-fieldError">
-                            {fieldErrors.mobileNumber}
+                            {shownErrors.mobileNumber}
                           </p>
                         )}
                       </div>
@@ -521,11 +558,12 @@ const RegisterUsers = () => {
                           onChange={(e) =>
                             updateFormField(ticket._id, "email", e.target.value)
                           }
+                          onBlur={() => markTouched(ticket._id, "email")}
                           disabled={isSubmitting}
                         />
-                        {fieldErrors.email && (
+                        {shownErrors.email && (
                           <p className="bookingRegister-fieldError">
-                            {fieldErrors.email}
+                            {shownErrors.email}
                           </p>
                         )}
                       </div>

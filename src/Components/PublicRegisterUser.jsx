@@ -3,6 +3,12 @@ import { useParams } from "react-router-dom";
 import "../assets/CSS/PublicRegisterUser.css";
 import { showError, showSuccess } from "../utilits/toast";
 import {
+  isValidMobileNumber,
+  MOBILE_ERROR_MESSAGE,
+  normalizeMobileNumber,
+  sanitizeMobileInput,
+} from "../utilits/mobileNumber";
+import {
   getPublicRegistrationDetailsApi,
   submitPublicRegistrationApi,
 } from "../services/publicRegistrationService";
@@ -92,8 +98,9 @@ const getFieldErrors = (form) => {
     errors.name = "Name is invalid.";
   }
 
-  if (!/^[6-9]\d{9}$/.test(form.mobileNumber)) {
-    errors.mobileNumber = "Please enter valid mobile number.";
+  // Valid with OR without 91 (9876543210 / 919876543210).
+  if (!isValidMobileNumber(form.mobileNumber)) {
+    errors.mobileNumber = MOBILE_ERROR_MESSAGE;
   }
 
   if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
@@ -101,6 +108,19 @@ const getFieldErrors = (form) => {
   }
 
   return errors;
+};
+
+// Maps a backend validation message to the field it is about, so it is
+// shown right under that field instead of only as a toast. Backend
+// responses carry a plain `message` string, so this is keyword based; a
+// message that does not clearly belong to a field (link expired, ticket
+// already registered, server error...) still falls back to the toast.
+const mapBackendMessageToField = (message) => {
+  if (!message) return null;
+  if (/mobile/i.test(message)) return "mobileNumber";
+  if (/email/i.test(message)) return "email";
+  if (/\bname\b/i.test(message)) return "name";
+  return null;
 };
 
 // Maps a failed axios call to one clean, customer-facing message — never
@@ -161,6 +181,11 @@ const PublicRegisterUser = () => {
   // up registering first.
   const [formStates, setFormStates] = useState({});
   const [fieldErrorsByKey, setFieldErrorsByKey] = useState({});
+  // Which fields of each slot the customer has already visited (left).
+  // The Submit button stays disabled while the form is invalid, so a
+  // submit-time error could never appear — errors are therefore also shown
+  // as soon as a field is left (or a mobile number is fully typed).
+  const [touchedByKey, setTouchedByKey] = useState({});
   const [submittingKey, setSubmittingKey] = useState(null);
 
   const loadRegistrationDetails = useCallback(async () => {
@@ -197,6 +222,14 @@ const PublicRegisterUser = () => {
 
   const getForm = (key) => formStates[key] || emptyForm;
   const getFieldErrorsForKey = (key) => fieldErrorsByKey[key] || {};
+
+  const markTouched = (key, field) => {
+    setTouchedByKey((prev) =>
+      prev[key]?.[field]
+        ? prev
+        : { ...prev, [key]: { ...(prev[key] || {}), [field]: true } }
+    );
+  };
 
   const updateField = (key, field, value) => {
     setFormStates((prev) => ({
@@ -263,7 +296,9 @@ const PublicRegisterUser = () => {
 
     const payload = new FormData();
     payload.append("name", form.name.trim());
-    payload.append("mobileNumber", form.mobileNumber.trim());
+    // Always "91" + 10 digits, whether or not the user typed the 91
+    // (previously a typed 91 was prefixed a second time).
+    payload.append("mobileNumber", normalizeMobileNumber(form.mobileNumber));
     payload.append("email", form.email.trim());
     if (form.profileImage) {
       payload.append("profileImage", form.profileImage);
@@ -292,16 +327,27 @@ const PublicRegisterUser = () => {
         return next;
       });
     } catch (error) {
-      showError(
-        getFriendlyErrorMessage(
-          error,
-          "Failed to submit your registration. Please try again."
-        )
+      const message = getFriendlyErrorMessage(
+        error,
+        "Failed to submit your registration. Please try again."
       );
-      // Someone may have just filled the last open slot from another
-      // tab/device; resync so this page doesn't keep offering a slot
-      // that no longer exists.
-      await loadRegistrationDetails();
+      const field =
+        error?.response?.status === 400 ? mapBackendMessageToField(message) : null;
+
+      if (field) {
+        // Backend validation error for one field — show it under that
+        // field (nothing changed on the server, so no resync is needed).
+        setFieldErrorsByKey((prev) => ({
+          ...prev,
+          [key]: { ...(prev[key] || {}), [field]: message },
+        }));
+      } else {
+        showError(message);
+        // Someone may have just filled the last open slot from another
+        // tab/device; resync so this page doesn't keep offering a slot
+        // that no longer exists.
+        await loadRegistrationDetails();
+      }
     } finally {
       setSubmittingKey(null);
     }
@@ -438,7 +484,21 @@ const PublicRegisterUser = () => {
 
             const form = getForm(key);
             const fieldErrors = getFieldErrorsForKey(key);
-            const isFormValid = Object.keys(getFieldErrors(form)).length === 0;
+            const liveErrors = getFieldErrors(form);
+            const isFormValid = Object.keys(liveErrors).length === 0;
+            const touched = touchedByKey[key] || {};
+            // Submit/server errors first, otherwise the live check once the
+            // field was left (mobile: also as soon as 10+ digits are typed).
+            const shownErrors = {
+              name: fieldErrors.name || (touched.name ? liveErrors.name : undefined),
+              mobileNumber:
+                fieldErrors.mobileNumber ||
+                (touched.mobileNumber || form.mobileNumber.length >= 10
+                  ? liveErrors.mobileNumber
+                  : undefined),
+              email:
+                fieldErrors.email || (touched.email ? liveErrors.email : undefined),
+            };
             const isSubmitting = submittingKey === key;
             const photoInputId = `publicRegister-photo-${key}`;
 
@@ -488,10 +548,11 @@ const PublicRegisterUser = () => {
                         placeholder="Name"
                         value={form.name}
                         onChange={(e) => updateField(key, "name", e.target.value)}
+                        onBlur={() => markTouched(key, "name")}
                         disabled={isSubmitting}
                       />
-                      {fieldErrors.name && (
-                        <p className="publicRegister-fieldError">{fieldErrors.name}</p>
+                      {shownErrors.name && (
+                        <p className="publicRegister-fieldError">{shownErrors.name}</p>
                       )}
                     </div>
 
@@ -500,21 +561,21 @@ const PublicRegisterUser = () => {
                         type="tel"
                         inputMode="numeric"
                         className="publicRegister-input"
-                        placeholder="Mobile No."
+                        placeholder="Mobile No. (91 optional)"
                         value={form.mobileNumber}
-                        maxLength={10}
                         onChange={(e) =>
                           updateField(
                             key,
                             "mobileNumber",
-                            e.target.value.replace(/\D/g, "").slice(0, 10)
+                            sanitizeMobileInput(e.target.value)
                           )
                         }
+                        onBlur={() => markTouched(key, "mobileNumber")}
                         disabled={isSubmitting}
                       />
-                      {fieldErrors.mobileNumber && (
+                      {shownErrors.mobileNumber && (
                         <p className="publicRegister-fieldError">
-                          {fieldErrors.mobileNumber}
+                          {shownErrors.mobileNumber}
                         </p>
                       )}
                     </div>
@@ -526,10 +587,11 @@ const PublicRegisterUser = () => {
                         placeholder="Email"
                         value={form.email}
                         onChange={(e) => updateField(key, "email", e.target.value)}
+                        onBlur={() => markTouched(key, "email")}
                         disabled={isSubmitting}
                       />
-                      {fieldErrors.email && (
-                        <p className="publicRegister-fieldError">{fieldErrors.email}</p>
+                      {shownErrors.email && (
+                        <p className="publicRegister-fieldError">{shownErrors.email}</p>
                       )}
                     </div>
                   </div>

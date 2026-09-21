@@ -23,7 +23,9 @@ export const showError = (message) => {
 export const showWarning = (message) => {
   toast.warning(message, {
     position: "top-right",
-    autoClose: 3000,
+    // Warnings carry more text than a plain success (e.g. the CSV import
+    // summary), so they stay on screen as long as an error does.
+    autoClose: 6000,
   });
 };
 

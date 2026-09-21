@@ -6,14 +6,15 @@ import { clearContactState } from "../redux/contact/contactSlice";
 import "../assets/CSS/CreateContactModal.css";
 import { showError, showSuccess } from "../utilits/toast";
 import { getErrorText } from "../utilits/apiError";
+import {
+  isValidMobileNumber,
+  toLocalMobileNumber,
+} from "../utilits/mobileNumber";
 
-// Same "10 digit mobile number" convention already used by
-// CreateUserModal.jsx/EditAdminModal.jsx's `mobile` field — the backend's
-// own check (express-validator's isMobilePhone("en-IN")) is a little more
-// permissive (e.g. accepts a +91 prefix), but this keeps the frontend's
-// field-level message consistent with every other form in the project
-// rather than introducing a different rule just for this one field.
-const isValidWhatsappNumber = (value) => /^\d{10}$/.test(value.trim());
+// Same mobile rule as CreateUserModal.jsx/EditAdminModal.jsx's `mobile`
+// field: 10 digits, with or without 91 / +91 in front (see
+// utilits/mobileNumber.js). The number is always sent as 10 digits.
+const isValidWhatsappNumber = (value) => isValidMobileNumber(value);
 
 const EMPTY_FORM = {
   fullName: "",
@@ -186,7 +187,8 @@ export default function CreateContactModal({
     if (!formData.whatsappNumber.trim()) {
       errors.whatsappNumber = "WhatsApp Number is required.";
     } else if (!isValidWhatsappNumber(formData.whatsappNumber)) {
-      errors.whatsappNumber = "Enter a valid 10-digit WhatsApp number.";
+      errors.whatsappNumber =
+        "Enter a valid 10-digit WhatsApp number (with or without 91).";
     }
 
     if (!formData.companyName.trim()) {
@@ -226,7 +228,7 @@ export default function CreateContactModal({
 
     const payload = {
       fullName: formData.fullName.trim(),
-      whatsappNumber: formData.whatsappNumber.trim(),
+      whatsappNumber: toLocalMobileNumber(formData.whatsappNumber),
       companyName: formData.companyName.trim(),
       designation: formData.designation.trim(),
       address: formData.address.trim(),
@@ -347,7 +349,7 @@ export default function CreateContactModal({
             <input
               type="text"
               className="contactFieldInput"
-              placeholder="WhatsApp Number"
+              placeholder="WhatsApp Number (91 optional)"
               name="whatsappNumber"
               value={formData.whatsappNumber}
               onChange={handleChange}
