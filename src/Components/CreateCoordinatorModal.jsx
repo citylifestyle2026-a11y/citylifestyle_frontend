@@ -203,32 +203,6 @@ export default function CreateCoordinatorModal({
         )}
 
         <div className="coordinatorFormGrid">
-          {/*
-            Chrome autofill trap: these two fields are invisible decoys.
-            Chrome's heuristics grab the FIRST username/password-shaped
-            fields it finds on the page and autofill them with saved
-            credentials. By placing hidden ones first, Chrome fills
-            these instead of the real Email/Password fields below.
-            Keep them mounted (not conditionally rendered) and out of
-            tab order so screen readers / keyboard users skip them.
-          */}
-          <input
-            type="text"
-            name="fakeusername"
-            autoComplete="username"
-            tabIndex={-1}
-            aria-hidden="true"
-            style={{ display: "none" }}
-          />
-          <input
-            type="password"
-            name="fakepassword"
-            autoComplete="new-password"
-            tabIndex={-1}
-            aria-hidden="true"
-            style={{ display: "none" }}
-          />
-
           <div className="coordinatorFieldGroup">
             <label className="coordinatorFieldLabel">
               Name <span className="coordinatorRequired">*</span>
@@ -240,7 +214,6 @@ export default function CreateCoordinatorModal({
               name="name"
               value={formData.name}
               onChange={handleChange}
-              autoComplete="off"
             />
             {formErrors.name && <p className="coordinatorFieldError">{formErrors.name}</p>}
           </div>
@@ -257,7 +230,6 @@ export default function CreateCoordinatorModal({
               name="mobile"
               value={formData.mobile}
               onChange={handleChange}
-              autoComplete="off"
             />
             {formErrors.mobile && <p className="coordinatorFieldError">{formErrors.mobile}</p>}
           </div>
@@ -271,7 +243,6 @@ export default function CreateCoordinatorModal({
               name="email"
               value={formData.email}
               onChange={handleChange}
-              autoComplete="off"
             />
             {formErrors.email && <p className="coordinatorFieldError">{formErrors.email}</p>}
           </div>
@@ -303,7 +274,6 @@ export default function CreateCoordinatorModal({
               name="password"
               value={formData.password}
               onChange={handleChange}
-              autoComplete="new-password"
             />
             {formErrors.password && (
               <p className="coordinatorFieldError">{formErrors.password}</p>
@@ -322,7 +292,6 @@ export default function CreateCoordinatorModal({
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
-              autoComplete="new-password"
             />
             {formErrors.confirmPassword && (
               <p className="coordinatorFieldError">{formErrors.confirmPassword}</p>

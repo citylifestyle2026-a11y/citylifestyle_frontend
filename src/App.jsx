@@ -26,11 +26,9 @@ import "react-toastify/dist/ReactToastify.css";
 import Profile from "./Pages/Profile";
 import Admin from "./Pages/Admin";
 import ContactList from "./Pages/ContactList";
-import CompanyCategory from "./Pages/CompanyCategory";
-import GuestList from "./Pages/GuestList";
+import EventHistory from "./Pages/EventHistory";
 import EditionList from "./Pages/EditionList";
-import Coordinator from "./Pages/Coordinator";
-import NominationList from "./Pages/NominationList";
+import CompanyCategory from "./Pages/CompanyCategory";
 import TopProgressLoader from "./Components/TopProgressLoader";
 
 // Public marketing site pages
@@ -54,13 +52,9 @@ const privateRoutes = [
   "/entry-report",
   "/admin",
   "/contact-list",
-  "/company-categories",
-  // PARV CRM — Phase 1 (Guest Management, admin-only).
-  "/guests",
+  "/event-history",
   "/editions",
-  // PARV CRM — Phase 2 (Coordinator role + Nomination).
-  "/coordinators",
-  "/nominations",
+  "/company-categories",
   // Staff login page — City Lifestyle branding too.
   "/login",
   // Public ticket-registration link opened from WhatsApp (/r/:token).
@@ -135,29 +129,17 @@ function App() {
             <Route path="/register-users/:id" element={<RegisterUsers />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/contact-list" element={<ContactList />} />
+            <Route path="/event-history/:contactId" element={<EventHistory />} />
             <Route path="/company-categories" element={<CompanyCategory />} />
           </Route>
 
           <Route element={<ProtectedRoute adminOnly />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/admin" element={<Admin />} />
-            {/* PARV CRM — Phase 1: Guest/Edition management is admin-only,
-                same as Admin management above. Coordinator's own scoped
-                nomination access (Phase 2) will get its own, non-admin-only
-                route. */}
-            <Route path="/guests" element={<GuestList />} />
+            {/* Edition master data — kept for Contact List's Event
+                History (Edition dropdown), admin-only same as
+                Admin/Dashboard above. */}
             <Route path="/editions" element={<EditionList />} />
-            {/* PARV CRM — Phase 2: Coordinator account management is
-                admin-only, same as Guest/Edition above. */}
-            <Route path="/coordinators" element={<Coordinator />} />
-          </Route>
-
-          {/* PARV CRM — Phase 2: Nomination is shared between Admin
-              (read-only oversight of everyone's nominations) and
-              Coordinator (their own nominations + "Add Nomination") —
-              not adminOnly, but also not a Checker `permission`. */}
-          <Route element={<ProtectedRoute allowRoles={["admin", "coordinator"]} />}>
-            <Route path="/nominations" element={<NominationList />} />
           </Route>
 
           <Route element={<ProtectedRoute permission="Entry Report" />}>

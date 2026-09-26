@@ -13,21 +13,18 @@ import { useSelector } from "react-redux";
 // no corresponding entry in the Checker `permissions` enum at all; it's
 // not "missing a permission", it's "not for this role, ever".
 // A non-admin hitting an adminOnly route is bounced to the one page that
-// role actually has — /entry-report for 'checker', /nominations for the
-// new 'coordinator' role (PARV CRM Phase 2) — rather than /dashboard,
-// since redirecting an already-blocked role back to /dashboard would loop.
+// role actually has — /entry-report for 'checker' — rather than
+// /dashboard, since redirecting an already-blocked role back to
+// /dashboard would loop.
 // IMPORTANT: Login.jsx navigates to "/dashboard" after every successful
 // login regardless of role, relying entirely on this redirect to send a
 // non-admin to the right place — so every non-admin role needs an entry
 // here or it will bounce back to /dashboard and loop.
 //
 // Optional `allowRoles` prop gates a route to a specific set of roles
-// (checked against `role`, not permissions) — e.g.
-// <Route element={<ProtectedRoute allowRoles={["admin", "coordinator"]} />}>
-// Used for routes shared by Admin and Coordinator (e.g. /nominations)
-// that shouldn't be fully `adminOnly` but also aren't Checker
-// `permission`-gated. A role not in the list is sent to the same
-// role-appropriate landing page adminOnly above uses.
+// (checked against `role`, not permissions) — a role not in the list is
+// sent to the same role-appropriate landing page adminOnly above uses.
+// Not currently used by any route, but kept generic for future reuse.
 //
 // Current-user source: prefer the live `profile` (fetched via
 // getProfile() from the backend on app load — always up to date), and
@@ -58,7 +55,9 @@ const ProtectedRoute = ({ permission = null, adminOnly = false, allowRoles = nul
   // Same role -> landing-page mapping used by both adminOnly and
   // allowRoles below, so a blocked role always bounces somewhere it
   // actually has access to, never back into another redirect loop.
-  const roleLandingPage = role === "coordinator" ? "/nominations" : "/entry-report";
+  // 'checker' is the only non-admin role, so this always resolves to
+  // /entry-report.
+  const roleLandingPage = "/entry-report";
 
   if (adminOnly && role !== "admin") {
     return <Navigate to={roleLandingPage} replace />;

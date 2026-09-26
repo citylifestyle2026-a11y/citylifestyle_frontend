@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import {
   FaSearch,
   FaPlus,
@@ -57,6 +58,7 @@ const SORTABLE_COLUMNS = ["fullName", "whatsappNumber", "companyName", "designat
 
 export default function ContactList() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const {
     contacts,
@@ -258,6 +260,17 @@ export default function ContactList() {
     setFormModalMode("edit");
     setIsFormModalOpen(true);
   }, []);
+
+  // Contact List -> Event History (Step 4B) — navigates with the
+  // contact's id; EventHistory.jsx reads it via useParams and loads
+  // that contact's history itself.
+  const handleEventHistoryClick = useCallback(
+    (contact) => {
+      setOpenActionMenuId(null);
+      navigate(`/event-history/${contact._id}`);
+    },
+    [navigate]
+  );
 
   const handleCloseFormModal = () => {
     setIsFormModalOpen(false);
@@ -563,6 +576,14 @@ const sortedReferenceFilterOptions = useMemo(
 
               <button
                 type="button"
+                className="contactAction__item contactAction__itemEventHistory"
+                onClick={() => handleEventHistoryClick(contact)}
+              >
+                Event History
+              </button>
+
+              <button
+                type="button"
                 className="contactAction__item contactAction__itemDelete"
                 onClick={() => handleDeleteClick(contact)}
               >
@@ -579,6 +600,7 @@ const sortedReferenceFilterOptions = useMemo(
     handleToggleActionMenu,
     handleViewClick,
     handleEditClick,
+    handleEventHistoryClick,
     handleDeleteClick,
     referenceContactsByKey,
   ]);

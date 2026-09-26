@@ -23,6 +23,10 @@ const EMPTY_FORM = {
   designation: "",
   address: "",
   companyCategory: "",
+  relationship: "",
+  spouseName: "",
+  spouseMobile: "",
+  profession: "",
 };
 
 export default function CreateContactModal({
@@ -77,6 +81,10 @@ export default function CreateContactModal({
         // contact.service.js's .populate("companyCategory", "name")) —
         // the <select> below needs the bare id.
         companyCategory: editContactData.companyCategory?._id || "",
+        relationship: editContactData.relationship || "",
+        spouseName: editContactData.spouseName || "",
+        spouseMobile: editContactData.spouseMobile || "",
+        profession: editContactData.profession || "",
       });
 
       setReferences(
@@ -100,6 +108,36 @@ export default function CreateContactModal({
       ...prev,
       [name]: value,
     }));
+  };
+
+  // Relationship gets its own handler (instead of the generic
+  // handleChange above) purely to add ONE extra behavior on top of it:
+  // switching FROM "Couple" TO "Single" clears spouseName/spouseMobile/
+  // profession — those fields are about to be hidden, and a value left
+  // sitting in state for a hidden field would otherwise still get sent
+  // on submit (see the payload in handleSubmit below). Their inline
+  // errors are cleared at the same time so a stale "required" message
+  // doesn't reappear if the admin flips back to Couple later without
+  // having retyped anything yet.
+  const handleRelationshipChange = (e) => {
+    const { value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      relationship: value,
+      ...(value !== "Couple"
+        ? { spouseName: "", spouseMobile: "", profession: "" }
+        : {}),
+    }));
+
+    if (value !== "Couple") {
+      setFormErrors((prev) => ({
+        ...prev,
+        spouseName: undefined,
+        spouseMobile: undefined,
+        profession: undefined,
+      }));
+    }
   };
 
   // Adds the staged reference input to the working list. Trimmed and
@@ -203,6 +241,38 @@ export default function CreateContactModal({
       errors.companyCategory = "Company Category is required.";
     }
 
+    // Relationship is required outright, independent of everything
+    // below — mirrors validators/contact.validator.js's `relationship`
+    // rule. No gender is inferred from this value anywhere in this
+    // form.
+    if (!formData.relationship) {
+      errors.relationship = "Relationship is required.";
+    }
+
+    // Couple-only required fields — same conditional rule as the
+    // backend's contact.validator.js (spouseName/spouseMobile/
+    // profession are required for Couple, accepted blank for Single).
+    // These fields are also hidden for Single (see the JSX below), so
+    // in practice they can only be non-empty here if relationship is
+    // currently Couple, or the admin just switched away from Couple —
+    // handleRelationshipChange already clears them in that case.
+    if (formData.relationship === "Couple") {
+      if (!formData.spouseName.trim()) {
+        errors.spouseName = "Spouse Name is required for Couple.";
+      }
+
+      if (!formData.spouseMobile.trim()) {
+        errors.spouseMobile = "Spouse Mobile Number is required for Couple.";
+      } else if (!isValidWhatsappNumber(formData.spouseMobile)) {
+        errors.spouseMobile =
+          "Enter a valid 10-digit Spouse Mobile Number (with or without 91).";
+      }
+
+      if (!formData.profession.trim()) {
+        errors.profession = "Profession is required for Couple.";
+      }
+    }
+
     if (resolvePendingReferences().length === 0) {
       errors.references = "At least one Reference is required.";
     }
@@ -214,6 +284,10 @@ export default function CreateContactModal({
       companyName: errors.companyName,
       designation: errors.designation,
       companyCategory: errors.companyCategory,
+      relationship: errors.relationship,
+      spouseName: errors.spouseName,
+      spouseMobile: errors.spouseMobile,
+      profession: errors.profession,
       references: errors.references,
     }));
 
@@ -234,6 +308,17 @@ export default function CreateContactModal({
       address: formData.address.trim(),
       references: resolvePendingReferences(),
       companyCategory: formData.companyCategory || null,
+      relationship: formData.relationship,
+      // Blank for Single (handleRelationshipChange already clears these
+      // when switching away from Couple, and they're hidden in the JSX
+      // below), populated for Couple. spouseMobile is normalized with
+      // the exact same toLocalMobileNumber used for whatsappNumber
+      // above, so it's stored in the same 10-digit form.
+      spouseName: formData.spouseName.trim(),
+      spouseMobile: formData.spouseMobile.trim()
+        ? toLocalMobileNumber(formData.spouseMobile)
+        : "",
+      profession: formData.profession.trim(),
     };
 
     try {
@@ -427,6 +512,85 @@ export default function CreateContactModal({
             />
             {formErrors.address && <p className="contactFieldError">{formErrors.address}</p>}
           </div>
+
+          <div className="contactFieldGroup">
+            <label className="contactFieldLabel">
+              Relationship <span className="contactRequired">*</span>
+            </label>
+            <select
+              className="contactFieldSelect"
+              name="relationship"
+              value={formData.relationship}
+              onChange={handleRelationshipChange}
+            >
+              <option value="">Select Relationship</option>
+              <option value="Single">Single</option>
+              <option value="Couple">Couple</option>
+            </select>
+            {formErrors.relationship && (
+              <p className="contactFieldError">{formErrors.relationship}</p>
+            )}
+          </div>
+
+          {/* Spouse Name / Spouse Mobile Number / Profession are only
+              shown/collected for Couple — hidden entirely for Single,
+              and their values are already cleared by
+              handleRelationshipChange the moment Couple -> Single
+              happens, so nothing hidden here is ever silently submitted. */}
+          {formData.relationship === "Couple" && (
+            <>
+              <div className="contactFieldGroup">
+                <label className="contactFieldLabel">
+                  Spouse Name <span className="contactRequired">*</span>
+                </label>
+                <input
+                  type="text"
+                  className="contactFieldInput"
+                  placeholder="Spouse Name"
+                  name="spouseName"
+                  value={formData.spouseName}
+                  onChange={handleChange}
+                />
+                {formErrors.spouseName && (
+                  <p className="contactFieldError">{formErrors.spouseName}</p>
+                )}
+              </div>
+
+              <div className="contactFieldGroup">
+                <label className="contactFieldLabel">
+                  Spouse Mobile Number <span className="contactRequired">*</span>
+                </label>
+                <input
+                  type="text"
+                  className="contactFieldInput"
+                  placeholder="Spouse Mobile Number (91 optional)"
+                  name="spouseMobile"
+                  value={formData.spouseMobile}
+                  onChange={handleChange}
+                />
+                {formErrors.spouseMobile && (
+                  <p className="contactFieldError">{formErrors.spouseMobile}</p>
+                )}
+              </div>
+
+              <div className="contactFieldGroup">
+                <label className="contactFieldLabel">
+                  Profession / Occupation <span className="contactRequired">*</span>
+                </label>
+                <input
+                  type="text"
+                  className="contactFieldInput"
+                  placeholder="Profession / Occupation"
+                  name="profession"
+                  value={formData.profession}
+                  onChange={handleChange}
+                />
+                {formErrors.profession && (
+                  <p className="contactFieldError">{formErrors.profession}</p>
+                )}
+              </div>
+            </>
+          )}
 
           <div className="contactFieldGroup contactFieldGroupFull">
             <label className="contactFieldLabel">

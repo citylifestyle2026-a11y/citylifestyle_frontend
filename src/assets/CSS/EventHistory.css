@@ -1,0 +1,515 @@
+/* Event History page (Contact List -> Event History) — mirrors the
+   structure/scale of NominationList.css under the eventHistoryPage__ /
+   eventHistoryForm__ prefixes, so this page matches the existing admin
+   list pages exactly. Pagination is intentionally not used here (the
+   page loads a single contact's full timeline in one request). */
+
+.eventHistoryPage__page {
+  min-height: 100vh;
+  background-color: #f7f7f9;
+}
+
+.eventHistoryPage__mainArea {
+  margin-left: 240px;
+  min-height: 100vh;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.eventHistoryPage__content {
+  flex: 1;
+  min-width: 0;
+  padding: 28px 36px 50px 36px;
+}
+
+.eventHistoryPage__topRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.eventHistoryPage__pageTitle {
+  color: #1b2a4e;
+  font-size: 24px;
+  font-weight: 800;
+  margin: 0 0 4px 0;
+}
+
+.eventHistoryPage__breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: #9a9ca8;
+}
+
+.eventHistoryPage__breadcrumbLink {
+  cursor: pointer;
+}
+
+.eventHistoryPage__breadcrumbLink:hover {
+  color: #1b2a4e;
+}
+
+.eventHistoryPage__breadcrumbActive {
+  color: var(--admin-accent);
+}
+
+.eventHistoryPage__headerActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.eventHistoryPage__backButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #ffffff;
+  color: #3a3d4d;
+  border: 1px solid #e2e5eb;
+  border-radius: 8px;
+  padding: 12px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  white-space: nowrap;
+}
+
+.eventHistoryPage__backButton:hover {
+  background-color: #f8fafc;
+  border-color: #d7dae1;
+}
+
+.eventHistoryPage__createButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--admin-accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+  white-space: nowrap;
+}
+
+.eventHistoryPage__createButton:hover {
+  background-color: var(--admin-accent-strong);
+  transform: translateY(-1px);
+}
+
+/* ===== Inline Add/Edit form card (no modal) ===== */
+
+.eventHistoryForm__card {
+  background-color: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.eventHistoryForm__title {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1b2a4e;
+}
+
+.eventHistoryForm__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.eventHistoryForm__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.eventHistoryForm__fieldFull {
+  grid-column: 1 / -1;
+}
+
+.eventHistoryForm__label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #6b7080;
+}
+
+.eventHistoryForm__select {
+  padding: 10px 14px;
+  border: 1px solid #e2e5eb;
+  background-color: #ffffff;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #1b2a4e;
+  outline: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+.eventHistoryForm__textarea {
+  padding: 10px 14px;
+  border: 1px solid #e2e5eb;
+  background-color: #ffffff;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #1b2a4e;
+  outline: none;
+  width: 100%;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.eventHistoryForm__select:focus,
+.eventHistoryForm__textarea:focus {
+  border-color: var(--admin-accent);
+}
+
+.eventHistoryForm__actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.eventHistoryForm__cancelButton {
+  background-color: #ffffff;
+  color: #3a3d4d;
+  border: 1px solid #e2e5eb;
+  border-radius: 8px;
+  padding: 11px 20px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.eventHistoryForm__cancelButton:hover {
+  background-color: #f8fafc;
+}
+
+.eventHistoryForm__saveButton {
+  background-color: var(--admin-accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 11px 20px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.eventHistoryForm__saveButton:hover {
+  background-color: var(--admin-accent-strong);
+}
+
+.eventHistoryForm__saveButton:disabled,
+.eventHistoryForm__cancelButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===== Table card ===== */
+
+.eventHistoryPage__tableCard {
+  background-color: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+  min-width: 0;
+  overflow: visible;
+}
+
+.eventHistoryPage__tableWrapper {
+  width: 100%;
+  position: relative;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+}
+
+.eventHistoryPage__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.eventHistoryPage__table thead th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9a9ca8;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #eef0f2;
+  white-space: nowrap;
+}
+
+.eventHistoryPage__thContent {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.eventHistoryPage__sortIcon {
+  font-size: 10px;
+  color: #c4c6d2;
+  display: inline-flex;
+  align-items: center;
+}
+
+.eventHistoryPage__table tbody td {
+  padding: 16px 14px;
+  font-size: 14px;
+  color: #3a3d4d;
+  border-bottom: 1px solid #f2f3f6;
+  text-align: left;
+}
+
+.eventHistoryPage__table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.eventHistoryPage__editionCell {
+  font-weight: 600;
+  color: #1b2a4e;
+  white-space: nowrap;
+}
+
+.eventHistoryPage__notesCell {
+  max-width: 320px;
+  white-space: normal;
+  word-break: break-word;
+  color: #6b7080;
+}
+
+.eventHistoryPage__stateCell {
+  text-align: center;
+  padding: 48px 16px;
+  border-bottom: none;
+}
+
+.eventHistoryPage__stateWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.eventHistoryPage__stateText {
+  font-size: 14px;
+  font-weight: 500;
+  color: #8b91a3;
+  margin: 0;
+}
+
+/* ===== Status badges ===== */
+
+.eventHistoryPage__statusBadge {
+  display: inline-block;
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  background-color: #f2f3f6;
+  color: #6b7080;
+}
+
+.eventHistoryPage__status--Invited {
+  background-color: #eef4ff;
+  color: #2952cc;
+}
+
+.eventHistoryPage__status--Confirmed {
+  background-color: #fff6e0;
+  color: #96720c;
+}
+
+.eventHistoryPage__status--Attended {
+  background-color: #e3f7e8;
+  color: #1e8a3c;
+}
+
+.eventHistoryPage__status--NotAttended {
+  background-color: #f2f3f6;
+  color: #6b7080;
+}
+
+.eventHistoryPage__status--Cancelled {
+  background-color: #fdeaea;
+  color: #c92a2a;
+}
+
+/* ===== Row actions (Edit / Delete — no dropdown/modal, plain inline buttons) ===== */
+
+.eventHistoryPage__rowActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.eventHistoryPage__rowActionBtn {
+  background: none;
+  border: none;
+  padding: 4px 2px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--admin-accent);
+  cursor: pointer;
+}
+
+.eventHistoryPage__rowActionBtn:hover {
+  text-decoration: underline;
+}
+
+.eventHistoryPage__rowActionBtn--danger {
+  color: #c92a2a;
+}
+
+/* Inline delete confirmation, replacing the Edit/Delete buttons in that
+   row — no popup/modal. */
+.eventHistoryPage__confirmDelete {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #3a3d4d;
+  white-space: nowrap;
+}
+
+.eventHistoryPage__confirmYes,
+.eventHistoryPage__confirmNo {
+  border: none;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.eventHistoryPage__confirmYes {
+  background-color: #c92a2a;
+  color: #ffffff;
+}
+
+.eventHistoryPage__confirmNo {
+  background-color: #f2f3f6;
+  color: #3a3d4d;
+}
+
+@media (max-width: 1023px) {
+  .eventHistoryPage__mainArea {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 1200px) {
+  .eventHistoryPage__content {
+    padding: 24px 24px 40px 24px;
+  }
+}
+
+@media (max-width: 992px) {
+  .eventHistoryPage__pageTitle {
+    font-size: 22px;
+  }
+
+  .eventHistoryPage__tableCard,
+  .eventHistoryForm__card {
+    padding: 20px;
+  }
+
+  .eventHistoryPage__table thead th,
+  .eventHistoryPage__table tbody td {
+    padding: 12px 12px;
+  }
+
+  .eventHistoryForm__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 767px) {
+  .eventHistoryPage__content {
+    padding: 22px 18px 40px 18px;
+  }
+
+  .eventHistoryPage__pageTitle {
+    font-size: 19px;
+  }
+
+  .eventHistoryPage__breadcrumb {
+    font-size: 12px;
+    flex-wrap: wrap;
+  }
+
+  .eventHistoryPage__tableCard,
+  .eventHistoryForm__card {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .eventHistoryPage__table thead th {
+    font-size: 11px;
+    padding: 10px 10px;
+  }
+
+  .eventHistoryPage__table tbody td {
+    font-size: 13px;
+    padding: 11px 10px;
+  }
+
+  .eventHistoryPage__topRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .eventHistoryPage__headerActions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .eventHistoryPage__backButton,
+  .eventHistoryPage__createButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .eventHistoryForm__actions {
+    flex-direction: column-reverse;
+  }
+
+  .eventHistoryForm__saveButton,
+  .eventHistoryForm__cancelButton {
+    width: 100%;
+  }
+}
+
+@media (max-width: 380px) {
+  .eventHistoryPage__content {
+    padding: 18px 14px 32px 14px;
+  }
+
+  .eventHistoryPage__tableCard,
+  .eventHistoryForm__card {
+    padding: 14px;
+  }
+}
