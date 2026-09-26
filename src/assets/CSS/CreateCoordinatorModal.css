@@ -1,0 +1,240 @@
+.coordinatorModalOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+  opacity: 0;
+  animation: coordinatorModalOverlayFadeIn 0.25s ease forwards;
+}
+
+@keyframes coordinatorModalOverlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.createCoordinatorModal {
+  background-color: #ffffff;
+  width: 100%;
+  max-width: 620px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  padding: 32px 36px 28px 36px;
+  opacity: 0;
+  transform: scale(0.94) translateY(10px);
+  animation: coordinatorModalPopIn 0.28s ease forwards;
+  animation-delay: 0.05s;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@keyframes coordinatorModalPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.coordinatorModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 26px;
+}
+
+.coordinatorModalTitle {
+  color: #1b2a4e;
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0;
+}
+
+.coordinatorCloseIconButton {
+  background: transparent;
+  border: none;
+  color: #9a9ca8;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.coordinatorCloseIconButton:hover {
+  background-color: #f2f3f6;
+  color: #1b2a4e;
+}
+
+.coordinatorFormGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 24px;
+  margin-bottom: 8px;
+  box-sizing: border-box;
+}
+
+/* Notes spans both columns. */
+.coordinatorFieldGroupFull {
+  grid-column: 1 / -1;
+}
+
+.coordinatorFieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.coordinatorFieldLabel {
+  color: #1b2a4e;
+  font-size: 13.5px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.coordinatorRequired {
+  color: #e0331e;
+}
+
+.coordinatorFieldInput,
+.coordinatorFieldSelect {
+  padding: 12px 14px;
+  border: 1px solid #e3e4ea;
+  border-radius: 10px;
+  font-size: 13.5px;
+  color: #1b2a4e;
+  background-color: #ffffff;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.coordinatorFieldSelect {
+  cursor: pointer;
+}
+
+.coordinatorFieldInput::placeholder {
+  color: #a7abbd;
+}
+
+.coordinatorFieldInput:focus,
+.coordinatorFieldSelect:focus {
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 4px var(--admin-focus-ring);
+}
+
+.coordinatorModalFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+.coordinatorModalCloseButton {
+  background-color: #eceef2;
+  color: #3a3d4d;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 26px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.coordinatorModalCreateButton {
+  background-color: var(--admin-accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 30px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.coordinatorModalCreateButton:hover {
+  background-color: var(--admin-accent-strong);
+  transform: translateY(-1px);
+}
+
+.coordinatorFieldError {
+  color: #dc3545;
+  font-size: 0.85rem;
+  margin-top: 4px;
+  margin-bottom: 0px;
+}
+
+@media (max-width: 560px) {
+  .createCoordinatorModal {
+    padding: 26px 22px 22px 22px;
+  }
+
+  .coordinatorFormGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .coordinatorModalFooter {
+    justify-content: stretch;
+  }
+
+  .coordinatorModalCreateButton,
+  .coordinatorModalCloseButton {
+    flex: 1;
+  }
+}
+.coordinatorFieldTextarea {
+  padding: 12px 14px;
+  border: 1px solid #e3e4ea;
+  border-radius: 10px;
+  font-size: 13.5px;
+  color: #1b2a4e;
+  background-color: #ffffff;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.coordinatorFieldTextarea:focus {
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 4px var(--admin-focus-ring);
+}
+
+.coordinatorFieldGroupCheckbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.coordinatorCheckboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #1b2a4e;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.coordinatorCheckboxLabel input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}

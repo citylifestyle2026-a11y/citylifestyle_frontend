@@ -11,6 +11,10 @@ import dashboardReducer from "./dashboard/dashboardSlice";
 import adminReducer from "./admin/adminSlice";
 import contactReducer from "./contact/contactSlice";
 import companyCategoryReducer from "./companyCategory/companyCategorySlice";
+import guestReducer from "./guest/guestSlice";
+import editionReducer from "./edition/editionSlice";
+import coordinatorReducer from "./coordinator/coordinatorSlice";
+import nominationReducer from "./nomination/nominationSlice";
 export const store = configureStore({
     reducer: {
         auth: authReducer,
@@ -25,6 +29,10 @@ export const store = configureStore({
         admin: adminReducer,
         contact: contactReducer,
         companyCategory: companyCategoryReducer,
+        guest: guestReducer,
+        edition: editionReducer,
+        coordinator: coordinatorReducer,
+        nomination: nominationReducer,
     }
 
 })

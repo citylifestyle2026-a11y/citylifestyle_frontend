@@ -91,14 +91,8 @@ const Booking = () => {
   // at a time, since only one menu can be open.
   const actionRef = useRef(null);
   const actionMenuRef = useRef(null);
-  // Tracks which row's menu (if any) was opened by a CLICK, as opposed to
-  // just a hover. A pinned menu stays open when the mouse leaves the row
-  // and is only closed by: clicking its button again, clicking outside,
-  // Escape, or scroll/resize. A hover-only menu closes as soon as the
-  // mouse leaves the row. This lets hover and click share the single
-  // openActionId/actionMenuPos state below instead of needing two
-  // separate dropdown implementations.
-  const pinnedActionIdRef = useRef(null);
+  // The Action menu opens ONLY on click (no hover). It closes by: clicking
+  // its button again, clicking outside, Escape, or scroll/resize.
   const [activePage, setActivePage] = useState(1);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -205,8 +199,7 @@ const Booking = () => {
     return value;
   };
   // Computes the fixed-viewport position for a row's menu from its
-  // trigger element's rect. Shared by hover and click so both open the
-  // menu the exact same way — no duplicate positioning logic.
+  // trigger element's rect.
   const computeActionMenuPos = (triggerEl) => {
     const rect = triggerEl.getBoundingClientRect();
     const estimatedMenuHeight = 190; // approx height for 4 menu items
@@ -228,50 +221,17 @@ const Booking = () => {
   const closeActionMenu = () => {
     setOpenActionId(null);
     setActionMenuPos(null);
-    pinnedActionIdRef.current = null;
   };
 
+  // Click on the row's Action button: opens its menu, or closes it if it
+  // is already open. Clicking another row's button switches to that row.
   const toggleActionMenu = (id, event) => {
     if (openActionId === id) {
-      // If the row is already open because it was hovered, clicking it
-      // should pin the menu open instead of immediately closing it.
-      if (pinnedActionIdRef.current === id) {
-        closeActionMenu();
-      } else {
-        pinnedActionIdRef.current = id;
-        openActionMenu(id, event.currentTarget);
-      }
+      closeActionMenu();
       return;
     }
 
-    pinnedActionIdRef.current = id;
     openActionMenu(id, event.currentTarget);
-  };
-
-  // Hover only opens/previews a menu; it never steals a menu the user
-  // has pinned open by clicking on a *different* row.
-  const handleActionMouseEnter = (id, event) => {
-    if (pinnedActionIdRef.current && pinnedActionIdRef.current !== id) return;
-    openActionMenu(id, event.currentTarget);
-  };
-
-  // Hover-only menus close on mouse leave; a click-pinned menu stays
-  // open until an explicit close (button click, outside click, Escape,
-  // scroll/resize) per the required click behavior.
-  const handleActionMouseLeave = (id, event) => {
-    if (pinnedActionIdRef.current === id) return;
-    const relatedTarget = event.relatedTarget || document.elementFromPoint(event.clientX, event.clientY);
-    if (
-      actionRef.current &&
-      actionMenuRef.current &&
-      (actionRef.current.contains(relatedTarget) || actionMenuRef.current.contains(relatedTarget))
-    ) {
-      return;
-    }
-    if (openActionId === id) {
-      setOpenActionId(null);
-      setActionMenuPos(null);
-    }
   };
 
   // Closes the open Action menu on: scrolling/resizing (stored
@@ -731,8 +691,6 @@ const Booking = () => {
                             <div
                               className="bookingPage-actionDropdownWrap"
                               ref={openActionId === row._id ? actionRef : null}
-                              onMouseEnter={(event) => handleActionMouseEnter(row._id, event)}
-                              onMouseLeave={(event) => handleActionMouseLeave(row._id, event)}
                             >
                               <button
                                 type="button"

@@ -11,7 +11,6 @@ import axios from "axios";
 // Content-Type and the server can never parse req.file.
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL;
-
 // The localhost fallback above is intentionally kept as-is (existing local
 // dev workflows may rely on it working with no .env file present at all).
 // This warning only makes a missing VITE_API_BASE_URL visible during local

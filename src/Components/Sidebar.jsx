@@ -15,7 +15,7 @@ import {
   BsFillTicketFill,
 } from 'react-icons/bs';
 
-import { FaFlag } from 'react-icons/fa6';
+import { FaFlag, FaUsersLine } from 'react-icons/fa6';
 
 import '../assets/CSS/Sidebar.css';
 import cityLifestyleLogo from '../assets/branding/city-lifestyle-logo.jpg';
@@ -62,6 +62,31 @@ const menuItems = [
     icon: <FaFlag />,
     path: '/entry-report',
   },
+  {
+    // PARV CRM — Phase 1 (Guest + Edition, admin-only) and Phase 2
+    // (Coordinator account management + read-only oversight of every
+    // Coordinator's nominations, both also admin-only). Hidden for the
+    // 'checker' AND 'coordinator' roles by the filter below, same as
+    // every other item except Entry Report / My Nominations.
+    label: 'PARV CRM',
+    icon: <FaUsersLine />,
+    submenu: [
+      { label: 'Guest List', path: '/guests' },
+      { label: 'Edition List', path: '/editions' },
+      { label: 'Coordinators', path: '/coordinators' },
+      { label: 'Nominations', path: '/nominations' },
+    ],
+  },
+  {
+    // PARV CRM — Phase 2: a Coordinator's own scoped nomination view
+    // (doc section 2 — Coordinator can only "Add and view own
+    // nominations"). Shown ONLY for the 'coordinator' role by the
+    // isCoordinator filter below — Admin gets the same underlying page
+    // via the "Nominations" submenu item above instead.
+    label: 'My Nominations',
+    icon: <FaUsersLine />,
+    path: '/nominations',
+  },
 ];
 
 export default function Sidebar() {
@@ -95,17 +120,33 @@ export default function Sidebar() {
   // Checker is locked to Entry Report ONLY — Dashboard, Event, Booking,
   // User Management (Users/Roles), and any future module are all hidden
   // for this role, regardless of what's added to `menuItems` later.
-  // Non-checker roles (currently just Admin) keep the existing behavior
-  // unchanged, including the Entry Report permission gate below.
   const isChecker = role === 'checker';
 
+  // Coordinator (PARV CRM Phase 2) is locked to "My Nominations" ONLY,
+  // same reasoning as Checker above — everything else here, including
+  // the admin-only "PARV CRM" submenu (Guest List/Edition List/
+  // Coordinators/Nominations), is Admin-only and must stay hidden.
+  const isCoordinator = role === 'coordinator';
+
+  // Admin (the only remaining role) keeps the existing behavior
+  // unchanged, including the Entry Report permission gate below — and
+  // now also never sees "My Nominations" (Coordinator-only label; Admin
+  // gets the same page via the "Nominations" submenu item instead).
   const visibleMenuItems = menuItems.filter((item) => {
     if (isChecker) {
       return item.label === 'Entry Report' && hasPermission('Entry Report');
     }
 
+    if (isCoordinator) {
+      return item.label === 'My Nominations';
+    }
+
     if (item.label === 'Entry Report') {
       return hasPermission('Entry Report');
+    }
+
+    if (item.label === 'My Nominations') {
+      return false;
     }
 
     return true;
