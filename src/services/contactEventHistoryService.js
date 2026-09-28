@@ -1,5 +1,16 @@
 import api from "../api/axios";
 
+// ================= GET ALL EVENT HISTORY (ALL CONTACTS) =================
+// params supports: contactId, editionId, status, page, limit — powers
+// the standalone Sidebar "Event History" page.
+export const getAllEventHistoryApi = async (params) => {
+  const response = await api.get("/contact-event-history/get-all-event-history", {
+    params,
+  });
+
+  return response.data;
+};
+
 // ================= CREATE EVENT HISTORY =================
 export const createEventHistoryApi = async (data) => {
   const response = await api.post("/contact-event-history/create", data);

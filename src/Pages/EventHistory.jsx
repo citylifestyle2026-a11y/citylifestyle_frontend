@@ -1,42 +1,36 @@
-import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
-import { FaArrowLeft, FaPlus } from "react-icons/fa";
+import { FaPlus, FaChevronDown } from "react-icons/fa";
 
 import CommonListLayout from "../Components/CommonListLayout";
 import CommonPageHeader from "../Components/CommonPageHeader";
 import CommonSelect from "../Components/CommonSelect";
 import CommonTable from "../Components/CommonTable";
 import CommonEmptyState from "../Components/CommonEmptyState";
+import CommonPagination from "../Components/CommonPagination";
+import CreateEventHistoryModal from "../Components/CreateEventHistoryModal";
+import DeleteUserModal from "../Components/DeleteUserModal";
 
-import { getContactById } from "../redux/contact/contactThunk";
-import { getAllEditions } from "../redux/edition/editionThunk";
-import {
-  getEventHistoryByContact,
-  createEventHistory,
-  updateEventHistory,
-  deleteEventHistory,
-} from "../redux/contactEventHistory/contactEventHistoryThunk";
+import { getAllEventHistory, deleteEventHistory } from "../redux/contactEventHistory/contactEventHistoryThunk";
 import { clearContactEventHistoryState } from "../redux/contactEventHistory/contactEventHistorySlice";
+import { getAllEditions } from "../redux/edition/editionThunk";
 
 import { showError, showSuccess } from "../utilits/toast";
+import { getErrorText } from "../utilits/apiError";
 import "../assets/CSS/EventHistory.css";
 
-// Must stay in sync with backend/models/contactEventHistory.model.js's
-// STATUS_VALUES (and validators/contactEventHistory.validator.js's own
-// copy of the same list).
-const STATUS_OPTIONS = [
-  "Invited",
-  "Confirmed",
-  "Attended",
-  "Not Attended",
-  "Cancelled",
-].map((value) => ({ value, label: value }));
+// Sidebar -> Event History: a standalone page listing EVERY contact's
+// event history (not scoped to one contact via a URL param anymore —
+// "Add Details" now picks the Contact itself, from a dropdown, inside
+// the modal). Reached directly from the Sidebar rather than from a
+// per-row action on Contact List.
 
-const EMPTY_FORM = { editionId: "", status: "Invited", notes: "" };
+const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100].map((n) => ({
+  value: n,
+  label: String(n),
+}));
 
-// DD-MM-YYYY hh:mm AM/PM — same shape as ViewEvent.jsx's formatDateTime,
-// used here for each entry's "Added On" column.
 const formatDateTime = (dateStr) => {
   if (!dateStr) return "-";
   const d = new Date(dateStr);
@@ -54,157 +48,139 @@ const formatDateTime = (dateStr) => {
 };
 
 export default function EventHistory() {
-  const { contactId } = useParams();
-  const navigate = useNavigate();
   const dispatch = useDispatch();
-  
-  const { contact, loading: contactLoading } = useSelector(
-    (state) => state.contact
-  );
-  const { editions } = useSelector((state) => state.edition);
-  const { history, loading, error, actionLoading } = useSelector(
+
+  const { history, loading, error, total, totalPages, limit } = useSelector(
     (state) => state.contactEventHistory
   );
+  const { editions } = useSelector((state) => state.edition);
 
-  // Inline form state (no modal — a card toggled open/closed on the
-  // page itself). `mode` decides whether Save calls createEventHistory
-  // or updateEventHistory; `editingId` is only set in edit mode.
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [formMode, setFormMode] = useState("create");
-  const [editingId, setEditingId] = useState(null);
-  const [formValues, setFormValues] = useState(EMPTY_FORM);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [editionFilter, setEditionFilter] = useState("");
 
-  // Inline delete confirmation — which row (if any) is currently
-  // showing its "Confirm delete?" state, instead of a popup modal.
-  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState("create");
+  const [editingEntry, setEditingEntry] = useState(null);
 
-  useEffect(() => {
-    if (contactId) {
-      dispatch(getContactById(contactId));
-      dispatch(getEventHistoryByContact({ contactId, params: {} }));
-    }
-  }, [dispatch, contactId]);
+  // Delete confirmation uses the same popup (DeleteUserModal) as every
+  // other list page, and the row actions use the same "Action" dropdown.
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [deleteEntryId, setDeleteEntryId] = useState(null);
+  const [deleteEntryName, setDeleteEntryName] = useState("");
+  const [openActionMenuId, setOpenActionMenuId] = useState(null);
 
-  // Edition dropdown — existing Edition API, all editions fetched once
-  // (same fetch-limit approach as NominationList.jsx's own edition
-  // filter dropdown) so a closed/older edition can still be selected
-  // for a past history entry, not just the currently Active one.
+  const effectiveLimit = limit || rowsPerPage;
+  const startIndex = total === 0 ? 0 : (currentPage - 1) * effectiveLimit;
+  const endIndex = Math.min(currentPage * effectiveLimit, total);
+  const resolvedTotalPages = totalPages || 1;
+
+  const currentQuery = useMemo(() => {
+    const q = { page: currentPage, limit: rowsPerPage };
+    if (editionFilter) q.editionId = editionFilter;
+    return q;
+  }, [currentPage, rowsPerPage, editionFilter]);
+
   useEffect(() => {
     dispatch(getAllEditions({ limit: 100, sortBy: "editionNumber", sortOrder: "desc" }));
   }, [dispatch]);
 
-  const editionOptions = useMemo(
-    () => (editions || []).map((edition) => ({ value: edition._id, label: edition.name })),
-    [editions]
-  );
+  useEffect(() => {
+    dispatch(getAllEventHistory(currentQuery));
+  }, [dispatch, currentQuery]);
 
-  const handleBack = () => navigate("/contact-list");
+  const actionMenuRef = useRef(null);
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (actionMenuRef.current && !actionMenuRef.current.contains(event.target)) {
+        setOpenActionMenuId(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleToggleActionMenu = useCallback((entryId) => {
+    setOpenActionMenuId((prev) => (prev === entryId ? null : entryId));
+  }, []);
+
+  const goToPreviousPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+  const goToNextPage = () => {
+    if (currentPage < resolvedTotalPages) setCurrentPage(currentPage + 1);
+  };
 
   const handleAddClick = () => {
-    setFormMode("create");
-    setEditingId(null);
-    setFormValues(EMPTY_FORM);
-    setConfirmDeleteId(null);
-    setIsFormOpen(true);
+    setModalMode("create");
+    setEditingEntry(null);
+    setIsModalOpen(true);
   };
 
   const handleEditClick = (entry) => {
-    setFormMode("edit");
-    setEditingId(entry._id);
-    setFormValues({
-      editionId: entry.editionId?._id || entry.editionId || "",
-      status: entry.status || "Invited",
-      notes: entry.notes || "",
-    });
-    setConfirmDeleteId(null);
-    setIsFormOpen(true);
+    setModalMode("edit");
+    setEditingEntry(entry);
+    setOpenActionMenuId(null);
+    setIsModalOpen(true);
   };
 
-  const handleCancelForm = () => {
-    setIsFormOpen(false);
-    setFormMode("create");
-    setEditingId(null);
-    setFormValues(EMPTY_FORM);
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingEntry(null);
+    setModalMode("create");
   };
 
-  const handleFormChange = (field) => (e) => {
-    setFormValues((prev) => ({ ...prev, [field]: e.target.value }));
+  const handleDeleteClick = (entry) => {
+    setIsModalOpen(false);
+    setOpenActionMenuId(null);
+    setDeleteEntryId(entry._id);
+    setDeleteEntryName(entry.contactId?.fullName || "this entry");
+    setIsDeleteOpen(true);
   };
 
-  const handleSaveForm = async (e) => {
-    e.preventDefault();
-
-    if (!formValues.editionId) {
-      showError("Please select an Edition");
-      return;
-    }
-
-    try {
-      if (formMode === "edit" && editingId) {
-        const res = await dispatch(
-          updateEventHistory({
-            id: editingId,
-            data: {
-              editionId: formValues.editionId,
-              status: formValues.status,
-              notes: formValues.notes,
-            },
-          })
-        ).unwrap();
-
-        showSuccess(res.message || "Event history entry updated successfully");
-      } else {
-        const res = await dispatch(
-          createEventHistory({
-            contactId,
-            editionId: formValues.editionId,
-            status: formValues.status,
-            notes: formValues.notes,
-          })
-        ).unwrap();
-
-        showSuccess(res.message || "Event history entry added successfully");
-      }
-
-      dispatch(clearContactEventHistoryState());
-      handleCancelForm();
-    } catch (err) {
-      showError(err || "Failed to save event history entry");
-    }
+  const handleCloseDeleteModal = () => {
+    setIsDeleteOpen(false);
+    setDeleteEntryId(null);
+    setDeleteEntryName("");
   };
 
-  const handleDeleteClick = (entryId) => {
-    setIsFormOpen(false);
-    setConfirmDeleteId(entryId);
-  };
-
-  const handleCancelDelete = () => setConfirmDeleteId(null);
-
-  const handleConfirmDelete = async (entryId) => {
+  const handleConfirmDelete = async () => {
+    const entryId = deleteEntryId;
     try {
       const res = await dispatch(deleteEventHistory(entryId)).unwrap();
-      showSuccess(res.message || "Event history entry deleted successfully");
+      showSuccess(res?.message || "Event history entry deleted successfully");
+      dispatch(getAllEventHistory(currentQuery));
       dispatch(clearContactEventHistoryState());
     } catch (err) {
-      showError(err || "Failed to delete event history entry");
+      showError(getErrorText(err, "Failed to delete event history entry"));
     } finally {
-      setConfirmDeleteId(null);
+      handleCloseDeleteModal();
     }
   };
 
   const historyTableColumns = useMemo(
     () => [
       {
+        key: "contact",
+        label: "Contact",
+        cellClassName: "eventHistoryPage__contactCell",
+        render: (entry) => entry.contactId?.fullName || "-",
+      },
+      {
+        key: "mobile",
+        label: "WhatsApp Number",
+        render: (entry) => entry.contactId?.whatsappNumber || "-",
+      },
+      {
         key: "edition",
         label: "Edition",
-        sortable: false,
         cellClassName: "eventHistoryPage__editionCell",
         render: (entry) => entry.editionId?.name || "-",
       },
       {
         key: "status",
         label: "Status",
-        sortable: false,
         render: (entry) => (
           <span
             className={`eventHistoryPage__statusBadge eventHistoryPage__status--${(
@@ -218,62 +194,58 @@ export default function EventHistory() {
       {
         key: "notes",
         label: "Notes",
-        sortable: false,
         cellClassName: "eventHistoryPage__notesCell",
         render: (entry) => entry.notes || "-",
       },
       {
         key: "createdAt",
         label: "Added On",
-        sortable: false,
         render: (entry) => formatDateTime(entry.createdAt),
       },
       {
         key: "action",
         label: "Actions",
         sortable: false,
-        render: (entry) =>
-          confirmDeleteId === entry._id ? (
-            <span className="eventHistoryPage__confirmDelete">
-              Delete this entry?
+        cellStyle: { position: "relative" },
+        render: (entry) => (
+          <div
+            className="eventHistoryAction__wrapper"
+            ref={openActionMenuId === entry._id ? actionMenuRef : null}
+          >
+            <button
+              type="button"
+              className="eventHistoryAction__button"
+              onClick={() => handleToggleActionMenu(entry._id)}
+            >
+              Action
+              <FaChevronDown className="eventHistoryAction__icon" />
+            </button>
+
+            <div
+              className={`eventHistoryAction__menu ${
+                openActionMenuId === entry._id ? "eventHistoryAction__menuOpen" : ""
+              }`}
+            >
               <button
                 type="button"
-                className="eventHistoryPage__confirmYes"
-                onClick={() => handleConfirmDelete(entry._id)}
-                disabled={actionLoading}
-              >
-                Yes
-              </button>
-              <button
-                type="button"
-                className="eventHistoryPage__confirmNo"
-                onClick={handleCancelDelete}
-                disabled={actionLoading}
-              >
-                No
-              </button>
-            </span>
-          ) : (
-            <span className="eventHistoryPage__rowActions">
-              <button
-                type="button"
-                className="eventHistoryPage__rowActionBtn"
+                className="eventHistoryAction__item eventHistoryAction__itemEdit"
                 onClick={() => handleEditClick(entry)}
               >
                 Edit
               </button>
               <button
                 type="button"
-                className="eventHistoryPage__rowActionBtn eventHistoryPage__rowActionBtn--danger"
-                onClick={() => handleDeleteClick(entry._id)}
+                className="eventHistoryAction__item eventHistoryAction__itemDelete"
+                onClick={() => handleDeleteClick(entry)}
               >
                 Delete
               </button>
-            </span>
-          ),
+            </div>
+          </div>
+        ),
       },
     ],
-    [confirmDeleteId, actionLoading]
+    [openActionMenuId, handleToggleActionMenu]
   );
 
   return (
@@ -282,50 +254,59 @@ export default function EventHistory() {
       mainAreaClassName="eventHistoryPage__mainArea"
       contentClassName="eventHistoryPage__content"
       headerTitle="Event History"
+      outsideMainArea={
+        <>
+          {isModalOpen && (
+            <div
+              tabIndex={-1}
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === "Escape") handleCloseModal();
+              }}
+            >
+              <CreateEventHistoryModal
+                onClose={handleCloseModal}
+                isEditMode={modalMode === "edit"}
+                editEntry={editingEntry}
+                currentQuery={currentQuery}
+              />
+            </div>
+          )}
+
+          {isDeleteOpen && (
+            <div
+              tabIndex={-1}
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === "Escape") handleCloseDeleteModal();
+              }}
+            >
+              <DeleteUserModal
+                userName={deleteEntryName}
+                entityLabel="event history entry"
+                onClose={handleCloseDeleteModal}
+                onDelete={handleConfirmDelete}
+              />
+            </div>
+          )}
+        </>
+      }
     >
       <CommonPageHeader
         containerClassName="eventHistoryPage__topRow"
-        title={
-          contactLoading
-            ? "Event History"
-            : `Event History — ${contact?.fullName || "Contact"}`
-        }
+        title="Event History"
         titleClassName="eventHistoryPage__pageTitle"
         titleStyle={{ textAlign: "start", display: "block" }}
         breadcrumb={
           <div className="eventHistoryPage__breadcrumb">
-            <span>Dashboard</span>
+            <Link to="/dashboard" className="appBreadcrumbLink">Dashboard</Link>
             <span>-</span>
-            <span
-              className="eventHistoryPage__breadcrumbLink"
-              role="button"
-              tabIndex={0}
-              onClick={handleBack}
-            >
-              Contact List
-            </span>
-            <span>-</span>
-            <span className="eventHistoryPage__breadcrumbActive">
-              Event History
-            </span>
+            <span className="eventHistoryPage__breadcrumbActive">Event History</span>
           </div>
         }
         actions={
           <div className="eventHistoryPage__headerActions">
-            <button
-              type="button"
-              className="eventHistoryPage__backButton"
-              onClick={handleBack}
-            >
-              <FaArrowLeft />
-              Back to Contact List
-            </button>
-
-            <button
-              type="button"
-              className="eventHistoryPage__createButton"
-              onClick={handleAddClick}
-            >
+            <button type="button" className="eventHistoryPage__createButton" onClick={handleAddClick}>
               <FaPlus />
               Add Details
             </button>
@@ -333,76 +314,30 @@ export default function EventHistory() {
         }
       />
 
-      {isFormOpen && (
-        <div className="eventHistoryForm__card">
-          <h3 className="eventHistoryForm__title">
-            {formMode === "edit" ? "Edit Event History" : "Add Event History"}
-          </h3>
+      <div className="eventHistoryPage__tableCard appCard">
+        <div className="eventHistoryPage__tableControls">
+          <CommonSelect
+            className="eventHistoryPage__rowsSelect"
+            value={rowsPerPage}
+            onChange={(e) => {
+              setRowsPerPage(Number(e.target.value));
+              setCurrentPage(1);
+            }}
+            options={ROWS_PER_PAGE_OPTIONS}
+          />
 
-          <form className="eventHistoryForm__grid" onSubmit={handleSaveForm}>
-            <div className="eventHistoryForm__field">
-              <label className="eventHistoryForm__label" htmlFor="eventHistory-edition">
-                Edition
-              </label>
-              <CommonSelect
-                id="eventHistory-edition"
-                className="eventHistoryForm__select"
-                value={formValues.editionId}
-                onChange={handleFormChange("editionId")}
-                placeholder="Select Edition"
-                options={editionOptions}
-              />
-            </div>
-
-            <div className="eventHistoryForm__field">
-              <label className="eventHistoryForm__label" htmlFor="eventHistory-status">
-                Status
-              </label>
-              <CommonSelect
-                id="eventHistory-status"
-                className="eventHistoryForm__select"
-                value={formValues.status}
-                onChange={handleFormChange("status")}
-                options={STATUS_OPTIONS}
-              />
-            </div>
-
-            <div className="eventHistoryForm__field eventHistoryForm__fieldFull">
-              <label className="eventHistoryForm__label" htmlFor="eventHistory-notes">
-                Notes
-              </label>
-              <textarea
-                id="eventHistory-notes"
-                className="eventHistoryForm__textarea"
-                rows={3}
-                value={formValues.notes}
-                onChange={handleFormChange("notes")}
-                placeholder="Optional notes..."
-              />
-            </div>
-
-            <div className="eventHistoryForm__actions">
-              <button
-                type="button"
-                className="eventHistoryForm__cancelButton"
-                onClick={handleCancelForm}
-                disabled={actionLoading}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="eventHistoryForm__saveButton"
-                disabled={actionLoading}
-              >
-                {actionLoading ? "Saving..." : "Save"}
-              </button>
-            </div>
-          </form>
+          <CommonSelect
+            className="eventHistoryPage__filterSelect"
+            value={editionFilter}
+            onChange={(e) => {
+              setEditionFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            placeholder="All Editions"
+            options={(editions || []).map((ed) => ({ value: ed._id, label: ed.name }))}
+          />
         </div>
-      )}
 
-      <div className="eventHistoryPage__tableCard">
         <div className="eventHistoryPage__tableWrapper">
           <CommonTable
             columns={historyTableColumns}
@@ -416,16 +351,28 @@ export default function EventHistory() {
               <CommonEmptyState
                 wrapperClassName="eventHistoryPage__stateWrap"
                 textClassName="eventHistoryPage__stateText"
-                message="No event history found for this contact."
+                message="No event history found."
               />
             }
-            stateCellClassName="eventHistoryPage__stateCell"
-            stateCellStyle={{}}
             tableClassName="eventHistoryPage__table"
             thContentClassName="eventHistoryPage__thContent"
             sortIconClassName="eventHistoryPage__sortIcon"
           />
         </div>
+
+        <CommonPagination
+          currentPage={currentPage}
+          totalPages={resolvedTotalPages}
+          rangeStart={total === 0 ? 0 : startIndex + 1}
+          rangeEnd={endIndex}
+          totalItems={total}
+          showControls={total > rowsPerPage}
+          onPageSelect={(page) => setCurrentPage(page)}
+          onPrevious={goToPreviousPage}
+          onNext={goToNextPage}
+          prevDisabled={currentPage === 1}
+          nextDisabled={currentPage === resolvedTotalPages}
+        />
       </div>
     </CommonListLayout>
   );

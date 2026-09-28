@@ -513,7 +513,7 @@ export default function CreateContactModal({
             {formErrors.address && <p className="contactFieldError">{formErrors.address}</p>}
           </div>
 
-          <div className="contactFieldGroup">
+          <div className="contactFieldGroup contactFieldGroupFull">
             <label className="contactFieldLabel">
               Relationship <span className="contactRequired">*</span>
             </label>
@@ -573,7 +573,7 @@ export default function CreateContactModal({
                 )}
               </div>
 
-              <div className="contactFieldGroup">
+              <div className="contactFieldGroup contactFieldGroupFull">
                 <label className="contactFieldLabel">
                   Profession / Occupation <span className="contactRequired">*</span>
                 </label>

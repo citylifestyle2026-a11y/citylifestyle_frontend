@@ -87,7 +87,8 @@
 .adminPage__tableWrapper {
   width: 100%;
   position: relative;
-  /* overflow-x: auto; */
+  overflow-x: auto;
+  padding-bottom: 72px; /* room for the action dropdown, same as User */
   overflow-y: visible;
   -webkit-overflow-scrolling: touch;
   min-height: fit-content;

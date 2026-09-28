@@ -132,15 +132,15 @@ const ViewBooking = () => {
 
   if (detailsLoading) {
     return (
-      <div className="bookingPage-wrapper">
+      <div className="bookingPage-wrapper appPage">
         <Sidebar />
-        <div className="bookingPageMainArea">
+        <div className="bookingPageMainArea appMain">
           <Header title="View Booking" />
-          <div className="bookingView-wrapper">
+          <div className="bookingView-wrapper appContent">
             <div className="bookingView-header">
-              <h1 className="bookingView-title">View Booking</h1>
+              <h1 className="bookingView-title appPageTitle">View Booking</h1>
               <div className="bookingView-breadcrumb">
-                <span>Dashboard</span>
+                <Link to="/dashboard" className="appBreadcrumbLink">Dashboard</Link>
                 <span className="bookingView-breadcrumbSep">-</span>
                 <span className="bookingView-breadcrumbActive">View Booking</span>
               </div>
@@ -169,15 +169,15 @@ const ViewBooking = () => {
 
   if (!booking || detailsErrorMessage) {
     return (
-      <div className="bookingPage-wrapper">
+      <div className="bookingPage-wrapper appPage">
         <Sidebar />
-        <div className="bookingPageMainArea">
+        <div className="bookingPageMainArea appMain">
           <Header title="View Booking" />
-          <div className="bookingView-wrapper">
+          <div className="bookingView-wrapper appContent">
             <div className="bookingView-header">
-              <h1 className="bookingView-title">View Booking</h1>
+              <h1 className="bookingView-title appPageTitle">View Booking</h1>
               <div className="bookingView-breadcrumb">
-                <span>Dashboard</span>
+                <Link to="/dashboard" className="appBreadcrumbLink">Dashboard</Link>
                 <span className="bookingView-breadcrumbSep">-</span>
                 <span className="bookingView-breadcrumbActive">View Booking</span>
               </div>
@@ -217,15 +217,15 @@ const ViewBooking = () => {
   const tickets = booking.tickets || [];
 
   return (
-    <div className="bookingPage-wrapper">
+    <div className="bookingPage-wrapper appPage">
       <Sidebar />
-      <div className="bookingPageMainArea">
+      <div className="bookingPageMainArea appMain">
         <Header title="View Booking" />
-        <div className="bookingView-wrapper">
+        <div className="bookingView-wrapper appContent">
           <div className="bookingView-header">
-            <h1 className="bookingView-title">View Booking</h1>
+            <h1 className="bookingView-title appPageTitle">View Booking</h1>
             <div className="bookingView-breadcrumb">
-              <span>Dashboard</span>
+              <Link to="/dashboard" className="appBreadcrumbLink">Dashboard</Link>
               <span className="bookingView-breadcrumbSep">-</span>
               <span className="bookingView-breadcrumbActive">View Booking</span>
             </div>

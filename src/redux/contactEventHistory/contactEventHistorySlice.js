@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
+  getAllEventHistory,
   createEventHistory,
   getEventHistoryByContact,
   updateEventHistory,
@@ -42,6 +43,30 @@ const contactEventHistorySlice = createSlice({
   },
 
   extraReducers: (builder) => {
+    // ================= GET ALL EVENT HISTORY (ALL CONTACTS) =================
+    // Same list state (`history`/pagination) as getEventHistoryByContact
+    // below — only one of the two is ever active on a given page (the
+    // general Sidebar page uses this one).
+    builder
+      .addCase(getAllEventHistory.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getAllEventHistory.fulfilled, (state, action) => {
+        state.loading = false;
+
+        state.history = action.payload.data;
+
+        state.total = action.payload.pagination.total;
+        state.page = action.payload.pagination.page;
+        state.limit = action.payload.pagination.limit;
+        state.totalPages = action.payload.pagination.totalPages;
+      })
+      .addCase(getAllEventHistory.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+
     // ================= CREATE EVENT HISTORY =================
     builder
       .addCase(createEventHistory.pending, (state) => {

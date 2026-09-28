@@ -180,16 +180,16 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="dashboardPage">
+    <div className="dashboardPage appPage">
       <Sidebar />
 
-      <div className="mainArea">
+      <div className="mainArea appMain">
         <Header />
 
-        <div className="content">
+        <div className="content appContent">
           <div className="dashboardPage-topRow">
             <div>
-              <h1 className="pageDashboardTitle">Dashboard</h1>
+              <h1 className="pageDashboardTitle appPageTitle">Dashboard</h1>
               <p className="pageSubtitle" style={{ margin: 0 }}>Dashboard</p>
             </div>
 

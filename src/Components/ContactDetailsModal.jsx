@@ -136,6 +136,30 @@ export default function ContactDetailsModal({ contact, onClose }) {
           </div>
 
           <div className="contactDetailsRow">
+            <span className="contactDetailsLabel">Spouse Name</span>
+            <span className="contactDetailsColon">:</span>
+            <span className="contactDetailsValue">
+              {contact.spouseName || "-"}
+            </span>
+          </div>
+
+          <div className="contactDetailsRow">
+            <span className="contactDetailsLabel">Spouse Mobile Number</span>
+            <span className="contactDetailsColon">:</span>
+            <span className="contactDetailsValue">
+              {contact.spouseMobile || "-"}
+            </span>
+          </div>
+
+          <div className="contactDetailsRow">
+            <span className="contactDetailsLabel">Profession / Occupation</span>
+            <span className="contactDetailsColon">:</span>
+            <span className="contactDetailsValue">
+              {contact.profession || "-"}
+            </span>
+          </div>
+
+          <div className="contactDetailsRow">
             <span className="contactDetailsLabel">References</span>
             <span className="contactDetailsColon">:</span>
             <span className="contactDetailsValue">

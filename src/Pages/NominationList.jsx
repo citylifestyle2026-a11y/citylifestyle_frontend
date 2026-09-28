@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FaSearch, FaPlus } from "react-icons/fa";
@@ -187,7 +188,7 @@ export default function NominationList() {
         titleStyle={{ textAlign: "start", display: "block" }}
         breadcrumb={
           <div className="nominationPage__breadcrumb">
-            <span>Dashboard</span>
+            <Link to="/dashboard" className="appBreadcrumbLink">Dashboard</Link>
             <span>-</span>
             <span className="nominationPage__breadcrumbActive">
               {isCoordinator ? "My Nominations" : "Nominations"}
@@ -210,7 +211,7 @@ export default function NominationList() {
         }
       />
 
-      <div className="nominationPage__tableCard">
+      <div className="nominationPage__tableCard appCard">
         <div className="nominationPage__tableControls">
           <CommonSelect
             className="nominationPage__rowsSelect"

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FaSearch, FaPlus, FaChevronDown, FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
@@ -223,15 +224,13 @@ export default function EditionList() {
     {
       key: "eventDateTime",
       label: "Event Date",
-      sortable: false,
       render: (edition) =>
         edition.eventDateTime ? new Date(edition.eventDateTime).toLocaleString() : "-",
     },
-    { key: "venue", label: "Venue", sortable: false, render: (edition) => edition.venue || "-" },
+    { key: "venue", label: "Venue", render: (edition) => edition.venue || "-" },
     {
       key: "guestCapacity",
       label: "Capacity",
-      sortable: false,
       render: (edition) => edition.guestCapacity ?? "-",
     },
     sortableColumn("status", "Status", {
@@ -341,7 +340,7 @@ export default function EditionList() {
         titleStyle={{ textAlign: "start", display: "block" }}
         breadcrumb={
           <div className="editionPage__breadcrumb">
-            <span>Dashboard</span>
+            <Link to="/dashboard" className="appBreadcrumbLink">Dashboard</Link>
             <span>-</span>
             <span className="editionPage__breadcrumbActive">Edition List</span>
           </div>
@@ -360,7 +359,7 @@ export default function EditionList() {
         }
       />
 
-      <div className="editionPage__tableCard">
+      <div className="editionPage__tableCard appCard">
         <div className="editionPage__tableControls">
           <CommonSelect
             className="editionPage__rowsSelect"

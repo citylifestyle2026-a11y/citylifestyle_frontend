@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FaSearch, FaPlus, FaChevronDown } from "react-icons/fa";
@@ -273,7 +274,7 @@ export default function Coordinator() {
         titleStyle={{ textAlign: "start", display: "block" }}
         breadcrumb={
           <div className="coordinatorPage__breadcrumb">
-            <span>Dashboard</span>
+            <Link to="/dashboard" className="appBreadcrumbLink">Dashboard</Link>
             <span>-</span>
             <span className="coordinatorPage__breadcrumbActive">Coordinators</span>
           </div>
@@ -288,7 +289,7 @@ export default function Coordinator() {
         }
       />
 
-      <div className="coordinatorPage__tableCard">
+      <div className="coordinatorPage__tableCard appCard">
         <div className="coordinatorPage__tableControls">
           <CommonSelect
             className="coordinatorPage__rowsSelect"

@@ -54,15 +54,13 @@ const menuItems = [
       // PUBLIC marketing contact page (see App.jsx) and must stay that
       // way.
       { label: 'Contact List', path: '/contact-list' },
-      // Event History is per-contact (/event-history/:contactId) — it
-      // has no standalone page of its own, so this entry lands on
-      // Contact List itself, where the "Event History" action on each
-      // row is what actually opens a specific contact's history.
-      { label: 'Event History', path: '/contact-list' },
-      // Edition master data — feeds the Edition dropdown on the Event
-      // History page above (see models/contactEventHistory.model.js).
-      { label: 'Editions', path: '/editions' },
       { label: 'Company Category', path: '/company-categories' },
+      // Edition master data — feeds the Edition checkboxes on the Event
+      // History page below (see models/contactEventHistory.model.js).
+      { label: 'Editions', path: '/editions' },
+      // Event History is its own standalone page — "Add Details" picks
+      // the Contact itself from a dropdown inside the modal.
+      { label: 'Event History', path: '/event-history' },
     ],
   },
   {

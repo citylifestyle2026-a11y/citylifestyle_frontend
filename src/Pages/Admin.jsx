@@ -320,7 +320,7 @@ export default function Admin() {
         }
       />
 
-      <div className="adminPage__tableCard">
+      <div className="adminPage__tableCard appCard">
         <div className="adminPage__tableWrapper">
           <CommonTable
             columns={adminTableColumns}

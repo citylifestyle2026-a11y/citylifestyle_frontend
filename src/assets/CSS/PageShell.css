@@ -1,0 +1,199 @@
+/*
+  PageShell.css — single source of truth for the admin page shell.
+
+  Every value below is copied from the Dashboard page (DashboardPage.css /
+  DashboardCard.css) and the Sidebar (240px wide, collapses at 1023px), so
+  Dashboard, list pages, view pages, forms and Profile all share the exact
+  same spacing, title size, card look and table look.
+
+  Classes (added in JSX next to each page's own class names):
+    .appPage        outermost page wrapper
+    .appMain        wrapper of Header + content (offset by the sidebar)
+    .appContent     padded content area under the Header
+    .appPageTitle   the <h1> page title
+    .appCard        white card (filter card / table card)
+
+  Specificity note: selectors are intentionally a little more specific
+  than the old per-page rules (e.g. `.userPage__content`) so this file wins
+  regardless of CSS import order, without using !important.
+*/
+
+:root {
+  --shell-sidebar-width: 240px;
+  --shell-bg: #f4f4f7;
+  --shell-card-radius: 16px;
+  --shell-card-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+/* ───────────── Page + main area ───────────── */
+
+div.appPage {
+  min-height: 100vh;
+  background-color: var(--shell-bg);
+}
+
+.appPage > .appMain {
+  margin-left: var(--shell-sidebar-width);
+  min-width: 0;
+  min-height: 100vh;
+  height: auto;
+  overflow: visible; /* keeps the sticky Header working, page scrolls normally */
+  display: flex;
+  flex-direction: column;
+}
+
+.appMain > .appContent {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  padding: 30px 36px 50px 36px;
+  box-sizing: border-box;
+  background: transparent;
+}
+
+/* ───────────── Title + breadcrumb ───────────── */
+
+h1.appPageTitle {
+  color: #1b2a4e;
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.25;
+  margin: 0 0 4px 0;
+  overflow-wrap: break-word;
+}
+
+.appMain [class*="readcrumb"],
+.appMain .pageSubtitle {
+  font-size: 14px;
+}
+
+/* ───────────── Card ───────────── */
+
+div.appCard,
+section.appCard {
+  background-color: #ffffff;
+  border-radius: var(--shell-card-radius);
+  box-shadow: var(--shell-card-shadow);
+  padding: 24px;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* ───────────── Table (inside a card) ───────────── */
+
+.appCard [class*="ableWrap"] {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+}
+
+.appCard table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.appCard table thead th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  color: #9a9ca8;
+  text-transform: uppercase;
+  padding: 10px 14px;
+  border-bottom: 1px solid #eef0f2;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.appCard table tbody td {
+  font-size: 14px;
+  color: #3a3d4d;
+  padding: 16px 14px;
+  border-bottom: 1px solid #f2f3f6;
+}
+
+.appCard table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ───────────── Responsive tiers (same as Dashboard) ───────────── */
+
+@media (max-width: 1023px) {
+  .appPage > .appMain {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 992px) {
+  div.appCard,
+  section.appCard {
+    padding: 20px;
+  }
+
+  .appCard table thead th,
+  .appCard table tbody td {
+    padding: 12px 12px;
+  }
+}
+
+@media (max-width: 900px) {
+  .appMain > .appContent {
+    padding: 26px 24px 40px 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .appMain > .appContent {
+    padding: 24px 18px 40px 18px;
+  }
+
+  h1.appPageTitle {
+    font-size: 22px;
+  }
+
+  div.appCard,
+  section.appCard {
+    padding: 16px;
+    border-radius: 14px;
+  }
+
+  .appCard table thead th {
+    font-size: 11px;
+    padding: 10px 10px;
+  }
+
+  .appCard table tbody td {
+    font-size: 13px;
+    padding: 11px 10px;
+  }
+}
+
+@media (max-width: 380px) {
+  .appMain > .appContent {
+    padding: 18px 14px 32px 14px;
+  }
+
+  h1.appPageTitle {
+    font-size: 20px;
+  }
+
+  div.appCard,
+  section.appCard {
+    padding: 14px;
+  }
+}
+
+/* ───────────── Breadcrumb "Dashboard" link ───────────── */
+
+.appBreadcrumbLink {
+  color: #9a9ca8;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.appBreadcrumbLink:hover {
+  color: #1b2a4e;
+}

@@ -167,18 +167,18 @@ a{
   /* Matches the sum of the colgroup widths below (50+220+175+175+160+130+90+110+140).
      Below this width .eventList__tableWrap scrolls horizontally instead of
      compressing columns. */
-  min-width: 1250px;
+  min-width: 1420px;
 }
 
-.eventList__colHash { width: 50px; }
-.eventList__colTitle { width: 220px; }
-.eventList__colStart { width: 175px; }
-.eventList__colEnd { width: 175px; }
-.eventList__colVenue { width: 160px; }
-.eventList__colCreatedBy { width: 130px; }
-.eventList__colActive { width: 90px; }
-.eventList__colCreatedOn { width: 110px; }
-.eventList__colAction { width: 140px; }
+.eventList__colHash { width: 60px; }
+.eventList__colTitle { width: 240px; }
+.eventList__colStart { width: 200px; }
+.eventList__colEnd { width: 200px; }
+.eventList__colVenue { width: 180px; }
+.eventList__colCreatedBy { width: 150px; }
+.eventList__colActive { width: 100px; }
+.eventList__colCreatedOn { width: 130px; }
+.eventList__colAction { width: 150px; }
 
 .eventList__table thead th {
   text-align: left;
@@ -284,28 +284,28 @@ a{
 .eventList__actionButton {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
-  background-color: #f2f3f6;
+  gap: 8px;
+  background-color: #ffffff;
   color: #3a3d4d;
-  border: none;
+  border: 1px solid #e2e5eb;
   border-radius: 8px;
   height: 38px;
-  min-width: 96px;
-  padding: 0 16px;
-  font-size: 12px;
+  padding: 0 14px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .eventList__actionButton:hover {
-  background-color: #e5e6ec;
+  background-color: #f8fafc;
+  border-color: #d7dae1;
 }
 
 .eventList__actionCaret {
   font-size: 11px;
+  color: #9a9ca8;
 }
 
 .eventList__actionMenu {
@@ -323,13 +323,13 @@ a{
      it now sits in its own stacking context directly under <body>. */
   position: fixed;
   background-color: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-  padding: 10px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 6px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  min-width: 150px;
+  gap: 0;
+  min-width: 140px;
   white-space: nowrap;
   z-index: 99999;
 }
@@ -342,21 +342,33 @@ a{
   min-width: 150px;
 }
 
+/* View / Ticket Type are wrapped in <Link>; make the anchor a full-width
+   block so those rows look identical to the plain buttons. */
+.eventList__actionMenu a {
+  display: block;
+  text-decoration: none;
+}
+
 .eventList__actionItem {
-  padding: 11px 14px;
-  border-radius: 8px;
-  font-size: 14px;
-  color: #4a4d5e;
-  cursor: pointer;
-  text-align: left;
-  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: none;
   border: none;
-  transition: background-color 0.2s ease;
+  text-align: left;
+  padding: 9px 10px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #3a3d4d;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  white-space: nowrap;
 }
 
 .eventList__actionItem:hover {
-  background-color: #f2f3f6;
-  width:100%;
+  background-color: #f8fafc;
 }
 
 .eventList__pagination {
@@ -462,7 +474,7 @@ a{
      the desktop widths (summing to 1250px) and 20px/16px cell padding
      made every column look far apart once viewed on a small screen. */
   .eventList__table {
-    min-width: 880px;
+    min-width: 1200px;
   }
 
   .eventList__table thead th,
@@ -470,15 +482,15 @@ a{
     padding: 10px 8px;
   }
 
-  .eventList__colHash { width: 34px; }
-  .eventList__colTitle { width: 150px; }
-  .eventList__colStart { width: 130px; }
-  .eventList__colEnd { width: 130px; }
-  .eventList__colVenue { width: 110px; }
-  .eventList__colCreatedBy { width: 100px; }
-  .eventList__colActive { width: 70px; }
-  .eventList__colCreatedOn { width: 90px; }
-  .eventList__colAction { width: 110px; }
+  .eventList__colHash { width: 50px; }
+  .eventList__colTitle { width: 190px; }
+  .eventList__colStart { width: 170px; }
+  .eventList__colEnd { width: 170px; }
+  .eventList__colVenue { width: 140px; }
+  .eventList__colCreatedBy { width: 120px; }
+  .eventList__colActive { width: 80px; }
+  .eventList__colCreatedOn { width: 110px; }
+  .eventList__colAction { width: 130px; }
 
   .eventList__footer {
     flex-direction: column;

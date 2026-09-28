@@ -637,13 +637,14 @@ export default function CreateEvent() {
   const pageTitle = isEditMode ? "Edit Event" : "Create Event";
 
   return (
-    <div className="Event__page">
+    <div className="Event__page appPage">
        <Sidebar/>
-         <div className="EventPage__mainArea">
+         <div className="EventPage__mainArea appMain">
                <Header title={pageTitle} />
+      <div className="appContent">
       <div className="createEvent__container">
         <div className="createEvent__header">
-          <h1 className="createEvent__title">{pageTitle}</h1>
+          <h1 className="createEvent__title appPageTitle">{pageTitle}</h1>
           <div className="createEvent__breadcrumb">
            <Link to="/dashboard">Dashboard</Link>
             <span className="createEvent__breadcrumbSep">-</span>
@@ -954,6 +955,7 @@ export default function CreateEvent() {
           </div>
         </div>
         )}
+      </div>
       </div>
       </div>
     </div>

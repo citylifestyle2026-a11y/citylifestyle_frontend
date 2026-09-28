@@ -12,7 +12,7 @@ import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import { exportBookingReport, getAllBookings } from "../redux/booking/bookingThunk";
 import { getAllEvents } from "../redux/event/eventThunk";
-import { FaSort } from "react-icons/fa";
+import { FaSort, FaChevronDown } from "react-icons/fa";
 import CommonSearch from "../Components/CommonSearch";
 import CommonSelect from "../Components/CommonSelect";
 import CommonPagination from "../Components/CommonPagination";
@@ -414,7 +414,7 @@ const Booking = () => {
         }
       />
       {/* booking filter */}
-            <div className="bookingPage-filterCard">
+            <div className="bookingPage-filterCard appCard">
               <div className="bookingPage-filterGrid">
 
                 {/* Booking Id */}
@@ -566,7 +566,7 @@ const Booking = () => {
               </div>
             </div>
 
-            <div className="bookingPage-card">
+            <div className="bookingPage-card appCard">
               <div className="erPage__tableToolbar">
                 <div className="erPage__toolbarLeft">
                   <CommonSelect
@@ -697,7 +697,7 @@ const Booking = () => {
                                 className="bookingPage-actionBtn"
                                 onClick={(event) => toggleActionMenu(row._id, event)}
                               >
-                                Action <span className="bookingPage-actionCaret">&#9662;</span>
+                                Action <FaChevronDown className="bookingPage-actionCaret" />
                               </button>
 
                               {openActionId === row._id && actionMenuPos && (

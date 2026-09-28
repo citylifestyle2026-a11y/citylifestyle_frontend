@@ -453,24 +453,28 @@
 .bookingPage-actionBtn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background-color: #f2f3f6;
+  gap: 8px;
+  background-color: #ffffff;
   color: #3a3d4d;
-  border: none;
+  border: 1px solid #e2e5eb;
   border-radius: 8px;
-  padding: 8px 14px;
+  height: 38px;
+  padding: 0 14px;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  white-space: nowrap;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .bookingPage-actionBtn:hover {
-  background-color: #e5e6ec;
+  background-color: #f8fafc;
+  border-color: #d7dae1;
 }
 
 .bookingPage-actionCaret {
   font-size: 11px;
+  color: #9a9ca8;
 }
 
 .bookingPage-actionMenu {
@@ -478,34 +482,41 @@
   top: calc(100% + 6px);
   right: 0;
   background-color: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-  padding: 8px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 6px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  min-width: 120px;
+  gap: 0;
+  min-width: 140px;
+  white-space: nowrap;
   /* Menu renders as position:fixed via inline style at click time, so it
      can visually sit over the Sidebar (z-index: 1001) or Header
      (z-index: 900). Needs to be above both or it renders invisibly
      behind them despite being "open" in state. */
-  z-index: 1100;
+  z-index: 99999;
 }
 
 .bookingPage-actionMenuItem {
-  padding: 9px 12px;
-  border-radius: 8px;
-  font-size: 13.5px;
-  color: #3a3d4d;
-  cursor: pointer;
-  text-align: left;
-  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: none;
   border: none;
-  transition: background-color 0.2s ease;
+  text-align: left;
+  padding: 9px 10px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #3a3d4d;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  white-space: nowrap;
 }
 
 .bookingPage-actionMenuItem:hover {
-  background-color: #f2f3f6;
+  background-color: #f8fafc;
 }
 
 .bookingPage-table tfoot td {

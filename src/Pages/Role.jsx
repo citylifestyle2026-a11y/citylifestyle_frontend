@@ -54,16 +54,16 @@ export default function Role() {
   const visibleRoles = roleMatchesSearch ? [role] : [];
 
   return (
-    <div className="rolePage">
+    <div className="rolePage appPage">
       <Sidebar />
 
-      <div className="mainArea">
+      <div className="mainArea appMain">
         <Header title="Role" />
 
-        <div className="content">
+        <div className="content appContent">
           <div className="topRow">
             <div>
-              <h1 className="pageRoleTitle">Role</h1>
+              <h1 className="pageRoleTitle appPageTitle">Role</h1>
               <div className="breadcrumb">
                 <Link to="/dashboard"><span style={{color:"#9a9ca8"}}>Dashboard</span></Link>
                 <span>-</span>
@@ -72,7 +72,7 @@ export default function Role() {
             </div>
           </div>
 
-          <div className="tableCard">
+          <div className="tableCard appCard">
             {/* <div className="tableControls">
               <select
                 className="rowsSelect"

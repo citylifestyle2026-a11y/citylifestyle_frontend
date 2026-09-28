@@ -15,12 +15,12 @@ import "../assets/CSS/DashboardLayout.css";
  */
 export default function DashboardLayout({ title, children }) {
   return (
-    <div className="dashboardLayout">
+    <div className="dashboardLayout appPage">
       <Sidebar />
 
-      <div className="dashboardMain">
+      <div className="dashboardMain appMain">
         <Header title={title} />
-        <main className="dashboardContent">{children}</main>
+        <main className="dashboardContent appContent">{children}</main>
       </div>
     </div>
   );

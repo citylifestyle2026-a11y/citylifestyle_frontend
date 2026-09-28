@@ -48,7 +48,7 @@ export default function CommonPageHeader({
 }) {
   const titleAndBreadcrumb = (
     <>
-      <h1 className={titleClassName} style={titleStyle}>
+      <h1 className={`${titleClassName || ""} appPageTitle`.trim()} style={titleStyle}>
         {title}
       </h1>
       {breadcrumb}

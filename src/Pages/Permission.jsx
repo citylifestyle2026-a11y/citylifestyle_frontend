@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useState } from "react";
 import { FaSort, FaSearch, FaChevronDown, FaPlus, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import Sidebar from "../Components/Sidebar";
@@ -103,18 +104,18 @@ export default function Permission() {
   };
 
   return (
-    <div className="permissionPageWrapper">
+    <div className="permissionPageWrapper appPage">
       <Sidebar />
 
-      <div className="permissionPageMainArea">
+      <div className="permissionPageMainArea appMain">
         <Header title="Permission" />
 
-        <div className="permissionPageContent">
+        <div className="permissionPageContent appContent">
           <div className="permissionPageTopRow">
             <div>
-              <h1 className="permissionPageTitle">Permission</h1>
+              <h1 className="permissionPageTitle appPageTitle">Permission</h1>
               <div className="permissionPageBreadcrumb">
-                <span>Dashboard</span>
+                <Link to="/dashboard" className="appBreadcrumbLink">Dashboard</Link>
                 <span>-</span>
                 <span className="permissionPageBreadcrumbActive">Permission</span>
               </div>
@@ -130,7 +131,7 @@ export default function Permission() {
             </button>
           </div>
 
-          <div className="permissionPageTableCard">
+          <div className="permissionPageTableCard appCard">
             {openActionId !== null && (
               <div
                 className="permissionPageActionOverlay"

@@ -159,7 +159,7 @@ export default function Profile() {
     <DashboardLayout title="Profile">
       {/* Breadcrumb */}
       <div className="profileBreadcrumbWrap">
-        <h1 className="profilePageTitle">Profile</h1>
+        <h1 className="profilePageTitle appPageTitle">Profile</h1>
         <div className="profileBreadcrumb">
            <Link to="/dashboard"><span style={{color:"#9a9ca8"}}>Dashboard</span></Link>
           <span className="breadcrumbDivider">-</span>

@@ -808,7 +808,7 @@ export default function EntryReport() {
       />
 
       {/* Filters Card */}
-      <div className="erPage__card erPage__filtersCard">
+      <div className="erPage__card erPage__filtersCard appCard">
         <div className="erPage__filtersRow erPage__filtersRow--fields">
           <input
             type="text"
@@ -950,7 +950,7 @@ export default function EntryReport() {
       </div>
 
       {/* Table Card */}
-      <div className="erPage__card erPage__tableCard">
+      <div className="erPage__card erPage__tableCard appCard">
         <div className="erPage__tableToolbar">
           <div className="erPage__toolbarLeft">
             <CommonSelect
@@ -1003,8 +1003,10 @@ export default function EntryReport() {
               <tr>
                 {COLUMNS.map((col) => (
                   <th key={col} className="erPage__th">
-                    <span className="eventList__sortIcon"><FaSort /></span>
-                    {col}
+                    <span className="erPage__thContent">
+                      <span className="erPage__sortIcon"><FaSort /></span>
+                      {col}
+                    </span>
                   </th>
                 ))}
               </tr>

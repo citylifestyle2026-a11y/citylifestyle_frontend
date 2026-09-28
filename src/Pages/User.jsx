@@ -366,7 +366,7 @@ export default function User() {
         }
       />
 
-      <div className="userPage__tableCard">
+      <div className="userPage__tableCard appCard">
         <div className="userPage__tableControls">
           <CommonSelect
             className="userPage__rowsSelect"

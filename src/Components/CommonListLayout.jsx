@@ -45,11 +45,11 @@ export default function CommonListLayout({
   outsideMainArea,
 }) {
   return (
-    <div className={pageClassName}>
+    <div className={`${pageClassName || ""} appPage`.trim()}>
       <Sidebar />
-      <div className={mainAreaClassName}>
+      <div className={`${mainAreaClassName || ""} appMain`.trim()}>
         <Header title={headerTitle} />
-        <div className={contentClassName}>{children}</div>
+        <div className={`${contentClassName || ""} appContent`.trim()}>{children}</div>
       </div>
       {outsideMainArea}
     </div>

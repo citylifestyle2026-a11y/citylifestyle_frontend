@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import "../assets/CSS/Event.css";
 import { Link, useNavigate } from "react-router-dom";
-import { FaSearch, FaSort } from "react-icons/fa";
+import { FaSearch, FaSort, FaChevronDown } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllEvents, changeEventStatus } from "../redux/event/eventThunk";
 import Swal from "sweetalert2";
@@ -281,7 +281,7 @@ const Event = () => {
         }
       />
 
-      <div className="eventList__card">
+      <div className="eventList__card appCard">
             {openActionId !== null && (
               <div
                 className="eventList__actionOverlay"
@@ -395,7 +395,7 @@ const Event = () => {
                             className="eventList__actionButton"
                             onClick={(e) => toggleActionMenu(event._id, e)}
                           >
-                            Action <span className="eventList__actionCaret">&#9662;</span>
+                            Action <FaChevronDown className="eventList__actionCaret" />
                           </button>
 
                           {openActionId === event._id &&

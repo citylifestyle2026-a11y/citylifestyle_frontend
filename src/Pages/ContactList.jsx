@@ -1,6 +1,6 @@
+import { Link } from "react-router-dom";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import {
   FaSearch,
   FaPlus,
@@ -58,7 +58,6 @@ const SORTABLE_COLUMNS = ["fullName", "whatsappNumber", "companyName", "designat
 
 export default function ContactList() {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   const {
     contacts,
@@ -260,17 +259,6 @@ export default function ContactList() {
     setFormModalMode("edit");
     setIsFormModalOpen(true);
   }, []);
-
-  // Contact List -> Event History (Step 4B) — navigates with the
-  // contact's id; EventHistory.jsx reads it via useParams and loads
-  // that contact's history itself.
-  const handleEventHistoryClick = useCallback(
-    (contact) => {
-      setOpenActionMenuId(null);
-      navigate(`/event-history/${contact._id}`);
-    },
-    [navigate]
-  );
 
   const handleCloseFormModal = () => {
     setIsFormModalOpen(false);
@@ -492,6 +480,15 @@ const sortedReferenceFilterOptions = useMemo(
         cellClassName: "contactPage__addressCell",
         render: (contact) => contact.address || "-",
       }),
+      sortableColumn("spouseName", "Spouse Name", {
+        render: (contact) => contact.spouseName || "-",
+      }),
+      sortableColumn("spouseMobile", "Spouse Mobile Number", {
+        render: (contact) => contact.spouseMobile || "-",
+      }),
+      sortableColumn("profession", "Profession", {
+        render: (contact) => contact.profession || "-",
+      }),
       sortableColumn("references", "Reference", {
         render: (contact) => {
           const references = (
@@ -576,14 +573,6 @@ const sortedReferenceFilterOptions = useMemo(
 
               <button
                 type="button"
-                className="contactAction__item contactAction__itemEventHistory"
-                onClick={() => handleEventHistoryClick(contact)}
-              >
-                Event History
-              </button>
-
-              <button
-                type="button"
                 className="contactAction__item contactAction__itemDelete"
                 onClick={() => handleDeleteClick(contact)}
               >
@@ -600,7 +589,6 @@ const sortedReferenceFilterOptions = useMemo(
     handleToggleActionMenu,
     handleViewClick,
     handleEditClick,
-    handleEventHistoryClick,
     handleDeleteClick,
     referenceContactsByKey,
   ]);
@@ -683,7 +671,7 @@ const sortedReferenceFilterOptions = useMemo(
         titleStyle={{ textAlign: "start", display: "block" }}
         breadcrumb={
           <div className="contactPage__breadcrumb">
-            <span>Dashboard</span>
+            <Link to="/dashboard" className="appBreadcrumbLink">Dashboard</Link>
             <span>-</span>
             <span className="contactPage__breadcrumbActive">Contact List</span>
           </div>
@@ -712,7 +700,7 @@ const sortedReferenceFilterOptions = useMemo(
         }
       />
 
-      <div className="contactPage__tableCard">
+      <div className="contactPage__tableCard appCard">
         <div className="contactPage__tableControls">
           <CommonSelect
             className="contactPage__rowsSelect"

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FaSearch, FaPlus, FaChevronDown, FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
@@ -338,7 +339,7 @@ export default function GuestList() {
         titleStyle={{ textAlign: "start", display: "block" }}
         breadcrumb={
           <div className="guestPage__breadcrumb">
-            <span>Dashboard</span>
+            <Link to="/dashboard" className="appBreadcrumbLink">Dashboard</Link>
             <span>-</span>
             <span className="guestPage__breadcrumbActive">Guest List</span>
           </div>
@@ -353,7 +354,7 @@ export default function GuestList() {
         }
       />
 
-      <div className="guestPage__tableCard">
+      <div className="guestPage__tableCard appCard">
         <div className="guestPage__tableControls">
           <CommonSelect
             className="guestPage__rowsSelect"

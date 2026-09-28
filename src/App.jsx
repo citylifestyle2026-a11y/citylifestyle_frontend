@@ -1,4 +1,5 @@
 import "./App.css";
+import "./assets/CSS/PageShell.css";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
@@ -129,7 +130,7 @@ function App() {
             <Route path="/register-users/:id" element={<RegisterUsers />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/contact-list" element={<ContactList />} />
-            <Route path="/event-history/:contactId" element={<EventHistory />} />
+            <Route path="/event-history" element={<EventHistory />} />
             <Route path="/company-categories" element={<CompanyCategory />} />
           </Route>
 

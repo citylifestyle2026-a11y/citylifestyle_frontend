@@ -1,11 +1,26 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import {
+  getAllEventHistoryApi,
   createEventHistoryApi,
   getEventHistoryByContactApi,
   updateEventHistoryApi,
   deleteEventHistoryApi,
 } from "../../services/contactEventHistoryService";
 import { getApiErrorMessage } from "../../utilits/apiError";
+
+// ================= GET ALL EVENT HISTORY (ALL CONTACTS) =================
+export const getAllEventHistory = createAsyncThunk(
+  "contactEventHistory/getAllEventHistory",
+  async (params, thunkAPI) => {
+    try {
+      return await getAllEventHistoryApi(params);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        getApiErrorMessage(error, "Failed to fetch event history")
+      );
+    }
+  }
+);
 
 // ================= CREATE EVENT HISTORY =================
 export const createEventHistory = createAsyncThunk(

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -408,7 +409,7 @@ export default function CompanyCategory() {
         titleStyle={{ textAlign: "start", display: "block" }}
         breadcrumb={
           <div className="companyCategoryPage__breadcrumb">
-            <span>Dashboard</span>
+            <Link to="/dashboard" className="appBreadcrumbLink">Dashboard</Link>
             <span>-</span>
             <span className="companyCategoryPage__breadcrumbActive">
               Company Category
@@ -427,7 +428,7 @@ export default function CompanyCategory() {
         }
       />
 
-      <div className="companyCategoryPage__tableCard">
+      <div className="companyCategoryPage__tableCard appCard">
         <div className="companyCategoryPage__tableControls">
           <CommonSelect
             className="companyCategoryPage__rowsSelect"

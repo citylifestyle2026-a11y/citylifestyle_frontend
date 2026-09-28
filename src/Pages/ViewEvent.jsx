@@ -96,15 +96,15 @@ const ViewEvent = () => {
   }, [dispatch, id]);
 
   return (
-    <div className="Event__page">
+    <div className="Event__page appPage">
       <Sidebar />
-      <div className="EventPage__mainArea">
+      <div className="EventPage__mainArea appMain">
         <Header title="View Event" />
-        <div className="viewEvent-wrapper">
+        <div className="viewEvent-wrapper appContent">
           <div className="viewEvent-header">
-            <h1 className="viewEvent-title">View Event Details</h1>
+            <h1 className="viewEvent-title appPageTitle">View Event Details</h1>
             <div className="viewEvent-breadcrumb">
-              <span>Dashboard</span>
+              <Link to="/dashboard" className="appBreadcrumbLink">Dashboard</Link>
               <span className="viewEvent-breadcrumbSep">-</span>
               <span className="viewEvent-breadcrumbActive">View Event Details</span>
             </div>

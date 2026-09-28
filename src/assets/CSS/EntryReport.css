@@ -702,3 +702,17 @@
     flex: 1;
   }
 }
+
+/* Header icon + text: same 6px gap / 10px icon as the User page table */
+.erPage__thContent {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.erPage__sortIcon {
+  font-size: 10px;
+  color: #c4c6d2;
+  display: inline-flex;
+  align-items: center;
+}
