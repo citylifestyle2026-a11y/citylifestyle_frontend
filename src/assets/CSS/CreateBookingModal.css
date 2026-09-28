@@ -228,6 +228,27 @@
   transform: translateY(-1px);
 }
 
+.bookingCreateDuplicateButton {
+  background-color: #fff4d6;
+  color: #8a5a00;
+  border: 1px solid #e6b800;
+  border-radius: 10px;
+  padding: 12px 22px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.bookingCreateDuplicateButton:hover:not(:disabled) {
+  background-color: #ffe8a3;
+}
+
+.bookingCreateDuplicateButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 @media (max-width: 700px) {
   .bookingCreateGrid {
     grid-template-columns: 1fr;
@@ -255,6 +276,7 @@
   }
 
   .bookingCreateCloseButton,
+  .bookingCreateDuplicateButton,
   .bookingCreateCreateButton {
     flex: 1;
   }

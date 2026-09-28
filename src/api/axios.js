@@ -95,14 +95,45 @@ api.interceptors.response.use(
       error.config?.method === "delete" &&
       /\/events\/[^/]+\/delete$/.test(error.config?.url || "");
 
+    // STALE-RESPONSE GUARD: a 401 that belongs to a request sent with an
+    // OLD token (e.g. the expired 1-day token still in localStorage, used
+    // by App.jsx's getProfile() on page load) must never wipe a NEWER
+    // token. On a slow/cold server that old request can answer only
+    // AFTER the admin has already logged in again — without this guard
+    // it deleted the fresh token and threw the admin back out, so the
+    // first login "didn't stick" and only the second one worked.
+    const sentAuthHeader =
+      error.config?.headers?.Authorization ||
+      error.config?.headers?.get?.("Authorization") ||
+      null;
+    const currentToken = localStorage.getItem("token");
+    const isStaleTokenResponse =
+      Boolean(currentToken) && sentAuthHeader !== `Bearer ${currentToken}`;
+
     if (
       error.response?.status === 401 &&
       !isLoginRequest &&
-      !isEventDeleteRequest
+      !isEventDeleteRequest &&
+      !isStaleTokenResponse
     ) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
-      window.location.href = "/";
+
+      // Only bounce to the login page when the admin is on a private
+      // page. On the public site / login / registration-link pages just
+      // clear the dead token (no reload, no jump to the marketing Home).
+      const path = window.location.pathname;
+      const isPublicPath =
+        path === "/" ||
+        path === "/login" ||
+        path === "/city-sparkle" ||
+        path === "/parv" ||
+        path === "/contact" ||
+        path.startsWith("/r/");
+
+      if (!isPublicPath) {
+        window.location.href = "/login";
+      }
     }
 
     return Promise.reject(error);

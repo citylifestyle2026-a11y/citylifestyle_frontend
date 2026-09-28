@@ -6,7 +6,7 @@ import { createBooking } from "../redux/booking/bookingThunk";
 import { clearBookingState } from "../redux/booking/bookingSlice";
 import { getAllEvents } from '../redux/event/eventThunk';
 import { getAllTicketTypes } from '../redux/ticketType/ticketTypeThunk'
-import { showError, showSuccess } from "../utilits/toast";
+import { showError, showSuccess, showWarning } from "../utilits/toast";
 import {
   isValidMobileNumber,
   MOBILE_ERROR_MESSAGE,
@@ -30,6 +30,9 @@ export default function CreateBookingModal({ onClose, onSuccess }) {
   const { events } = useSelector((state) => state.event);
   const activeEvent = events?.find((event) => event.isActive === true);
   const [fieldErrors, setFieldErrors] = useState({});
+  // true after the server reports a duplicate (same name + mobile) —
+  // shows the "Book Anyway" button until name/mobile/event/ticket changes.
+  const [duplicateFound, setDuplicateFound] = useState(false);
   // Returns a { fieldName: message } map instead of a single message so
   // each error can render directly below its own field, per the project's
   // validation pattern (see EditProfileModal). Only falls back to a toast
@@ -134,6 +137,7 @@ export default function CreateBookingModal({ onClose, onSuccess }) {
     }));
 
     setTicketTypes([]);
+    setDuplicateFound(false);
     setFieldErrors((prev) => ({ ...prev, eventId: undefined, ticketType: undefined }));
 
     if (!eventId) return;
@@ -201,6 +205,7 @@ export default function CreateBookingModal({ onClose, onSuccess }) {
     const price = selectedTicket?.amount || 0;
     const availableCount = selectedTicket?.availableCount;
 
+    setDuplicateFound(false);
     setFormData((prev) => {
       // Re-clamp an already-entered qty to the newly selected ticket's
       // availableCount — only ever brings it down if it's now out of
@@ -222,13 +227,14 @@ export default function CreateBookingModal({ onClose, onSuccess }) {
   // handel change
   const handleChange = (field) => (e) => {
     setFormData((prev) => ({ ...prev, [field]: e.target.value }));
+    if (field === "name" || field === "mobile") setDuplicateFound(false);
     // Clear that field's inline error as soon as the user edits it, so the
     // message doesn't linger after they've corrected it but before the
     // next submit attempt re-validates.
     setFieldErrors((prev) => (prev[field] ? { ...prev, [field]: undefined } : prev));
   };
   // handel create 
-  const handleCreate = async () => {
+  const handleCreate = async (allowDuplicate = false) => {
     const errors = validateForm();
 
     if (Object.keys(errors).length > 0) {
@@ -249,6 +255,8 @@ export default function CreateBookingModal({ onClose, onSuccess }) {
       email: formData.email.trim(),
       discount: Number(formData.discount),
       remark: formData.remark.trim(),
+      // Only sent when the admin clicked "Book Anyway".
+      ...(allowDuplicate ? { allowDuplicate: true } : {}),
     };
 
     try {
@@ -258,6 +266,7 @@ export default function CreateBookingModal({ onClose, onSuccess }) {
 
       setFormData(initialFormData);
       setTicketTypes([]);
+      setDuplicateFound(false);
       dispatch(clearBookingState());
       onSuccess();
       onClose();
@@ -267,9 +276,21 @@ export default function CreateBookingModal({ onClose, onSuccess }) {
       // this is the single place that shows the create-failure toast —
       // there's no separate effect watching createError, which would
       // otherwise fire a second, duplicate toast for the same failure.
-      showError(
-        typeof err === "string" ? err : err?.message || "Failed to create booking."
-      );
+      const message =
+        typeof err === "string" ? err : err?.message || "Failed to create booking.";
+
+      // Same name + mobile already booked for this event & ticket ->
+      // shown as a warning (not a generic error); the form stays open.
+      if (/^duplicate booking/i.test(message)) {
+        setDuplicateFound(true);
+        showWarning(message);
+        setFieldErrors((prev) => ({
+          ...prev,
+          mobile: "Duplicate booking — this name & mobile number already has a booking.",
+        }));
+      } else {
+        showError(message);
+      }
       dispatch(clearBookingState());
     }
   };
@@ -500,10 +521,20 @@ export default function CreateBookingModal({ onClose, onSuccess }) {
             >
               Close
             </button>
+            {duplicateFound && (
+              <button
+                type="button"
+                className="bookingCreateDuplicateButton"
+                onClick={() => handleCreate(true)}
+                disabled={createLoading}
+              >
+                Book Anyway
+              </button>
+            )}
             <button
               type="button"
               className="bookingCreateCreateButton"
-              onClick={handleCreate}
+              onClick={() => handleCreate(false)}
               disabled={createLoading}
             >
               {createLoading ? "Creating..." : "Create"}

@@ -138,11 +138,11 @@ export default function BulkImportBookingModal({ onClose, onSuccess }) {
         <p className="bulkImportHint">
           Upload a CSV file to create bookings line by line. Each successful
           row also gets its registration link sent automatically, just like
-          a normal booking. If a row's mobile number already has a booking
-          for the same event &amp; ticket type — even with a different name,
-          and whether the number is written with or without 91 — it is
-          skipped as a duplicate (this includes re-uploading the same
-          file), so tickets are never duplicated.
+          a normal booking. If a row's name and mobile number already have
+          a booking for the same event &amp; ticket type — whether the
+          number is written with or without 91 — it is skipped as a
+          duplicate (this includes re-uploading the same file), so tickets
+          are never duplicated.
         </p>
         <p className="bulkImportColumnsHint">
           Columns: <code>eventId</code> or <code>eventName</code>,{" "}
