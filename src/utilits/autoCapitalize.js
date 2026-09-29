@@ -40,6 +40,10 @@ const EXCLUDED_INPUT_TYPES = new Set([
   "reset",
 ]);
 
+// name / id / autocomplete values that mark a field as email / login /
+// username, regardless of its `type`.
+const EMAIL_LIKE_FIELD = /e-?mail|login|username/i;
+
 // Opt a specific field out with data-no-autocap="true" (e.g. a
 // reference/tag input where casing is intentionally user-controlled),
 // should that ever be needed — none of the current fields use it.
@@ -51,7 +55,18 @@ function isEligibleField(target) {
 
   if (target.tagName === "INPUT") {
     const type = (target.type || "text").toLowerCase();
-    return !EXCLUDED_INPUT_TYPES.has(type);
+    if (EXCLUDED_INPUT_TYPES.has(type)) return false;
+
+    // Email-like fields that are NOT type="email" (e.g. the Guest /
+    // Coordinator / Nomination modals use type="text" name="email", and
+    // the Login field takes "email or mobile") must never be
+    // capitalized either — "Rahul@gmail.com" is a wrong email.
+    const hint = `${target.name || ""} ${target.id || ""} ${
+      target.getAttribute("autocomplete") || ""
+    }`;
+    if (EMAIL_LIKE_FIELD.test(hint)) return false;
+
+    return true;
   }
 
   return false;

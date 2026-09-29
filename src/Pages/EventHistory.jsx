@@ -135,7 +135,10 @@ export default function EventHistory() {
     setIsModalOpen(false);
     setOpenActionMenuId(null);
     setDeleteEntryId(entry._id);
-    setDeleteEntryName(entry.contactId?.fullName || "this entry");
+    setDeleteEntryName(
+      (entry.isSpouse ? entry.contactId?.spouseName : entry.contactId?.fullName) ||
+        "this entry"
+    );
     setIsDeleteOpen(true);
   };
 
@@ -165,12 +168,26 @@ export default function EventHistory() {
         key: "contact",
         label: "Contact",
         cellClassName: "eventHistoryPage__contactCell",
-        render: (entry) => entry.contactId?.fullName || "-",
+        render: (entry) =>
+          entry.isSpouse ? (
+            <>
+              {entry.contactId?.spouseName || "-"}
+              <br />
+              <small style={{ color: "#8a8fa3", fontWeight: 400 }}>
+                Spouse of {entry.contactId?.fullName || "-"}
+              </small>
+            </>
+          ) : (
+            entry.contactId?.fullName || "-"
+          ),
       },
       {
         key: "mobile",
         label: "WhatsApp Number",
-        render: (entry) => entry.contactId?.whatsappNumber || "-",
+        render: (entry) =>
+          (entry.isSpouse
+            ? entry.contactId?.spouseMobile
+            : entry.contactId?.whatsappNumber) || "-",
       },
       {
         key: "edition",

@@ -13,11 +13,19 @@
      unwanted horizontal scrollbar. min-width:0 lets the card actually
      shrink to the grid track's width like every other block element. */
   min-width: 0;
+  position: relative;
 }
 
 .card:hover {
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.1);
   transform: translateY(-2px);
+}
+
+/* Lift the hovered/focused card above its neighbours so its info
+   tooltip is never painted underneath the next row of cards. */
+.card:hover,
+.card:focus-within {
+  z-index: 5;
 }
 
 .cardHeader {
@@ -272,4 +280,61 @@
   .rowLabel {
     font-size: 11.5px;
   }
+}
+
+/* ===== Info tooltip =====
+   Hovering ANYWHERE on a card that has infoText opens the explanation
+   tooltip. Touch screens have no hover, so there tapping the card
+   (which focuses it, see tabIndex in DashboardCard.jsx) opens it. */
+.cardInfo {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+}
+
+.card:focus {
+  outline: none;
+}
+
+.card:focus-visible {
+  box-shadow: 0 0 0 3px var(--admin-focus-ring, rgba(27, 42, 78, 0.2));
+}
+
+.cardInfoTooltip {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 250px;
+  max-width: min(250px, calc(100vw - 72px));
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background-color: #1b2a4e;
+  color: #ffffff;
+  font-size: 12.5px;
+  line-height: 1.5;
+  font-weight: 400;
+  text-align: left;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+  pointer-events: none;
+}
+
+.cardInfoTooltipTitle {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.card:hover .cardInfoTooltip,
+.card:focus .cardInfoTooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
 }

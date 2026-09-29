@@ -123,7 +123,11 @@ export default function ContactDetailsModal({ contact, onClose }) {
             <span className="contactDetailsLabel">Company Category</span>
             <span className="contactDetailsColon">:</span>
             <span className="contactDetailsValue">
-              {contact.companyCategory?.name || "-"}
+              {[
+                ...new Set(
+                  [contact.companyCategory?.name, contact.professionCategory?.name].filter(Boolean)
+                ),
+              ].join(", ") || "-"}
             </span>
           </div>
 

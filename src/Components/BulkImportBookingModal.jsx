@@ -5,6 +5,8 @@ import "../assets/CSS/BulkImportBookingModal.css";
 import { importBookingsCsv } from "../redux/booking/bookingThunk";
 import { clearImportResult } from "../redux/booking/bookingSlice";
 import { showError, showSuccess, showWarning } from "../utilits/toast";
+import { checkBookingsCsvApi } from "../services/bookingService";
+import { getErrorText } from "../utilits/apiError";
 
 // ================= BULK IMPORT BOOKING MODAL =================
 // Lets an admin pick a .csv file and import bookings from it, one row
@@ -28,15 +30,36 @@ export default function BulkImportBookingModal({ onClose, onSuccess }) {
 
   const [selectedFile, setSelectedFile] = useState(null);
   const [fileError, setFileError] = useState("");
+  // Pre-import check of the chosen file (see checkBookingsCsvApi): rows
+  // sharing a mobile number block the import until the file is fixed.
+  const [checking, setChecking] = useState(false);
+  const [checkResult, setCheckResult] = useState(null);
 
   const { importLoading, importResult, importError } = useSelector(
     (state) => state.booking
   );
 
+  const runCheck = async (file) => {
+    setChecking(true);
+    setCheckResult(null);
+
+    try {
+      const response = await checkBookingsCsvApi(file);
+      setCheckResult(response?.data || null);
+    } catch (err) {
+      // e.g. "CSV file has no data rows" — the import would fail the
+      // same way, so it stays disabled (fileError disables it).
+      setFileError(getErrorText(err, "Could not check the CSV file."));
+    } finally {
+      setChecking(false);
+    }
+  };
+
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
 
     setFileError("");
+    setCheckResult(null);
     dispatch(clearImportResult());
 
     if (!file) {
@@ -52,6 +75,11 @@ export default function BulkImportBookingModal({ onClose, onSuccess }) {
     }
 
     setSelectedFile(file);
+    runCheck(file);
+
+    // Clear the input so choosing the SAME file name again (after fixing
+    // it) still fires onChange and re-runs the check.
+    e.target.value = "";
   };
 
   const handleBrowseClick = () => {
@@ -63,6 +91,10 @@ export default function BulkImportBookingModal({ onClose, onSuccess }) {
       setFileError("Please choose a CSV file first.");
       return;
     }
+
+    // Same mobile number in more than one row: nothing is booked until
+    // the file is fixed (the backend enforces this too).
+    if (checkResult && !checkResult.canImport) return;
 
     try {
       const response = await dispatch(
@@ -113,6 +145,7 @@ export default function BulkImportBookingModal({ onClose, onSuccess }) {
   const handlePickAnotherFile = () => {
     setSelectedFile(null);
     setFileError("");
+    setCheckResult(null);
     dispatch(clearImportResult());
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
@@ -138,11 +171,15 @@ export default function BulkImportBookingModal({ onClose, onSuccess }) {
         <p className="bulkImportHint">
           Upload a CSV file to create bookings line by line. Each successful
           row also gets its registration link sent automatically, just like
-          a normal booking. If a row's name and mobile number already have
-          a booking for the same event &amp; ticket type — whether the
-          number is written with or without 91 — it is skipped as a
-          duplicate (this includes re-uploading the same file), so tickets
-          are never duplicated.
+          a normal booking. Names may repeat, but each mobile number must
+          be different: if a row's mobile number already has a booking for
+          the same event &amp; ticket type — whether the number is written
+          with or without 91 — the row is skipped as a duplicate (this
+          includes re-uploading the same file), so tickets are never
+          duplicated. If the same mobile number is in more than one row of
+          the file, a warning is shown as soon as you choose it and nothing
+          is booked until you merge those rows into one (add the quantities)
+          or change the number, and choose the file again.
         </p>
         <p className="bulkImportColumnsHint">
           Columns: <code>eventId</code> or <code>eventName</code>,{" "}
@@ -175,6 +212,63 @@ export default function BulkImportBookingModal({ onClose, onSuccess }) {
         </div>
 
         {fileError && <p className="bookingCreateFieldError">{fileError}</p>}
+        {checking && <p className="bulkImportChecking">Checking file...</p>}
+
+        {!importResult && checkResult && (
+          <div className="bulkImportCheck">
+            {checkResult.sameMobileGroups.length > 0 && (
+              <div className="bulkImportWarning bulkImportWarning--block">
+                <strong>
+                  Same mobile number in more than one row — import is blocked
+                </strong>
+                {checkResult.sameMobileGroups.map((group) => (
+                  <p key={group.mobileNumber} className="bulkImportWarningItem">
+                    <b>{group.mobileNumber}</b> is in rows{" "}
+                    {group.rows.map((r) => r.row).join(", ")} (
+                    {group.rows.map((r) => `qty ${r.quantity}`).join(" + ")}) →
+                    total qty <b>{group.totalQuantity}</b>.
+                  </p>
+                ))}
+                <span>
+                  Merge these rows into ONE row (add the quantities) or change
+                  the mobile number in your file, then choose the file again.
+                  The Import button stays disabled until then.
+                </span>
+              </div>
+            )}
+
+            {checkResult.existingDuplicates.length > 0 && (
+              <div className="bulkImportWarning">
+                <strong>Already booked — these rows will be skipped</strong>
+                {checkResult.existingDuplicates.map((d) => (
+                  <p key={d.row} className="bulkImportWarningItem">
+                    Row {d.row}: {d.mobileNumber} already has booking{" "}
+                    {d.existingBookingNumber} ({d.existingName}).
+                  </p>
+                ))}
+              </div>
+            )}
+
+            {checkResult.rowErrors.length > 0 && (
+              <div className="bulkImportWarning bulkImportWarning--error">
+                <strong>Rows with errors — these rows will fail</strong>
+                {checkResult.rowErrors.map((r) => (
+                  <p key={r.row} className="bulkImportWarningItem">
+                    Row {r.row}: {r.error}
+                  </p>
+                ))}
+              </div>
+            )}
+
+            {checkResult.canImport &&
+              checkResult.existingDuplicates.length === 0 &&
+              checkResult.rowErrors.length === 0 && (
+                <p className="bulkImportCheckOk">
+                  File checked — no repeated mobile numbers found.
+                </p>
+              )}
+          </div>
+        )}
         {importError && (
           <p className="bookingCreateFieldError">{importError}</p>
         )}
@@ -254,7 +348,13 @@ export default function BulkImportBookingModal({ onClose, onSuccess }) {
               type="button"
               className="bookingCreateCreateButton"
               onClick={handleImport}
-              disabled={importLoading || !selectedFile}
+              disabled={
+                importLoading ||
+                checking ||
+                !selectedFile ||
+                Boolean(fileError) ||
+                Boolean(checkResult && !checkResult.canImport)
+              }
             >
               {importLoading ? "Importing..." : "Import"}
             </button>

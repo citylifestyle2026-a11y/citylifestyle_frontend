@@ -1,0 +1,229 @@
+/* Entry Report -> "Add to Event History" popup (addHistory__ prefix) */
+
+.addHistory__overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(30, 30, 40, 0.5);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2200;
+  padding: 20px;
+  animation: addHistory__fadeIn 0.25s ease forwards;
+}
+
+@keyframes addHistory__fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.addHistory__container {
+  background-color: #ffffff;
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  padding: 28px 32px 28px 32px;
+  box-sizing: border-box;
+  animation: addHistory__popIn 0.28s ease forwards;
+}
+
+@keyframes addHistory__popIn {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.addHistory__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.addHistory__title {
+  margin: 0;
+  color: #1b2a4e;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.addHistory__closeIcon {
+  background: none;
+  border: none;
+  color: #8b91a3;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 6px;
+  display: inline-flex;
+  border-radius: 8px;
+}
+
+.addHistory__closeIcon:hover {
+  background-color: #f2f3f6;
+}
+
+.addHistory__message {
+  margin: 0 0 20px 0;
+  color: #3a3d4d;
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+
+.addHistory__word {
+  font-weight: 700;
+  padding: 1px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.addHistory__word--green {
+  background-color: #e3f7e8;
+  color: #1e8a3c;
+}
+
+.addHistory__word--red {
+  background-color: #fdeaea;
+  color: #c92a2a;
+}
+
+.addHistory__loading {
+  margin: 0 0 20px 0;
+  color: #8b91a3;
+  font-size: 14px;
+}
+
+.addHistory__error {
+  margin: 0 0 20px 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background-color: #fdeaea;
+  color: #c92a2a;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.addHistory__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.addHistory__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background-color: #f4f4f7;
+  min-width: 0;
+}
+
+.addHistory__stat--green {
+  background-color: #e3f7e8;
+}
+
+.addHistory__stat--red {
+  background-color: #fdeaea;
+}
+
+.addHistory__statValue {
+  color: #1b2a4e;
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.addHistory__stat--green .addHistory__statValue {
+  color: #1e8a3c;
+}
+
+.addHistory__stat--red .addHistory__statValue {
+  color: #c92a2a;
+}
+
+.addHistory__statLabel {
+  color: #6b7080;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.addHistory__details {
+  margin: 0 0 22px 0;
+  padding-left: 18px;
+  color: #6b7080;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.addHistory__details strong {
+  color: #1b2a4e;
+}
+
+.addHistory__note {
+  margin: 0 0 20px 0;
+  color: #96720c;
+  font-size: 13px;
+}
+
+.addHistory__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.addHistory__btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  transition: opacity 0.15s ease;
+}
+
+.addHistory__btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.addHistory__btn--primary {
+  background: var(--admin-accent, #5a93c7);
+  color: #ffffff;
+}
+
+.addHistory__btn--secondary {
+  background: #ffffff;
+  color: #1e2432;
+  border-color: #1e2432;
+}
+
+@media (max-width: 576px) {
+  .addHistory__container {
+    padding: 22px 18px;
+  }
+
+  .addHistory__stats {
+    grid-template-columns: 1fr;
+  }
+
+  .addHistory__stat {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .addHistory__actions {
+    flex-direction: column-reverse;
+  }
+
+  .addHistory__btn {
+    width: 100%;
+  }
+}

@@ -39,3 +39,19 @@ export const deleteEventHistoryApi = async (id) => {
   const response = await api.delete(`/contact-event-history/${id}/delete`);
   return response.data;
 };
+
+// ================= ENTRY REPORT -> ADD TO EVENT HISTORY =================
+// Counts for the confirmation popup (registered / entered / not entered).
+export const getEventHistorySyncSummaryApi = async (eventId) => {
+  const response = await api.get("/contact-event-history/sync-summary", {
+    params: { eventId },
+  });
+
+  return response.data;
+};
+
+// data: { eventId, ticketIds?: [...], selectAll?: boolean }
+export const syncEventHistoryFromEventApi = async (data) => {
+  const response = await api.post("/contact-event-history/sync-from-event", data);
+  return response.data;
+};

@@ -27,6 +27,7 @@ const EMPTY_FORM = {
   spouseName: "",
   spouseMobile: "",
   profession: "",
+  professionCategory: "",
 };
 
 export default function CreateContactModal({
@@ -85,6 +86,8 @@ export default function CreateContactModal({
         spouseName: editContactData.spouseName || "",
         spouseMobile: editContactData.spouseMobile || "",
         profession: editContactData.profession || "",
+        // populated as { _id, name } by contact.service.js
+        professionCategory: editContactData.professionCategory?._id || "",
       });
 
       setReferences(
@@ -107,6 +110,47 @@ export default function CreateContactModal({
     setFormData((prev) => ({
       ...prev,
       [name]: value,
+      // Typing in Profession by hand drops a previously picked category
+      // unless the text still equals that category's name exactly.
+      ...(name === "profession"
+        ? {
+            professionCategory: (() => {
+              const match = (companyCategories || []).find(
+                (cat) =>
+                  String(cat.name || "").trim().toLowerCase() ===
+                  value.trim().toLowerCase()
+              );
+              return match ? match._id : "";
+            })(),
+          }
+        : {}),
+    }));
+  };
+
+  // ---- Profession <-> Company Category (Couple only) ----
+  // As soon as anything is typed in the spouse's Profession (C.A, CA,
+  // Doctor ...), a Category dropdown appears beside it. Picking a
+  // category from the COMPANY CATEGORY list (e.g. "Chartered
+  // Accountant") replaces the profession text with that category's
+  // exact name, so the saved profession always matches the master list.
+  // The category is COMPULSORY for Couple: it is what makes the contact
+  // also show under the spouse's category in the Contact List.
+  const showProfessionCategory = formData.profession.trim() !== "";
+
+  const handleProfessionCategoryChange = (e) => {
+    const category = (companyCategories || []).find(
+      (c) => c._id === e.target.value
+    );
+    if (!category) return;
+    setFormData((prev) => ({
+      ...prev,
+      profession: category.name,
+      professionCategory: category._id,
+    }));
+    setFormErrors((prev) => ({
+      ...prev,
+      profession: undefined,
+      professionCategory: undefined,
     }));
   };
 
@@ -126,7 +170,7 @@ export default function CreateContactModal({
       ...prev,
       relationship: value,
       ...(value !== "Couple"
-        ? { spouseName: "", spouseMobile: "", profession: "" }
+        ? { spouseName: "", spouseMobile: "", profession: "", professionCategory: "" }
         : {}),
     }));
 
@@ -136,6 +180,7 @@ export default function CreateContactModal({
         spouseName: undefined,
         spouseMobile: undefined,
         profession: undefined,
+        professionCategory: undefined,
       }));
     }
   };
@@ -270,6 +315,8 @@ export default function CreateContactModal({
 
       if (!formData.profession.trim()) {
         errors.profession = "Profession is required for Couple.";
+      } else if (!formData.professionCategory) {
+        errors.professionCategory = "Category is required for Couple.";
       }
     }
 
@@ -288,6 +335,7 @@ export default function CreateContactModal({
       spouseName: errors.spouseName,
       spouseMobile: errors.spouseMobile,
       profession: errors.profession,
+      professionCategory: errors.professionCategory,
       references: errors.references,
     }));
 
@@ -319,6 +367,8 @@ export default function CreateContactModal({
         ? toLocalMobileNumber(formData.spouseMobile)
         : "",
       profession: formData.profession.trim(),
+      professionCategory:
+        formData.relationship === "Couple" ? formData.professionCategory || null : null,
     };
 
     try {
@@ -575,18 +625,40 @@ export default function CreateContactModal({
 
               <div className="contactFieldGroup contactFieldGroupFull">
                 <label className="contactFieldLabel">
-                  Profession / Occupation <span className="contactRequired">*</span>
+                  Profession / Occupation &amp; Category <span className="contactRequired">*</span>
                 </label>
-                <input
-                  type="text"
-                  className="contactFieldInput"
-                  placeholder="Profession / Occupation"
-                  name="profession"
-                  value={formData.profession}
-                  onChange={handleChange}
-                />
+                <div style={{ display: "flex", gap: "12px", alignItems: "stretch" }}>
+                  <input
+                    type="text"
+                    className="contactFieldInput"
+                    style={{ flex: 1, minWidth: 0 }}
+                    placeholder="Profession / Occupation"
+                    name="profession"
+                    value={formData.profession}
+                    onChange={handleChange}
+                  />
+                  {showProfessionCategory && (
+                    <select
+                      className="contactFieldSelect"
+                      style={{ flex: 1, minWidth: 0 }}
+                      aria-label="Profession category"
+                      value={formData.professionCategory || ""}
+                      onChange={handleProfessionCategoryChange}
+                    >
+                      <option value="">Select Category</option>
+                      {(companyCategories || []).map((category) => (
+                        <option key={category._id} value={category._id}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
                 {formErrors.profession && (
                   <p className="contactFieldError">{formErrors.profession}</p>
+                )}
+                {formErrors.professionCategory && (
+                  <p className="contactFieldError">{formErrors.professionCategory}</p>
                 )}
               </div>
             </>

@@ -177,6 +177,8 @@
   display: flex;
   align-items: center;
   justify-self: end;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .erPage__pageSizeSelect {
@@ -715,4 +717,74 @@
   color: #c4c6d2;
   display: inline-flex;
   align-items: center;
+}
+
+/* ===== Add to Event History: checkbox column, button, selection bar ===== */
+
+.erPage__th--check,
+.erPage__td--check {
+  width: 44px;
+  padding-right: 0;
+  text-align: center;
+}
+
+.erPage__checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--admin-accent, #5a93c7);
+  vertical-align: middle;
+}
+
+.erPage__checkbox:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.erPage__btn--history {
+  background: #ffffff;
+  color: var(--admin-accent, #5a93c7);
+  border-color: var(--admin-accent, #5a93c7);
+}
+
+.erPage__btn--history:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.erPage__selectionBar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin: 0 0 14px 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background-color: #eef4ff;
+  color: #2952cc;
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.erPage__selectionBar--hint {
+  background-color: #f4f4f7;
+  color: #6b7080;
+}
+
+.erPage__selectionLink {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--admin-accent, #5a93c7);
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .erPage__toolbarRight .erPage__btn {
+    flex: 1;
+    justify-content: center;
+  }
 }

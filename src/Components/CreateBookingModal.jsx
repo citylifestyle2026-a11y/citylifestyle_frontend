@@ -30,8 +30,8 @@ export default function CreateBookingModal({ onClose, onSuccess }) {
   const { events } = useSelector((state) => state.event);
   const activeEvent = events?.find((event) => event.isActive === true);
   const [fieldErrors, setFieldErrors] = useState({});
-  // true after the server reports a duplicate (same name + mobile) —
-  // shows the "Book Anyway" button until name/mobile/event/ticket changes.
+  // true after the server reports a duplicate (same mobile number) —
+  // shows the "Book Anyway" button until mobile/event/ticket changes.
   const [duplicateFound, setDuplicateFound] = useState(false);
   // Returns a { fieldName: message } map instead of a single message so
   // each error can render directly below its own field, per the project's
@@ -227,7 +227,7 @@ export default function CreateBookingModal({ onClose, onSuccess }) {
   // handel change
   const handleChange = (field) => (e) => {
     setFormData((prev) => ({ ...prev, [field]: e.target.value }));
-    if (field === "name" || field === "mobile") setDuplicateFound(false);
+    if (field === "mobile") setDuplicateFound(false);
     // Clear that field's inline error as soon as the user edits it, so the
     // message doesn't linger after they've corrected it but before the
     // next submit attempt re-validates.
@@ -279,14 +279,14 @@ export default function CreateBookingModal({ onClose, onSuccess }) {
       const message =
         typeof err === "string" ? err : err?.message || "Failed to create booking.";
 
-      // Same name + mobile already booked for this event & ticket ->
+      // Same mobile number already booked for this event & ticket ->
       // shown as a warning (not a generic error); the form stays open.
       if (/^duplicate booking/i.test(message)) {
         setDuplicateFound(true);
         showWarning(message);
         setFieldErrors((prev) => ({
           ...prev,
-          mobile: "Duplicate booking — this name & mobile number already has a booking.",
+          mobile: "Duplicate booking — this mobile number already has a booking.",
         }));
       } else {
         showError(message);

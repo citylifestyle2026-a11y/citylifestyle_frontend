@@ -25,6 +25,11 @@ function DashboardCard({
   // Booking so "No Bookings Available" never appears; every other card
   // leaves this false and is unaffected.
   hideBody = false,
+  // Optional — plain-language explanation of what this card counts.
+  // When provided, hovering the card (or tapping / keyboard-focusing it
+  // on touch screens) shows this text in a tooltip, so anyone reading
+  // the dashboard knows what the number means.
+  infoText,
 }) {
   // Optional 3rd column (e.g. "Amount"). Only Pass Booking cards pass a
   // 3-item columns array / rows with `value2` — every other card keeps
@@ -32,7 +37,16 @@ function DashboardCard({
   const hasThirdColumn = Boolean(columns[2]);
 
   return (
-    <div className="card">
+    <div className="card" tabIndex={infoText ? 0 : undefined}>
+      {infoText && (
+        <div className="cardInfo">
+          <div className="cardInfoTooltip" role="tooltip">
+            <strong className="cardInfoTooltipTitle">{amountLabel || title}</strong>
+            <span>{infoText}</span>
+          </div>
+        </div>
+      )}
+
       <div className="cardHeader">
         {amountValue ? (
           <div className="cardAmount">

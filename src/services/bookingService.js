@@ -22,6 +22,18 @@ export const importBookingsCsvApi = async (file) => {
   return response.data;
 };
 
+// ================= CHECK CSV BEFORE IMPORT =================
+// Read-only twin of importBookingsCsvApi (POST /bookings/import-csv/check):
+// creates nothing, just reports rows that share a mobile number, rows
+// that already have a booking, and invalid rows.
+export const checkBookingsCsvApi = async (file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await api.post("/bookings/import-csv/check", formData);
+  return response.data;
+};
+
 // ================= GET ALL BOOKINGS =================
 export const getAllBookingsApi = async (params) => {
   const response = await api.get("/bookings/get-all-bookings", {

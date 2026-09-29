@@ -474,7 +474,14 @@ const sortedReferenceFilterOptions = useMemo(
         // Populated by the backend as { _id, name } (see
         // getAllContacts' .populate("companyCategory", "name")), and is
         // legitimately null for contacts with no category assigned.
-        render: (contact) => contact.companyCategory?.name || "-",
+        // A Couple's spouse profession category (professionCategory) is
+        // shown here too, so both categories appear in this column.
+        render: (contact) =>
+          [
+            ...new Set(
+              [contact.companyCategory?.name, contact.professionCategory?.name].filter(Boolean)
+            ),
+          ].join(", ") || "-",
       }),
       sortableColumn("address", "Address", {
         cellClassName: "contactPage__addressCell",

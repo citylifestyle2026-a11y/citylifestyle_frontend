@@ -12,6 +12,7 @@ import CommonPageHeader from "../Components/CommonPageHeader";
 import CommonListLayout from "../Components/CommonListLayout";
 import CommonLoader from "../Components/CommonLoader";
 import CommonEmptyState from "../Components/CommonEmptyState";
+import AddToEventHistoryModal from "../Components/AddToEventHistoryModal";
 // Existing entryReport redux architecture — adjust path if your thunk file
 // lives elsewhere; it must resolve to the existing entryReportThunk.js.
 import {
@@ -209,6 +210,21 @@ export default function EntryReport() {
 
   const rows = entryReports ?? [];
 
+  // ================= ADD TO EVENT HISTORY (checkbox selection) =================
+  // Only an admin can save to Event History (the backend route is
+  // admin-only), so the checkbox column and the button are hidden for a
+  // Checker. Entries are ticked per row (or the whole page via the header
+  // checkbox); when nothing is filtered, "Select all N entries" also lets
+  // the admin pick every entry of the event across all pages.
+  const authProfile = useSelector((state) => state.auth.profile);
+  const authUser = useSelector((state) => state.auth.user);
+  const currentRole = authProfile?.role ?? authUser?.role;
+  const canAddToHistory = currentRole === "admin";
+
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [selectAllEntries, setSelectAllEntries] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+
   // The dropdown option matching the currently selected event, used as a
   // fallback for the event end time below before the entry-report API's
   // own response (entryReportEvent) has arrived for that event.
@@ -309,6 +325,75 @@ export default function EntryReport() {
   const limit = pagination?.limit ?? pageSize;
   const totalPages = pagination?.totalPages ?? 1;
   const totalRecords = pagination?.total ?? rows.length;
+
+  // History is saved for ONE event at a time, so ticks only make sense
+  // while an event is selected; changing the event drops them.
+  useEffect(() => {
+    setSelectedIds([]);
+    setSelectAllEntries(false);
+  }, [eventId]);
+
+  const hasActiveFilters = Boolean(
+    bookingId ||
+      ticketId ||
+      name ||
+      mobileNumber ||
+      searchTerm ||
+      apiStartDate ||
+      apiEndDate
+  );
+
+  // "Select all N entries" means every entry of the event, so it can't
+  // stay on while a filter narrows the list.
+  useEffect(() => {
+    if (hasActiveFilters && selectAllEntries) {
+      setSelectAllEntries(false);
+      setSelectedIds([]);
+    }
+  }, [hasActiveFilters, selectAllEntries]);
+
+  const pageRowIds = rows.map((row) => row?._id).filter(Boolean);
+  const selectedIdSet = new Set(selectedIds);
+  const isRowSelected = (id) => selectAllEntries || selectedIdSet.has(id);
+  const allPageSelected =
+    pageRowIds.length > 0 && pageRowIds.every((id) => isRowSelected(id));
+  const somePageSelected = pageRowIds.some((id) => isRowSelected(id));
+  const selectedCount = selectAllEntries ? totalRecords : selectedIds.length;
+  const canSelectRows = canAddToHistory && Boolean(eventId);
+
+  const clearSelection = () => {
+    setSelectedIds([]);
+    setSelectAllEntries(false);
+  };
+
+  const handleToggleRow = (id) => {
+    if (selectAllEntries) {
+      // Unticking one row leaves "select all" mode: keep this page's other
+      // rows ticked, drop the one that was unticked.
+      setSelectAllEntries(false);
+      setSelectedIds(pageRowIds.filter((rowId) => rowId !== id));
+      return;
+    }
+
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const handleTogglePage = () => {
+    if (allPageSelected) {
+      if (selectAllEntries) {
+        clearSelection();
+      } else {
+        setSelectedIds((prev) => prev.filter((id) => !pageRowIds.includes(id)));
+      }
+      return;
+    }
+
+    setSelectedIds((prev) => [...new Set([...prev, ...pageRowIds])]);
+  };
+
+  const columnCount = COLUMNS.length + (canAddToHistory ? 1 : 0);
 
   // Populate the Event dropdown on load with every currently active/valid
   // event the logged-in user is allowed to view. This is the only place
@@ -618,6 +703,7 @@ export default function EntryReport() {
     setTicketId("");
     setName("");
     setSearchTerm("");
+    clearSelection();
     setDateRange("");
     setApiStartDate("");
     setApiEndDate("");
@@ -988,6 +1074,23 @@ export default function EntryReport() {
           </div>
 
           <div className="erPage__toolbarRight">
+            {canAddToHistory && (
+              <button
+                type="button"
+                className="erPage__btn erPage__btn--history"
+                onClick={() => setShowHistoryModal(true)}
+                disabled={!eventId || selectedCount === 0}
+                title={
+                  !eventId
+                    ? "Select an event first"
+                    : selectedCount === 0
+                    ? "Tick the entries you want to add"
+                    : "Add the selected entries to Event History"
+                }
+              >
+                Add to History{selectedCount > 0 ? ` (${selectedCount})` : ""}
+              </button>
+            )}
             <CommonExportButton
               onClick={handleExport}
               loading={exportLoading}
@@ -997,10 +1100,72 @@ export default function EntryReport() {
           </div>
         </div>
 
+        {canAddToHistory && !eventId && (
+          <div className="erPage__selectionBar erPage__selectionBar--hint">
+            Select an event above to tick entries and add them to Event History.
+          </div>
+        )}
+
+        {canSelectRows && selectedCount > 0 && (
+          <div className="erPage__selectionBar">
+            {selectAllEntries ? (
+              <span>All {totalRecords} entries of this event are selected.</span>
+            ) : (
+              <span>
+                {selectedIds.length} {selectedIds.length === 1 ? "entry" : "entries"} selected.
+              </span>
+            )}
+
+            {!selectAllEntries &&
+              allPageSelected &&
+              !hasActiveFilters &&
+              totalRecords > pageRowIds.length && (
+                <button
+                  type="button"
+                  className="erPage__selectionLink"
+                  onClick={() => setSelectAllEntries(true)}
+                >
+                  Select all {totalRecords} entries
+                </button>
+              )}
+
+            <button
+              type="button"
+              className="erPage__selectionLink"
+              onClick={clearSelection}
+            >
+              Clear selection
+            </button>
+          </div>
+        )}
+
         <div className="erPage__tableWrap">
           <table className="erPage__table">
             <thead>
               <tr>
+                {canAddToHistory && (
+                  <th className="erPage__th erPage__th--check">
+                    <input
+                      type="checkbox"
+                      className="erPage__checkbox"
+                      checked={canSelectRows && allPageSelected}
+                      ref={(el) => {
+                        if (el) {
+                          el.indeterminate =
+                            canSelectRows && somePageSelected && !allPageSelected;
+                        }
+                      }}
+                      onChange={handleTogglePage}
+                      disabled={!canSelectRows || pageRowIds.length === 0}
+                      aria-label="Select all entries on this page"
+                      title={
+                        canSelectRows
+                          ? "Select all entries on this page"
+                          : "Select an event first"
+                      }
+                    />
+                  </th>
+                )}
                 {COLUMNS.map((col) => (
                   <th key={col} className="erPage__th">
                     <span className="erPage__thContent">
@@ -1015,7 +1180,7 @@ export default function EntryReport() {
               {/* Loading state */}
               {loading && (
                 <tr className="erPage__emptyRow">
-                  <td colSpan={COLUMNS.length} className="erPage__emptyCell">
+                  <td colSpan={columnCount} className="erPage__emptyCell">
                     <CommonLoader
                       wrapperClassName="erPage__emptyState"
                       messageClassName="erPage__emptyText"
@@ -1028,7 +1193,7 @@ export default function EntryReport() {
               {/* Error state */}
               {!loading && errorMessage && (
                 <tr className="erPage__emptyRow">
-                  <td colSpan={COLUMNS.length} className="erPage__emptyCell">
+                  <td colSpan={columnCount} className="erPage__emptyCell">
                     <div className="erPage__emptyState">
                       <p className="erPage__emptyText">{errorMessage}</p>
                       <button
@@ -1046,7 +1211,7 @@ export default function EntryReport() {
               {/* Empty state */}
               {!loading && !errorMessage && rows.length === 0 && (
                 <tr className="erPage__emptyRow">
-                  <td colSpan={COLUMNS.length} className="erPage__emptyCell">
+                  <td colSpan={columnCount} className="erPage__emptyCell">
                     <CommonEmptyState
                       wrapperClassName="erPage__emptyState"
                       textClassName="erPage__emptyText"
@@ -1082,6 +1247,18 @@ export default function EntryReport() {
 
                   return (
                     <tr key={rowKey} className="erPage__tr">
+                      {canAddToHistory && (
+                        <td className="erPage__td erPage__td--check">
+                          <input
+                            type="checkbox"
+                            className="erPage__checkbox"
+                            checked={canSelectRows && isRowSelected(row?._id)}
+                            onChange={() => handleToggleRow(row?._id)}
+                            disabled={!canSelectRows || !row?._id}
+                            aria-label={`Select entry ${serial}`}
+                          />
+                        </td>
+                      )}
                       <td className="erPage__td">{serial}</td>
                       <td className="erPage__td">
                         <ProfileAvatar src={profileImage} name={nameVal} />
@@ -1148,6 +1325,20 @@ export default function EntryReport() {
           inactiveButtonClassName="permissionPagePaginationBtn--reset"
         />
       </div>
+
+      {showHistoryModal && (
+        <AddToEventHistoryModal
+          eventId={eventId}
+          selectedCount={selectedCount}
+          selectAll={selectAllEntries}
+          ticketIds={selectedIds}
+          onClose={() => setShowHistoryModal(false)}
+          onDone={() => {
+            setShowHistoryModal(false);
+            clearSelection();
+          }}
+        />
+      )}
     </CommonListLayout>
   );
 }

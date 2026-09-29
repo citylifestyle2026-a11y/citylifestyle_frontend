@@ -349,13 +349,13 @@
 }
 
 .eventHistoryPage__status--NotAttended {
-  background-color: #f2f3f6;
-  color: #6b7080;
+  background-color: #fdeaea;
+  color: #c92a2a;
 }
 
 .eventHistoryPage__status--Cancelled {
-  background-color: #fdeaea;
-  color: #c92a2a;
+  background-color: #f2f3f6;
+  color: #6b7080;
 }
 
 /* ===== Action Dropdown (eventHistoryAction__ prefix) — same as the other list pages ===== */

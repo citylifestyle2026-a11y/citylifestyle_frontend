@@ -18,8 +18,8 @@ import { getErrorText } from "../utilits/apiError";
 // Must stay in sync with backend/models/contactEventHistory.model.js's
 // STATUS_VALUES.
 const STATUS_OPTIONS = [
-  "Invited",
-  "Confirmed",
+  // "Invited",
+  // "Confirmed",
   "Attended",
   "Not Attended",
   "Cancelled",
@@ -53,7 +53,9 @@ export default function CreateEventHistoryModal({
   const [selectedEditionIds, setSelectedEditionIds] = useState([]); // create mode only
   const [status, setStatus] = useState("Invited");
   const [notes, setNotes] = useState("");
-  const [formError, setFormError] = useState("");
+  // Per-field validation messages: { contact?: string, edition?: string }.
+  // Each one is rendered directly under its own field.
+  const [formErrors, setFormErrors] = useState({});
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -70,7 +72,12 @@ export default function CreateEventHistoryModal({
 
   useEffect(() => {
     if (isEditMode && editEntry) {
-      setContactId(editEntry.contactId?._id || editEntry.contactId || "");
+      // "<id>:spouse" = the spouse option of that contact (see contactOptions).
+      setContactId(
+        `${editEntry.contactId?._id || editEntry.contactId || ""}${
+          editEntry.isSpouse ? ":spouse" : ""
+        }`
+      );
       setEditionId(editEntry.editionId?._id || editEntry.editionId || "");
       setStatus(editEntry.status || "Invited");
       setNotes(editEntry.notes || "");
@@ -80,27 +87,43 @@ export default function CreateEventHistoryModal({
       setStatus("Invited");
       setNotes("");
     }
-    setFormError("");
+    setFormErrors({});
   }, [isEditMode, editEntry]);
 
+  // Every contact is an option; a Couple contact also gets a second
+  // option for its SPOUSE (value "<contactId>:spouse").
   const contactOptions = useMemo(
-    () => (contacts || []).map((c) => ({ value: c._id, label: `${c.fullName} (${c.whatsappNumber})` })),
+    () =>
+      (contacts || []).flatMap((c) => {
+        const options = [{ value: c._id, label: `${c.fullName} (${c.whatsappNumber})` }];
+        if (c.relationship === "Couple" && c.spouseName) {
+          options.push({
+            value: `${c._id}:spouse`,
+            label: `${c.spouseName}${c.spouseMobile ? ` (${c.spouseMobile})` : ""} — Spouse of ${c.fullName}`,
+          });
+        }
+        return options;
+      }),
     [contacts]
   );
 
   const editEntryContactLabel = useMemo(() => {
     if (!isEditMode || !editEntry) return "";
     const c = editEntry.contactId;
-    if (c && typeof c === "object") return `${c.fullName} (${c.whatsappNumber})`;
-    const found = (contacts || []).find((x) => x._id === contactId);
-    return found ? `${found.fullName} (${found.whatsappNumber})` : "";
-  }, [isEditMode, editEntry, contacts, contactId]);
+    if (c && typeof c === "object") {
+      return editEntry.isSpouse
+        ? `${c.spouseName || "-"}${c.spouseMobile ? ` (${c.spouseMobile})` : ""} — Spouse of ${c.fullName}`
+        : `${c.fullName} (${c.whatsappNumber})`;
+    }
+    const found = contactOptions.find((o) => o.value === contactId);
+    return found ? found.label : "";
+  }, [isEditMode, editEntry, contactOptions, contactId]);
 
   const toggleEdition = (id) => {
     setSelectedEditionIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
-    setFormError("");
+    setFormErrors((prev) => ({ ...prev, edition: undefined }));
   };
 
   const handleSubmit = async (e) => {
@@ -108,35 +131,43 @@ export default function CreateEventHistoryModal({
 
     if (actionLoading) return;
 
-    if (!contactId) {
-      setFormError("Please select a Contact.");
+    // Validate every field first so all messages show together,
+    // each one under its own field.
+    const errors = {};
+    if (!contactId) errors.contact = "Please select a Contact.";
+    if (isEditMode && editEntry) {
+      if (!editionId) errors.edition = "Please select an Edition.";
+    } else if (selectedEditionIds.length === 0) {
+      errors.edition = "Please select at least one Edition.";
+    }
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
       return;
     }
+    setFormErrors({});
 
     try {
       if (isEditMode && editEntry) {
-        if (!editionId) {
-          setFormError("Please select an Edition.");
-          return;
-        }
-
         const res = await dispatch(
           updateEventHistory({ id: editEntry._id, data: { editionId, status, notes } })
         ).unwrap();
 
         showSuccess(res?.message || "Event history entry updated successfully");
       } else {
-        if (selectedEditionIds.length === 0) {
-          setFormError("Please select at least one Edition.");
-          return;
-        }
-
         // One backend create call per checked edition — createEventHistory
         // (backend) only ever takes a single (contactId, editionId) pair;
         // the checkbox multi-select is a frontend convenience on top of it.
         const results = await Promise.allSettled(
           selectedEditionIds.map((id) =>
-            dispatch(createEventHistory({ contactId, editionId: id, status, notes })).unwrap()
+            dispatch(
+              createEventHistory({
+                contactId: contactId.split(":")[0],
+                isSpouse: contactId.endsWith(":spouse"),
+                editionId: id,
+                status,
+                notes,
+              })
+            ).unwrap()
           )
         );
 
@@ -199,7 +230,7 @@ export default function CreateEventHistoryModal({
                   value={contactId}
                   onChange={(e) => {
                     setContactId(e.target.value);
-                    setFormError("");
+                    setFormErrors((prev) => ({ ...prev, contact: undefined }));
                   }}
                   disabled={contactsLoading}
                 >
@@ -213,6 +244,9 @@ export default function CreateEventHistoryModal({
                   ))}
                 </select>
               )}
+              {formErrors.contact && (
+                <p className="eventHistoryFieldError">{formErrors.contact}</p>
+              )}
             </div>
 
             {isEditMode ? (
@@ -225,7 +259,7 @@ export default function CreateEventHistoryModal({
                   value={editionId}
                   onChange={(e) => {
                     setEditionId(e.target.value);
-                    setFormError("");
+                    setFormErrors((prev) => ({ ...prev, edition: undefined }));
                   }}
                   disabled={editionsLoading}
                 >
@@ -238,6 +272,9 @@ export default function CreateEventHistoryModal({
                     </option>
                   ))}
                 </select>
+                {formErrors.edition && (
+                  <p className="eventHistoryFieldError">{formErrors.edition}</p>
+                )}
               </div>
             ) : (
               <div className="eventHistoryFieldGroup">
@@ -275,6 +312,9 @@ export default function CreateEventHistoryModal({
                 <p className="eventHistoryFieldHint">
                   Tick every edition this contact was part of — one entry is added per edition.
                 </p>
+                {formErrors.edition && (
+                  <p className="eventHistoryFieldError">{formErrors.edition}</p>
+                )}
               </div>
             )}
 
@@ -305,10 +345,9 @@ export default function CreateEventHistoryModal({
             </div>
           </div>
 
-          {(formError || actionError) && (
+          {actionError && (
             <p className="eventHistoryFieldError">
-              {formError ||
-                (typeof actionError === "string" ? actionError : "Something went wrong.")}
+              {typeof actionError === "string" ? actionError : "Something went wrong."}
             </p>
           )}
 

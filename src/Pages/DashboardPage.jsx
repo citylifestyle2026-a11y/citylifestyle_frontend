@@ -140,11 +140,12 @@ export default function DashboardPage() {
     ];
   }, [activeEvent, eventDateRange]);
 
-  // The 4 overall, all-events counts from dashboard.service.js's
-  // getDashboardCounts() (Step 2). Each is a single number — the backend
-  // doesn't return a date-wise or ticket-wise breakdown for these, so
-  // every card here renders as amount-only (hideBody: true), same as
-  // the Active Event card's siblings used to before any rows existed.
+  // The overall stat counts from dashboard.service.js's
+  // getDashboardCounts(). Each is a single number — the backend doesn't
+  // return a date-wise or ticket-wise breakdown for these, so every
+  // card here renders as amount-only (hideBody: true). `infoText` is the
+  // plain-language explanation shown when the card's eye icon is
+  // hovered, so anyone reading the dashboard knows what each number is.
   const statCards = useMemo(
     () => [
       {
@@ -153,6 +154,8 @@ export default function DashboardPage() {
         amountValue: String(dashboardData?.totalBookings ?? 0),
         amountLabel: "Total Bookings",
         hideBody: true,
+        infoText:
+          "Total number of tickets booked for this event (sum of the quantity of every booking). Deleted bookings are not counted.",
       },
       {
         key: "registeredTickets",
@@ -160,6 +163,8 @@ export default function DashboardPage() {
         amountValue: String(dashboardData?.registeredTickets ?? 0),
         amountLabel: "Registered Tickets",
         hideBody: true,
+        infoText:
+          "Tickets whose attendee has completed registration (name and details filled in), so a QR pass has been issued.",
       },
       {
         key: "pendingRegistrations",
@@ -167,6 +172,8 @@ export default function DashboardPage() {
         amountValue: String(dashboardData?.pendingRegistrations ?? 0),
         amountLabel: "Pending Registrations",
         hideBody: true,
+        infoText:
+          "Tickets that are booked but whose attendee has not completed registration yet.",
       },
       {
         key: "scannedEntries",
@@ -174,8 +181,27 @@ export default function DashboardPage() {
         amountValue: String(dashboardData?.scannedEntries ?? 0),
         amountLabel: "Scanned Entries",
         hideBody: true,
+        infoText:
+          "Tickets already scanned at the entry gate — people who actually came to the event.",
       },
     ],
+    [dashboardData]
+  );
+
+  // Registered but never scanned: e.g. 2 tickets registered and only 1
+  // scanned means 1 person registered but did not come to the event.
+  // Counted directly by the backend (registeredNotScanned), not as
+  // registeredTickets - scannedEntries.
+  const notScannedCard = useMemo(
+    () => ({
+      key: "registeredNotScanned",
+      title: "Registered but Not Scanned",
+      amountValue: String(dashboardData?.registeredNotScanned ?? 0),
+      amountLabel: "Registered but Not Scanned",
+      hideBody: true,
+      infoText:
+        "Tickets that are registered but have not been scanned at entry — these people registered but did not attend the event. Cancelled tickets are not counted.",
+    }),
     [dashboardData]
   );
 
@@ -234,6 +260,7 @@ export default function DashboardPage() {
                 <DashboardCardSkeleton />
                 <DashboardCardSkeleton />
                 <DashboardCardSkeleton />
+                <DashboardCardSkeleton />
               </>
             ) : error && !dashboardData ? (
               // Request failed and there's no prior data to fall back on —
@@ -265,8 +292,19 @@ export default function DashboardPage() {
                     emptyText={card.emptyText}
                     noteText={card.noteText}
                     hideBody={card.hideBody}
+                    infoText={card.infoText}
                   />
                 ))}
+
+                {/* Same normal (half) width as the other four stat cards —
+                    no fullWidth wrapper. */}
+                <DashboardCard
+                  title={notScannedCard.title}
+                  amountValue={notScannedCard.amountValue}
+                  amountLabel={notScannedCard.amountLabel}
+                  hideBody={notScannedCard.hideBody}
+                  infoText={notScannedCard.infoText}
+                />
               </>
             )}
           </div>
