@@ -140,7 +140,7 @@ function App() {
             {/* Edition master data — kept for Contact List's Event
                 History (Edition dropdown), admin-only same as
                 Admin/Dashboard above. */}
-            <Route path="/editions" element={<EditionList />} />
+            {/* <Route path="/editions" element={<EditionList />} /> */}
           </Route>
 
           <Route element={<ProtectedRoute permission="Entry Report" />}>

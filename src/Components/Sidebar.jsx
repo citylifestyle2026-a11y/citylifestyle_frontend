@@ -57,7 +57,7 @@ const menuItems = [
       { label: 'Company Category', path: '/company-categories' },
       // Edition master data — feeds the Edition checkboxes on the Event
       // History page below (see models/contactEventHistory.model.js).
-      { label: 'Editions', path: '/editions' },
+      // { label: 'Editions', path: '/editions' },
       // Event History is its own standalone page — "Add Details" picks
       // the Contact itself from a dropdown inside the modal.
       { label: 'Event History', path: '/event-history' },

@@ -26,7 +26,8 @@ function DashboardCard({
   // leaves this false and is unaffected.
   hideBody = false,
   // Optional — plain-language explanation of what this card counts.
-  // When provided, hovering the card (or tapping / keyboard-focusing it
+  // When provided, a small "i" (info) button is shown in the card's top
+  // right corner. Hovering that button (or tapping / keyboard-focusing it
   // on touch screens) shows this text in a tooltip, so anyone reading
   // the dashboard knows what the number means.
   infoText,
@@ -37,9 +38,30 @@ function DashboardCard({
   const hasThirdColumn = Boolean(columns[2]);
 
   return (
-    <div className="card" tabIndex={infoText ? 0 : undefined}>
+    <div className="card">
       {infoText && (
         <div className="cardInfo">
+          <button
+            type="button"
+            className="cardInfoBtn"
+            aria-label={`Info: ${amountLabel || title}`}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="11" x2="12" y2="17" />
+              <circle cx="12" cy="7.2" r="0.6" fill="currentColor" />
+            </svg>
+          </button>
           <div className="cardInfoTooltip" role="tooltip">
             <strong className="cardInfoTooltipTitle">{amountLabel || title}</strong>
             <span>{infoText}</span>
@@ -99,4 +121,4 @@ function DashboardCard({
   );
 }
 
-export default React.memo(DashboardCard);
+export default React.memo(DashboardCard); 

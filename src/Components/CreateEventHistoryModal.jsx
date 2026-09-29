@@ -10,23 +10,23 @@ import {
 } from "../redux/contactEventHistory/contactEventHistoryThunk";
 import { clearContactEventHistoryState } from "../redux/contactEventHistory/contactEventHistorySlice";
 import { getAllContacts } from "../redux/contact/contactThunk";
-import { getAllEditions } from "../redux/edition/editionThunk";
+import useEventOptions from "../hooks/useEventOptions";
 
 import "../assets/CSS/CreateEventHistoryModal.css";
 import { showError, showSuccess } from "../utilits/toast";
 import { getErrorText } from "../utilits/apiError";
 
-// Status is decided by the checkboxes, no dropdown: a TICKED edition is
+// Status is decided by the checkboxes, no dropdown: a TICKED event is
 // "Attended" (green badge), an UN-TICKED one is "Not Attended" (red badge).
 const ATTENDED = "Attended";
 const NOT_ATTENDED = "Not Attended";
 
 // Contact List -> Event History: the "Add Details" modal. On CREATE, a
-// single Contact is picked from a dropdown and one or more Editions are
+// single Contact is picked from a dropdown and one or more Events are
 // picked via checkboxes ("je check box par check kare te multiple check
-// thai and add thai" — every checked edition becomes its own event
+// thai and add thai" — every checked event becomes its own event
 // history entry for that contact, in one submit). On EDIT, an entry
-// only ever has ONE edition (that's what it was created with), so it's
+// only ever has ONE event (that's what it was created with), so it's
 // a plain dropdown instead, matching updateEventHistory's own shape —
 // and the Contact it belongs to is shown read-only, since the backend
 // never allows moving an entry to a different contact.
@@ -42,14 +42,14 @@ export default function CreateEventHistoryModal({
     (state) => state.contactEventHistory
   );
   const { contacts, loading: contactsLoading } = useSelector((state) => state.contact);
-  const { editions, loading: editionsLoading } = useSelector((state) => state.edition);
+  const { events, loading: eventsLoading } = useEventOptions();
 
   const [contactId, setContactId] = useState("");
-  const [selectedEditionIds, setSelectedEditionIds] = useState([]); // checkbox multi-select (create + edit)
+  const [selectedEventIds, setSelectedEventIds] = useState([]); // checkbox multi-select (create + edit)
   const [notes, setNotes] = useState("");
   // Edit mode: notes the form was opened with, to know if they were changed.
   const [initialNotes, setInitialNotes] = useState("");
-  // Per-field validation messages: { contact?: string, edition?: string }.
+  // Per-field validation messages: { contact?: string, event?: string }.
   // Each one is rendered directly under its own field.
   const [formErrors, setFormErrors] = useState({});
 
@@ -63,7 +63,6 @@ export default function CreateEventHistoryModal({
   useEffect(() => {
     dispatch(clearContactEventHistoryState());
     dispatch(getAllContacts({ page: 1, limit: 500 }));
-    dispatch(getAllEditions({ limit: 100, sortBy: "editionNumber", sortOrder: "desc" }));
   }, [dispatch]);
 
   // Entries added from Entry Report are fixed (shown ticked + disabled);
@@ -77,11 +76,11 @@ export default function CreateEventHistoryModal({
     () => rowEntries.filter((e) => e.source === "entry-report"),
     [rowEntries]
   );
-  const lockedEditionIds = useMemo(
-    () => lockedEntries.map((e) => e.editionId?._id || e.editionId),
+  const lockedEventIds = useMemo(
+    () => lockedEntries.map((e) => e.eventId?._id || e.eventId),
     [lockedEntries]
   );
-  const entryEditionId = (e) => e.editionId?._id || e.editionId || "";
+  const entryEventId = (e) => e.eventId?._id || e.eventId || "";
 
   useEffect(() => {
     if (isEditMode && editRow) {
@@ -92,15 +91,15 @@ export default function CreateEventHistoryModal({
         }`
       );
       // Ticked = the entries that are currently "Attended".
-      setSelectedEditionIds(
-        manualEntries.filter((e) => e.status === ATTENDED).map(entryEditionId)
+      setSelectedEventIds(
+        manualEntries.filter((e) => e.status === ATTENDED).map(entryEventId)
       );
       const firstNotes = manualEntries.find((e) => e.notes)?.notes || "";
       setNotes(firstNotes);
       setInitialNotes(firstNotes);
     } else {
       setContactId("");
-      setSelectedEditionIds([]);
+      setSelectedEventIds([]);
       setNotes("");
     }
     setFormErrors({});
@@ -136,11 +135,11 @@ export default function CreateEventHistoryModal({
     return found ? found.label : "";
   }, [isEditMode, editRow, contactOptions, contactId]);
 
-  const toggleEdition = (id) => {
-    setSelectedEditionIds((prev) =>
+  const toggleEvent = (id) => {
+    setSelectedEventIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
-    setFormErrors((prev) => ({ ...prev, edition: undefined }));
+    setFormErrors((prev) => ({ ...prev, event: undefined }));
   };
 
   const handleSubmit = async (e) => {
@@ -153,8 +152,8 @@ export default function CreateEventHistoryModal({
     const errors = {};
     if (!contactId) errors.contact = "Please select a Contact.";
     const lockedAttended = lockedEntries.some((e) => e.status === ATTENDED);
-    if (selectedEditionIds.length === 0 && !(isEditMode && lockedAttended)) {
-      errors.edition = "Please select at least one Edition.";
+    if (selectedEventIds.length === 0 && !(isEditMode && lockedAttended)) {
+      errors.event = "Please select at least one Event.";
     }
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
@@ -167,7 +166,7 @@ export default function CreateEventHistoryModal({
         const baseContactId = contactId.split(":")[0];
         const isSpouse = contactId.endsWith(":spouse");
 
-        const manualByEdition = new Map(manualEntries.map((e) => [entryEditionId(e), e]));
+        const manualByEvent = new Map(manualEntries.map((e) => [entryEventId(e), e]));
         const notesChanged = notes !== initialNotes;
         const ops = [];
 
@@ -175,7 +174,7 @@ export default function CreateEventHistoryModal({
         // Attended (red). Only entries whose status / notes really change
         // are sent.
         for (const entry of manualEntries) {
-          const ticked = selectedEditionIds.includes(entryEditionId(entry));
+          const ticked = selectedEventIds.includes(entryEventId(entry));
           let desired = entry.status;
           if (ticked) desired = ATTENDED;
           else if (entry.status === ATTENDED) desired = NOT_ATTENDED;
@@ -192,18 +191,18 @@ export default function CreateEventHistoryModal({
           }
         }
 
-        // Editions this person has no entry for yet: only a TICK adds one
-        // (Attended). Un-ticked ones are skipped, so an edition created
+        // Events this person has no entry for yet: only a TICK adds one
+        // (Attended). Un-ticked ones are skipped, so an event created
         // after this guest was added never turns red by itself.
-        const allExistingEditionIds = new Set(rowEntries.map(entryEditionId));
-        for (const id of selectedEditionIds) {
-          if (manualByEdition.has(id) || allExistingEditionIds.has(id)) continue;
+        const allExistingEventIds = new Set(rowEntries.map(entryEventId));
+        for (const id of selectedEventIds) {
+          if (manualByEvent.has(id) || allExistingEventIds.has(id)) continue;
           ops.push(
             dispatch(
               createEventHistory({
                 contactId: baseContactId,
                 isSpouse,
-                editionId: id,
+                eventId: id,
                 status: ATTENDED,
                 notes,
               })
@@ -227,17 +226,17 @@ export default function CreateEventHistoryModal({
           "Event history updated successfully" + (failed ? ` (${failed} failed)` : "")
         );
       } else {
-        // One entry for EVERY edition: ticked -> Attended (green), not
-        // ticked -> Not Attended (red). One backend create call per edition
-        // (createEventHistory takes a single (contactId, editionId) pair).
+        // One entry for EVERY event: ticked -> Attended (green), not
+        // ticked -> Not Attended (red). One backend create call per event
+        // (createEventHistory takes a single (contactId, eventId) pair).
         const results = await Promise.allSettled(
-          (editions || []).map((ed) =>
+          (events || []).map((ed) =>
             dispatch(
               createEventHistory({
                 contactId: contactId.split(":")[0],
                 isSpouse: contactId.endsWith(":spouse"),
-                editionId: ed._id,
-                status: selectedEditionIds.includes(ed._id) ? ATTENDED : NOT_ATTENDED,
+                eventId: ed._id,
+                status: selectedEventIds.includes(ed._id) ? ATTENDED : NOT_ATTENDED,
                 notes,
               })
             ).unwrap()
@@ -324,25 +323,25 @@ export default function CreateEventHistoryModal({
 
             <div className="eventHistoryFieldGroup">
               <label className="eventHistoryFieldLabel">
-                Editions <span className="eventHistoryRequired">*</span>
+                Events <span className="eventHistoryRequired">*</span>
               </label>
               <div className="eventHistoryCheckboxGrid">
-                {editionsLoading && (
-                  <p className="eventHistoryCheckboxEmpty">Loading editions...</p>
+                {eventsLoading && (
+                  <p className="eventHistoryCheckboxEmpty">Loading events...</p>
                 )}
-                {!editionsLoading && (editions || []).length === 0 && (
+                {!eventsLoading && (events || []).length === 0 && (
                   <p className="eventHistoryCheckboxEmpty">
-                    No editions available. Add one from the Editions page first.
+                    No events available. Add one from the Events page first.
                   </p>
                 )}
-                {(editions || []).map((ed) => {
+                {(events || []).map((ed) => {
                   const lockedEntry = lockedEntries.find(
-                    (e) => entryEditionId(e) === ed._id
+                    (e) => entryEventId(e) === ed._id
                   );
                   const taken = !!lockedEntry;
                   const checked = taken
                     ? lockedEntry.status === ATTENDED
-                    : selectedEditionIds.includes(ed._id);
+                    : selectedEventIds.includes(ed._id);
                   return (
                     <label
                       key={ed._id}
@@ -354,10 +353,10 @@ export default function CreateEventHistoryModal({
                         type="checkbox"
                         checked={checked}
                         disabled={taken}
-                        onChange={() => toggleEdition(ed._id)}
+                        onChange={() => toggleEvent(ed._id)}
                       />
-                      <span title={taken ? `${ed.name} (added from Entry Report)` : ed.name}>
-                        {ed.name}
+                      <span title={taken ? `${ed.title} (added from Entry Report)` : ed.name}>
+                        {ed.title}
                         {taken ? " (Entry Report)" : ""}
                       </span>
                     </label>
@@ -366,11 +365,11 @@ export default function CreateEventHistoryModal({
               </div>
               <p className="eventHistoryFieldHint">
                 {isEditMode
-                  ? "Ticked = Attended (green), un-ticked = Not Attended (red). Editions from Entry Report cannot be changed here."
-                  : "Tick the editions this contact attended (green). Editions left un-ticked are saved as Not Attended (red)."}
+                  ? "Ticked = Attended (green), un-ticked = Not Attended (red). Events from Entry Report cannot be changed here."
+                  : "Tick the events this contact attended (green). Events left un-ticked are saved as Not Attended (red)."}
               </p>
-              {formErrors.edition && (
-                <p className="eventHistoryFieldError">{formErrors.edition}</p>
+              {formErrors.event && (
+                <p className="eventHistoryFieldError">{formErrors.event}</p>
               )}
             </div>
 

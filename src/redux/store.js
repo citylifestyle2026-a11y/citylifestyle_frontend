@@ -12,7 +12,7 @@ import adminReducer from "./admin/adminSlice";
 import contactReducer from "./contact/contactSlice";
 import contactEventHistoryReducer from "./contactEventHistory/contactEventHistorySlice";
 import companyCategoryReducer from "./companyCategory/companyCategorySlice";
-import editionReducer from "./edition/editionSlice";
+// import editionReducer from "./edition/editionSlice";
 export const store = configureStore({
     reducer: {
         auth: authReducer,
@@ -28,7 +28,7 @@ export const store = configureStore({
         contact: contactReducer,
         contactEventHistory: contactEventHistoryReducer,
         companyCategory: companyCategoryReducer,
-        edition: editionReducer,
+        // edition: editionReducer,
     }
 
 })

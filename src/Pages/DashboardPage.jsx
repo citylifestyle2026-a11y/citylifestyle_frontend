@@ -144,7 +144,7 @@ export default function DashboardPage() {
   // getDashboardCounts(). Each is a single number — the backend doesn't
   // return a date-wise or ticket-wise breakdown for these, so every
   // card here renders as amount-only (hideBody: true). `infoText` is the
-  // plain-language explanation shown when the card's eye icon is
+  // plain-language explanation shown when the card's "i" button is
   // hovered, so anyone reading the dashboard knows what each number is.
   const statCards = useMemo(
     () => [

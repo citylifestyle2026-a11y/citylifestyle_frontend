@@ -11,6 +11,7 @@ import {
 } from "react-icons/fa";
 
 import CommonListLayout from "../Components/CommonListLayout";
+import { formatDate } from "../utilits/dateFormat";
 import CommonPageHeader from "../Components/CommonPageHeader";
 import CommonSearch from "../Components/CommonSearch";
 import CommonSelect from "../Components/CommonSelect";
@@ -291,10 +292,7 @@ export default function CompanyCategory() {
         render: (category) => category.description || "-",
       }),
       sortableColumn("createdAt", "Created", {
-        render: (category) =>
-          category.createdAt
-            ? new Date(category.createdAt).toLocaleDateString()
-            : "-",
+        render: (category) => formatDate(category.createdAt),
       }),
       {
         key: "action",

@@ -283,27 +283,48 @@
 }
 
 /* ===== Info tooltip =====
-   Hovering ANYWHERE on a card that has infoText opens the explanation
-   tooltip. Touch screens have no hover, so there tapping the card
-   (which focuses it, see tabIndex in DashboardCard.jsx) opens it. */
+   A small "i" button sits in the top-right corner of every card that
+   has infoText. Hovering it (or keyboard-focusing / tapping it on touch
+   screens, where there is no hover) opens the explanation tooltip. */
 .cardInfo {
   position: absolute;
-  top: 14px;
-  right: 14px;
+  top: 12px;
+  right: 12px;
   z-index: 2;
 }
 
-.card:focus {
+.cardInfoBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #6b7280;
+  cursor: help;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.cardInfoBtn:hover,
+.cardInfoBtn:focus-visible {
+  color: #1b2a4e;
+  background-color: rgba(27, 42, 78, 0.08);
+}
+
+.cardInfoBtn:focus {
   outline: none;
 }
 
-.card:focus-visible {
+.cardInfoBtn:focus-visible {
   box-shadow: 0 0 0 3px var(--admin-focus-ring, rgba(27, 42, 78, 0.2));
 }
 
 .cardInfoTooltip {
   position: absolute;
-  top: 0;
+  top: calc(100% + 6px);
   right: 0;
   width: 250px;
   max-width: min(250px, calc(100vw - 72px));
@@ -332,8 +353,8 @@
   font-weight: 700;
 }
 
-.card:hover .cardInfoTooltip,
-.card:focus .cardInfoTooltip {
+.cardInfo:hover .cardInfoTooltip,
+.cardInfo:focus-within .cardInfoTooltip {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);

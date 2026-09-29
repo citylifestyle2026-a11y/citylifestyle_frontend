@@ -14,7 +14,7 @@ import DeleteUserModal from "../Components/DeleteUserModal";
 
 import { getAllEventHistory, deleteEventHistory } from "../redux/contactEventHistory/contactEventHistoryThunk";
 import { clearContactEventHistoryState } from "../redux/contactEventHistory/contactEventHistorySlice";
-import { getAllEditions } from "../redux/edition/editionThunk";
+import useEventOptions from "../hooks/UseeventOptions";
 
 import { showError, showSuccess } from "../utilits/toast";
 import { getErrorText } from "../utilits/apiError";
@@ -53,11 +53,11 @@ export default function EventHistory() {
   const { history, loading, error, total, totalPages, limit } = useSelector(
     (state) => state.contactEventHistory
   );
-  const { editions } = useSelector((state) => state.edition);
+  const { events } = useEventOptions();
 
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [editionFilter, setEditionFilter] = useState("");
+  const [eventFilter, setEventFilter] = useState("");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("create");
@@ -77,13 +77,9 @@ export default function EventHistory() {
 
   const currentQuery = useMemo(() => {
     const q = { page: currentPage, limit: rowsPerPage };
-    if (editionFilter) q.editionId = editionFilter;
+    if (eventFilter) q.eventId = eventFilter;
     return q;
-  }, [currentPage, rowsPerPage, editionFilter]);
-
-  useEffect(() => {
-    dispatch(getAllEditions({ limit: 100, sortBy: "editionNumber", sortOrder: "desc" }));
-  }, [dispatch]);
+  }, [currentPage, rowsPerPage, eventFilter]);
 
   useEffect(() => {
     dispatch(getAllEventHistory(currentQuery));
@@ -118,7 +114,7 @@ export default function EventHistory() {
     setIsModalOpen(true);
   };
 
-  // Every table row is ONE person carrying all of their editions
+  // Every table row is ONE person carrying all of their events
   // (row.entries). Edit opens the whole row; Delete removes the whole row.
   const handleEditClick = (row) => {
     setModalMode("edit");
@@ -153,7 +149,7 @@ export default function EventHistory() {
   const handleConfirmDelete = async () => {
     const ids = deleteEntryIds;
     try {
-      // The whole row = every edition entry of this person.
+      // The whole row = every event entry of this person.
       const results = await Promise.allSettled(
         ids.map((id) => dispatch(deleteEventHistory(id)).unwrap())
       );
@@ -202,23 +198,23 @@ export default function EventHistory() {
             : entry.contactId?.whatsappNumber) || "-",
       },
       {
-        key: "edition",
-        label: "Edition",
-        cellClassName: "eventHistoryPage__editionCell",
-        // One row per person: every edition of that person sits side by
+        key: "event",
+        label: "Event",
+        cellClassName: "eventHistoryPage__eventCell",
+        // One row per person: every event of that person sits side by
         // side in this cell. Each badge carries its own colour (green =
         // Attended, red = Not Attended, ...).
         render: (row) => (
-          <div className="eventHistoryPage__editionList">
+          <div className="eventHistoryPage__eventList">
             {(row.entries || []).map((entry) => (
               <span
                 key={entry._id}
                 title={entry.status || ""}
-                className={`eventHistoryPage__editionBadge eventHistoryPage__status--${(
+                className={`eventHistoryPage__eventBadge eventHistoryPage__status--${(
                   entry.status || ""
                 ).replace(/\s+/g, "")}`}
               >
-                {entry.editionId?.name || "-"}
+                {entry.eventId?.title || "-"}
               </span>
             ))}
           </div>
@@ -234,7 +230,7 @@ export default function EventHistory() {
             <div className="eventHistoryPage__stackedCell">
               {entries.map((entry) => (
                 <div key={entry._id}>
-                  {entry.editionId?.name || "-"}: {entry.status || "-"}
+                  {entry.eventId?.title || "-"}: {entry.status || "-"}
                 </div>
               ))}
             </div>
@@ -253,7 +249,7 @@ export default function EventHistory() {
             <div className="eventHistoryPage__stackedCell">
               {withNotes.map((entry) => (
                 <div key={entry._id}>
-                  {entry.editionId?.name || "-"}: {entry.notes}
+                  {entry.eventId?.title || "-"}: {entry.notes}
                 </div>
               ))}
             </div>
@@ -395,13 +391,13 @@ export default function EventHistory() {
 
           <CommonSelect
             className="eventHistoryPage__filterSelect"
-            value={editionFilter}
+            value={eventFilter}
             onChange={(e) => {
-              setEditionFilter(e.target.value);
+              setEventFilter(e.target.value);
               setCurrentPage(1);
             }}
-            placeholder="All Editions"
-            options={(editions || []).map((ed) => ({ value: ed._id, label: ed.name }))}
+            placeholder="All Events"
+            options={(events || []).map((ev) => ({ value: ev._id, label: ev.title }))}
           />
         </div>
 
