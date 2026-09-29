@@ -316,3 +316,14 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Edition already added for this person (edit modal) */
+.eventHistoryCheckboxItem--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.eventHistoryCheckboxItem--disabled input {
+  cursor: not-allowed;
+}

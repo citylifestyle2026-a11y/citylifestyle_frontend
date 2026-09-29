@@ -66,7 +66,7 @@ export default function EventHistory() {
   // Delete confirmation uses the same popup (DeleteUserModal) as every
   // other list page, and the row actions use the same "Action" dropdown.
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [deleteEntryId, setDeleteEntryId] = useState(null);
+  const [deleteEntryIds, setDeleteEntryIds] = useState([]);
   const [deleteEntryName, setDeleteEntryName] = useState("");
   const [openActionMenuId, setOpenActionMenuId] = useState(null);
 
@@ -118,9 +118,11 @@ export default function EventHistory() {
     setIsModalOpen(true);
   };
 
-  const handleEditClick = (entry) => {
+  // Every table row is ONE person carrying all of their editions
+  // (row.entries). Edit opens the whole row; Delete removes the whole row.
+  const handleEditClick = (row) => {
     setModalMode("edit");
-    setEditingEntry(entry);
+    setEditingEntry(row);
     setOpenActionMenuId(null);
     setIsModalOpen(true);
   };
@@ -131,12 +133,12 @@ export default function EventHistory() {
     setModalMode("create");
   };
 
-  const handleDeleteClick = (entry) => {
+  const handleDeleteClick = (row) => {
     setIsModalOpen(false);
     setOpenActionMenuId(null);
-    setDeleteEntryId(entry._id);
+    setDeleteEntryIds((row.entries || []).map((e) => e._id));
     setDeleteEntryName(
-      (entry.isSpouse ? entry.contactId?.spouseName : entry.contactId?.fullName) ||
+      (row.isSpouse ? row.contactId?.spouseName : row.contactId?.fullName) ||
         "this entry"
     );
     setIsDeleteOpen(true);
@@ -144,19 +146,29 @@ export default function EventHistory() {
 
   const handleCloseDeleteModal = () => {
     setIsDeleteOpen(false);
-    setDeleteEntryId(null);
+    setDeleteEntryIds([]);
     setDeleteEntryName("");
   };
 
   const handleConfirmDelete = async () => {
-    const entryId = deleteEntryId;
+    const ids = deleteEntryIds;
     try {
-      const res = await dispatch(deleteEventHistory(entryId)).unwrap();
-      showSuccess(res?.message || "Event history entry deleted successfully");
+      // The whole row = every edition entry of this person.
+      const results = await Promise.allSettled(
+        ids.map((id) => dispatch(deleteEventHistory(id)).unwrap())
+      );
+      const failed = results.filter((r) => r.status === "rejected").length;
+      if (failed === results.length) {
+        showError("Failed to delete event history.");
+      } else {
+        showSuccess(
+          "Event history deleted successfully" + (failed ? ` (${failed} failed)` : "")
+        );
+      }
       dispatch(getAllEventHistory(currentQuery));
       dispatch(clearContactEventHistoryState());
     } catch (err) {
-      showError(getErrorText(err, "Failed to delete event history entry"));
+      showError(getErrorText(err, "Failed to delete event history"));
     } finally {
       handleCloseDeleteModal();
     }
@@ -193,31 +205,65 @@ export default function EventHistory() {
         key: "edition",
         label: "Edition",
         cellClassName: "eventHistoryPage__editionCell",
-        render: (entry) => entry.editionId?.name || "-",
+        // One row per person: every edition of that person sits side by
+        // side in this cell. Each badge carries its own colour (green =
+        // Attended, red = Not Attended, ...).
+        render: (row) => (
+          <div className="eventHistoryPage__editionList">
+            {(row.entries || []).map((entry) => (
+              <span
+                key={entry._id}
+                title={entry.status || ""}
+                className={`eventHistoryPage__editionBadge eventHistoryPage__status--${(
+                  entry.status || ""
+                ).replace(/\s+/g, "")}`}
+              >
+                {entry.editionId?.name || "-"}
+              </span>
+            ))}
+          </div>
+        ),
       },
       {
         key: "status",
         label: "Status",
-        render: (entry) => (
-          <span
-            className={`eventHistoryPage__statusBadge eventHistoryPage__status--${(
-              entry.status || ""
-            ).replace(/\s+/g, "")}`}
-          >
-            {entry.status || "-"}
-          </span>
-        ),
+        render: (row) => {
+          const entries = row.entries || [];
+          if (entries.length <= 1) return entries[0]?.status || "-";
+          return (
+            <div className="eventHistoryPage__stackedCell">
+              {entries.map((entry) => (
+                <div key={entry._id}>
+                  {entry.editionId?.name || "-"}: {entry.status || "-"}
+                </div>
+              ))}
+            </div>
+          );
+        },
       },
       {
         key: "notes",
         label: "Notes",
         cellClassName: "eventHistoryPage__notesCell",
-        render: (entry) => entry.notes || "-",
+        render: (row) => {
+          const withNotes = (row.entries || []).filter((e) => e.notes);
+          if (withNotes.length === 0) return "-";
+          if ((row.entries || []).length <= 1) return withNotes[0].notes;
+          return (
+            <div className="eventHistoryPage__stackedCell">
+              {withNotes.map((entry) => (
+                <div key={entry._id}>
+                  {entry.editionId?.name || "-"}: {entry.notes}
+                </div>
+              ))}
+            </div>
+          );
+        },
       },
       {
         key: "createdAt",
         label: "Added On",
-        render: (entry) => formatDateTime(entry.createdAt),
+        render: (row) => formatDateTime(row.createdAt),
       },
       {
         key: "action",
@@ -243,13 +289,17 @@ export default function EventHistory() {
                 openActionMenuId === entry._id ? "eventHistoryAction__menuOpen" : ""
               }`}
             >
-              <button
-                type="button"
-                className="eventHistoryAction__item eventHistoryAction__itemEdit"
-                onClick={() => handleEditClick(entry)}
-              >
-                Edit
-              </button>
+              {/* Edit only for rows added from the "Add Details" modal; rows
+                  that came from Entry Report can only be deleted. */}
+              {(entry.entries || []).some((e) => e.source !== "entry-report") && (
+                <button
+                  type="button"
+                  className="eventHistoryAction__item eventHistoryAction__itemEdit"
+                  onClick={() => handleEditClick(entry)}
+                >
+                  Edit
+                </button>
+              )}
               <button
                 type="button"
                 className="eventHistoryAction__item eventHistoryAction__itemDelete"
@@ -284,7 +334,7 @@ export default function EventHistory() {
               <CreateEventHistoryModal
                 onClose={handleCloseModal}
                 isEditMode={modalMode === "edit"}
-                editEntry={editingEntry}
+                editRow={editingEntry}
                 currentQuery={currentQuery}
               />
             </div>
