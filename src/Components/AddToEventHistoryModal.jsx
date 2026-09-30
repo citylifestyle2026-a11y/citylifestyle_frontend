@@ -165,7 +165,7 @@ export default function AddToEventHistoryModal({
               You are about to save the attendance of <strong>{eventTitle}</strong> to
               Event History. Everyone you selected will be marked{" "}
               <span className="addHistory__word addHistory__word--green">Attended</span>,
-              and everyone who booked but never entered will be marked{" "}
+              and everyone who registered but never entered will be marked{" "}
               <span className="addHistory__word addHistory__word--red">Not Attended</span>.
             </p>
 

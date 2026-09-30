@@ -26,16 +26,7 @@ const menuItems = [
     icon: <MdDashboard />,
     path: '/dashboard',
   },
-  {
-    label: 'User Management',
-    icon: <FaUsers />,
-    submenu: [
-      { label: 'Users', path: '/user' },
-      { label: 'Roles', path: '/role' },
-      // { label: 'Permissions', path: '/permission' },
-      { label: 'Admins', path: '/admin' },
-    ],
-  },
+ 
   {
     label: 'Add Event',
     icon: <BsCalendarEventFill />,
@@ -47,6 +38,11 @@ const menuItems = [
     path: '/booking',
   },
   {
+    label: 'Entry Report',
+    icon: <FaFlag />,
+    path: '/entry-report',
+  },
+   {
     label: 'Contact List',
     icon: <FaAddressBook />,
     submenu: [
@@ -63,10 +59,15 @@ const menuItems = [
       { label: 'Event History', path: '/event-history' },
     ],
   },
-  {
-    label: 'Entry Report',
-    icon: <FaFlag />,
-    path: '/entry-report',
+   {
+    label: 'User Management',
+    icon: <FaUsers />,
+    submenu: [
+      { label: 'Users', path: '/user' },
+      { label: 'Roles', path: '/role' },
+      // { label: 'Permissions', path: '/permission' },
+      { label: 'Admins', path: '/admin' },
+    ],
   },
 ];
 

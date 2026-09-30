@@ -18,6 +18,10 @@ import { getErrorText } from "../utilits/apiError";
 
 // Status is decided by the checkboxes, no dropdown: a TICKED event is
 // "Attended" (green badge), an UN-TICKED one is "Not Attended" (red badge).
+// An event is shown to the admin by its EDITION (e.g. "Parv 6"); events
+// created before the Edition field existed fall back to their title.
+const editionLabel = (ev) => ev?.edition || ev?.title || "";
+
 const ATTENDED = "Attended";
 const NOT_ATTENDED = "Not Attended";
 
@@ -153,7 +157,7 @@ export default function CreateEventHistoryModal({
     if (!contactId) errors.contact = "Please select a Contact.";
     const lockedAttended = lockedEntries.some((e) => e.status === ATTENDED);
     if (selectedEventIds.length === 0 && !(isEditMode && lockedAttended)) {
-      errors.event = "Please select at least one Event.";
+      errors.event = "Please select at least one Edition.";
     }
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
@@ -323,15 +327,15 @@ export default function CreateEventHistoryModal({
 
             <div className="eventHistoryFieldGroup">
               <label className="eventHistoryFieldLabel">
-                Events <span className="eventHistoryRequired">*</span>
+                Edition <span className="eventHistoryRequired">*</span>
               </label>
               <div className="eventHistoryCheckboxGrid">
                 {eventsLoading && (
-                  <p className="eventHistoryCheckboxEmpty">Loading events...</p>
+                  <p className="eventHistoryCheckboxEmpty">Loading editions...</p>
                 )}
                 {!eventsLoading && (events || []).length === 0 && (
                   <p className="eventHistoryCheckboxEmpty">
-                    No events available. Add one from the Events page first.
+                    No editions available. Add an event (with its edition) from the Add Event page first.
                   </p>
                 )}
                 {(events || []).map((ed) => {
@@ -355,8 +359,8 @@ export default function CreateEventHistoryModal({
                         disabled={taken}
                         onChange={() => toggleEvent(ed._id)}
                       />
-                      <span title={taken ? `${ed.title} (added from Entry Report)` : ed.name}>
-                        {ed.title}
+                      <span title={taken ? `${editionLabel(ed)} (added from Entry Report)` : editionLabel(ed)}>
+                        {editionLabel(ed)}
                         {taken ? " (Entry Report)" : ""}
                       </span>
                     </label>
@@ -365,8 +369,8 @@ export default function CreateEventHistoryModal({
               </div>
               <p className="eventHistoryFieldHint">
                 {isEditMode
-                  ? "Ticked = Attended (green), un-ticked = Not Attended (red). Events from Entry Report cannot be changed here."
-                  : "Tick the events this contact attended (green). Events left un-ticked are saved as Not Attended (red)."}
+                  ? "Ticked = Attended (green), un-ticked = Not Attended (red). Editions from Entry Report cannot be changed here."
+                  : "Tick the editions this contact attended (green). Editions left un-ticked are saved as Not Attended (red)."}
               </p>
               {formErrors.event && (
                 <p className="eventHistoryFieldError">{formErrors.event}</p>

@@ -146,6 +146,7 @@ const API_FIELD_MAP = {
   endDateTime: "endDateTime",
   title: "title",
   name: "title",
+  edition: "edition",
   venueName: "venueName",
   address: "address",
   description: "description",
@@ -192,6 +193,7 @@ const FieldError = ({ message, id }) =>
 
 const REQUIRED_FIELDS = [
   { key: "title", label: "Title" },
+  { key: "edition", label: "Edition" },
   { key: "startDateTime", label: "Start Date & Time" },
   { key: "endDateTime", label: "End Date & Time" },
   { key: "venueName", label: "Venue Name" },
@@ -216,6 +218,7 @@ const isFieldEmpty = (key, value) =>
 
 const INITIAL_FORM_DATA = {
   title: "",
+  edition: "",
   startDateTime: "",
   endDateTime: "",
   venueName: "",
@@ -308,6 +311,7 @@ export default function CreateEvent() {
 
         setFormData({
           title: event.title || "",
+          edition: event.edition || "",
           startDateTime: toLocalDateTimeInputValue(event.startDateTime),
           endDateTime: toLocalDateTimeInputValue(event.endDateTime),
           venueName: event.venueName || "",
@@ -600,6 +604,7 @@ export default function CreateEvent() {
 
     const payload = new FormData();
     payload.append("title", formData.title);
+    payload.append("edition", formData.edition.trim());
     // Attach the explicit IST offset so the stored Date is unambiguous
     // regardless of the server's own timezone (see toISTISOString above).
     payload.append("startDateTime", toISTISOString(formData.startDateTime));
@@ -683,6 +688,22 @@ export default function CreateEvent() {
                   aria-describedby={formErrors.title ? "createEvent-title-error" : undefined}
                 />
                 <FieldError id="createEvent-title-error" message={formErrors.title} />
+              </div>
+
+              <div className="createEvent__fieldGroup">
+                <label className="createEvent__label" htmlFor="createEvent-edition">
+                  Edition <span className="createEvent__required">*</span>
+                </label>
+                <input
+                  id="createEvent-edition"
+                  type="text"
+                  className="createEvent__input"
+                  placeholder="Enter The Edition (e.g. Parv 6)"
+                  value={formData.edition}
+                  onChange={handleFieldChange("edition")}
+                  aria-describedby={formErrors.edition ? "createEvent-edition-error" : undefined}
+                />
+                <FieldError id="createEvent-edition-error" message={formErrors.edition} />
               </div>
                      
               <div className="createEvent__fieldRow">

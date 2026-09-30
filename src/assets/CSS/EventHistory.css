@@ -686,3 +686,41 @@
   font-weight: 600;
   white-space: nowrap;
 }
+
+/* ===== Colour legend: what green / red badges mean ===== */
+.eventHistoryPage__legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+  margin: 4px 0 14px;
+  font-size: 13px;
+  color: #4a4f63;
+}
+
+.eventHistoryPage__legendTitle {
+  font-weight: 600;
+  color: #1f2a4d;
+}
+
+.eventHistoryPage__legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+
+.eventHistoryPage__legendDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.eventHistoryPage__legendDot--attended {
+  background-color: #1e8a3c;
+}
+
+.eventHistoryPage__legendDot--notAttended {
+  background-color: #c92a2a;
+}

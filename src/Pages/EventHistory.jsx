@@ -47,6 +47,10 @@ const formatDateTime = (dateStr) => {
   return `${dd}-${mm}-${yyyy} ${hh}:${minutes} ${ampm}`;
 };
 
+// Edition (e.g. "Parv 6") is what the admin sees; events created before the
+// Edition field existed fall back to their title.
+const editionLabel = (ev) => ev?.edition || ev?.title || "-";
+
 // Event badges shown per row before "+N more".
 const MAX_VISIBLE_EVENTS = 3;
 
@@ -209,7 +213,7 @@ export default function EventHistory() {
       },
       {
         key: "event",
-        label: "Event",
+        label: "Edition",
         cellClassName: "eventHistoryPage__eventCell",
         // One row per person; every event is a coloured badge (green =
         // Attended, red = Not Attended ...). Only the first
@@ -231,7 +235,7 @@ export default function EventHistory() {
                     entry.status || ""
                   ).replace(/\s+/g, "")}`}
                 >
-                  {entry.eventId?.title || "-"}
+                  {editionLabel(entry.eventId)}
                 </span>
               ))}
               {hidden > 0 && (
@@ -292,8 +296,8 @@ export default function EventHistory() {
 
           const multiple = entries.length > 1;
           const label = (entry) =>
-            multiple && entry.eventId?.title
-              ? `${entry.eventId.title}: ${entry.notes}`
+            multiple && (entry.eventId?.edition || entry.eventId?.title)
+              ? `${editionLabel(entry.eventId)}: ${entry.notes}`
               : entry.notes;
 
           const tag = fromReport ? (
@@ -476,9 +480,21 @@ export default function EventHistory() {
               setEventFilter(e.target.value);
               setCurrentPage(1);
             }}
-            placeholder="All Events"
-            options={(events || []).map((ev) => ({ value: ev._id, label: ev.title }))}
+            placeholder="All Editions"
+            options={(events || []).map((ev) => ({ value: ev._id, label: editionLabel(ev) }))}
           />
+        </div>
+
+        <div className="eventHistoryPage__legend" aria-label="Colour meaning">
+          <span className="eventHistoryPage__legendTitle">Colour meaning:</span>
+          <span className="eventHistoryPage__legendItem">
+            <span className="eventHistoryPage__legendDot eventHistoryPage__legendDot--attended" />
+            Green = Attended
+          </span>
+          <span className="eventHistoryPage__legendItem">
+            <span className="eventHistoryPage__legendDot eventHistoryPage__legendDot--notAttended" />
+            Red = Not Attended
+          </span>
         </div>
 
         <div className="eventHistoryPage__tableWrapper">
