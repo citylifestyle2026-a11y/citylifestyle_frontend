@@ -6,6 +6,7 @@ import { useDispatch } from "react-redux";
 
 import { getProfile } from "./redux/auth/authSlice";
 import { updateSiteMeta } from "./utilits/updateSiteMeta";
+import useIdleLogout from "./hooks/useIdleLogout";
 
 import ProtectedRoute from "./routes/ProtectedRoute";
 
@@ -77,6 +78,13 @@ function SiteMetaHandler() {
   return null;
 }
 
+// Logs the person out after 20 minutes without any activity (see
+// hooks/useIdleLogout.js). Lives inside <BrowserRouter> because it navigates.
+function IdleLogoutHandler() {
+  useIdleLogout();
+  return null;
+}
+
 function App() {
   const dispatch = useDispatch();
 
@@ -108,6 +116,7 @@ function App() {
 
       <BrowserRouter>
         <SiteMetaHandler />
+        <IdleLogoutHandler />
 
         <TopProgressLoader />
 

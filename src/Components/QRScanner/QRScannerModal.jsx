@@ -23,11 +23,17 @@ import "./QRScannerModal.css";
 
 const SCANNER_ELEMENT_ID = "qr-scanner-region";
 
-/* Plays a short, synthesized "success" chirp using the Web Audio API —
-   no external mp3/wav asset needed. Wrapped in try/catch since audio is
-   a nice-to-have here and must never break the check-in flow (some
-   browsers/contexts can restrict AudioContext creation). */
-const playSuccessBeep = () => {
+/* Scan sounds (files live in  public/sounds/ ):
+     scan-success.mp3 -> correct QR (entry allowed)
+     wrong-qr.mp3     -> wrong / invalid QR (also cancelled / expired ticket)
+   Nothing is played for "Ticket Already Used" (only the message shows).
+   Audio is a nice-to-have and must never break the check-in flow, so if a
+   file is missing or the browser blocks playback, a short synthesized
+   beep is played instead (and any failure there is ignored). */
+const SUCCESS_SOUND_URL = `${import.meta.env.BASE_URL}sounds/scan-success.mp3`;
+const WRONG_SOUND_URL = `${import.meta.env.BASE_URL}sounds/wrong-qr.mp3`;
+
+const playFallbackBeep = (frequency) => {
   try {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (!AudioContextClass) return;
@@ -37,7 +43,7 @@ const playSuccessBeep = () => {
     const gain = ctx.createGain();
 
     oscillator.type = "sine";
-    oscillator.frequency.value = 880; // A5 — a clean, short "ding"
+    oscillator.frequency.value = frequency;
 
     gain.gain.setValueAtTime(0.0001, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.35, ctx.currentTime + 0.01);
@@ -51,6 +57,25 @@ const playSuccessBeep = () => {
     oscillator.onended = () => ctx.close();
   } catch (err) {
     // Non-critical — silently ignore if audio can't play.
+  }
+};
+
+const audioCache = new Map();
+const playSound = (url, fallbackFrequency) => {
+  try {
+    let audio = audioCache.get(url);
+    if (!audio) {
+      audio = new Audio(url);
+      audio.preload = "auto";
+      audioCache.set(url, audio);
+    }
+    audio.currentTime = 0;
+    const result = audio.play();
+    if (result && typeof result.catch === "function") {
+      result.catch(() => playFallbackBeep(fallbackFrequency));
+    }
+  } catch (err) {
+    playFallbackBeep(fallbackFrequency);
   }
 };
 
@@ -528,20 +553,29 @@ const QRScannerModal = ({ isOpen, onClose, onVerified, onCheckedIn }) => {
     handleAllowEntry();
   }, [isValidTicket, ticket, checkInLoading, checkInSuccess, handleAllowEntry]);
 
-  // Tracks whether the beep has already played for the current
-  // "checkedIn" state so it fires exactly once per successful scan, not
-  // on every re-render while the success screen is showing.
-  const hasPlayedSuccessSoundRef = useRef(false);
+  // Remembers which result the sound has already been played for, so each
+  // scan makes its sound exactly once (not on every re-render while the
+  // result screen is showing).
+  const lastSoundStateRef = useRef(null);
 
   useEffect(() => {
-    if (resultState === "checkedIn") {
-      if (!hasPlayedSuccessSoundRef.current) {
-        hasPlayedSuccessSoundRef.current = true;
-        playSuccessBeep();
-      }
-    } else {
-      hasPlayedSuccessSoundRef.current = false;
+    if (!resultState || resultState === "loading") {
+      lastSoundStateRef.current = null;
+      return;
     }
+    if (lastSoundStateRef.current === resultState) return;
+    lastSoundStateRef.current = resultState;
+
+    if (resultState === "checkedIn") {
+      playSound(SUCCESS_SOUND_URL, 880); // correct QR
+    } else if (
+      resultState === "invalid" ||
+      resultState === "cancelled" ||
+      resultState === "expired"
+    ) {
+      playSound(WRONG_SOUND_URL, 220); // wrong QR
+    }
+    // "used" (already scanned) and "network": no sound.
   }, [resultState]);
 
   // ---------- auto-advance: clear success state and scan again ----------
