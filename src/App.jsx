@@ -28,7 +28,6 @@ import Profile from "./Pages/Profile";
 import Admin from "./Pages/Admin";
 import ContactList from "./Pages/ContactList";
 import EventHistory from "./Pages/EventHistory";
-import EditionList from "./Pages/EditionList";
 import CompanyCategory from "./Pages/CompanyCategory";
 import TopProgressLoader from "./Components/TopProgressLoader";
 
@@ -54,7 +53,6 @@ const privateRoutes = [
   "/admin",
   "/contact-list",
   "/event-history",
-  "/editions",
   "/company-categories",
   // Staff login page — City Lifestyle branding too.
   "/login",
@@ -83,7 +81,14 @@ function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (localStorage.getItem("token")) {
+    // Public marketing pages don't need the admin profile — skipping it
+    // there means a slow / cold server can never keep a loader running on
+    // the Home page. Every private page still loads the profile as before.
+    const path = window.location.pathname;
+    const isPublicSitePage =
+      path === "/" || path === "/city-sparkle" || path === "/parv" || path === "/contact";
+
+    if (localStorage.getItem("token") && !isPublicSitePage) {
       dispatch(getProfile());
     }
   }, [dispatch]);
@@ -137,10 +142,6 @@ function App() {
           <Route element={<ProtectedRoute adminOnly />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/admin" element={<Admin />} />
-            {/* Edition master data — kept for Contact List's Event
-                History (Edition dropdown), admin-only same as
-                Admin/Dashboard above. */}
-            {/* <Route path="/editions" element={<EditionList />} /> */}
           </Route>
 
           <Route element={<ProtectedRoute permission="Entry Report" />}>

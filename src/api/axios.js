@@ -42,12 +42,19 @@ const api = axios.create({
 
 let activeRequests = 0;
 
-const showLoader = () => {
+// Each request is counted ONCE (flagged on its own config) and released
+// ONCE, so a request can never leave the top loader stuck on, or switch it
+// off early because another request's release was counted twice.
+const showLoader = (config) => {
+  if (!config || config.silent || config.__loaderCounted) return;
+  config.__loaderCounted = true;
   activeRequests += 1;
   window.dispatchEvent(new Event("api-loading-start"));
 };
 
-const hideLoader = () => {
+const hideLoader = (config) => {
+  if (!config || !config.__loaderCounted) return;
+  config.__loaderCounted = false;
   activeRequests = Math.max(0, activeRequests - 1);
 
   if (activeRequests === 0) {
@@ -63,23 +70,23 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    showLoader();
+    showLoader(config);
 
     return config;
   },
   (error) => {
-    hideLoader();
+    hideLoader(error?.config);
     return Promise.reject(error);
   }
 );
 
 api.interceptors.response.use(
   (response) => {
-    hideLoader();
+    hideLoader(response.config);
     return response;
   },
   (error) => {
-    hideLoader();
+    hideLoader(error.config);
 
     // Do not redirect/reload when login credentials are invalid.
     // Let authSlice handle the login error and show it on the Login page.
