@@ -14,7 +14,7 @@ import DeleteUserModal from "../Components/DeleteUserModal";
 
 import { getAllEventHistory, deleteEventHistory } from "../redux/contactEventHistory/contactEventHistoryThunk";
 import { clearContactEventHistoryState } from "../redux/contactEventHistory/contactEventHistorySlice";
-import useEventOptions from "../hooks/UseeventOptions";
+import useEventOptions from "../hooks/useEventOptions";
 
 import { showError, showSuccess } from "../utilits/toast";
 import { getErrorText } from "../utilits/apiError";
@@ -47,6 +47,9 @@ const formatDateTime = (dateStr) => {
   return `${dd}-${mm}-${yyyy} ${hh}:${minutes} ${ampm}`;
 };
 
+// Event badges shown per row before "+N more".
+const MAX_VISIBLE_EVENTS = 3;
+
 export default function EventHistory() {
   const dispatch = useDispatch();
 
@@ -69,6 +72,13 @@ export default function EventHistory() {
   const [deleteEntryIds, setDeleteEntryIds] = useState([]);
   const [deleteEntryName, setDeleteEntryName] = useState("");
   const [openActionMenuId, setOpenActionMenuId] = useState(null);
+  // Rows whose full event list / notes are expanded. Collapsed rows stay
+  // one line high no matter how many events a person has.
+  const [expandedRowIds, setExpandedRowIds] = useState([]);
+  const toggleRowExpanded = (id) =>
+    setExpandedRowIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
 
   const effectiveLimit = limit || rowsPerPage;
   const startIndex = total === 0 ? 0 : (currentPage - 1) * effectiveLimit;
@@ -201,37 +211,63 @@ export default function EventHistory() {
         key: "event",
         label: "Event",
         cellClassName: "eventHistoryPage__eventCell",
-        // One row per person: every event of that person sits side by
-        // side in this cell. Each badge carries its own colour (green =
-        // Attended, red = Not Attended, ...).
-        render: (row) => (
-          <div className="eventHistoryPage__eventList">
-            {(row.entries || []).map((entry) => (
-              <span
-                key={entry._id}
-                title={entry.status || ""}
-                className={`eventHistoryPage__eventBadge eventHistoryPage__status--${(
-                  entry.status || ""
-                ).replace(/\s+/g, "")}`}
-              >
-                {entry.eventId?.title || "-"}
-              </span>
-            ))}
-          </div>
-        ),
+        // One row per person; every event is a coloured badge (green =
+        // Attended, red = Not Attended ...). Only the first
+        // MAX_VISIBLE_EVENTS show until the row is expanded, so the row
+        // height does not grow with the number of events.
+        render: (row) => {
+          const entries = row.entries || [];
+          const expanded = expandedRowIds.includes(row._id);
+          const shown = expanded ? entries : entries.slice(0, MAX_VISIBLE_EVENTS);
+          const hidden = entries.length - MAX_VISIBLE_EVENTS;
+
+          return (
+            <div className="eventHistoryPage__eventList">
+              {shown.map((entry) => (
+                <span
+                  key={entry._id}
+                  title={entry.status || ""}
+                  className={`eventHistoryPage__eventBadge eventHistoryPage__status--${(
+                    entry.status || ""
+                  ).replace(/\s+/g, "")}`}
+                >
+                  {entry.eventId?.title || "-"}
+                </span>
+              ))}
+              {hidden > 0 && (
+                <button
+                  type="button"
+                  className="eventHistoryPage__moreBtn"
+                  onClick={() => toggleRowExpanded(row._id)}
+                >
+                  {expanded ? "Show less" : `+${hidden} more`}
+                </button>
+              )}
+            </div>
+          );
+        },
       },
       {
         key: "status",
         label: "Status",
+        // Colour of each badge already shows the status per event, so this
+        // column only summarises it: "1 Attended · 2 Not Attended".
         render: (row) => {
           const entries = row.entries || [];
-          if (entries.length <= 1) return entries[0]?.status || "-";
+          if (entries.length === 0) return "-";
+
+          const counts = new Map();
+          for (const entry of entries) {
+            const key = entry.status || "-";
+            counts.set(key, (counts.get(key) || 0) + 1);
+          }
+
           return (
-            <div className="eventHistoryPage__stackedCell">
-              {entries.map((entry) => (
-                <div key={entry._id}>
-                  {entry.eventId?.title || "-"}: {entry.status || "-"}
-                </div>
+            <div className="eventHistoryPage__statusSummary">
+              {[...counts.entries()].map(([status, count]) => (
+                <span key={status} className="eventHistoryPage__statusCount">
+                  {entries.length > 1 ? `${count} ${status}` : status}
+                </span>
               ))}
             </div>
           );
@@ -241,17 +277,41 @@ export default function EventHistory() {
         key: "notes",
         label: "Notes",
         cellClassName: "eventHistoryPage__notesCell",
+        // One line (ellipsis) while collapsed — the full text is in the
+        // tooltip and in the expanded view.
         render: (row) => {
           const withNotes = (row.entries || []).filter((e) => e.notes);
           if (withNotes.length === 0) return "-";
-          if ((row.entries || []).length <= 1) return withNotes[0].notes;
+
+          const multiple = (row.entries || []).length > 1;
+          const label = (entry) =>
+            multiple && entry.eventId?.title
+              ? `${entry.eventId.title}: ${entry.notes}`
+              : entry.notes;
+
+          if (expandedRowIds.includes(row._id)) {
+            return (
+              <div className="eventHistoryPage__stackedCell">
+                {withNotes.map((entry) => (
+                  <div key={entry._id}>{label(entry)}</div>
+                ))}
+              </div>
+            );
+          }
+
           return (
-            <div className="eventHistoryPage__stackedCell">
-              {withNotes.map((entry) => (
-                <div key={entry._id}>
-                  {entry.eventId?.title || "-"}: {entry.notes}
-                </div>
-              ))}
+            <div
+              className="eventHistoryPage__notesOneLine"
+              title={withNotes.map(label).join("\n")}
+            >
+              <span className="eventHistoryPage__notesText">
+                {label(withNotes[0])}
+              </span>
+              {withNotes.length > 1 && (
+                <span className="eventHistoryPage__notesMore">
+                  +{withNotes.length - 1}
+                </span>
+              )}
             </div>
           );
         },
@@ -308,7 +368,7 @@ export default function EventHistory() {
         ),
       },
     ],
-    [openActionMenuId, handleToggleActionMenu]
+    [openActionMenuId, handleToggleActionMenu, expandedRowIds]
   );
 
   return (

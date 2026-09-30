@@ -169,7 +169,7 @@
   margin: 0;
 }
 
-/* ===== Edition checkboxes (multi-select) ===== */
+/* ===== Event checkboxes (multi-select) ===== */
 
 .eventHistoryCheckboxGrid {
   display: grid;
@@ -318,7 +318,7 @@
 }
 
 
-/* Edition already added for this person (edit modal) */
+/* Event already added for this person (edit modal) */
 .eventHistoryCheckboxItem--disabled {
   opacity: 0.5;
   cursor: not-allowed;
