@@ -515,17 +515,20 @@ export default function EventHistory() {
           />
         </div>
 
-        <div className="eventHistoryPage__legend" aria-label="Colour meaning">
-          <span className="eventHistoryPage__legendTitle">Colour meaning:</span>
-          <span className="eventHistoryPage__legendItem">
-            <span className="eventHistoryPage__legendDot eventHistoryPage__legendDot--attended" />
-            Green = Attended
-          </span>
-          <span className="eventHistoryPage__legendItem">
-            <span className="eventHistoryPage__legendDot eventHistoryPage__legendDot--notAttended" />
-            Red = Not Attended
-          </span>
-        </div>
+        {/* Colour legend only makes sense when there are rows to colour. */}
+        {!loading && !error && (history || []).length > 0 && (
+          <div className="eventHistoryPage__legend" aria-label="Colour meaning">
+            <span className="eventHistoryPage__legendTitle">Colour meaning:</span>
+            <span className="eventHistoryPage__legendItem">
+              <span className="eventHistoryPage__legendDot eventHistoryPage__legendDot--attended" />
+              Green = Attended
+            </span>
+            <span className="eventHistoryPage__legendItem">
+              <span className="eventHistoryPage__legendDot eventHistoryPage__legendDot--notAttended" />
+              Red = Not Attended
+            </span>
+          </div>
+        )}
 
         <div className="eventHistoryPage__tableWrapper">
           <CommonTable
