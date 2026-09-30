@@ -556,6 +556,35 @@
   margin-bottom: 22px;
 }
 
+.eventHistoryPage__searchBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #f2f3f6;
+  border-radius: 8px;
+  padding: 10px 16px;
+  width: 260px;
+}
+
+.eventHistoryPage__searchBox svg {
+  color: #9a9ca8;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.eventHistoryPage__searchInput {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 13.5px;
+  color: #1b2a4e;
+  width: 100%;
+}
+
+.eventHistoryPage__searchInput::placeholder {
+  color: #a7abbd;
+}
+
 .eventHistoryPage__rowsSelect,
 .eventHistoryPage__filterSelect {
   padding: 10px 14px;
@@ -591,6 +620,11 @@
     flex: 0 1 140px;
   }
 
+  .eventHistoryPage__searchBox {
+    flex: 1 1 220px;
+    min-width: 0;
+  }
+
   .eventHistoryPage__filterSelect {
     flex: 1 1 200px;
     min-width: 0;
@@ -605,6 +639,7 @@
   }
 
   .eventHistoryPage__rowsSelect,
+  .eventHistoryPage__searchBox,
   .eventHistoryPage__filterSelect {
     width: 100%;
     max-width: none;

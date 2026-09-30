@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { FaPlus, FaChevronDown } from "react-icons/fa";
+import { FaPlus, FaChevronDown, FaSearch } from "react-icons/fa";
 
 import CommonListLayout from "../Components/CommonListLayout";
 import CommonPageHeader from "../Components/CommonPageHeader";
+import CommonSearch from "../Components/CommonSearch";
 import CommonSelect from "../Components/CommonSelect";
 import CommonTable from "../Components/CommonTable";
 import CommonEmptyState from "../Components/CommonEmptyState";
@@ -66,6 +67,11 @@ export default function EventHistory() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [eventFilter, setEventFilter] = useState("");
 
+  // searchTerm tracks the raw input value; search is the debounced value
+  // actually sent to the API — same pattern as ContactList.jsx.
+  const [searchTerm, setSearchTerm] = useState("");
+  const [search, setSearch] = useState("");
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("create");
   const [editingEntry, setEditingEntry] = useState(null);
@@ -89,11 +95,22 @@ export default function EventHistory() {
   const endIndex = Math.min(currentPage * effectiveLimit, total);
   const resolvedTotalPages = totalPages || 1;
 
+  // Debounce the search input before it affects the API call / page reset.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearch(searchTerm.trim());
+      setCurrentPage(1);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
   const currentQuery = useMemo(() => {
     const q = { page: currentPage, limit: rowsPerPage };
     if (eventFilter) q.eventId = eventFilter;
+    if (search) q.search = search;
     return q;
-  }, [currentPage, rowsPerPage, eventFilter]);
+  }, [currentPage, rowsPerPage, eventFilter, search]);
 
   useEffect(() => {
     dispatch(getAllEventHistory(currentQuery));
@@ -473,6 +490,19 @@ export default function EventHistory() {
             options={ROWS_PER_PAGE_OPTIONS}
           />
 
+          <CommonSearch
+            containerClassName="eventHistoryPage__searchBox"
+            inputClassName="eventHistoryPage__searchInput"
+            icon={<FaSearch />}
+            type="text"
+            placeholder="Search name, mobile or edition..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") e.preventDefault();
+            }}
+          />
+
           <CommonSelect
             className="eventHistoryPage__filterSelect"
             value={eventFilter}
@@ -510,7 +540,9 @@ export default function EventHistory() {
               <CommonEmptyState
                 wrapperClassName="eventHistoryPage__stateWrap"
                 textClassName="eventHistoryPage__stateText"
-                message="No event history found."
+                message={
+                  search ? `No event history found for "${search}".` : "No event history found."
+                }
               />
             }
             tableClassName="eventHistoryPage__table"
