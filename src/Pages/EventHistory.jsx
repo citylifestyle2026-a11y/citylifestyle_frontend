@@ -277,24 +277,41 @@ export default function EventHistory() {
         key: "notes",
         label: "Notes",
         cellClassName: "eventHistoryPage__notesCell",
-        // One line (ellipsis) while collapsed — the full text is in the
-        // tooltip and in the expanded view.
+        // Only notes the admin typed are shown as text. The automatic text
+        // Entry Report writes ("Attended Parv6 (added from Entry Report)")
+        // just repeats what the coloured badge already says, so it becomes a
+        // small "Entry Report" tag instead.
         render: (row) => {
-          const withNotes = (row.entries || []).filter((e) => e.notes);
-          if (withNotes.length === 0) return "-";
+          const entries = row.entries || [];
+          const manualNotes = entries.filter(
+            (e) => e.source !== "entry-report" && e.notes
+          );
+          const fromReport = entries.some((e) => e.source === "entry-report");
 
-          const multiple = (row.entries || []).length > 1;
+          if (manualNotes.length === 0 && !fromReport) return "-";
+
+          const multiple = entries.length > 1;
           const label = (entry) =>
             multiple && entry.eventId?.title
               ? `${entry.eventId.title}: ${entry.notes}`
               : entry.notes;
 
+          const tag = fromReport ? (
+            <span
+              className="eventHistoryPage__sourceTag"
+              title="Added from Entry Report"
+            >
+              Entry Report
+            </span>
+          ) : null;
+
           if (expandedRowIds.includes(row._id)) {
             return (
               <div className="eventHistoryPage__stackedCell">
-                {withNotes.map((entry) => (
+                {manualNotes.map((entry) => (
                   <div key={entry._id}>{label(entry)}</div>
                 ))}
+                {tag && <div>{tag}</div>}
               </div>
             );
           }
@@ -302,16 +319,19 @@ export default function EventHistory() {
           return (
             <div
               className="eventHistoryPage__notesOneLine"
-              title={withNotes.map(label).join("\n")}
+              title={manualNotes.map(label).join("\n")}
             >
-              <span className="eventHistoryPage__notesText">
-                {label(withNotes[0])}
-              </span>
-              {withNotes.length > 1 && (
-                <span className="eventHistoryPage__notesMore">
-                  +{withNotes.length - 1}
+              {manualNotes.length > 0 && (
+                <span className="eventHistoryPage__notesText">
+                  {label(manualNotes[0])}
                 </span>
               )}
+              {manualNotes.length > 1 && (
+                <span className="eventHistoryPage__notesMore">
+                  +{manualNotes.length - 1}
+                </span>
+              )}
+              {tag}
             </div>
           );
         },

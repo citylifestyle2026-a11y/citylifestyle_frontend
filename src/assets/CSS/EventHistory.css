@@ -675,3 +675,14 @@
   font-size: 11.5px;
   font-weight: 700;
 }
+
+.eventHistoryPage__sourceTag {
+  flex: 0 0 auto;
+  background: #eef1f8;
+  color: #5b6b8c;
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
