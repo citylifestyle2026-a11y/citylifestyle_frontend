@@ -31,7 +31,6 @@
   min-height: 100vh;
   background: var(--login-bg) url('/assets/images/site/bgImg.png') repeat;
   overflow-y: auto;
-  font-family: 'Montserrat', 'Poppins', sans-serif;
 }
 
 .emsLogin__container {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, Link, useLocation } from "react-router-dom";
 import Sidebar from "./Sidebar";
@@ -7,7 +7,7 @@ import "../assets/CSS/TicketType.css";
 import { deleteTicketType, getAllTicketTypes } from "../redux/ticketType/ticketTypeThunk";
 import { getEventById } from "../redux/event/eventThunk";
 import CreateTicketTypeModal from "./CreateTicketTypeModal";
-import { FaChevronLeft, FaChevronRight, FaSearch, FaSort } from "react-icons/fa";
+import { FaChevronLeft, FaChevronRight, FaChevronDown, FaSearch, FaSort } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { clearTicketTypeState } from "../redux/ticketType/ticketTypeSlice";
 
@@ -52,6 +52,20 @@ const TicketType = () => {
     error,
   } = useSelector((state) => state.ticketType);
   const [openActionId, setOpenActionId] = useState(null);
+
+  // Close the open Action menu when the person clicks anywhere outside it
+  // (same behaviour as the other list pages, e.g. Event History).
+  const actionMenuRef = useRef(null);
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (actionMenuRef.current && !actionMenuRef.current.contains(event.target)) {
+        setOpenActionId(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -122,6 +136,7 @@ const TicketType = () => {
   const rows = ticketTypes || [];
 
   const openCreateModal = () => {
+    setOpenActionId(null);
     setIsEditMode(false);
     setSelectedTicketType(null);
     setIsModalOpen(true);
@@ -307,13 +322,17 @@ const TicketType = () => {
                         {ticket.createdBy?.name || "-"}
                       </td>
                       <td className="ticketType__td ticketType__tdAction">
-                        <div className="ticketType__actionDropdown">
+                        <div
+                          className="ticketType__actionDropdown"
+                          ref={openActionId === ticket._id ? actionMenuRef : null}
+                        >
                           <button
                             type="button"
                             className="ticketType__actionBtn"
                             onClick={() => toggleAction(ticket._id)}
                           >
-                            Action <span className="ticketType__caret">▾</span>
+                            Action
+                            <FaChevronDown className="ticketType__caret" />
                           </button>
 
                           {openActionId === ticket._id && (

@@ -1,7 +1,13 @@
 .dashboardPage {
   min-height: 100vh;
   background-color: #f4f4f7;
-  overflow-x: hidden;
+  /* `overflow-x: hidden` made this wrapper a scroll container (when one
+     axis is not `visible`, the other `visible` axis silently becomes
+     `auto`), so the dashboard got its OWN vertical scrollbar next to the
+     browser's page scrollbar. `clip` still cuts off any sideways overflow
+     but does not create a scroll container — one scrollbar only, and the
+     sticky Header works like on the other pages. */
+  overflow-x: clip;
 }
 
 .mainArea {

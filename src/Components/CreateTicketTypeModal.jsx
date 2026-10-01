@@ -105,7 +105,13 @@ const CreateTicketTypeModal = ({
       ? `Allow Dates must be between ${formatDisplayDate(eventStartDateOnly)} and ${formatDisplayDate(eventEndDateOnly)}.`
       : "Event dates are not available.";
 
-  // ================= PREFILL ON EDIT =================
+  // ================= PREFILL ON EDIT / CLEAR ON ADD =================
+  // `isOpen` is a dependency on purpose: this component stays mounted while
+  // the modal is closed (it just returns null), so its useState values
+  // would otherwise survive — after creating a ticket type (or pressing
+  // Close) the next "Create Ticket Type" opened with the old values still
+  // filled in. Re-running on open/close gives Add a blank form every time
+  // and Edit a fresh prefill from the selected ticket type.
   useEffect(() => {
     if (isEditMode && selectedTicketType) {
       setFormData({
@@ -140,7 +146,7 @@ const CreateTicketTypeModal = ({
       });
     }
     setFormErrors({});
-  }, [isEditMode, selectedTicketType]);
+  }, [isEditMode, selectedTicketType, isOpen]);
 
   // ================= ALLOW DATES CHANGE (event-range enforced) =================
   // MultipleDatePicker is given minDate/maxDate below so react-day-picker's
