@@ -131,15 +131,6 @@ export default function DashboardPage() {
     return `${fmt(activeEvent.startDateTime)} - ${fmt(activeEvent.endDateTime)}`;
   }, [activeEvent?.startDateTime, activeEvent?.endDateTime]);
 
-  const activeEventRows = useMemo(() => {
-    if (!activeEvent) return [];
-    return [
-      { label: activeEvent.title, value: activeEvent.venueName || "-" },
-      { label: "Duration", value: eventDateRange },
-      { label: "Address", value: activeEvent.address || "-" },
-    ];
-  }, [activeEvent, eventDateRange]);
-
   // The overall stat counts from dashboard.service.js's
   // getDashboardCounts(). Each is a single number — the backend doesn't
   // return a date-wise or ticket-wise breakdown for these, so every
@@ -237,30 +228,27 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="banner">
-            {activeEvent?.title || "No Active Event"}
-          </div>
+          <div className="dashboardPage-body">
+            {error && (
+              <div className="dashboardErrorBar">
+                <span className="dashboardError">{error}</span>
+                <button type="button" className="dashboardRetryBtn" onClick={handleRetry}>
+                  Retry
+                </button>
+              </div>
+            )}
 
-          {error && (
-            <div className="dashboardErrorBar">
-              <span className="dashboardError">{error}</span>
-              <button type="button" className="dashboardRetryBtn" onClick={handleRetry}>
-                Retry
-              </button>
-            </div>
-          )}
-
-          <div className="cardGrid">
             {loading && !dashboardData ? (
               <>
-                <div className="fullWidth">
-                  <DashboardCardSkeleton />
+                <section className="eventInfoCard">
+                  <div className="skeletonBlock skeletonAmount" />
+                  <div className="skeletonBlock skeletonRow" style={{ marginTop: 14 }} />
+                </section>
+                <div className="statGrid">
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <DashboardCardSkeleton key={i} />
+                  ))}
                 </div>
-                <DashboardCardSkeleton />
-                <DashboardCardSkeleton />
-                <DashboardCardSkeleton />
-                <DashboardCardSkeleton />
-                <DashboardCardSkeleton />
               </>
             ) : error && !dashboardData ? (
               // Request failed and there's no prior data to fall back on —
@@ -270,41 +258,47 @@ export default function DashboardPage() {
               null
             ) : (
               <>
-                <div className="fullWidth">
-                  <DashboardCard
-                    title="Active Event"
-                    columns={["Venue", "Dates"]}
-                    emptyText={!activeEvent ? "No Active Event" : undefined}
-                    rows={activeEventRows}
-                  />
+                {/* Active event — one compact card (replaces the separate
+                    blue banner + the tall full-width "Active Event" table). */}
+                <section className="eventInfoCard">
+                  <div className="eventInfoCard__head">
+                    <span className="eventInfoCard__tag">Active Event</span>
+                    <h2 className="eventInfoCard__title">
+                      {activeEvent?.title || "No Active Event"}
+                    </h2>
+                  </div>
+
+                  {activeEvent && (
+                    <dl className="eventInfoCard__grid">
+                      <div className="eventInfoCard__item">
+                        <dt>Venue</dt>
+                        <dd>{activeEvent.venueName || "-"}</dd>
+                      </div>
+                      <div className="eventInfoCard__item">
+                        <dt>Duration</dt>
+                        <dd>{eventDateRange || "-"}</dd>
+                      </div>
+                      <div className="eventInfoCard__item">
+                        <dt>Address</dt>
+                        <dd>{activeEvent.address || "-"}</dd>
+                      </div>
+                    </dl>
+                  )}
+                </section>
+
+                <div className="statGrid">
+                  {[...statCards, notScannedCard].map((card) => (
+                    <DashboardCard
+                      key={card.key}
+                      compact
+                      title={card.title}
+                      amountValue={card.amountValue}
+                      amountLabel={card.amountLabel}
+                      hideBody={card.hideBody}
+                      infoText={card.infoText}
+                    />
+                  ))}
                 </div>
-
-                {statCards.map((card) => (
-                  <DashboardCard
-                    key={card.key}
-                    title={card.title}
-                    amountValue={card.amountValue}
-                    amountLabel={card.amountLabel}
-                    secondaryAmountValue={card.secondaryAmountValue}
-                    secondaryAmountLabel={card.secondaryAmountLabel}
-                    columns={card.columns}
-                    rows={card.rows}
-                    emptyText={card.emptyText}
-                    noteText={card.noteText}
-                    hideBody={card.hideBody}
-                    infoText={card.infoText}
-                  />
-                ))}
-
-                {/* Same normal (half) width as the other four stat cards —
-                    no fullWidth wrapper. */}
-                <DashboardCard
-                  title={notScannedCard.title}
-                  amountValue={notScannedCard.amountValue}
-                  amountLabel={notScannedCard.amountLabel}
-                  hideBody={notScannedCard.hideBody}
-                  infoText={notScannedCard.infoText}
-                />
               </>
             )}
           </div>
@@ -325,14 +319,9 @@ export default function DashboardPage() {
 
 function DashboardCardSkeleton() {
   return (
-    <div className="card cardSkeleton">
-      <div className="cardHeader">
-        <div className="skeletonBlock skeletonAmount" />
-      </div>
-      <div className="skeletonBlock skeletonRowHeader" />
-      <div className="skeletonBlock skeletonRow" />
-      <div className="skeletonBlock skeletonRow" />
-      <div className="skeletonBlock skeletonRow" />
+    <div className="card card--compact cardSkeleton">
+      <div className="skeletonBlock skeletonAmount" />
+      <div className="skeletonBlock skeletonRow" style={{ marginBottom: 0 }} />
     </div>
   );
 }

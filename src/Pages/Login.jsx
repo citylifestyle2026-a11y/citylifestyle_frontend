@@ -1,6 +1,6 @@
 import "../assets/CSS/Login.css";
 import logo from "../assets/images/logo/city-lifestyle-logo.jpg";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Alert,
   Button,
@@ -25,6 +25,7 @@ import {
 } from "../redux/auth/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import api from "../api/axios";
 import { HiOutlineEye, HiOutlineEyeOff } from "react-icons/hi";
 
 const FEATURES = [
@@ -35,6 +36,19 @@ const FEATURES = [
 ];
 
 const Login = () => {
+  // WAKE-UP PING. On the hosting plan the Node.js app goes to sleep after a
+  // few idle minutes, and the first request afterwards has to start the app
+  // and reconnect to MongoDB — which is why the first login after an idle
+  // logout felt slow (and the same login was instant in another browser,
+  // where the server was already awake). Hitting the public health route as
+  // soon as the Login page opens starts that wake-up while the person is
+  // still typing their email and password, so the login request itself finds
+  // a running server. `silent` keeps it off the top loader and it never
+  // shows an error: if it fails, login simply behaves as before.
+  useEffect(() => {
+    api.get("/health", { silent: true }).catch(() => {});
+  }, []);
+
   const [formData, setFormData] = useState({
     login: "",
     password: "",

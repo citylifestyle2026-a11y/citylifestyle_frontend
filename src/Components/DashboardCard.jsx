@@ -31,6 +31,9 @@ function DashboardCard({
   // on touch screens) shows this text in a tooltip, so anyone reading
   // the dashboard knows what the number means.
   infoText,
+  // Optional — small, tidy stat card (less padding, smaller number).
+  // Used by the Dashboard; any other page using this card is unaffected.
+  compact = false,
 }) {
   // Optional 3rd column (e.g. "Amount"). Only Pass Booking cards pass a
   // 3-item columns array / rows with `value2` — every other card keeps
@@ -38,7 +41,7 @@ function DashboardCard({
   const hasThirdColumn = Boolean(columns[2]);
 
   return (
-    <div className="card">
+    <div className={compact ? "card card--compact" : "card"}>
       {infoText && (
         <div className="cardInfo">
           <button
