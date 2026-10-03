@@ -1,7 +1,9 @@
 import api from "../api/axios";
 
 export const loginApi = async (data) => {
-  const response = await api.post("/auth/login", data);
+  // 60 s instead of the 30 s default: the first login after the server has
+  // been asleep must wait for the app to start, which can take a while.
+  const response = await api.post("/auth/login", data, { timeout: 60000 });
   return response.data;
 };
 

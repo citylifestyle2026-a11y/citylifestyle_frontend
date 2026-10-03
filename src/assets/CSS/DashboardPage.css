@@ -40,7 +40,7 @@
 .dashboardPage-topRow {
   /* same cap as .dashboardPage-body so the Event selector lines up with
      the right edge of the cards on wide screens */
-  max-width: 1200px;
+  max-width: 1800px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -123,10 +123,12 @@
   color: #ffffff;
 }
 
-/* Dashboard body: capped width so the cards stay compact on big desktop
-   screens instead of stretching across the whole window. */
+/* Dashboard body */
 .dashboardPage-body {
-  max-width: 1200px;
+  /* Fills the whole content area (no empty strip on the right). The cap only
+     matters on very wide monitors, where cards would otherwise stretch too
+     long. */
+  max-width: 1800px;
 }
 
 /* ===== Active event card ===== */

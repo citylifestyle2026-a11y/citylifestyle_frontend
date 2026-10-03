@@ -74,6 +74,19 @@ const Login = () => {
 
   const { loading } = useSelector((state) => state.auth);
 
+  // If sign-in is still waiting after a few seconds, tell the person why —
+  // the server is most likely starting up after being idle — so a slow first
+  // login doesn't look like a hang.
+  const [slowLogin, setSlowLogin] = useState(false);
+  useEffect(() => {
+    if (!loading) {
+      setSlowLogin(false);
+      return undefined;
+    }
+    const timer = setTimeout(() => setSlowLogin(true), 4000);
+    return () => clearTimeout(timer);
+  }, [loading]);
+
   // ===== Forgot Password (OTP, via email) =====
   // Which screen is currently shown: "login" (default), "forgot-email"
   // (enter email to request an OTP), or "forgot-reset" (enter the OTP +
@@ -514,6 +527,16 @@ const Login = () => {
                     "Sign In"
                   )}
                 </Button>
+
+                {loading && slowLogin && (
+                  <Typography
+                    variant="body2"
+                    sx={{ mt: 1.5, textAlign: "center", opacity: 0.75 }}
+                  >
+                    Waking up the server after a break — this can take up to
+                    30 seconds. Please wait…
+                  </Typography>
+                )}
 
               </form>
             )}
