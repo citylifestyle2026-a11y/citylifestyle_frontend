@@ -121,6 +121,10 @@ export default function EditBookingModal({ booking, onClose, onSuccess }) {
 
     if (!isValidMobileNumber(formData.mobile)) errors.mobile = MOBILE_ERROR_MESSAGE;
 
+    // Company / Brand is compulsory (same rule + message as CreateBookingModal).
+    if (!formData.companyName.trim())
+      errors.companyName = "Please enter company / brand name.";
+
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
       errors.email = "Please enter a valid email.";
 
@@ -194,7 +198,9 @@ export default function EditBookingModal({ booking, onClose, onSuccess }) {
 
         <div className="bookingCreateGrid">
           <div className="bookingCreateFieldGroup">
-            <label className="bookingCreateLabel">Event</label>
+            <label className="bookingCreateLabel">
+              Event <span className="bookingCreateRequired">*</span>
+            </label>
             <input
               type="text"
               className="bookingCreateInput"
@@ -205,7 +211,9 @@ export default function EditBookingModal({ booking, onClose, onSuccess }) {
           </div>
 
           <div className="bookingCreateFieldGroup">
-            <label className="bookingCreateLabel">Ticket</label>
+            <label className="bookingCreateLabel">
+              Ticket <span className="bookingCreateRequired">*</span>
+            </label>
             <select
               className="bookingCreateSelect"
               value={formData.ticketType}
@@ -229,7 +237,9 @@ export default function EditBookingModal({ booking, onClose, onSuccess }) {
           </div>
 
           <div className="bookingCreateFieldGroup">
-            <label className="bookingCreateLabel">Qty</label>
+            <label className="bookingCreateLabel">
+              Qty <span className="bookingCreateRequired">*</span>
+            </label>
             <input
               type="number"
               min="1"
@@ -243,12 +253,16 @@ export default function EditBookingModal({ booking, onClose, onSuccess }) {
           </div>
 
           <div className="bookingCreateFieldGroup">
-            <label className="bookingCreateLabel">Amount</label>
+            <label className="bookingCreateLabel">
+              Amount <span className="bookingCreateRequired">*</span>
+            </label>
             <input type="text" className="bookingCreateInput" value={subtotal} readOnly />
           </div>
 
           <div className="bookingCreateFieldGroup">
-            <label className="bookingCreateLabel">Name</label>
+            <label className="bookingCreateLabel">
+              Name <span className="bookingCreateRequired">*</span>
+            </label>
             <input
               type="text"
               className="bookingCreateInput"
@@ -259,7 +273,9 @@ export default function EditBookingModal({ booking, onClose, onSuccess }) {
           </div>
 
           <div className="bookingCreateFieldGroup">
-            <label className="bookingCreateLabel">Mobile Number</label>
+            <label className="bookingCreateLabel">
+              Mobile Number <span className="bookingCreateRequired">*</span>
+            </label>
             <input
               type="tel"
               inputMode="numeric"
@@ -301,13 +317,19 @@ export default function EditBookingModal({ booking, onClose, onSuccess }) {
           </div>
 
           <div className="bookingCreateFieldGroup">
-            <label className="bookingCreateLabel">Company / Brand</label>
+            <label className="bookingCreateLabel">
+              Company / Brand <span className="bookingCreateRequired">*</span>
+            </label>
             <input
               type="text"
               className="bookingCreateInput"
+              placeholder="Company / Brand"
               value={formData.companyName}
               onChange={handleChange("companyName")}
             />
+            {fieldErrors.companyName && (
+              <p className="bookingCreateFieldError">{fieldErrors.companyName}</p>
+            )}
           </div>
 
           <div className="bookingCreateFieldGroup">

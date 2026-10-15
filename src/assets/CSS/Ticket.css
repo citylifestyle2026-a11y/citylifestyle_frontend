@@ -12,89 +12,212 @@
 .pass__state { margin: 40vh 0 0; color: #cfd2ff; }
 .pass__state--error { color: #ff9aa8; }
 
+.pass__icon { color: #ec2f86; flex-shrink: 0; }
+
+/* ---------- the ticket: two halves joined at the dashed tear line ---------- */
 .pass__ticket {
-  position: relative;
   width: 100%;
   max-width: 364px;
-  background: #fff;
   color: #16193a;
-  border-radius: 6px;
-  padding: 26px 22px 24px;
-  text-align: center;
-  box-sizing: border-box;
-  /* notched corners like the reference pass */
-  -webkit-mask:
-    radial-gradient(circle 24px at 0 0, transparent 98%, #000) top left / 51% 51% no-repeat,
-    radial-gradient(circle 24px at 100% 0, transparent 98%, #000) top right / 51% 51% no-repeat,
-    radial-gradient(circle 24px at 0 100%, transparent 98%, #000) bottom left / 51% 51% no-repeat,
-    radial-gradient(circle 24px at 100% 100%, transparent 98%, #000) bottom right / 51% 51% no-repeat;
-  mask:
-    radial-gradient(circle 24px at 0 0, transparent 98%, #000) top left / 51% 51% no-repeat,
-    radial-gradient(circle 24px at 100% 0, transparent 98%, #000) top right / 51% 51% no-repeat,
-    radial-gradient(circle 24px at 0 100%, transparent 98%, #000) bottom left / 51% 51% no-repeat,
-    radial-gradient(circle 24px at 100% 100%, transparent 98%, #000) bottom right / 51% 51% no-repeat;
+  filter: drop-shadow(0 18px 30px rgba(5, 7, 30, 0.45));
 }
-.pass__chip {
-  display: inline-block; padding: 4px 14px; border-radius: 999px;
-  background: #fdeaf3; color: #e6287a; font-size: 10px; font-weight: 600; letter-spacing: 1px;
-}
-.pass__logo { margin-top: 8px; font-size: 54px; line-height: 1.1; font-weight: 700; color: #ec2f86; }
-.pass__title { margin: 2px 0 4px; font-size: 22px; font-weight: 700; }
-.pass__sub { margin: 0; font-size: 13px; color: #333; }
-.pass__tear { margin: 16px -4px 8px; border-top: 3px dashed #16193a; }
 
+/* Each half has its own quarter-circle notches (outer corners + the two
+   notches at the tear line), so the notches show the page background. */
+.pass__top,
+.pass__bottom {
+  --r-tl: 30px;
+  --r-tr: 30px;
+  --r-bl: 24px;
+  --r-br: 24px;
+  position: relative;
+  box-sizing: border-box;
+  background: #fff;
+  text-align: center;
+  -webkit-mask:
+    radial-gradient(circle var(--r-tl) at 0 0, transparent 98%, #000) top left / 51% 51% no-repeat,
+    radial-gradient(circle var(--r-tr) at 100% 0, transparent 98%, #000) top right / 51% 51% no-repeat,
+    radial-gradient(circle var(--r-bl) at 0 100%, transparent 98%, #000) bottom left / 51% 51% no-repeat,
+    radial-gradient(circle var(--r-br) at 100% 100%, transparent 98%, #000) bottom right / 51% 51% no-repeat;
+  mask:
+    radial-gradient(circle var(--r-tl) at 0 0, transparent 98%, #000) top left / 51% 51% no-repeat,
+    radial-gradient(circle var(--r-tr) at 100% 0, transparent 98%, #000) top right / 51% 51% no-repeat,
+    radial-gradient(circle var(--r-bl) at 0 100%, transparent 98%, #000) bottom left / 51% 51% no-repeat,
+    radial-gradient(circle var(--r-br) at 100% 100%, transparent 98%, #000) bottom right / 51% 51% no-repeat;
+}
+
+.pass__top { padding: 26px 24px 17px; }
+
+.pass__bottom {
+  --r-tl: 24px;
+  --r-tr: 24px;
+  --r-bl: 30px;
+  --r-br: 30px;
+  margin-top: -1px; /* no hairline gap between the two halves */
+  padding: 12px 24px 28px;
+}
+
+.pass__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 14px;
+  border-radius: 999px;
+  background: #fdeaf3;
+  color: #e6287a;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+.pass__chipIcon { font-size: 10px; }
+
+.pass__logo { display: block; width: 100px; height: auto; margin: 8px auto 0; }
+.pass__title { margin: 2px 0 4px; font-size: 22px; font-weight: 700; line-height: 1.2; }
+.pass__sub {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: #222;
+}
+
+.pass__tear {
+  position: absolute;
+  left: 32px;
+  right: 32px;
+  bottom: 0;
+  border-top: 3px dashed #16193a;
+}
+
+/* ---------- guest details ---------- */
 .pass__rows { margin: 0; text-align: left; }
 .pass__rows > div {
-  display: flex; justify-content: space-between; gap: 12px;
-  padding: 9px 0; border-bottom: 1px solid #eee; font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid #eee;
+  font-size: 13px;
 }
 .pass__rows > div:last-child { border-bottom: 0; }
-.pass__rows dt { color: #666; }
+.pass__rows dt { display: flex; align-items: center; gap: 10px; color: #5b5f73; }
 .pass__rows dd { margin: 0; font-weight: 600; text-align: right; word-break: break-word; }
 
+/* ---------- QR ---------- */
 .pass__qrBox {
-  margin: 14px auto 12px; width: 194px; padding: 12px;
-  border: 1.5px solid #ec2f86; border-radius: 18px; box-sizing: border-box;
+  margin: 14px auto 12px;
+  width: 194px;
+  padding: 12px;
+  border: 1.5px solid #ec2f86;
+  border-radius: 18px;
+  box-sizing: border-box;
 }
-.pass__qr { display: block; width: 100%; height: auto; }
+.pass__qr { display: block; width: 100%; height: auto; image-rendering: pixelated; }
 .pass__qr--off { opacity: 0.3; filter: grayscale(1); }
 
-.pass__codeLabel { margin: 0; font-size: 10px; letter-spacing: 1px; color: #444; }
+.pass__codeLabel { margin: 0; font-size: 10px; font-weight: 500; letter-spacing: 1px; color: #444; }
 .pass__code {
-  display: inline-block; margin: 8px 0 10px; padding: 6px 30px;
-  border: 1.5px dashed #ec2f86; border-radius: 999px;
-  color: #ec2f86; font-size: 24px; font-weight: 700; letter-spacing: 2px;
+  display: inline-block;
+  margin: 8px 0 10px;
+  padding: 6px 30px;
+  border: 1.5px dashed #ec2f86;
+  border-radius: 999px;
+  color: #ec2f86;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 2px;
 }
 .pass__badge {
-  display: block; width: fit-content; margin: 0 auto; padding: 5px 18px; border-radius: 999px;
-  background: #123d33; color: #4be3a4; font-size: 12px; font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: fit-content;
+  margin: 0 auto;
+  padding: 5px 18px;
+  border-radius: 999px;
+  background: #123d33;
+  color: #4be3a4;
+  font-size: 12px;
+  font-weight: 500;
 }
+.pass__badgeIcon { font-size: 11px; }
 .pass__badge--bad { background: #4a1620; color: #ff9aa8; }
 
-.pass__note { max-width: 364px; margin: 16px 0; font-size: 11px; color: #d8dafc; text-align: center; }
+/* ---------- under the ticket ---------- */
+.pass__note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  max-width: 364px;
+  box-sizing: border-box;
+  margin: 18px 0 16px;
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: #d8dafc;
+}
+.pass__note span { flex: 1; text-align: center; }
+.pass__noteIcon { flex-shrink: 0; margin-top: 3px; color: #e9eaff; }
 
 .pass__help {
-  width: 100%; max-width: 364px; background: #161a3b; border: 1px solid #2a2f63;
-  border-radius: 14px; overflow: hidden;
+  width: 100%;
+  max-width: 364px;
+  background: #161a3b;
+  border: 1px solid #2a2f63;
+  border-radius: 14px;
+  overflow: hidden;
 }
 .pass__helpHead {
-  width: 100%; display: flex; justify-content: space-between; align-items: center;
-  padding: 14px 16px; background: none; border: 0; color: #fff;
-  font: 600 13px "Poppins", sans-serif; cursor: pointer;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: none;
+  border: 0;
+  color: #fff;
+  font: 600 13px "Poppins", sans-serif;
+  cursor: pointer;
 }
-.pass__helpBody { padding: 4px 16px 14px; font-size: 12px; border-top: 1px solid #2a2f63; }
-.pass__helpBody p { margin: 8px 0; }
+.pass__helpTitle { display: flex; align-items: center; gap: 9px; }
+.pass__helpBody { padding: 6px 16px 14px; font-size: 12px; border-top: 1px solid #2a2f63; }
+.pass__helpBody p { display: flex; align-items: flex-start; gap: 10px; margin: 9px 0; }
+.pass__helpBody .pass__icon { margin-top: 2px; }
 .pass__helpBody a { color: #6aa8ff; }
 
 .pass__actions { display: flex; gap: 12px; width: 100%; max-width: 364px; margin-top: 12px; }
 .pass__btn {
-  flex: 1; padding: 13px 0; border: 0; border-radius: 10px; color: #fff;
-  font: 600 13px "Poppins", sans-serif; cursor: pointer;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 0;
+  border: 0;
+  border-radius: 10px;
+  color: #fff;
+  font: 600 13px "Poppins", sans-serif;
+  cursor: pointer;
 }
 .pass__btn--dark { background: #262b57; }
 .pass__btn--pink { background: #ec4899; box-shadow: 0 6px 18px rgba(236, 72, 153, 0.35); }
 
+/* ---------- Save / Print: just the pass, on white paper ---------- */
 @media print {
-  .pass { background: #fff; }
+  .pass { background: #fff; min-height: 0; }
+  .pass__ticket { filter: none; }
   .pass__note, .pass__help, .pass__actions { display: none; }
 }
+
+/* ---------- embedded in admin "View Booking" (not a full page) ---------- */
+.pass--embedded {
+  min-height: 0;
+  padding: 24px 16px;
+  border-radius: 16px;
+}
+.pass--embedded .pass__state { margin: 20px 0; }
+.pass--embedded a.pass__btn { display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }

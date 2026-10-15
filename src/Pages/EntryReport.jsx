@@ -115,51 +115,22 @@ const formatDateTime = (value) => {
   return `${datePart}, ${timePart}`;
 };
 
-// Shows the attendee's profile image returned by the API; falls back to a
-// default avatar icon when no image is provided or the image fails to load.
-function ProfileAvatar({ src, name }) {
-  const [imgError, setImgError] = useState(false);
-
-  if (src && !imgError) {
-    return (
-      <span className="erPage__profileAvatar erPage__profileAvatar--img">
-        <img
-          src={src}
-          alt={name || "Profile"}
-          className="erPage__profileAvatarImg"
-          onError={() => setImgError(true)}
-        />
-      </span>
-    );
-  }
-
-  return (
-    <span className="erPage__profileAvatar erPage__profileAvatar--default">
-      <svg
-        viewBox="0 0 24 24"
-        width="18"
-        height="18"
-        fill="currentColor"
-        className="erPage__profileAvatarIcon"
-      >
-        <path d="M12 12c2.7 0 4.9-2.2 4.9-4.9S14.7 2.2 12 2.2 7.1 4.4 7.1 7.1 9.3 12 12 12zm0 2.2c-3.3 0-9.8 1.6-9.8 4.9v2.7h19.6v-2.7c0-3.3-6.5-4.9-9.8-4.9z" />
-      </svg>
-    </span>
-  );
-}
-
 // Table columns mapped 1:1 to the real Entry Report API response fields.
-// Order: #, Profile, Name, Mobile Number, Scanned By, Scanned At first,
-// then every other existing field unchanged after that.
+// Single-QR flow: guests are NOT registered one by one any more, so the
+// person on each row is the BOOKING's guest (name / company / mobile) and
+// one row = one scanned pass. "Guests" is how many people that single scan
+// admitted; "Invitation ID" is the 8-digit code printed on the guest's pass.
+// (The old "Profile" photo column is gone - there is no attendee photo.)
 const COLUMNS = [
   "#",
-  "Profile",
   "Name",
+  "Company/ Brand",
   "Mobile Number",
+  "Guests",
   "Scanned By",
   "Scanned At",
   "Booking Id",
-  "Ticket Id",
+  "Invitation ID",
   "QR Code",
   "Pass Date",
 ];
@@ -167,8 +138,8 @@ const COLUMNS = [
 export default function EntryReport() {
   const [bookingId, setBookingId] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
-  const [ticketId, setTicketId] = useState("");
   const [name, setName] = useState("");
+  const [invitationId, setInvitationId] = useState("");
   const [dateRange, setDateRange] = useState("");
   const [apiStartDate, setApiStartDate] = useState("");
   const [apiEndDate, setApiEndDate] = useState("");
@@ -264,13 +235,13 @@ export default function EntryReport() {
   // *dispatched* entry-report list request — i.e. exactly what the rows
   // currently on screen were fetched with. Export reads from this (see
   // handleExport) instead of the raw filter state below, because the raw
-  // state updates on every keystroke (Booking Id/Ticket Id/Name/Mobile
+  // state updates on every keystroke (Booking Id/Invitation Id/Name/Mobile
   // Number inputs, and the debounced toolbar Search box) and can therefore
   // hold edits the user hasn't actually applied yet via Search/Reset/etc.
   const appliedFiltersRef = useRef({
     eventId: "",
     bookingId: "",
-    ticketId: "",
+    invitationId: "",
     name: "",
     mobileNumber: "",
     search: "",
@@ -296,7 +267,7 @@ export default function EntryReport() {
     if (eventId) params.eventId = eventId;
 
     if (bookingId) params.bookingId = bookingId;
-    if (ticketId) params.ticketId = ticketId;
+    if (invitationId) params.invitationId = invitationId;
     if (name) params.name = name;
     if (mobileNumber) params.mobileNumber = mobileNumber;
     if (apiStartDate) params.startDate = apiStartDate;
@@ -309,7 +280,7 @@ export default function EntryReport() {
     appliedFiltersRef.current = {
       eventId: eventId || "",
       bookingId: bookingId || "",
-      ticketId: ticketId || "",
+      invitationId: invitationId || "",
       name: name || "",
       mobileNumber: mobileNumber || "",
       search: searchTerm || "",
@@ -335,7 +306,7 @@ export default function EntryReport() {
 
   const hasActiveFilters = Boolean(
     bookingId ||
-      ticketId ||
+      invitationId ||
       name ||
       mobileNumber ||
       searchTerm ||
@@ -700,8 +671,8 @@ export default function EntryReport() {
 
     setBookingId("");
     setMobileNumber("");
-    setTicketId("");
     setName("");
+    setInvitationId("");
     setSearchTerm("");
     clearSelection();
     setDateRange("");
@@ -737,7 +708,7 @@ export default function EntryReport() {
     appliedFiltersRef.current = {
       eventId: eventId || "",
       bookingId: "",
-      ticketId: "",
+      invitationId: "",
       name: "",
       mobileNumber: "",
       search: "",
@@ -1010,10 +981,14 @@ export default function EntryReport() {
 
           <input
             type="text"
+            inputMode="numeric"
+            maxLength={8}
             className="erPage__input"
-            placeholder="Ticket Id"
-            value={ticketId}
-            onChange={(e) => setTicketId(e.target.value)}
+            placeholder="Invitation Id"
+            value={invitationId}
+            onChange={(e) =>
+              setInvitationId(e.target.value.replace(/\D/g, "").slice(0, 8))
+            }
           />
         </div>
 
@@ -1233,11 +1208,18 @@ export default function EntryReport() {
                   const serial = (currentPage - 1) * limit + idx + 1;
 
                   // Flat entry-report API row shape.
-                  const profileImage = row?.profileImage ?? null;
                   const bookingIdVal = row?.bookingId ?? "-";
-                  const ticketIdVal = row?.ticketId ?? "-";
+                  const invitationIdVal = row?.invitationId || "-";
                   const qrImage = row?.qrImage ?? null;
+                  // Clicking the QR opens the guest's digital pass page. A
+                  // data: image can't be opened in a new tab by browsers, so
+                  // it is only used as the thumbnail.
+                  const qrLink =
+                    row?.passUrl ||
+                    (qrImage && !String(qrImage).startsWith("data:") ? qrImage : "");
                   const nameVal = row?.name ?? "-";
+                  const companyVal = row?.companyName || "-";
+                  const guestsVal = row?.guests ?? 1;
                   const mobileNumberVal = row?.mobileNumber ?? "-";
                   const scannedByVal = row?.scannedBy ?? "-";
                   const passDate = formatPassDates(row);
@@ -1260,23 +1242,23 @@ export default function EntryReport() {
                         </td>
                       )}
                       <td className="erPage__td">{serial}</td>
-                      <td className="erPage__td">
-                        <ProfileAvatar src={profileImage} name={nameVal} />
-                      </td>
                       <td className="erPage__td">{nameVal}</td>
+                      <td className="erPage__td">{companyVal}</td>
                       <td className="erPage__td">{mobileNumberVal}</td>
+                      <td className="erPage__td">{guestsVal}</td>
                       <td className="erPage__td">{scannedByVal}</td>
                       <td className="erPage__td">{scannedAt}</td>
                       <td className="erPage__td">{bookingIdVal}</td>
-                      <td className="erPage__td">{ticketIdVal}</td>
+                      <td className="erPage__td">{invitationIdVal}</td>
                       <td className="erPage__td">
                         {qrImage ? (
                           <button
                             type="button"
                             onClick={() =>
-                              window.open(qrImage, "_blank", "noopener,noreferrer")
+                              qrLink &&
+                              window.open(qrLink, "_blank", "noopener,noreferrer")
                             }
-                            title="Click to preview QR code"
+                            title={qrLink ? "Click to open the guest pass" : "QR code"}
                             style={{
                               padding: 0,
                               border: "none",

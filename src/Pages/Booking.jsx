@@ -729,16 +729,20 @@ const Booking = () => {
                                     View Booking
                                   </button>
 
-                                  <button
-                                    type="button"
-                                    className="bookingPage-actionMenuItem"
-                                    onClick={() => {
-                                      closeActionMenu();
-                                      window.open(`/register-users/${row._id}`, "_blank");
-                                    }}
-                                  >
-                                    Register Users
-                                  </button>
+                                  {/* Single-QR bookings have no guest registration, so
+                                      "Register Users" is only for old per-ticket bookings. */}
+                                  {row.entryMode !== "single_qr" && (
+                                    <button
+                                      type="button"
+                                      className="bookingPage-actionMenuItem"
+                                      onClick={() => {
+                                        closeActionMenu();
+                                        window.open(`/register-users/${row._id}`, "_blank");
+                                      }}
+                                    >
+                                      Register Users
+                                    </button>
+                                  )}
 
                                   <button
                                     type="button"

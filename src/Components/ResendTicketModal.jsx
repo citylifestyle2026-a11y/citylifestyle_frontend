@@ -53,8 +53,12 @@ export default function ResendTicketModal({ bookingId, onClose, onSuccess }) {
 
   // Single ticket: resolved automatically, no picker needed.
   // Multiple tickets: only resolved once the admin picks one.
+  //
+  // Single-QR bookings (new flow): the whole booking has ONE invitation, so
+  // there is nothing to pick - the invitation is re-sent (same pass link).
+  const isSingleQr = isCurrentBooking && booking.entryMode === "single_qr";
   const ticketToResendId =
-    tickets.length === 1 ? tickets[0]._id : selectedTicketId;
+    isSingleQr || tickets.length === 1 ? tickets[0]?._id : selectedTicketId;
 
   const handleResend = async () => {
     if (!ticketToResendId) {
@@ -110,11 +114,13 @@ export default function ResendTicketModal({ bookingId, onClose, onSuccess }) {
         ) : (
           <>
             <p className="bookingResendMessage">
-              You want to resend the message to this mobile number:{" "}
+              {isSingleQr
+                ? "You want to resend the invitation (pass link) to this mobile number:"
+                : "You want to resend the message to this mobile number:"}{" "}
               <span className="bookingResendMobile">{mobileNumber}</span>
             </p>
 
-            {tickets.length > 1 && (
+            {!isSingleQr && tickets.length > 1 && (
               <div style={{ margin: "12px 0", textAlign: "left" }}>
                 <label
                   className="bookingResendMessage"

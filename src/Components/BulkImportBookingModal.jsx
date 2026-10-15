@@ -22,7 +22,7 @@ import { getErrorText } from "../utilits/apiError";
 //
 // Expected CSV header row (case-insensitive, any column order):
 //   eventId OR eventName, ticketTypeId OR ticketTypeName,
-//   quantity, amount, name, mobileNumber, email, discount, remark
+//   quantity, amount, name, mobileNumber, companyName, email, discount, remark
 
 export default function BulkImportBookingModal({ onClose, onSuccess }) {
   const dispatch = useDispatch();
@@ -184,8 +184,9 @@ export default function BulkImportBookingModal({ onClose, onSuccess }) {
         <p className="bulkImportColumnsHint">
           Columns: <code>eventId</code> or <code>eventName</code>,{" "}
           <code>ticketTypeId</code> or <code>ticketTypeName</code>,{" "}
-          <code>quantity, amount, name, mobileNumber, email, discount, remark</code>.
+          <code>quantity, amount, name, mobileNumber, companyName, email, discount, remark</code>.
           Event/Ticket names must match exactly (not case-sensitive).{" "}
+          <code>companyName</code> (Company / Brand) is required for every row.{" "}
           <code>mobileNumber</code> can be 10 digits or with 91 (e.g.{" "}
           <code>9876543210</code> or <code>919876543210</code>).{" "}
           <code>amount</code>, <code>email</code>, <code>discount</code> and{" "}

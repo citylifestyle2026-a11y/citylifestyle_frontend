@@ -5,6 +5,7 @@ import Header from "../Components/Header";
 import BookingUserModal from "../Components/BookingUserModal";
 import BookingResendModal from "../Components/BookingResendModal";
 import TicketDetailsModal from "../Components/TicketDetailsModal";
+import GuestPass from "../Components/GuestPass";
 import { Link, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getBookingById } from "../redux/booking/bookingThunk";
@@ -303,6 +304,14 @@ const ViewBooking = () => {
               </div>
             </div>
 
+            {booking.entryMode === "single_qr" && booking.invitationId ? (
+              // NEW single-QR booking: show the guest pass itself (one QR for
+              // all guests, "Admit N" = quantity) instead of the per-guest
+              // registration table. Old per-ticket bookings keep the table.
+              <div className="bookingView-passCard">
+                <GuestPass invitationId={booking.invitationId} embedded />
+              </div>
+            ) : (
             <div className="bookingView-membersCard">
               {openMenuId !== null && (
                 <div
@@ -481,6 +490,7 @@ const ViewBooking = () => {
                 </table>
               </div>
             </div>
+            )}
           </div>
         </div>
       </div>

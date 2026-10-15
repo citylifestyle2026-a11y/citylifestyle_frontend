@@ -435,3 +435,10 @@
     min-width: 100%;
   }
 }
+/* single-QR booking: the guest pass sits in the right-hand column */
+.bookingView-passCard {
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 16px;
+}
