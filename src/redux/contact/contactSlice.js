@@ -35,6 +35,9 @@ const initialState = {
   referenceSummaryLoading: false,
   referenceSummaryError: null,
 
+  // Numbers on the Pending / Approved / Rejected filter tabs.
+  statusCounts: { all: 0, pending: 0, approved: 0, rejected: 0 },
+
   // Isolated from the main loading/error pair, same reasoning as
   // uniqueReferences/referenceSummary above — an in-flight or failed
   // export must never be picked up by the table's own loading/error UI.
@@ -108,6 +111,10 @@ const contactSlice = createSlice({
         state.page = action.payload.pagination.page;
         state.limit = action.payload.pagination.limit;
         state.totalPages = action.payload.pagination.totalPages;
+
+        if (action.payload.statusCounts) {
+          state.statusCounts = action.payload.statusCounts;
+        }
       })
       .addCase(getAllContacts.rejected, (state, action) => {
         state.loading = false;

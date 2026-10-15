@@ -1,0 +1,319 @@
+.importContacts__overlay,
+.importContacts__overlay * {
+  font-family: "Poppins", sans-serif;
+  box-sizing: border-box;
+}
+
+.importContacts__overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(30, 30, 40, 0.5);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2200;
+  padding: 20px;
+}
+
+.importContacts__container {
+  background: #ffffff;
+  width: 100%;
+  max-width: 640px;
+  max-height: 92vh;
+  overflow-y: auto;
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  padding: 26px 28px 22px;
+}
+
+.importContacts__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.importContacts__title {
+  margin: 0;
+  color: #1b2a4e;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.importContacts__close {
+  background: #f2f3f6;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: #4a4d5e;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.importContacts__sampleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.importContacts__hint {
+  margin: 0;
+  color: #6b6e7c;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.importContacts__sampleBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+  background: #ffffff;
+  color: var(--admin-accent);
+  border: 1px solid var(--admin-accent);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.importContacts__sampleBtn:hover {
+  background: #f2f6ff;
+}
+
+.importContacts__columns {
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  background: #f7f8fb;
+  border-radius: 10px;
+  color: #4a4d5e;
+  font-size: 12.5px;
+  line-height: 1.8;
+}
+
+.importContacts__columns code {
+  background: #eaf0ff;
+  color: #2a4a9a;
+  padding: 1px 6px;
+  border-radius: 5px;
+  font-size: 12px;
+}
+
+.importContacts__label {
+  display: block;
+  margin: 16px 0 8px;
+  color: #1b2a4e;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.importContacts__segment {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.importContacts__segmentBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  text-align: left;
+  background: #ffffff;
+  border: 1.5px solid #e1e3ea;
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  color: #4a4d5e;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.importContacts__segmentBtn strong {
+  font-size: 14px;
+  color: #1b2a4e;
+}
+
+.importContacts__segmentBtn span {
+  font-size: 12px;
+  color: #8a8d9b;
+}
+
+.importContacts__segmentBtnActive {
+  border-color: var(--admin-accent);
+  background: #f2f6ff;
+}
+
+.importContacts__drop {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border: 2px dashed #cfd4e2;
+  border-radius: 12px;
+  padding: 22px 16px;
+  cursor: pointer;
+  background: #fbfcfe;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.importContacts__drop:hover {
+  border-color: var(--admin-accent);
+  background: #f2f6ff;
+}
+
+.importContacts__dropIcon {
+  font-size: 28px;
+  color: var(--admin-accent);
+}
+
+.importContacts__dropText {
+  color: #6b6e7c;
+  font-size: 14px;
+}
+
+.importContacts__fileName {
+  color: #1b2a4e;
+  font-size: 14px;
+  font-weight: 600;
+  word-break: break-all;
+}
+
+.importContacts__fileInput {
+  display: none;
+}
+
+.importContacts__error {
+  margin: 10px 0 0;
+  color: #d63a3a;
+  font-size: 13px;
+}
+
+.importContacts__checking {
+  margin: 10px 0 0;
+  color: #6b6e7c;
+  font-size: 13px;
+}
+
+.importContacts__check,
+.importContacts__result {
+  margin-top: 14px;
+}
+
+.importContacts__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.importContacts__chip {
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.importContacts__chip--total { background: #eef0f6; color: #1b2a4e; }
+.importContacts__chip--ok { background: #e8f8ee; color: #1a9b4b; }
+.importContacts__chip--dup { background: #fff4e5; color: #b36a00; }
+.importContacts__chip--fail { background: #fdecec; color: #d63a3a; }
+
+.importContacts__problems {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  max-height: 180px;
+  overflow-y: auto;
+  border: 1px solid #eef0f4;
+  border-radius: 10px;
+}
+
+.importContacts__problems--tall {
+  max-height: 300px;
+}
+
+.importContacts__problems li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 9px 12px;
+  border-bottom: 1px solid #f2f3f6;
+  font-size: 12.5px;
+  color: #4a4d5e;
+  line-height: 1.5;
+}
+
+.importContacts__problems li:last-child {
+  border-bottom: none;
+}
+
+.importContacts__okIcon { color: #1a9b4b; margin-top: 3px; flex-shrink: 0; }
+.importContacts__warnIcon { color: #e08a00; margin-top: 3px; flex-shrink: 0; }
+.importContacts__failIcon { color: #d63a3a; margin-top: 3px; flex-shrink: 0; }
+
+.importContacts__ok {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 0;
+  color: #1a9b4b;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.importContacts__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.importContacts__btn {
+  border-radius: 8px;
+  padding: 11px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: transform 0.15s ease, opacity 0.2s ease;
+}
+
+.importContacts__btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.importContacts__btn--ghost {
+  background: #ffffff;
+  color: #4a4d5e;
+  border-color: #dcdde4;
+}
+
+.importContacts__btn--primary {
+  background: var(--admin-accent);
+  color: #ffffff;
+}
+
+.importContacts__btn--primary:hover:not(:disabled) {
+  background: var(--admin-accent-strong);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 560px) {
+  .importContacts__sampleRow {
+    flex-direction: column;
+  }
+  .importContacts__segment {
+    grid-template-columns: 1fr;
+  }
+  .importContacts__container {
+    padding: 20px 16px;
+  }
+}

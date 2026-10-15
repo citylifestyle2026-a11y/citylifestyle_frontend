@@ -186,6 +186,9 @@
 .pass__helpTitle { display: flex; align-items: center; gap: 9px; }
 .pass__helpBody { padding: 6px 16px 14px; font-size: 12px; border-top: 1px solid #2a2f63; }
 .pass__helpBody p { display: flex; align-items: flex-start; gap: 10px; margin: 9px 0; }
+.pass__helpBody p a{
+  text-decoration: underline;
+}
 .pass__helpBody .pass__icon { margin-top: 2px; }
 .pass__helpBody a { color: #6aa8ff; }
 

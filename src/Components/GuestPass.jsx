@@ -216,7 +216,7 @@ export default function GuestPass({ invitationId: rawInvitationId, embedded = fa
                 <a href={event.locationUrl} target="_blank" rel="noopener noreferrer">
                   Get Google Maps Directions →
                 </a>
-              </p>
+              </p>  
             )}
             <p>
               <FaHeadset className="pass__icon" />

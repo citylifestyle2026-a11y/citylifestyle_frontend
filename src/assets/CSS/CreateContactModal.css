@@ -343,3 +343,23 @@
   font-size: 12px;
   margin: 0;
 }
+
+/* ---------- PUBLIC contact form page (/city-lifestyle) ---------- */
+.publicContactPage {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 24px 16px 48px;
+  background: #f3f4f8;
+  box-sizing: border-box;
+  position: relative;
+}
+.publicContactCard {
+  max-height: none;
+  overflow: visible;
+  opacity: 1;
+  transform: none;
+  animation: none;
+}
+.publicContactThanks { text-align: center; margin-top: 12vh; }

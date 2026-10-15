@@ -21,5 +21,29 @@ export const isValidInstagramId = (value) => {
   return !normalized || INSTAGRAM_USERNAME_REGEX.test(normalized);
 };
 
+// ---------------------------------------------------------------------
+// The contact forms ask for the Instagram PROFILE LINK (not a name).
+// Returns "" when OK (blank is fine - the field is optional) or an error
+// message. Same rule as the backend (utils/normalizeInstagramId.js).
+//   https://instagram.com/karan.shah  OK
+//   instagram.com/karan.shah/?hl=en   OK
+//   karan.shah / @karan.shah          error (a name, not a link)
+//   https://instagram.com/p/abc       error (a post, not a profile)
+// ---------------------------------------------------------------------
+const INSTAGRAM_LINK_REGEX =
+  /^(?:https?:\/\/)?(?:www\.|m\.)?(?:instagram\.com|instagr\.am)\/([A-Za-z0-9._]{1,30})\/?(?:[?#].*)?$/i;
+const INSTAGRAM_RESERVED_PATHS = ["p", "reel", "reels", "stories", "explore", "tv", "accounts", "direct", "about"];
+
+export const instagramLinkError = (value) => {
+  const raw = String(value ?? "").trim();
+  if (!raw) return "";
+
+  const match = raw.match(INSTAGRAM_LINK_REGEX);
+  if (!match || INSTAGRAM_RESERVED_PATHS.includes(match[1].toLowerCase())) {
+    return "Please enter the Instagram profile link (e.g. https://instagram.com/username), not a name.";
+  }
+  return "";
+};
+
 export const getInstagramUrl = (id) =>
   id ? `https://instagram.com/${encodeURIComponent(id)}` : "";

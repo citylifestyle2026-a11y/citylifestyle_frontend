@@ -8,6 +8,11 @@ import {
   FaSort,
   FaSortUp,
   FaSortDown,
+  FaWhatsapp,
+  FaCheck,
+  FaTimes,
+  FaClock,
+  FaFileCsv,
 } from "react-icons/fa";
 
 import CommonListLayout from "../Components/CommonListLayout";
@@ -21,6 +26,8 @@ import DeleteUserModal from "../Components/DeleteUserModal";
 import CreateContactModal from "../Components/CreateContactModal";
 import ContactDetailsModal from "../Components/ContactDetailsModal";
 import CommonExportButton from "../Components/CommonExportButton";
+import SendPassModal from "../Components/SendPassModal";
+import ImportContactsModal from "../Components/ImportContactsModal";
 import { ContactPerson, InstagramLink } from "../Components/ContactAvatar";
 
 import {
@@ -29,6 +36,7 @@ import {
   getReferenceSummary,
   deleteContact,
   exportContacts,
+  bulkUpdateContactStatus,
 } from "../redux/contact/contactThunk";
 import { clearContactState } from "../redux/contact/contactSlice";
 import { getAllCompanyCategories } from "../redux/companyCategory/companyCategoryThunk";
@@ -55,6 +63,23 @@ const CATEGORY_FILTER_FETCH_LIMIT = 100;
 // services/contact.service.js). Columns outside this list render a plain,
 // non-interactive header rather than a sort affordance that the API would
 // silently ignore and fall back to `createdAt` for.
+// Approval filter tabs. "" = all contacts.
+const STATUS_TABS = [
+  { value: "", label: "All", countKey: "all" },
+  { value: "pending", label: "Pending", countKey: "pending" },
+  { value: "approved", label: "Approved", countKey: "approved" },
+  { value: "rejected", label: "Rejected", countKey: "rejected" },
+];
+
+const STATUS_LABELS = {
+  pending: "Pending",
+  approved: "Approved",
+  rejected: "Rejected",
+};
+
+// Contacts created before approval existed have no approvalStatus -> approved.
+const getApprovalStatus = (contact) => contact?.approvalStatus || "approved";
+
 const SORTABLE_COLUMNS = ["fullName", "whatsappNumber", "companyName", "designation", "area"];
 
 export default function ContactList() {
@@ -71,6 +96,7 @@ export default function ContactList() {
     uniqueReferencesLoading,
     referenceSummary,
     exportLoading,
+    statusCounts,
   } = useSelector((state) => state.contact);
 
   const { companyCategories } = useSelector((state) => state.companyCategory);
@@ -87,6 +113,19 @@ export default function ContactList() {
   // from the request params below rather than sent as "".
   const [categoryFilter, setCategoryFilter] = useState("");
   const [referenceFilter, setReferenceFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+
+  // Checkbox selection (id -> contact). Kept across pages so many contacts
+  // can be approved / rejected / sent a pass in one go.
+  const [selected, setSelected] = useState({});
+  const [statusBusy, setStatusBusy] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  // Contacts the "Send Pass" modal is open for (null = closed).
+  const [passContacts, setPassContacts] = useState(null);
+
+  // CSV import modal.
+  const [isImportOpen, setIsImportOpen] = useState(false);
 
   // Sorting. Defaults mirror the backend's own defaults so the first
   // render and the API agree without sending redundant params.
@@ -141,6 +180,7 @@ export default function ContactList() {
 
     if (categoryFilter) params.companyCategory = categoryFilter;
     if (referenceFilter) params.reference = referenceFilter;
+    if (statusFilter) params.approvalStatus = statusFilter;
 
     dispatch(getAllContacts(params));
   }, [
@@ -152,6 +192,8 @@ export default function ContactList() {
     sortOrder,
     categoryFilter,
     referenceFilter,
+    statusFilter,
+    refreshKey,
   ]);
 
   // Filter dropdown data. Both are fetched once on mount — neither depends
@@ -238,6 +280,7 @@ export default function ContactList() {
 
     if (categoryFilter) params.companyCategory = categoryFilter;
     if (referenceFilter) params.reference = referenceFilter;
+    if (statusFilter) params.approvalStatus = statusFilter;
 
     dispatch(exportContacts(params));
   };
@@ -304,6 +347,7 @@ export default function ContactList() {
 
       if (categoryFilter) params.companyCategory = categoryFilter;
       if (referenceFilter) params.reference = referenceFilter;
+      if (statusFilter) params.approvalStatus = statusFilter;
 
       dispatch(getAllContacts(params));
 
@@ -324,6 +368,105 @@ export default function ContactList() {
     } catch (err) {
       showError(err || "Failed to delete contact");
     }
+  };
+
+  // ---------- Approval + selection ----------
+
+  const selectedContacts = useMemo(() => Object.values(selected), [selected]);
+  const selectedCount = selectedContacts.length;
+
+  const selectedApproved = useMemo(
+    () =>
+      selectedContacts.filter(
+        (contact) => getApprovalStatus(contact) === "approved"
+      ),
+    [selectedContacts]
+  );
+
+  const allOnPageSelected =
+    contacts.length > 0 && contacts.every((contact) => selected[contact._id]);
+  const someOnPageSelected =
+    !allOnPageSelected && contacts.some((contact) => selected[contact._id]);
+
+  const handleToggleSelect = useCallback((contact) => {
+    setSelected((prev) => {
+      const next = { ...prev };
+      if (next[contact._id]) delete next[contact._id];
+      else next[contact._id] = contact;
+      return next;
+    });
+  }, []);
+
+  const handleToggleSelectAll = () => {
+    setSelected((prev) => {
+      const next = { ...prev };
+      if (allOnPageSelected) {
+        contacts.forEach((contact) => delete next[contact._id]);
+      } else {
+        contacts.forEach((contact) => {
+          next[contact._id] = contact;
+        });
+      }
+      return next;
+    });
+  };
+
+  const clearSelection = () => setSelected({});
+
+  // One function for both the row menu (1 contact) and the bulk bar (many).
+  const handleChangeStatus = useCallback(
+    async (targets, status) => {
+      if (!targets.length || statusBusy) return;
+
+      setOpenActionMenuId(null);
+      setStatusBusy(true);
+
+      try {
+        const res = await dispatch(
+          bulkUpdateContactStatus({
+            ids: targets.map((contact) => contact._id),
+            status,
+          })
+        ).unwrap();
+
+        showSuccess(res.message || `Marked as ${STATUS_LABELS[status]}`);
+
+        setSelected((prev) => {
+          const next = { ...prev };
+          targets.forEach((contact) => delete next[contact._id]);
+          return next;
+        });
+
+        setRefreshKey((key) => key + 1);
+      } catch (err) {
+        showError(err || "Failed to update status");
+      } finally {
+        setStatusBusy(false);
+      }
+    },
+    [dispatch, statusBusy]
+  );
+
+  const handleOpenPass = useCallback((targets) => {
+    setOpenActionMenuId(null);
+    setPassContacts(targets);
+  }, []);
+
+  const handlePassDone = () => {
+    // Refresh so "pass sent" state shows; selection of those contacts is
+    // cleared once the admin closes the result dialog.
+    setRefreshKey((key) => key + 1);
+  };
+
+  const handleClosePass = () => {
+    if (passContacts) {
+      setSelected((prev) => {
+        const next = { ...prev };
+        passContacts.forEach((contact) => delete next[contact._id]);
+        return next;
+      });
+    }
+    setPassContacts(null);
   };
 
   // ---------- Filter options ----------
@@ -458,12 +601,55 @@ const sortedReferenceFilterOptions = useMemo(
     };
 
     return [
+      {
+        key: "select",
+        sortable: false,
+        headerClassName: "contactPage__checkCol",
+        cellClassName: "contactPage__checkCol",
+        label: (
+          <input
+            type="checkbox"
+            className="contactPage__checkbox"
+            aria-label="Select all contacts on this page"
+            checked={allOnPageSelected}
+            ref={(el) => {
+              if (el) el.indeterminate = someOnPageSelected;
+            }}
+            onChange={handleToggleSelectAll}
+            disabled={contacts.length === 0}
+          />
+        ),
+        render: (contact) => (
+          <input
+            type="checkbox"
+            className="contactPage__checkbox"
+            aria-label={`Select ${contact.fullName}`}
+            checked={!!selected[contact._id]}
+            onChange={() => handleToggleSelect(contact)}
+          />
+        ),
+      },
       sortableColumn("fullName", "Full Name", {
         cellClassName: "contactPage__contactName",
         render: (contact) => (
           <ContactPerson name={contact.fullName} image={contact.profileImage} />
         ),
       }),
+      {
+        key: "approvalStatus",
+        label: "Status",
+        sortable: false,
+        render: (contact) => {
+          const status = getApprovalStatus(contact);
+          return (
+            <span
+              className={`contactPage__statusBadge contactPage__statusBadge--${status}`}
+            >
+              {STATUS_LABELS[status]}
+            </span>
+          );
+        },
+      },
       sortableColumn("whatsappNumber", "WhatsApp Number", {
         render: (contact) => contact.whatsappNumber || "-",
       }),
@@ -557,12 +743,33 @@ const sortedReferenceFilterOptions = useMemo(
         key: "action",
         label: "Actions",
         sortable: false,
-        cellStyle: { position: "relative" },
+        // Sticky on the right edge (see .contactPage__actionCol) so the
+        // WhatsApp icon + Action menu are always visible without scrolling.
+        headerClassName: "contactPage__actionCol",
+        cellClassName: "contactPage__actionCol",
         render: (contact) => (
           <div
             className="contactAction__wrapper"
             ref={openActionMenuId === contact._id ? actionMenuRef : null}
           >
+            {getApprovalStatus(contact) === "approved" && (
+              <button
+                type="button"
+                className={`contactAction__whatsapp ${
+                  contact.passSentAt ? "contactAction__whatsappSent" : ""
+                }`}
+                title={
+                  contact.passSentAt
+                    ? "Pass already sent - click to send again"
+                    : "Send pass on WhatsApp"
+                }
+                aria-label={`Send pass to ${contact.fullName} on WhatsApp`}
+                onClick={() => handleOpenPass([contact])}
+              >
+                <FaWhatsapp />
+              </button>
+            )}
+
             <button
               type="button"
               className="contactAction__button"
@@ -586,6 +793,36 @@ const sortedReferenceFilterOptions = useMemo(
               >
                 View
               </button>
+
+              {getApprovalStatus(contact) !== "approved" && (
+                <button
+                  type="button"
+                  className="contactAction__item contactAction__itemApprove"
+                  onClick={() => handleChangeStatus([contact], "approved")}
+                >
+                  Approve
+                </button>
+              )}
+
+              {getApprovalStatus(contact) !== "rejected" && (
+                <button
+                  type="button"
+                  className="contactAction__item contactAction__itemReject"
+                  onClick={() => handleChangeStatus([contact], "rejected")}
+                >
+                  Reject
+                </button>
+              )}
+
+              {getApprovalStatus(contact) !== "pending" && (
+                <button
+                  type="button"
+                  className="contactAction__item contactAction__itemPending"
+                  onClick={() => handleChangeStatus([contact], "pending")}
+                >
+                  Mark Pending
+                </button>
+              )}
 
               <button
                 type="button"
@@ -615,6 +852,13 @@ const sortedReferenceFilterOptions = useMemo(
     handleEditClick,
     handleDeleteClick,
     referenceContactsByKey,
+    contacts,
+    selected,
+    allOnPageSelected,
+    someOnPageSelected,
+    handleToggleSelect,
+    handleChangeStatus,
+    handleOpenPass,
   ]);
 
   return (
@@ -667,6 +911,25 @@ const sortedReferenceFilterOptions = useMemo(
             </div>
           )}
 
+          {isImportOpen && (
+            <ImportContactsModal
+              onClose={() => setIsImportOpen(false)}
+              onSuccess={() => {
+                setRefreshKey((key) => key + 1);
+                dispatch(getUniqueReferences({}));
+                dispatch(getReferenceSummary());
+              }}
+            />
+          )}
+
+          {passContacts && (
+            <SendPassModal
+              contacts={passContacts}
+              onClose={handleClosePass}
+              onDone={handlePassDone}
+            />
+          )}
+
           {isDeleteOpen && (
             <div
               tabIndex={-1}
@@ -702,6 +965,15 @@ const sortedReferenceFilterOptions = useMemo(
         }
         actions={
           <div className="contactPage__headerActions">
+            <button
+              type="button"
+              className="contactPage__exportButton"
+              onClick={() => setIsImportOpen(true)}
+            >
+              <FaFileCsv />
+              Import CSV
+            </button>
+
             <CommonExportButton
               onClick={handleExport}
               loading={exportLoading}
@@ -725,6 +997,86 @@ const sortedReferenceFilterOptions = useMemo(
       />
 
       <div className="contactPage__tableCard appCard">
+        <div className="contactPage__statusTabs" role="tablist">
+          {STATUS_TABS.map((tab) => (
+            <button
+              key={tab.countKey}
+              type="button"
+              role="tab"
+              aria-selected={statusFilter === tab.value}
+              className={`contactPage__statusTab contactPage__statusTab--${tab.countKey} ${
+                statusFilter === tab.value ? "contactPage__statusTabActive" : ""
+              }`}
+              onClick={() => {
+                setStatusFilter(tab.value);
+                setCurrentPage(1);
+              }}
+            >
+              {tab.label}
+              <span className="contactPage__statusTabCount">
+                {statusCounts?.[tab.countKey] ?? 0}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {selectedCount > 0 && (
+          <div className="contactPage__bulkBar">
+            <span className="contactPage__bulkCount">
+              {selectedCount} selected
+            </span>
+
+            <div className="contactPage__bulkButtons">
+              <button
+                type="button"
+                className="contactPage__bulkBtn contactPage__bulkBtn--approve"
+                disabled={statusBusy}
+                onClick={() => handleChangeStatus(selectedContacts, "approved")}
+              >
+                <FaCheck /> Approve
+              </button>
+              <button
+                type="button"
+                className="contactPage__bulkBtn contactPage__bulkBtn--reject"
+                disabled={statusBusy}
+                onClick={() => handleChangeStatus(selectedContacts, "rejected")}
+              >
+                <FaTimes /> Reject
+              </button>
+              <button
+                type="button"
+                className="contactPage__bulkBtn contactPage__bulkBtn--pending"
+                disabled={statusBusy}
+                onClick={() => handleChangeStatus(selectedContacts, "pending")}
+              >
+                <FaClock /> Pending
+              </button>
+              {selectedApproved.length > 0 && (
+                <button
+                  type="button"
+                  className="contactPage__bulkBtn contactPage__bulkBtn--whatsapp"
+                  disabled={statusBusy}
+                  title={
+                    selectedApproved.length < selectedCount
+                      ? "Only approved contacts will receive the pass"
+                      : "Send pass on WhatsApp"
+                  }
+                  onClick={() => handleOpenPass(selectedApproved)}
+                >
+                  <FaWhatsapp /> Send Pass ({selectedApproved.length})
+                </button>
+              )}
+              <button
+                type="button"
+                className="contactPage__bulkBtn contactPage__bulkBtn--clear"
+                onClick={clearSelection}
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="contactPage__tableControls">
           <CommonSelect
             className="contactPage__rowsSelect"
@@ -795,6 +1147,9 @@ const sortedReferenceFilterOptions = useMemo(
             }
             stateCellClassName="contactPage__stateCell"
             stateCellStyle={{}}
+            rowClassName={(contact) =>
+              openActionMenuId === contact._id ? "contactPage__rowActive" : ""
+            }
             tableClassName="contactPage__table"
             thContentClassName="contactPage__thContent"
             sortIconClassName="contactPage__sortIcon"

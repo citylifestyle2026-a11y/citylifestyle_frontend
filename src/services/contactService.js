@@ -81,3 +81,36 @@ export const getReferenceSummaryApi = async () => {
   const response = await api.get("/contacts/reference-summary");
   return response.data;
 };
+
+// ================= BULK APPROVAL STATUS =================
+// body: { ids: string[], status: "pending" | "approved" | "rejected" }
+// Used for a single row action and for checkbox multi-select alike.
+export const bulkUpdateContactStatusApi = async (data) => {
+  const response = await api.put("/contacts/bulk-status", data);
+  return response.data;
+};
+
+// ================= SEND PASS (WHATSAPP) =================
+// body: { ids: string[], eventId, ticketTypeId }
+export const sendContactPassApi = async (data) => {
+  const response = await api.post("/contacts/send-pass", data);
+  return response.data;
+};
+
+// ================= IMPORT CONTACTS (CSV) =================
+// file: browser File. options.dryRun = true only checks the file (nothing
+// is saved); options.approvalStatus = "approved" | "pending" for real imports.
+// Content-Type is left for axios to set (multipart boundary).
+export const importContactsCsvApi = async (
+  file,
+  { dryRun = false, approvalStatus = "approved" } = {}
+) => {
+  const formData = new FormData();
+  formData.append("approvalStatus", approvalStatus);
+  formData.append("file", file);
+
+  const response = await api.post("/contacts/import-csv", formData, {
+    params: dryRun ? { dryRun: true } : undefined,
+  });
+  return response.data;
+};

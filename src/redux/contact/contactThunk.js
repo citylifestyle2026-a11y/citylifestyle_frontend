@@ -8,6 +8,8 @@ import {
   deleteContactApi,
   getUniqueReferencesApi,
   getReferenceSummaryApi,
+  bulkUpdateContactStatusApi,
+  sendContactPassApi,
 } from "../../services/contactService";
 import { getApiErrorMessage } from "../../utilits/apiError";
 
@@ -144,6 +146,34 @@ export const getReferenceSummary = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(
         getApiErrorMessage(error, "Failed to fetch reference summary")
+      );
+    }
+  }
+);
+
+// ================= BULK APPROVAL STATUS =================
+export const bulkUpdateContactStatus = createAsyncThunk(
+  "contact/bulkUpdateContactStatus",
+  async (data, thunkAPI) => {
+    try {
+      return await bulkUpdateContactStatusApi(data);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        getApiErrorMessage(error, "Failed to update contact status")
+      );
+    }
+  }
+);
+
+// ================= SEND PASS (WHATSAPP) =================
+export const sendContactPass = createAsyncThunk(
+  "contact/sendContactPass",
+  async (data, thunkAPI) => {
+    try {
+      return await sendContactPassApi(data);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        getApiErrorMessage(error, "Failed to send pass")
       );
     }
   }

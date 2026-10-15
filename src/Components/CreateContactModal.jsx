@@ -7,7 +7,11 @@ import "../assets/CSS/CreateContactModal.css";
 import { showError, showSuccess } from "../utilits/toast";
 import { getErrorText } from "../utilits/apiError";
 import ContactPhotoPicker from "./ContactPhotoPicker";
-import { isValidInstagramId } from "../utilits/instagram";
+import { getInstagramUrl, instagramLinkError } from "../utilits/instagram";
+import {
+  getPublicCategoriesApi,
+  submitPublicContactApi,
+} from "../services/publicContactService";
 import {
   isValidMobileNumber,
   toLocalMobileNumber,
@@ -56,11 +60,31 @@ export default function CreateContactModal({
   sortOrder = "desc",
   companyCategoryFilter = "",
   referenceFilter = "",
+  // true = the PUBLIC page at /city-lifestyle: no login, shown as a normal
+  // page (not a popup), saved through the public API, no admin lists refreshed.
+  publicMode = false,
 }) {
   const dispatch = useDispatch();
 
-  const { loading, error } = useSelector((state) => state.contact);
+  const { loading: reduxLoading, error: reduxError } = useSelector((state) => state.contact);
   const { companyCategories } = useSelector((state) => state.companyCategory);
+
+  const [publicCategories, setPublicCategories] = useState([]);
+  const [publicSaving, setPublicSaving] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [honeypot, setHoneypot] = useState("");
+
+  const loading = publicMode ? publicSaving : reduxLoading;
+  const error = publicMode ? null : reduxError;
+  // Category dropdown source: public API on the public page, redux in admin.
+  const categories = publicMode ? publicCategories : companyCategories || [];
+
+  useEffect(() => {
+    if (!publicMode) return;
+    getPublicCategoriesApi()
+      .then((res) => setPublicCategories(res?.data || []))
+      .catch(() => showError("Unable to load categories. Please refresh the page."));
+  }, [publicMode]);
 
   const [formData, setFormData] = useState(EMPTY_FORM);
 
@@ -96,16 +120,18 @@ export default function CreateContactModal({
   }, []);
 
   useEffect(() => {
+    if (publicMode) return undefined; // the public page scrolls normally
+
     document.body.style.overflow = "hidden";
 
     return () => {
       document.body.style.overflow = "";
     };
-  }, []);
+  }, [publicMode]);
 
   useEffect(() => {
-    dispatch(clearContactState());
-  }, [dispatch]);
+    if (!publicMode) dispatch(clearContactState());
+  }, [dispatch, publicMode]);
 
   useEffect(() => {
     if (isEditMode && editContactData) {
@@ -116,7 +142,8 @@ export default function CreateContactModal({
         designation: editContactData.designation || "",
         address: editContactData.address || "",
         area: editContactData.area || "",
-        instagramId: editContactData.instagramId || "",
+        // saved as a bare username; the form edits it as a profile LINK
+        instagramId: getInstagramUrl(editContactData.instagramId),
         // companyCategory arrives populated as { _id, name } (see
         // contact.service.js's .populate("companyCategory", "name")) —
         // the <select> below needs the bare id.
@@ -124,7 +151,7 @@ export default function CreateContactModal({
         relationship: editContactData.relationship || "",
         spouseName: editContactData.spouseName || "",
         spouseMobile: editContactData.spouseMobile || "",
-        spouseInstagramId: editContactData.spouseInstagramId || "",
+        spouseInstagramId: getInstagramUrl(editContactData.spouseInstagramId),
         profession: editContactData.profession || "",
         // populated as { _id, name } by contact.service.js
         professionCategory: editContactData.professionCategory?._id || "",
@@ -199,51 +226,23 @@ export default function CreateContactModal({
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-      // Typing in Profession by hand drops a previously picked category
-      // unless the text still equals that category's name exactly.
-      ...(name === "profession"
-        ? {
-            professionCategory: (() => {
-              const match = (companyCategories || []).find(
-                (cat) =>
-                  String(cat.name || "").trim().toLowerCase() ===
-                  value.trim().toLowerCase()
-              );
-              return match ? match._id : "";
-            })(),
-          }
-        : {}),
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ---- Profession <-> Company Category (Couple only) ----
-  // As soon as anything is typed in the spouse's Profession (C.A, CA,
-  // Doctor ...), a Category dropdown appears beside it. Picking a
-  // category from the COMPANY CATEGORY list (e.g. "Chartered
-  // Accountant") replaces the profession text with that category's
-  // exact name, so the saved profession always matches the master list.
-  // The category is COMPULSORY for Couple: it is what makes the contact
-  // also show under the spouse's category in the Contact List.
-  const showProfessionCategory = formData.profession.trim() !== "";
-
+  // ---- Spouse Category (Couple only) ----
+  // The spouse now only picks a Category (same list as the contact's own
+  // Company Category). `profession` is no longer typed: it is filled with the
+  // chosen category's name so lists/exports keep showing it. The category is
+  // what makes a Couple contact also show under the spouse's category.
   const handleProfessionCategoryChange = (e) => {
-    const category = (companyCategories || []).find(
-      (c) => c._id === e.target.value
-    );
-    if (!category) return;
+    const category = categories.find((c) => c._id === e.target.value);
+
     setFormData((prev) => ({
       ...prev,
-      profession: category.name,
-      professionCategory: category._id,
+      profession: category ? category.name : "",
+      professionCategory: category ? category._id : "",
     }));
-    setFormErrors((prev) => ({
-      ...prev,
-      profession: undefined,
-      professionCategory: undefined,
-    }));
+    setFormErrors((prev) => ({ ...prev, professionCategory: undefined }));
   };
 
   // Relationship gets its own handler (instead of the generic
@@ -395,20 +394,10 @@ export default function CreateContactModal({
       errors.area = "Area is required.";
     }
 
-    // Instagram ID is compulsory and must be a real username (or a
-    // pasted instagram.com link).
-    if (!formData.instagramId.trim()) {
-      errors.instagramId = "Instagram ID is required.";
-    } else if (!isValidInstagramId(formData.instagramId)) {
-      errors.instagramId =
-        "Enter a valid Instagram ID (letters, numbers, . and _ only).";
-    }
-
-    // Profile Photo is compulsory: a newly picked file, or the saved
-    // photo (when editing) that hasn't been removed.
-    if (!profilePhoto.preview) {
-      errors.profilePhoto = "Profile Photo is required.";
-    }
+    // Instagram is OPTIONAL, but when filled it must be a profile LINK -
+    // a plain name is rejected. Photos are optional too.
+    const instagramError = instagramLinkError(formData.instagramId);
+    if (instagramError) errors.instagramId = instagramError;
 
     // Relationship is required outright, independent of everything
     // below — mirrors validators/contact.validator.js's `relationship`
@@ -437,20 +426,10 @@ export default function CreateContactModal({
           "Enter a valid 10-digit Spouse Mobile Number (with or without 91).";
       }
 
-      if (!formData.spouseInstagramId.trim()) {
-        errors.spouseInstagramId = "Spouse Instagram ID is required for Couple.";
-      } else if (!isValidInstagramId(formData.spouseInstagramId)) {
-        errors.spouseInstagramId =
-          "Enter a valid Instagram ID (letters, numbers, . and _ only).";
-      }
+      const spouseInstagramError = instagramLinkError(formData.spouseInstagramId);
+      if (spouseInstagramError) errors.spouseInstagramId = spouseInstagramError;
 
-      if (!spousePhoto.preview) {
-        errors.spousePhoto = "Spouse Profile Photo is required for Couple.";
-      }
-
-      if (!formData.profession.trim()) {
-        errors.profession = "Profession is required for Couple.";
-      } else if (!formData.professionCategory) {
+      if (!formData.professionCategory) {
         errors.professionCategory = "Category is required for Couple.";
       }
     }
@@ -468,13 +447,10 @@ export default function CreateContactModal({
       companyCategory: errors.companyCategory,
       area: errors.area,
       instagramId: errors.instagramId,
-      profilePhoto: errors.profilePhoto,
       spouseInstagramId: errors.spouseInstagramId,
-      spousePhoto: errors.spousePhoto,
       relationship: errors.relationship,
       spouseName: errors.spouseName,
       spouseMobile: errors.spouseMobile,
-      profession: errors.profession,
       professionCategory: errors.professionCategory,
       references: errors.references,
     }));
@@ -503,8 +479,7 @@ export default function CreateContactModal({
       designation: formData.designation.trim(),
       address: formData.address.trim(),
       area: formData.area.trim(),
-      // The backend strips a leading "@" / instagram.com link and
-      // lowercases it, so it is sent as typed.
+      // Sent as the typed profile LINK; the backend stores the username.
       instagramId: formData.instagramId.trim(),
       references: JSON.stringify(resolvePendingReferences()),
       relationship: formData.relationship,
@@ -522,6 +497,8 @@ export default function CreateContactModal({
     };
 
     Object.entries(fields).forEach(([key, value]) => payload.append(key, value));
+
+    if (publicMode) payload.append("website", honeypot); // honeypot (bots only)
 
     if (formData.companyCategory) {
       payload.append("companyCategory", formData.companyCategory);
@@ -542,6 +519,21 @@ export default function CreateContactModal({
       } else if (spousePhoto.remove) {
         payload.append("removeSpouseProfileImage", "true");
       }
+    }
+
+    if (publicMode) {
+      setPublicSaving(true);
+      try {
+        await submitPublicContactApi(payload);
+        setSubmitted(true);
+      } catch (err) {
+        showError(
+          err?.response?.data?.message || "Something went wrong. Please try again."
+        );
+      } finally {
+        setPublicSaving(false);
+      }
+      return;
     }
 
     try {
@@ -608,22 +600,75 @@ export default function CreateContactModal({
     }
   };
 
-  return (
-    <div className="contactModalOverlay" onClick={onClose}>
-      <div className="createContactModal" onClick={(e) => e.stopPropagation()}>
-        <div className="contactModalHeader">
-          <h2 className="contactModalTitle">
-            {isEditMode ? "Edit Contact" : "Create Contact"}
-          </h2>
+  // Public page: after a successful submit show a thank-you instead of the form.
+  if (publicMode && submitted) {
+    return (
+      <div className="publicContactPage">
+        <div className="createContactModal publicContactCard publicContactThanks">
+          <h2 className="contactModalTitle">Thank you!</h2>
+          <p>Your details have been submitted successfully.</p>
           <button
             type="button"
-            className="contactCloseIconButton"
-            onClick={onClose}
-            aria-label="Close modal"
+            className="contactModalCreateButton"
+            onClick={() => {
+              setFormData(EMPTY_FORM);
+              setReferences([]);
+              setReferenceInput("");
+              setProfilePhoto(EMPTY_PHOTO);
+              setSpousePhoto(EMPTY_PHOTO);
+              setFormErrors({});
+              setSubmitted(false);
+            }}
           >
-            <FaTimes />
+            Submit another response
           </button>
         </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={publicMode ? "publicContactPage" : "contactModalOverlay"}
+      onClick={publicMode ? undefined : onClose}
+    >
+      <div
+        className={`createContactModal${publicMode ? " publicContactCard" : ""}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="contactModalHeader">
+          <h2 className="contactModalTitle">
+            {publicMode
+              ? "City Lifestyle - Contact Form"
+              : isEditMode
+                ? "Edit Contact"
+                : "Create Contact"}
+          </h2>
+          {!publicMode && (
+            <button
+              type="button"
+              className="contactCloseIconButton"
+              onClick={onClose}
+              aria-label="Close modal"
+            >
+              <FaTimes />
+            </button>
+          )}
+        </div>
+
+        {/* Honeypot: hidden from people, bots fill it. */}
+        {publicMode && (
+          <input
+            type="text"
+            name="website"
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            style={{ position: "absolute", left: "-9999px", opacity: 0 }}
+            value={honeypot}
+            onChange={(e) => setHoneypot(e.target.value)}
+          />
+        )}
 
         {/* Suppressed when the same message is already shown below the
             WhatsApp Number field below, so a duplicate error (e.g.
@@ -712,7 +757,7 @@ export default function CreateContactModal({
               onChange={handleChange}
             >
               <option value="">No category</option>
-              {(companyCategories || []).map((category) => (
+              {categories.map((category) => (
                 <option key={category._id} value={category._id}>
                   {category.name}
                 </option>
@@ -753,12 +798,12 @@ export default function CreateContactModal({
 
           <div className="contactFieldGroup">
             <label className="contactFieldLabel">
-              Instagram ID <span className="contactRequired">*</span>
+              Instagram Link
             </label>
             <input
               type="text"
               className="contactFieldInput"
-              placeholder="@username"
+              placeholder="https://instagram.com/username"
               name="instagramId"
               value={formData.instagramId}
               onChange={handleChange}
@@ -770,7 +815,7 @@ export default function CreateContactModal({
 
           <div className="contactFieldGroup">
             <label className="contactFieldLabel">
-              Profile Photo <span className="contactRequired">*</span>
+              Profile Photo
             </label>
             <ContactPhotoPicker
               label="Profile photo"
@@ -846,12 +891,12 @@ export default function CreateContactModal({
 
               <div className="contactFieldGroup">
                 <label className="contactFieldLabel">
-                  Spouse Instagram ID <span className="contactRequired">*</span>
+                  Spouse Instagram Link
                 </label>
                 <input
                   type="text"
                   className="contactFieldInput"
-                  placeholder="@username"
+                  placeholder="https://instagram.com/username"
                   name="spouseInstagramId"
                   value={formData.spouseInstagramId}
                   onChange={handleChange}
@@ -863,7 +908,7 @@ export default function CreateContactModal({
 
               <div className="contactFieldGroup">
                 <label className="contactFieldLabel">
-                  Spouse Profile Photo <span className="contactRequired">*</span>
+                  Spouse Profile Photo
                 </label>
                 <ContactPhotoPicker
                   label="Spouse profile photo"
@@ -879,38 +924,21 @@ export default function CreateContactModal({
 
               <div className="contactFieldGroup contactFieldGroupFull">
                 <label className="contactFieldLabel">
-                  Profession / Occupation &amp; Category <span className="contactRequired">*</span>
+                  Category <span className="contactRequired">*</span>
                 </label>
-                <div style={{ display: "flex", gap: "12px", alignItems: "stretch" }}>
-                  <input
-                    type="text"
-                    className="contactFieldInput"
-                    style={{ flex: 1, minWidth: 0 }}
-                    placeholder="Profession / Occupation"
-                    name="profession"
-                    value={formData.profession}
-                    onChange={handleChange}
-                  />
-                  {showProfessionCategory && (
-                    <select
-                      className="contactFieldSelect"
-                      style={{ flex: 1, minWidth: 0 }}
-                      aria-label="Profession category"
-                      value={formData.professionCategory || ""}
-                      onChange={handleProfessionCategoryChange}
-                    >
-                      <option value="">Select Category</option>
-                      {(companyCategories || []).map((category) => (
-                        <option key={category._id} value={category._id}>
-                          {category.name}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                </div>
-                {formErrors.profession && (
-                  <p className="contactFieldError">{formErrors.profession}</p>
-                )}
+                <select
+                  className="contactFieldSelect"
+                  aria-label="Spouse category"
+                  value={formData.professionCategory || ""}
+                  onChange={handleProfessionCategoryChange}
+                >
+                  <option value="">Select Category</option>
+                  {categories.map((category) => (
+                    <option key={category._id} value={category._id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
                 {formErrors.professionCategory && (
                   <p className="contactFieldError">{formErrors.professionCategory}</p>
                 )}
@@ -965,21 +993,23 @@ export default function CreateContactModal({
         </div>
 
         <div className="contactModalFooter">
-          <button
-            type="button"
-            className="contactModalCloseButton"
-            onClick={onClose}
-            disabled={loading}
-          >
-            Close
-          </button>
+          {!publicMode && (
+            <button
+              type="button"
+              className="contactModalCloseButton"
+              onClick={onClose}
+              disabled={loading}
+            >
+              Close
+            </button>
+          )}
           <button
             type="button"
             className="contactModalCreateButton"
             onClick={handleSubmit}
             disabled={loading}
           >
-            {loading ? "Saving..." : isEditMode ? "Save" : "Create"}
+            {loading ? "Saving..." : isEditMode ? "Save" : publicMode ? "Submit" : "Create"}
           </button>
         </div>
       </div>
