@@ -378,7 +378,8 @@ export default function ContactList() {
   const selectedApproved = useMemo(
     () =>
       selectedContacts.filter(
-        (contact) => getApprovalStatus(contact) === "approved"
+        (contact) =>
+          getApprovalStatus(contact) === "approved" && !contact.passSentAt
       ),
     [selectedContacts]
   );
@@ -642,10 +643,22 @@ const sortedReferenceFilterOptions = useMemo(
         render: (contact) => {
           const status = getApprovalStatus(contact);
           return (
-            <span
-              className={`contactPage__statusBadge contactPage__statusBadge--${status}`}
-            >
-              {STATUS_LABELS[status]}
+            <span className="contactPage__statusCell">
+              <span
+                className={`contactPage__statusBadge contactPage__statusBadge--${status}`}
+              >
+                {STATUS_LABELS[status]}
+              </span>
+              {contact.passSentAt && (
+                <span
+                  className="contactPage__passSentTag"
+                  title={`Pass sent on ${new Date(
+                    contact.passSentAt
+                  ).toLocaleString("en-GB")}`}
+                >
+                  <FaWhatsapp /> Pass sent
+                </span>
+              )}
             </span>
           );
         },
@@ -752,17 +765,11 @@ const sortedReferenceFilterOptions = useMemo(
             className="contactAction__wrapper"
             ref={openActionMenuId === contact._id ? actionMenuRef : null}
           >
-            {getApprovalStatus(contact) === "approved" && (
+            {getApprovalStatus(contact) === "approved" && !contact.passSentAt && (
               <button
                 type="button"
-                className={`contactAction__whatsapp ${
-                  contact.passSentAt ? "contactAction__whatsappSent" : ""
-                }`}
-                title={
-                  contact.passSentAt
-                    ? "Pass already sent - click to send again"
-                    : "Send pass on WhatsApp"
-                }
+                className="contactAction__whatsapp"
+                title="Send pass on WhatsApp"
                 aria-label={`Send pass to ${contact.fullName} on WhatsApp`}
                 onClick={() => handleOpenPass([contact])}
               >

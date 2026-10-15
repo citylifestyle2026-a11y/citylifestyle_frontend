@@ -605,6 +605,7 @@ export default function CreateContactModal({
     return (
       <div className="publicContactPage">
         <div className="createContactModal publicContactCard publicContactThanks">
+          <div className="contactModalBadge" aria-hidden="true">&#9733;</div>
           <h2 className="contactModalTitle">Thank you!</h2>
           <p>Your details have been submitted successfully.</p>
           <button
@@ -637,9 +638,12 @@ export default function CreateContactModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="contactModalHeader">
+          {publicMode && (
+            <div className="contactModalBadge" aria-hidden="true">&#9733;</div>
+          )}
           <h2 className="contactModalTitle">
             {publicMode
-              ? "City Lifestyle - Contact Form"
+              ? "पर्व — REQUEST YOUR INVITE"
               : isEditMode
                 ? "Edit Contact"
                 : "Create Contact"}

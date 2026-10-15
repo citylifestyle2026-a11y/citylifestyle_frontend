@@ -186,6 +186,28 @@ export default function GuestPass({ invitationId: rawInvitationId, embedded = fa
         </span>
       </p>
 
+      <div className="pass__actions">
+        {embedded ? (
+          <a
+            className="pass__btn pass__btn--dark"
+            href={passUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <FaExternalLinkAlt />
+            Open Pass
+          </a>
+        ) : (
+          <button type="button" className="pass__btn pass__btn--dark" onClick={() => window.print()}>
+            <FaDownload />
+            Save/ Print
+          </button>
+        )}
+        <button type="button" className="pass__btn pass__btn--pink" onClick={handleShare}>
+          <FaShareAlt />
+          {copied ? "Link Copied" : "Share Link"}
+        </button>
+      </div>
       <div className="pass__help">
         <button
           type="button"
@@ -229,28 +251,6 @@ export default function GuestPass({ invitationId: rawInvitationId, embedded = fa
         )}
       </div>
 
-      <div className="pass__actions">
-        {embedded ? (
-          <a
-            className="pass__btn pass__btn--dark"
-            href={passUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <FaExternalLinkAlt />
-            Open Pass
-          </a>
-        ) : (
-          <button type="button" className="pass__btn pass__btn--dark" onClick={() => window.print()}>
-            <FaDownload />
-            Save/ Print
-          </button>
-        )}
-        <button type="button" className="pass__btn pass__btn--pink" onClick={handleShare}>
-          <FaShareAlt />
-          {copied ? "Link Copied" : "Share Link"}
-        </button>
-      </div>
     </div>
   );
 }

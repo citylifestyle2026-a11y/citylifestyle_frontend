@@ -5,7 +5,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: linear-gradient(180deg, #14173d 0%, #1f2457 55%, #3a2a5c 100%);
+  /* Sunset + city-lights artwork stretched over the whole page; the colour
+     under it is the image's own top colour so it never shows a seam. */
+  background: #10172a url("../images/ticket-bg.png") center / 100% 100% no-repeat;
+  /* room under the last block so the city lights stay visible */
+  padding-bottom: 170px;
   font-family: "Poppins", sans-serif;
   color: #fff;
 }
@@ -158,7 +162,7 @@
   margin: 18px 0 16px;
   font-size: 11.5px;
   line-height: 1.55;
-  color: #d8dafc;
+  color: #ffffff;
 }
 .pass__note span { flex: 1; text-align: center; }
 .pass__noteIcon { flex-shrink: 0; margin-top: 3px; color: #e9eaff; }
@@ -166,8 +170,11 @@
 .pass__help {
   width: 100%;
   max-width: 364px;
-  background: #161a3b;
-  border: 1px solid #2a2f63;
+  margin-top: 16px;
+  background: rgba(16, 20, 48, 0.78);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 14px;
   overflow: hidden;
 }
@@ -206,12 +213,12 @@
   font: 600 13px "Poppins", sans-serif;
   cursor: pointer;
 }
-.pass__btn--dark { background: #262b57; }
+.pass__btn--dark { background: #2b2f4f; }
 .pass__btn--pink { background: #ec4899; box-shadow: 0 6px 18px rgba(236, 72, 153, 0.35); }
 
 /* ---------- Save / Print: just the pass, on white paper ---------- */
 @media print {
-  .pass { background: #fff; min-height: 0; }
+  .pass { background: #fff; min-height: 0; padding-bottom: 24px; }
   .pass__ticket { filter: none; }
   .pass__note, .pass__help, .pass__actions { display: none; }
 }
@@ -220,6 +227,7 @@
 .pass--embedded {
   min-height: 0;
   padding: 24px 16px;
+  background: linear-gradient(180deg, #14173d 0%, #1f2457 55%, #3a2a5c 100%);
   border-radius: 16px;
 }
 .pass--embedded .pass__state { margin: 20px 0; }

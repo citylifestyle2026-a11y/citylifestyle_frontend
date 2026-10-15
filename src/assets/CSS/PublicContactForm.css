@@ -1,0 +1,158 @@
+/* "पर्व by City Toppers" wrapper for the public /city-lifestyle form.
+   Black page with a faint grid, matching the design mock-up. */
+.cityForm {
+  min-height: 100vh;
+  color: #ffffff;
+  font-family: "Poppins", "Montserrat", sans-serif;
+  background-color: #000000;
+  /* grid artwork from /public (bgImg.png) on a black page */
+  background-image: url("/assets/images/site/bgImg.png");
+  background-size: 100% auto;
+  background-repeat: repeat-y;
+  background-position: top center;
+  box-sizing: border-box;
+}
+
+.cityFormHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 13% 14px 13.5%;
+}
+
+.cityFormLogo {
+  height: 104px;
+  width: auto;
+  display: block;
+}
+
+.cityFormParv {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.cityFormParvHindi {
+  color: #ec4899;
+  font-size: 68px;
+  font-weight: 600;
+  line-height: 0.9;
+}
+
+.cityFormParvBy {
+  color: #ffffff;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  padding-bottom: 8px;
+  white-space: nowrap;
+}
+
+.cityFormHero {
+  position: relative;
+}
+
+/* dark overlay on the photo, as in the design */
+.cityFormHeroShade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55));
+  pointer-events: none;
+}
+
+.cityFormHero img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 70vh;
+  object-fit: cover;
+}
+
+.cityFormTagline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 38px 13% 38px 14%;
+}
+
+.cityFormTags {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+.cityFormAbout {
+  margin: 0;
+  max-width: 420px;
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: justify;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.cityFormBody {
+  padding: 8px 0 24px;
+}
+
+/* Form card sits on the black page: drop the old grey page background. */
+.cityForm .publicContactPage {
+  min-height: 0;
+  background: transparent;
+  padding: 8px 16px 48px;
+}
+
+.cityForm .publicContactThanks {
+  margin-top: 0;
+}
+
+/* ---------- Tablet / mobile ---------- */
+@media (max-width: 900px) {
+  .cityFormHeader {
+    padding: 12px 20px;
+  }
+  .cityFormLogo {
+    height: 72px;
+  }
+  .cityFormParvHindi {
+    font-size: 46px;
+  }
+  .cityFormParvBy {
+    font-size: 17px;
+    padding-bottom: 5px;
+  }
+  .cityFormTagline {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 24px 20px;
+    gap: 16px;
+  }
+  .cityFormTags {
+    font-size: 14px;
+  }
+  .cityFormAbout {
+    max-width: none;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .cityFormLogo {
+    height: 56px;
+  }
+  .cityFormParvHindi {
+    font-size: 36px;
+  }
+  .cityFormParvBy {
+    font-size: 13px;
+  }
+}
