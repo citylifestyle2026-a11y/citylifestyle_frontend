@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import '../assets/CSS/Booking.css';
 import CreateBookingModal from "../Components/CreateBookingModal";
+import EditBookingModal from "../Components/EditBookingModal";
 import BulkImportBookingModal from "../Components/BulkImportBookingModal";
 import ResendTicketModal from "../Components/ResendTicketModal";
 import DeleteBookingModal from "../Components/DeleteBookingModal";
@@ -98,6 +99,7 @@ const Booking = () => {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [resendTarget, setResendTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [editTarget, setEditTarget] = useState(null);
   const { events } = useSelector((state) => state.event);
   // `filters` is the draft form state bound to the inputs — updates on
   // every keystroke but does NOT by itself trigger a fetch.
@@ -743,6 +745,17 @@ const Booking = () => {
                                     className="bookingPage-actionMenuItem"
                                     onClick={() => {
                                       closeActionMenu();
+                                      setEditTarget(row);
+                                    }}
+                                  >
+                                    Edit Booking
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    className="bookingPage-actionMenuItem"
+                                    onClick={() => {
+                                      closeActionMenu();
                                       setResendTarget(row._id);
                                     }}
                                   >
@@ -865,6 +878,14 @@ const Booking = () => {
                 />
               </div>
             )}
+            {editTarget && (
+              <EditBookingModal
+                booking={editTarget}
+                onSuccess={fetchBookings}
+                onClose={() => setEditTarget(null)}
+              />
+            )}
+
             {deleteTarget && (
               <div
                 tabIndex={-1}

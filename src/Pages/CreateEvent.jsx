@@ -149,6 +149,8 @@ const API_FIELD_MAP = {
   edition: "edition",
   venueName: "venueName",
   address: "address",
+  dressCode: "dressCode",
+  mapLink: "mapLink",
   description: "description",
   termsConditions: "termsConditions",
 };
@@ -225,6 +227,8 @@ const INITIAL_FORM_DATA = {
   latitude: "",
   longitude: "",
   address: "",
+  dressCode: "Traditional",
+  mapLink: "",
   description: "",
   termsConditions: "",
   videoLink: "",
@@ -318,6 +322,8 @@ export default function CreateEvent() {
           latitude: event.latitude != null ? String(event.latitude) : "",
           longitude: event.longitude != null ? String(event.longitude) : "",
           address: event.address || "",
+          dressCode: event.dressCode || "Traditional",
+          mapLink: event.mapLink || "",
           description: event.description || "",
           termsConditions: event.termsConditions || "",
           videoLink: "",
@@ -613,6 +619,8 @@ export default function CreateEvent() {
     payload.append("latitude", formData.latitude);
     payload.append("longitude", formData.longitude);
     payload.append("address", formData.address);
+    payload.append("dressCode", formData.dressCode.trim() || "Traditional");
+    payload.append("mapLink", formData.mapLink.trim());
     payload.append("description", formData.description);
     payload.append("termsConditions", formData.termsConditions);
     payload.append("videoLinks", JSON.stringify(formData.videoLinks));
@@ -835,6 +843,30 @@ export default function CreateEvent() {
                   aria-describedby={formErrors.address ? "createEvent-address-error" : undefined}
                 />
                 <FieldError id="createEvent-address-error" message={formErrors.address} />
+              </div>
+
+              <div className="createEvent__fieldGroup">
+                <label className="createEvent__label" htmlFor="createEvent-dressCode">Dress Code</label>
+                <input
+                  id="createEvent-dressCode"
+                  type="text"
+                  className="createEvent__input"
+                  placeholder="Traditional"
+                  value={formData.dressCode}
+                  onChange={handleFieldChange("dressCode")}
+                />
+              </div>
+
+              <div className="createEvent__fieldGroup">
+                <label className="createEvent__label" htmlFor="createEvent-mapLink">Venue Map Link (optional)</label>
+                <input
+                  id="createEvent-mapLink"
+                  type="text"
+                  className="createEvent__input"
+                  placeholder="https://maps.app.goo.gl/... (blank = auto link from latitude/longitude)"
+                  value={formData.mapLink}
+                  onChange={handleFieldChange("mapLink")}
+                />
               </div>
 
               <div className="createEvent__fieldGroup">

@@ -21,6 +21,7 @@ import DeleteUserModal from "../Components/DeleteUserModal";
 import CreateContactModal from "../Components/CreateContactModal";
 import ContactDetailsModal from "../Components/ContactDetailsModal";
 import CommonExportButton from "../Components/CommonExportButton";
+import { ContactPerson, InstagramLink } from "../Components/ContactAvatar";
 
 import {
   getAllContacts,
@@ -54,7 +55,7 @@ const CATEGORY_FILTER_FETCH_LIMIT = 100;
 // services/contact.service.js). Columns outside this list render a plain,
 // non-interactive header rather than a sort affordance that the API would
 // silently ignore and fall back to `createdAt` for.
-const SORTABLE_COLUMNS = ["fullName", "whatsappNumber", "companyName", "designation"];
+const SORTABLE_COLUMNS = ["fullName", "whatsappNumber", "companyName", "designation", "area"];
 
 export default function ContactList() {
   const dispatch = useDispatch();
@@ -459,7 +460,9 @@ const sortedReferenceFilterOptions = useMemo(
     return [
       sortableColumn("fullName", "Full Name", {
         cellClassName: "contactPage__contactName",
-        render: (contact) => contact.fullName || "-",
+        render: (contact) => (
+          <ContactPerson name={contact.fullName} image={contact.profileImage} />
+        ),
       }),
       sortableColumn("whatsappNumber", "WhatsApp Number", {
         render: (contact) => contact.whatsappNumber || "-",
@@ -487,11 +490,25 @@ const sortedReferenceFilterOptions = useMemo(
         cellClassName: "contactPage__addressCell",
         render: (contact) => contact.address || "-",
       }),
+      sortableColumn("area", "Area", {
+        render: (contact) => contact.area || "-",
+      }),
+      sortableColumn("instagramId", "Instagram ID", {
+        render: (contact) => <InstagramLink id={contact.instagramId} />,
+      }),
       sortableColumn("spouseName", "Spouse Name", {
-        render: (contact) => contact.spouseName || "-",
+        render: (contact) => (
+          <ContactPerson
+            name={contact.spouseName}
+            image={contact.spouseProfileImage}
+          />
+        ),
       }),
       sortableColumn("spouseMobile", "Spouse Mobile Number", {
         render: (contact) => contact.spouseMobile || "-",
+      }),
+      sortableColumn("spouseInstagramId", "Spouse Instagram ID", {
+        render: (contact) => <InstagramLink id={contact.spouseInstagramId} />,
       }),
       sortableColumn("profession", "Profession", {
         render: (contact) => contact.profession || "-",

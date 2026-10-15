@@ -23,6 +23,7 @@ const initialFormData = {
   email: "",
   discount: "0",
   remark: "",
+  companyName: "",
 };
 export default function CreateBookingModal({ onClose, onSuccess }) {
   const dispatch = useDispatch();
@@ -255,6 +256,7 @@ export default function CreateBookingModal({ onClose, onSuccess }) {
       email: formData.email.trim(),
       discount: Number(formData.discount),
       remark: formData.remark.trim(),
+      companyName: formData.companyName.trim(),
       // Only sent when the admin clicked "Book Anyway".
       ...(allowDuplicate ? { allowDuplicate: true } : {}),
     };
@@ -484,6 +486,17 @@ export default function CreateBookingModal({ onClose, onSuccess }) {
             {fieldErrors.discount && (
               <p className="bookingCreateFieldError">{fieldErrors.discount}</p>
             )}
+          </div>
+
+          <div className="bookingCreateFieldGroup">
+            <label className="bookingCreateLabel">Company / Brand</label>
+            <input
+              type="text"
+              className="bookingCreateInput"
+              placeholder="Company / Brand"
+              value={formData.companyName}
+              onChange={handleChange("companyName")}
+            />
           </div>
 
           <div className="bookingCreateFieldGroup">

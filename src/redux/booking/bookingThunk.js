@@ -2,6 +2,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 
 import {
   createBookingApi,
+  updateBookingApi,
   importBookingsCsvApi,
   getAllBookingsApi,
   getBookingByIdApi,
@@ -19,6 +20,20 @@ export const createBooking = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(
         getApiErrorMessage(error, "Failed to create booking")
+      );
+    }
+  }
+);
+
+// ================= EDIT BOOKING =================
+export const updateBooking = createAsyncThunk(
+  "booking/updateBooking",
+  async ({ id, data }, thunkAPI) => {
+    try {
+      return await updateBookingApi(id, data);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        getApiErrorMessage(error, "Failed to update booking")
       );
     }
   }

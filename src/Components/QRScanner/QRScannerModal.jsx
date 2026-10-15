@@ -867,13 +867,22 @@ const QRScannerModal = ({ isOpen, onClose, onVerified, onCheckedIn }) => {
 
               <div className="crmQrCardRow">
                 <span className="crmQrCardLabel">Name</span>
-                <span className="crmQrCardValue">{ticket?.attendee?.name || "N/A"}</span>
+                <span className="crmQrCardValue">{ticket?.attendee?.name || ticket?.booking?.name || "N/A"}</span>
               </div>
 
               <div className="crmQrCardRow">
                 <span className="crmQrCardLabel">Mobile</span>
-                <span className="crmQrCardValue">{ticket?.attendee?.mobileNumber || "N/A"}</span>
+                <span className="crmQrCardValue">{ticket?.attendee?.mobileNumber || ticket?.booking?.mobileNumber || "N/A"}</span>
               </div>
+
+              {ticket?.isGroupEntry && (
+                <div className="crmQrCardRow">
+                  <span className="crmQrCardLabel">Guests</span>
+                  <span className="crmQrCardValue">
+                    {ticket?.guests || ticket?.booking?.quantity || 1} (all enter with this QR)
+                  </span>
+                </div>
+              )}
 
               <div className="crmQrCardRow">
                 <span className="crmQrCardLabel">Booking No.</span>

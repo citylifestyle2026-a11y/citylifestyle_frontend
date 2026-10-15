@@ -1,0 +1,100 @@
+.pass {
+  min-height: 100vh;
+  padding: 24px 16px 40px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(180deg, #14173d 0%, #1f2457 55%, #3a2a5c 100%);
+  font-family: "Poppins", sans-serif;
+  color: #fff;
+}
+.pass__state { margin: 40vh 0 0; color: #cfd2ff; }
+.pass__state--error { color: #ff9aa8; }
+
+.pass__ticket {
+  position: relative;
+  width: 100%;
+  max-width: 364px;
+  background: #fff;
+  color: #16193a;
+  border-radius: 6px;
+  padding: 26px 22px 24px;
+  text-align: center;
+  box-sizing: border-box;
+  /* notched corners like the reference pass */
+  -webkit-mask:
+    radial-gradient(circle 24px at 0 0, transparent 98%, #000) top left / 51% 51% no-repeat,
+    radial-gradient(circle 24px at 100% 0, transparent 98%, #000) top right / 51% 51% no-repeat,
+    radial-gradient(circle 24px at 0 100%, transparent 98%, #000) bottom left / 51% 51% no-repeat,
+    radial-gradient(circle 24px at 100% 100%, transparent 98%, #000) bottom right / 51% 51% no-repeat;
+  mask:
+    radial-gradient(circle 24px at 0 0, transparent 98%, #000) top left / 51% 51% no-repeat,
+    radial-gradient(circle 24px at 100% 0, transparent 98%, #000) top right / 51% 51% no-repeat,
+    radial-gradient(circle 24px at 0 100%, transparent 98%, #000) bottom left / 51% 51% no-repeat,
+    radial-gradient(circle 24px at 100% 100%, transparent 98%, #000) bottom right / 51% 51% no-repeat;
+}
+.pass__chip {
+  display: inline-block; padding: 4px 14px; border-radius: 999px;
+  background: #fdeaf3; color: #e6287a; font-size: 10px; font-weight: 600; letter-spacing: 1px;
+}
+.pass__logo { margin-top: 8px; font-size: 54px; line-height: 1.1; font-weight: 700; color: #ec2f86; }
+.pass__title { margin: 2px 0 4px; font-size: 22px; font-weight: 700; }
+.pass__sub { margin: 0; font-size: 13px; color: #333; }
+.pass__tear { margin: 16px -4px 8px; border-top: 3px dashed #16193a; }
+
+.pass__rows { margin: 0; text-align: left; }
+.pass__rows > div {
+  display: flex; justify-content: space-between; gap: 12px;
+  padding: 9px 0; border-bottom: 1px solid #eee; font-size: 13px;
+}
+.pass__rows > div:last-child { border-bottom: 0; }
+.pass__rows dt { color: #666; }
+.pass__rows dd { margin: 0; font-weight: 600; text-align: right; word-break: break-word; }
+
+.pass__qrBox {
+  margin: 14px auto 12px; width: 194px; padding: 12px;
+  border: 1.5px solid #ec2f86; border-radius: 18px; box-sizing: border-box;
+}
+.pass__qr { display: block; width: 100%; height: auto; }
+.pass__qr--off { opacity: 0.3; filter: grayscale(1); }
+
+.pass__codeLabel { margin: 0; font-size: 10px; letter-spacing: 1px; color: #444; }
+.pass__code {
+  display: inline-block; margin: 8px 0 10px; padding: 6px 30px;
+  border: 1.5px dashed #ec2f86; border-radius: 999px;
+  color: #ec2f86; font-size: 24px; font-weight: 700; letter-spacing: 2px;
+}
+.pass__badge {
+  display: block; width: fit-content; margin: 0 auto; padding: 5px 18px; border-radius: 999px;
+  background: #123d33; color: #4be3a4; font-size: 12px; font-weight: 500;
+}
+.pass__badge--bad { background: #4a1620; color: #ff9aa8; }
+
+.pass__note { max-width: 364px; margin: 16px 0; font-size: 11px; color: #d8dafc; text-align: center; }
+
+.pass__help {
+  width: 100%; max-width: 364px; background: #161a3b; border: 1px solid #2a2f63;
+  border-radius: 14px; overflow: hidden;
+}
+.pass__helpHead {
+  width: 100%; display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 16px; background: none; border: 0; color: #fff;
+  font: 600 13px "Poppins", sans-serif; cursor: pointer;
+}
+.pass__helpBody { padding: 4px 16px 14px; font-size: 12px; border-top: 1px solid #2a2f63; }
+.pass__helpBody p { margin: 8px 0; }
+.pass__helpBody a { color: #6aa8ff; }
+
+.pass__actions { display: flex; gap: 12px; width: 100%; max-width: 364px; margin-top: 12px; }
+.pass__btn {
+  flex: 1; padding: 13px 0; border: 0; border-radius: 10px; color: #fff;
+  font: 600 13px "Poppins", sans-serif; cursor: pointer;
+}
+.pass__btn--dark { background: #262b57; }
+.pass__btn--pink { background: #ec4899; box-shadow: 0 6px 18px rgba(236, 72, 153, 0.35); }
+
+@media print {
+  .pass { background: #fff; }
+  .pass__note, .pass__help, .pass__actions { display: none; }
+}

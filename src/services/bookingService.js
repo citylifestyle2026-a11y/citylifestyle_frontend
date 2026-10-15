@@ -7,6 +7,12 @@ export const createBookingApi = async (data) => {
   return response.data;
 };
 
+// ================= EDIT BOOKING =================
+export const updateBookingApi = async (id, data) => {
+  const response = await api.put(`/bookings/update/${id}`, data);
+  return response.data;
+};
+
 // ================= BULK IMPORT BOOKINGS (CSV) =================
 // `file` is a browser File object (from an <input type="file"> — see
 // BulkImportBookingModal). Sent as multipart/form-data under the "file"

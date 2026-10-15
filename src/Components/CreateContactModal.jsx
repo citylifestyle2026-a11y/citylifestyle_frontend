@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FaTimes } from "react-icons/fa";
 import { createContact, updateContact, getAllContacts, getUniqueReferences, getReferenceSummary } from "../redux/contact/contactThunk";
@@ -6,6 +6,8 @@ import { clearContactState } from "../redux/contact/contactSlice";
 import "../assets/CSS/CreateContactModal.css";
 import { showError, showSuccess } from "../utilits/toast";
 import { getErrorText } from "../utilits/apiError";
+import ContactPhotoPicker from "./ContactPhotoPicker";
+import { isValidInstagramId } from "../utilits/instagram";
 import {
   isValidMobileNumber,
   toLocalMobileNumber,
@@ -22,13 +24,26 @@ const EMPTY_FORM = {
   companyName: "",
   designation: "",
   address: "",
+  area: "",
+  instagramId: "",
   companyCategory: "",
   relationship: "",
   spouseName: "",
   spouseMobile: "",
+  spouseInstagramId: "",
   profession: "",
   professionCategory: "",
 };
+
+// Same image rules as the User profile photo (CreateUserModal.jsx) and the
+// backend's 100 MB image upload middleware.
+const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
+const MAX_IMAGE_BYTES = 100 * 1024 * 1024;
+
+// Photo state: `file` = newly picked File (not uploaded yet), `preview` =
+// what's shown in the circle (blob URL for a new file, or the saved URL
+// when editing), `remove` = admin pressed Remove on a SAVED photo.
+const EMPTY_PHOTO = { file: null, preview: "", remove: false };
 
 export default function CreateContactModal({
   onClose,
@@ -58,6 +73,28 @@ export default function CreateContactModal({
 
   const [formErrors, setFormErrors] = useState({});
 
+  const [profilePhoto, setProfilePhoto] = useState(EMPTY_PHOTO);
+  const [spousePhoto, setSpousePhoto] = useState(EMPTY_PHOTO);
+
+  // Blob URLs made for new previews must be released, or they leak memory
+  // until the tab closes. The refs always hold the latest photo state so
+  // the unmount cleanup below can see it.
+  const profilePhotoRef = useRef(profilePhoto);
+  const spousePhotoRef = useRef(spousePhoto);
+  profilePhotoRef.current = profilePhoto;
+  spousePhotoRef.current = spousePhoto;
+
+  const releasePreview = (photo) => {
+    if (photo?.file && photo.preview) URL.revokeObjectURL(photo.preview);
+  };
+
+  useEffect(() => {
+    return () => {
+      releasePreview(profilePhotoRef.current);
+      releasePreview(spousePhotoRef.current);
+    };
+  }, []);
+
   useEffect(() => {
     document.body.style.overflow = "hidden";
 
@@ -78,6 +115,8 @@ export default function CreateContactModal({
         companyName: editContactData.companyName || "",
         designation: editContactData.designation || "",
         address: editContactData.address || "",
+        area: editContactData.area || "",
+        instagramId: editContactData.instagramId || "",
         // companyCategory arrives populated as { _id, name } (see
         // contact.service.js's .populate("companyCategory", "name")) —
         // the <select> below needs the bare id.
@@ -85,6 +124,7 @@ export default function CreateContactModal({
         relationship: editContactData.relationship || "",
         spouseName: editContactData.spouseName || "",
         spouseMobile: editContactData.spouseMobile || "",
+        spouseInstagramId: editContactData.spouseInstagramId || "",
         profession: editContactData.profession || "",
         // populated as { _id, name } by contact.service.js
         professionCategory: editContactData.professionCategory?._id || "",
@@ -95,14 +135,66 @@ export default function CreateContactModal({
           ? editContactData.references
           : []
       );
+
+      // Saved photos are shown as the preview; nothing new is picked yet.
+      setProfilePhoto({
+        file: null,
+        preview: editContactData.profileImage || "",
+        remove: false,
+      });
+      setSpousePhoto({
+        file: null,
+        preview: editContactData.spouseProfileImage || "",
+        remove: false,
+      });
     } else {
       setFormData(EMPTY_FORM);
       setReferences([]);
+      setProfilePhoto(EMPTY_PHOTO);
+      setSpousePhoto(EMPTY_PHOTO);
     }
 
     setReferenceInput("");
     setFormErrors({});
   }, [isEditMode, editContactData]);
+
+  // ---- Profile photo / Spouse photo ----
+  // kind = "profile" | "spouse". A newly picked file replaces whatever was
+  // there; Remove on a SAVED photo sets `remove` so the backend deletes it
+  // (a photo that was only just picked, never saved, simply disappears).
+  const pickPhoto = (kind, file) => {
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      showError("Only PNG, JPG, JPEG and WEBP files are allowed.");
+      return;
+    }
+
+    if (file.size > MAX_IMAGE_BYTES) {
+      showError("Image size should be less than 100MB.");
+      return;
+    }
+
+    const setter = kind === "spouse" ? setSpousePhoto : setProfilePhoto;
+    const current = kind === "spouse" ? spousePhotoRef.current : profilePhotoRef.current;
+
+    releasePreview(current);
+    setter({ file, preview: URL.createObjectURL(file), remove: false });
+    setFormErrors((prev) => ({
+      ...prev,
+      [kind === "spouse" ? "spousePhoto" : "profilePhoto"]: undefined,
+    }));
+  };
+
+  const removePhoto = (kind) => {
+    const setter = kind === "spouse" ? setSpousePhoto : setProfilePhoto;
+    const current = kind === "spouse" ? spousePhotoRef.current : profilePhotoRef.current;
+    const saved =
+      kind === "spouse"
+        ? editContactData?.spouseProfileImage
+        : editContactData?.profileImage;
+
+    releasePreview(current);
+    setter({ file: null, preview: "", remove: Boolean(isEditMode && saved) });
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -170,15 +262,28 @@ export default function CreateContactModal({
       ...prev,
       relationship: value,
       ...(value !== "Couple"
-        ? { spouseName: "", spouseMobile: "", profession: "", professionCategory: "" }
+        ? {
+            spouseName: "",
+            spouseMobile: "",
+            spouseInstagramId: "",
+            profession: "",
+            professionCategory: "",
+          }
         : {}),
     }));
 
     if (value !== "Couple") {
+      // Spouse photo goes away with the rest of the spouse details (the
+      // backend also deletes a saved spouse photo when relationship
+      // becomes Single).
+      releasePreview(spousePhotoRef.current);
+      setSpousePhoto(EMPTY_PHOTO);
+
       setFormErrors((prev) => ({
         ...prev,
         spouseName: undefined,
         spouseMobile: undefined,
+        spouseInstagramId: undefined,
         profession: undefined,
         professionCategory: undefined,
       }));
@@ -286,6 +391,25 @@ export default function CreateContactModal({
       errors.companyCategory = "Company Category is required.";
     }
 
+    if (!formData.area.trim()) {
+      errors.area = "Area is required.";
+    }
+
+    // Instagram ID is compulsory and must be a real username (or a
+    // pasted instagram.com link).
+    if (!formData.instagramId.trim()) {
+      errors.instagramId = "Instagram ID is required.";
+    } else if (!isValidInstagramId(formData.instagramId)) {
+      errors.instagramId =
+        "Enter a valid Instagram ID (letters, numbers, . and _ only).";
+    }
+
+    // Profile Photo is compulsory: a newly picked file, or the saved
+    // photo (when editing) that hasn't been removed.
+    if (!profilePhoto.preview) {
+      errors.profilePhoto = "Profile Photo is required.";
+    }
+
     // Relationship is required outright, independent of everything
     // below — mirrors validators/contact.validator.js's `relationship`
     // rule. No gender is inferred from this value anywhere in this
@@ -313,6 +437,17 @@ export default function CreateContactModal({
           "Enter a valid 10-digit Spouse Mobile Number (with or without 91).";
       }
 
+      if (!formData.spouseInstagramId.trim()) {
+        errors.spouseInstagramId = "Spouse Instagram ID is required for Couple.";
+      } else if (!isValidInstagramId(formData.spouseInstagramId)) {
+        errors.spouseInstagramId =
+          "Enter a valid Instagram ID (letters, numbers, . and _ only).";
+      }
+
+      if (!spousePhoto.preview) {
+        errors.spousePhoto = "Spouse Profile Photo is required for Couple.";
+      }
+
       if (!formData.profession.trim()) {
         errors.profession = "Profession is required for Couple.";
       } else if (!formData.professionCategory) {
@@ -331,6 +466,11 @@ export default function CreateContactModal({
       companyName: errors.companyName,
       designation: errors.designation,
       companyCategory: errors.companyCategory,
+      area: errors.area,
+      instagramId: errors.instagramId,
+      profilePhoto: errors.profilePhoto,
+      spouseInstagramId: errors.spouseInstagramId,
+      spousePhoto: errors.spousePhoto,
       relationship: errors.relationship,
       spouseName: errors.spouseName,
       spouseMobile: errors.spouseMobile,
@@ -348,14 +488,25 @@ export default function CreateContactModal({
     if (loading) return; // guards against double-submit
     if (!validate()) return;
 
-    const payload = {
+    const isCouple = formData.relationship === "Couple";
+
+    // multipart/form-data (not JSON) because the two photos are files.
+    // Every value is a string; `references` goes as a JSON string and is
+    // turned back into an array by the backend (parseContactFormData).
+    // Empty strings are still sent so clearing a field on Edit clears it
+    // in the database too.
+    const payload = new FormData();
+    const fields = {
       fullName: formData.fullName.trim(),
       whatsappNumber: toLocalMobileNumber(formData.whatsappNumber),
       companyName: formData.companyName.trim(),
       designation: formData.designation.trim(),
       address: formData.address.trim(),
-      references: resolvePendingReferences(),
-      companyCategory: formData.companyCategory || null,
+      area: formData.area.trim(),
+      // The backend strips a leading "@" / instagram.com link and
+      // lowercases it, so it is sent as typed.
+      instagramId: formData.instagramId.trim(),
+      references: JSON.stringify(resolvePendingReferences()),
       relationship: formData.relationship,
       // Blank for Single (handleRelationshipChange already clears these
       // when switching away from Couple, and they're hidden in the JSX
@@ -366,10 +517,32 @@ export default function CreateContactModal({
       spouseMobile: formData.spouseMobile.trim()
         ? toLocalMobileNumber(formData.spouseMobile)
         : "",
+      spouseInstagramId: isCouple ? formData.spouseInstagramId.trim() : "",
       profession: formData.profession.trim(),
-      professionCategory:
-        formData.relationship === "Couple" ? formData.professionCategory || null : null,
     };
+
+    Object.entries(fields).forEach(([key, value]) => payload.append(key, value));
+
+    if (formData.companyCategory) {
+      payload.append("companyCategory", formData.companyCategory);
+    }
+    if (isCouple && formData.professionCategory) {
+      payload.append("professionCategory", formData.professionCategory);
+    }
+
+    if (profilePhoto.file) {
+      payload.append("profileImage", profilePhoto.file);
+    } else if (profilePhoto.remove) {
+      payload.append("removeProfileImage", "true");
+    }
+
+    if (isCouple) {
+      if (spousePhoto.file) {
+        payload.append("spouseProfileImage", spousePhoto.file);
+      } else if (spousePhoto.remove) {
+        payload.append("removeSpouseProfileImage", "true");
+      }
+    }
 
     try {
       if (isEditMode) {
@@ -550,7 +723,7 @@ export default function CreateContactModal({
             )}
           </div>
 
-          <div className="contactFieldGroup contactFieldGroupFull">
+          <div className="contactFieldGroup">
             <label className="contactFieldLabel">Address</label>
             <input
               type="text"
@@ -561,6 +734,54 @@ export default function CreateContactModal({
               onChange={handleChange}
             />
             {formErrors.address && <p className="contactFieldError">{formErrors.address}</p>}
+          </div>
+
+          <div className="contactFieldGroup">
+            <label className="contactFieldLabel">
+              Area <span className="contactRequired">*</span>
+            </label>
+            <input
+              type="text"
+              className="contactFieldInput"
+              placeholder="Area"
+              name="area"
+              value={formData.area}
+              onChange={handleChange}
+            />
+            {formErrors.area && <p className="contactFieldError">{formErrors.area}</p>}
+          </div>
+
+          <div className="contactFieldGroup">
+            <label className="contactFieldLabel">
+              Instagram ID <span className="contactRequired">*</span>
+            </label>
+            <input
+              type="text"
+              className="contactFieldInput"
+              placeholder="@username"
+              name="instagramId"
+              value={formData.instagramId}
+              onChange={handleChange}
+            />
+            {formErrors.instagramId && (
+              <p className="contactFieldError">{formErrors.instagramId}</p>
+            )}
+          </div>
+
+          <div className="contactFieldGroup">
+            <label className="contactFieldLabel">
+              Profile Photo <span className="contactRequired">*</span>
+            </label>
+            <ContactPhotoPicker
+              label="Profile photo"
+              preview={profilePhoto.preview}
+              onPick={(file) => pickPhoto("profile", file)}
+              onRemove={() => removePhoto("profile")}
+              disabled={loading}
+            />
+            {formErrors.profilePhoto && (
+              <p className="contactFieldError">{formErrors.profilePhoto}</p>
+            )}
           </div>
 
           <div className="contactFieldGroup contactFieldGroupFull">
@@ -620,6 +841,39 @@ export default function CreateContactModal({
                 />
                 {formErrors.spouseMobile && (
                   <p className="contactFieldError">{formErrors.spouseMobile}</p>
+                )}
+              </div>
+
+              <div className="contactFieldGroup">
+                <label className="contactFieldLabel">
+                  Spouse Instagram ID <span className="contactRequired">*</span>
+                </label>
+                <input
+                  type="text"
+                  className="contactFieldInput"
+                  placeholder="@username"
+                  name="spouseInstagramId"
+                  value={formData.spouseInstagramId}
+                  onChange={handleChange}
+                />
+                {formErrors.spouseInstagramId && (
+                  <p className="contactFieldError">{formErrors.spouseInstagramId}</p>
+                )}
+              </div>
+
+              <div className="contactFieldGroup">
+                <label className="contactFieldLabel">
+                  Spouse Profile Photo <span className="contactRequired">*</span>
+                </label>
+                <ContactPhotoPicker
+                  label="Spouse profile photo"
+                  preview={spousePhoto.preview}
+                  onPick={(file) => pickPhoto("spouse", file)}
+                  onRemove={() => removePhoto("spouse")}
+                  disabled={loading}
+                />
+                {formErrors.spousePhoto && (
+                  <p className="contactFieldError">{formErrors.spousePhoto}</p>
                 )}
               </div>
 

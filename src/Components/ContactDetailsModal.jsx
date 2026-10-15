@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { FaTimes } from "react-icons/fa";
 import "../assets/CSS/ContactDetailsModal.css";
+import { ContactAvatar, ContactPerson, InstagramLink } from "./ContactAvatar";
 
 // Same "-" fallback + DD-MM-YYYY formatting convention already used across
 // the admin list pages (see Pages/User.jsx's created-date formatting).
@@ -78,6 +79,11 @@ export default function ContactDetailsModal({ contact, onClose }) {
         </div>
 
         <div className="contactDetailsProfileSection">
+          <ContactAvatar
+            src={contact.profileImage}
+            name={contact.fullName}
+            size={88}
+          />
           <div className="contactDetailsNameStatus">
             <span className="contactDetailsProfileName">
               {contact.fullName || "-"}
@@ -140,10 +146,30 @@ export default function ContactDetailsModal({ contact, onClose }) {
           </div>
 
           <div className="contactDetailsRow">
+            <span className="contactDetailsLabel">Area</span>
+            <span className="contactDetailsColon">:</span>
+            <span className="contactDetailsValue">
+              {contact.area || "-"}
+            </span>
+          </div>
+
+          <div className="contactDetailsRow">
+            <span className="contactDetailsLabel">Instagram ID</span>
+            <span className="contactDetailsColon">:</span>
+            <span className="contactDetailsValue">
+              <InstagramLink id={contact.instagramId} />
+            </span>
+          </div>
+
+          <div className="contactDetailsRow">
             <span className="contactDetailsLabel">Spouse Name</span>
             <span className="contactDetailsColon">:</span>
             <span className="contactDetailsValue">
-              {contact.spouseName || "-"}
+              <ContactPerson
+                name={contact.spouseName}
+                image={contact.spouseProfileImage}
+                size={40}
+              />
             </span>
           </div>
 
@@ -152,6 +178,14 @@ export default function ContactDetailsModal({ contact, onClose }) {
             <span className="contactDetailsColon">:</span>
             <span className="contactDetailsValue">
               {contact.spouseMobile || "-"}
+            </span>
+          </div>
+
+          <div className="contactDetailsRow">
+            <span className="contactDetailsLabel">Spouse Instagram ID</span>
+            <span className="contactDetailsColon">:</span>
+            <span className="contactDetailsValue">
+              <InstagramLink id={contact.spouseInstagramId} />
             </span>
           </div>
 
