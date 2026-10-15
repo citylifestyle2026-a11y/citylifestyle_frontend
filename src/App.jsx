@@ -19,6 +19,7 @@ import Booking from "./Pages/Booking";
 import ViewBooking from "./Pages/ViewBooking";
 import RegisterUsers from "./Components/RegisterUsers";
 import PublicRegisterUser from "./Components/PublicRegisterUser";
+import Ticket from "./Pages/Ticket";
 import EntryReport from "./Pages/EntryReport";
 import CreateEvent from "./Pages/CreateEvent";
 import ViewEvent from "./Pages/ViewEvent";
@@ -62,6 +63,8 @@ const privateRoutes = [
   // tickets), not City Toppers — so it gets the City Lifestyle favicon
   // and title. The trailing slash keeps it from matching other routes.
   "/r/",
+  // NEW single-QR invitation page (/ticket?qr=<invitationId>) — same City Lifestyle branding.
+  "/ticket",
 ];
 
 function SiteMetaHandler() {
@@ -131,6 +134,8 @@ function App() {
           <Route path="/login" element={<Login />} />
 
           <Route path="/r/:token" element={<PublicRegisterUser />} />
+          {/* NEW: single-QR invitation page opened from the WhatsApp link */}
+          <Route path="/ticket" element={<Ticket />} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/user" element={<User />} />
