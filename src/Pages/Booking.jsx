@@ -382,18 +382,18 @@ const Booking = () => {
       pageClassName="bookingPage-wrapper"
       mainAreaClassName="bookingPageMainArea"
       contentClassName="bookingPageContent"
-      headerTitle="Booking"
+      headerTitle="Manual Booking"
     >
       <CommonPageHeader
         containerClassName="bookingPage-header"
         leftWrapperClassName="bookingPage-headerLeft"
-        title="Booking"
+        title="Manual Booking"
         titleClassName="bookingPage-title"
         breadcrumb={
           <div className="bookingPage-breadcrumb">
             <Link to="/dashboard"><span style={{color:"#9a9ca8"}}>Dashboard</span></Link>
             <span className="bookingPage-breadcrumbSep">-</span>
-            <span className="bookingPage-breadcrumbActive">Booking</span>
+            <span className="bookingPage-breadcrumbActive">Manual Booking</span>
           </div>
         }
         actions={

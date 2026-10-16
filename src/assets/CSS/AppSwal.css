@@ -1,0 +1,98 @@
+/* Themed SweetAlert2 (see utilits/appSwal.js) */
+.swal2-container { font-family: "Poppins", sans-serif; }
+
+.appSwal {
+  width: 440px;
+  max-width: calc(100vw - 32px);
+  padding: 30px 28px 26px;
+  border-radius: 20px;
+  box-shadow: 0 24px 60px rgba(16, 24, 40, 0.28);
+}
+
+.appSwal__icon { margin: 0 auto 14px; transform: scale(0.88); }
+
+.appSwal__title {
+  padding: 0;
+  color: #1b2a4e;
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.appSwal__body { margin: 10px 0 0; padding: 0; color: #5b6275; }
+
+.appSwal__text { margin: 0 0 4px; font-size: 14px; line-height: 1.55; }
+
+.appSwal__hint {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fff7e6;
+  color: #8a5a00;
+  font-size: 12.5px;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.appSwal__points {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+
+.appSwal__points li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #f5f6fa;
+  color: #3b4258;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.appSwal__pointIcon { flex-shrink: 0; font-size: 15px; line-height: 1.4; }
+
+.appSwal__actions { margin-top: 22px; gap: 10px; width: 100%; }
+
+.appSwal__btn {
+  flex: 1;
+  min-width: 120px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s, background-color 0.15s;
+}
+
+.appSwal__btn:hover { transform: translateY(-1px); }
+.appSwal__btn:focus-visible { outline: 3px solid rgba(90, 147, 199, 0.35); outline-offset: 2px; }
+
+.appSwal__btn--confirm { background: #5a93c7; color: #ffffff; box-shadow: 0 6px 16px rgba(90, 147, 199, 0.35); }
+.appSwal__btn--confirm:hover { background: #4a83b7; }
+
+.appSwal__btn--danger { background: #e5484d; box-shadow: 0 6px 16px rgba(229, 72, 77, 0.3); }
+.appSwal__btn--danger:hover { background: #d23a3f; }
+
+.appSwal__btn--cancel { background: #eef0f5; color: #3b4258; }
+.appSwal__btn--cancel:hover { background: #e2e5ee; }
+
+.appSwal__in { animation: appSwalIn 0.22s ease-out; }
+.appSwal__out { animation: appSwalOut 0.16s ease-in forwards; }
+
+@keyframes appSwalIn { from { opacity: 0; transform: translateY(14px) scale(0.96); } to { opacity: 1; transform: none; } }
+@keyframes appSwalOut { to { opacity: 0; transform: translateY(8px) scale(0.97); } }
+
+@media (max-width: 480px) {
+  .appSwal { padding: 24px 18px 20px; }
+  .appSwal__actions { flex-direction: column-reverse; }
+  .appSwal__btn { width: 100%; }
+}

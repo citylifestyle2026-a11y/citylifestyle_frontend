@@ -43,6 +43,7 @@ import { getAllCompanyCategories } from "../redux/companyCategory/companyCategor
 
 import { showError, showSuccess } from "../utilits/toast";
 import { resendContactPassApi } from "../services/contactService";
+import { confirmDialog, noticeDialog } from "../utilits/appSwal";
 import "../assets/CSS/ContactList.css";
 
 // Options for the "rows per page" select. Lives in the page (not inside
@@ -424,37 +425,42 @@ export default function ContactList() {
 
       setOpenActionMenuId(null);
 
-      // Warn before cancelling a pass that was already sent, and before the
-      // automatic "next Parv" WhatsApp message goes out on Reject.
+      // Themed (SweetAlert) confirmation before cancelling a pass that was
+      // already sent, and before the automatic "next Parv" WhatsApp message
+      // goes out on Reject.
       if (status !== "approved") {
         const withPass = targets.filter((contact) => contact.passSentAt);
-        const lines = [];
+        const newlyRejected =
+          status === "rejected"
+            ? targets.filter((contact) => getApprovalStatus(contact) !== "rejected")
+            : [];
+        const points = [];
 
         if (withPass.length) {
-          lines.push(
-            `${withPass.length === 1 ? "A pass was" : `${withPass.length} passes were`} already sent. ` +
-              "Marking as " +
-              STATUS_LABELS[status] +
-              " will CANCEL the pass - its QR will stop working at the gate."
-          );
+          points.push({
+            icon: "🎟️",
+            text: `${withPass.length === 1 ? "The pass that was sent is" : `${withPass.length} passes that were sent are`} CANCELLED - the QR will stop working at the gate.`,
+          });
         }
 
-        if (status === "rejected") {
-          const newlyRejected = targets.filter(
-            (contact) => getApprovalStatus(contact) !== "rejected"
-          );
-          if (newlyRejected.length) {
-            lines.push(
-              'A polite WhatsApp message ("we will invite you to the next Parv") will be sent to ' +
-                (newlyRejected.length === 1
-                  ? "this contact."
-                  : `${newlyRejected.length} contacts.`)
-            );
-          }
+        if (newlyRejected.length) {
+          points.push({
+            icon: "💬",
+            text: `A polite WhatsApp message ("we will invite you to the next Parv") is sent to ${newlyRejected.length === 1 ? "this contact" : `${newlyRejected.length} contacts`}.`,
+          });
         }
 
-        if (lines.length && !window.confirm(`${lines.join("\n\n")}\n\nContinue?`)) {
-          return;
+        if (points.length) {
+          const one = targets.length === 1;
+          const confirmed = await confirmDialog({
+            title: `${status === "rejected" ? "Reject" : "Move to Pending"}: ${one ? targets[0].fullName : `${targets.length} contacts`}?`,
+            text: "Please check before you continue.",
+            points,
+            confirmText: status === "rejected" ? "Yes, Reject" : "Yes, Move to Pending",
+            tone: status === "rejected" ? "danger" : "warning",
+          });
+
+          if (!confirmed) return;
         }
       }
 
@@ -468,7 +474,21 @@ export default function ContactList() {
           })
         ).unwrap();
 
-        showSuccess(res.message || `Marked as ${STATUS_LABELS[status]}`);
+        // The status change always goes through. If the rejection WhatsApp
+        // could not be delivered, say so clearly (with the reason) instead
+        // of a toast that is easy to miss.
+        if (res?.data?.rejectionFailed) {
+          await noticeDialog({
+            icon: "warning",
+            title: "Status updated, message not sent",
+            text: `Marked as ${STATUS_LABELS[status]}, but the WhatsApp message could not be delivered to ${res.data.rejectionFailed} contact${res.data.rejectionFailed === 1 ? "" : "s"}.${res.data.rejectionError ? ` Reason: ${res.data.rejectionError}` : ""}`,
+            hint: res.data.rejectionUsedTemplate
+              ? "Check that the template name in .env is approved and the language matches."
+              : "A normal WhatsApp text only reaches people who messaged your number in the last 24 hours. Create an approved template and set CHATBOX_REJECTION_TEMPLATE_NAME in the backend .env.",
+          });
+        } else {
+          showSuccess(res.message || `Marked as ${STATUS_LABELS[status]}`);
+        }
 
         setSelected((prev) => {
           const next = { ...prev };
@@ -946,7 +966,7 @@ const sortedReferenceFilterOptions = useMemo(
       pageClassName="contactPage__page"
       mainAreaClassName="contactPage__mainArea"
       contentClassName="contactPage__content"
-      headerTitle="Contact List"
+      headerTitle="Guest List"
       outsideMainArea={
         <>
           {isFormModalOpen && (
@@ -1033,14 +1053,14 @@ const sortedReferenceFilterOptions = useMemo(
     >
       <CommonPageHeader
         containerClassName="contactPage__topRow"
-        title="Contact List"
+        title="Guest List"
         titleClassName="contactPage__pageTitle"
         titleStyle={{ textAlign: "start", display: "block" }}
         breadcrumb={
           <div className="contactPage__breadcrumb">
             <Link to="/dashboard" className="appBreadcrumbLink">Dashboard</Link>
             <span>-</span>
-            <span className="contactPage__breadcrumbActive">Contact List</span>
+            <span className="contactPage__breadcrumbActive">Guest List</span>
           </div>
         }
         actions={
@@ -1058,7 +1078,7 @@ const sortedReferenceFilterOptions = useMemo(
               onClick={handleExport}
               loading={exportLoading}
               disabled={exportLoading || total === 0}
-              label="Export Contact List"
+              label="Export Guest List"
               className="contactPage__exportButton"
               iconClassName="contactPage__exportIcon"
               iconLoadingClassName="contactPage__exportIcon contactPage__exportIcon--spinning"

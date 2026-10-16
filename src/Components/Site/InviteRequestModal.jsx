@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { MOBILE_ERROR_MESSAGE, normalizeMobileNumber } from "../../utilits/mobileNumber";
 
 // This is a SEPARATE Google Sheet from the "Join Community" form
 // (Pages/Site/Contact.jsx) — its own Google Apps Script Web App, its own
@@ -12,22 +13,10 @@ import { useEffect, useRef, useState } from "react";
 const PARV_REGISTER_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycby2MX8lKZIjVwXd7zG7qibpeOIoRKaxJt6LoptykM1AOQnONk8vF8MIpUGG98hjj9M/exec";
 
-// Accepts a WhatsApp number with or without a country code and always
-// sends it to the sheet as +91XXXXXXXXXX — so the person filling the
-// form is never required to type +91 themselves (the hint under the
-// field says so), but the sheet still gets a consistent, dialable
-// format either way.
-const normalizeWhatsapp = (value) => {
-  const stripped = String(value || "").replace(/[^\d+]/g, "");
-  if (stripped.startsWith("+")) return stripped;
-
-  const withoutLeadingZero = stripped.replace(/^0+/, "");
-  // Already has the country code, just missing the "+" (e.g. "919876543210").
-  if (withoutLeadingZero.startsWith("91") && withoutLeadingZero.length > 10) {
-    return `+${withoutLeadingZero}`;
-  }
-  return `+91${withoutLeadingZero}`;
-};
+// The number is accepted with or without +91 / 91 and with spaces
+// ("98765 43210", "+91 98765 43210", "919876543210"). It is checked with the
+// same rule as the whole CRM (utilits/mobileNumber.js) and always sent to the
+// sheet as +91XXXXXXXXXX.
 
 /**
  * "Request Invitation" / "Request Your Invitation" modal for the Parv
@@ -120,11 +109,17 @@ export default function InviteRequestModal({ open, onClose }) {
       return;
     }
 
+    const phone = normalizeMobileNumber(new FormData(form).get("contact"));
+    if (!phone) {
+      setStatus({ visible: true, color: "#ff6b6b", message: MOBILE_ERROR_MESSAGE });
+      return;
+    }
+
     setSubmitting(true);
     setStatus({ visible: true, color: "#F4DD4E", message: "Sending your registration..." });
 
     const formData = new FormData(form);
-    formData.set("contact", normalizeWhatsapp(formData.get("contact")));
+    formData.set("contact", `+${phone}`);
 
     try {
       // no-cors: request reaches Google and the sheet gets the row.
@@ -198,7 +193,7 @@ export default function InviteRequestModal({ open, onClose }) {
                 aria-label="Contact number"
                 required
               />
-              <p className="join-hint">You can enter it with or without +91 — either way works.</p>
+              <p className="join-hint">Works with or without +91, and with spaces (e.g. 98765 43210).</p>
             </div>
 
             <div className="join-actions">
