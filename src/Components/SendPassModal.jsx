@@ -20,7 +20,12 @@ const MAX_GUESTS = 10;
  * contact in `contacts` (one contact from a row icon, or many from the
  * checkbox selection). Shows a per-contact result afterwards.
  */
-export default function SendPassModal({ contacts = [], onClose, onDone }) {
+export default function SendPassModal({
+  contacts = [],
+  defaultEventId = "",
+  onClose,
+  onDone,
+}) {
   const dispatch = useDispatch();
 
   const [events, setEvents] = useState([]);
@@ -28,7 +33,8 @@ export default function SendPassModal({ contacts = [], onClose, onDone }) {
   const [ticketTypes, setTicketTypes] = useState([]);
   const [ticketsLoading, setTicketsLoading] = useState(false);
 
-  const [eventId, setEventId] = useState("");
+  // Pre-selected when every contact belongs to the same edition.
+  const [eventId, setEventId] = useState(defaultEventId || "");
   const [ticketTypeId, setTicketTypeId] = useState("");
 
   const [sending, setSending] = useState(false);

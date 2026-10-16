@@ -1,0 +1,81 @@
+.memberPage__person {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "Poppins", sans-serif;
+}
+
+.memberPage__personName {
+  font-weight: 600;
+  color: #1b2a4e;
+}
+
+.memberPage__status {
+  display: inline-block;
+  background: #e8f8ee;
+  color: #1a9b4b;
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  font-family: "Poppins", sans-serif;
+}
+
+.memberPage__movedTag {
+  display: inline-block;
+  background: #eaf0ff;
+  color: #2a4a9a;
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  font-family: "Poppins", sans-serif;
+}
+
+.memberPage__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.memberPage__moveBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #eaf0ff;
+  color: var(--admin-accent);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: "Poppins", sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.memberPage__moveBtn:hover {
+  background: var(--admin-accent);
+  color: #ffffff;
+}
+
+.memberPage__deleteBtn {
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 8px;
+  background: #fdecec;
+  color: #d63a3a;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.memberPage__deleteBtn:hover {
+  background: #d63a3a;
+  color: #ffffff;
+}

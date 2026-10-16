@@ -133,9 +133,7 @@ api.interceptors.response.use(
       const isPublicPath =
         path === "/" ||
         path === "/login" ||
-        path === "/city-sparkle" ||
-        path === "/parv" ||
-        path === "/contact" ||
+        path === "/city-lifestyle" ||
         path.startsWith("/r/");
 
       if (!isPublicPath) {

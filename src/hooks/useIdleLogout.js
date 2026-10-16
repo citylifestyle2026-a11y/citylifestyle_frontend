@@ -135,7 +135,7 @@ export function startIdleWatcher({
   };
 }
 
-const PUBLIC_PATHS = ["/", "/login", "/city-sparkle", "/parv", "/contact"];
+const PUBLIC_PATHS = ["/", "/login", "/city-lifestyle"];
 
 export default function useIdleLogout() {
   const dispatch = useDispatch();

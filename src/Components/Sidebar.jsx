@@ -8,7 +8,7 @@ import {
   MdKeyboardArrowDown,
 } from 'react-icons/md';
 
-import { FaUsers, FaAddressBook } from 'react-icons/fa';
+import { FaUsers, FaAddressBook, FaUserFriends } from 'react-icons/fa';
 
 import {
   BsCalendarEventFill,
@@ -31,6 +31,11 @@ const menuItems = [
     label: 'Add Event',
     icon: <BsCalendarEventFill />,
     path: '/event',
+  },
+  {
+    label: 'Member List',
+    icon: <FaUserFriends />,
+    path: '/member-list',
   },
    {
     label: 'Guest List',

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -13,7 +13,6 @@ import {
   FaTimes,
   FaClock,
   FaFileCsv,
-  FaTrash,
 } from "react-icons/fa";
 
 import CommonListLayout from "../Components/CommonListLayout";
@@ -29,6 +28,7 @@ import ContactDetailsModal from "../Components/ContactDetailsModal";
 import CommonExportButton from "../Components/CommonExportButton";
 import SendPassModal from "../Components/SendPassModal";
 import ImportContactsModal from "../Components/ImportContactsModal";
+import useEditionOptions from "../hooks/useEditionOptions";
 import { ContactPerson, InstagramLink } from "../Components/ContactAvatar";
 
 import {
@@ -118,6 +118,15 @@ export default function ContactList() {
   const [referenceFilter, setReferenceFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
+  // Edition (event) the guests were moved into from Member List. Can be
+  // preset with /contact-list?edition=<eventId>.
+  const [searchParams] = useSearchParams();
+  const [editionFilter, setEditionFilter] = useState(
+    searchParams.get("edition") || ""
+  );
+  const { editions: editionOptions, loading: editionsLoading } =
+    useEditionOptions();
+
   // Checkbox selection (id -> contact). Kept across pages so many contacts
   // can be approved / rejected / sent a pass in one go.
   const [selected, setSelected] = useState({});
@@ -186,6 +195,7 @@ export default function ContactList() {
     if (categoryFilter) params.companyCategory = categoryFilter;
     if (referenceFilter) params.reference = referenceFilter;
     if (statusFilter) params.approvalStatus = statusFilter;
+    if (editionFilter) params.editionEventId = editionFilter;
 
     dispatch(getAllContacts(params));
   }, [
@@ -198,6 +208,7 @@ export default function ContactList() {
     categoryFilter,
     referenceFilter,
     statusFilter,
+    editionFilter,
     refreshKey,
   ]);
 
@@ -286,6 +297,7 @@ export default function ContactList() {
     if (categoryFilter) params.companyCategory = categoryFilter;
     if (referenceFilter) params.reference = referenceFilter;
     if (statusFilter) params.approvalStatus = statusFilter;
+    if (editionFilter) params.editionEventId = editionFilter;
 
     dispatch(exportContacts(params));
   };
@@ -353,6 +365,7 @@ export default function ContactList() {
       if (categoryFilter) params.companyCategory = categoryFilter;
       if (referenceFilter) params.reference = referenceFilter;
       if (statusFilter) params.approvalStatus = statusFilter;
+      if (editionFilter) params.editionEventId = editionFilter;
 
       dispatch(getAllContacts(params));
 
@@ -508,7 +521,7 @@ export default function ContactList() {
   );
 
   // Deletes the booking (pass) made by Send Pass - for one contact (row
-  // menu) or all selected ones (bulk bar). Works for live and already
+  // menu). Works for live and already
   // cancelled bookings; contacts without a booking are skipped by the
   // server. The contact itself stays in the list.
   const handleDeleteBooking = useCallback(
@@ -811,6 +824,17 @@ const sortedReferenceFilterOptions = useMemo(
           );
         },
       },
+      {
+        key: "editionName",
+        label: "Edition",
+        sortable: false,
+        render: (contact) =>
+          contact.editionName ? (
+            <span className="contactPage__editionTag">{contact.editionName}</span>
+          ) : (
+            "-"
+          ),
+      },
       sortableColumn("whatsappNumber", "WhatsApp Number", {
         render: (contact) => contact.whatsappNumber || "-",
       }),
@@ -960,7 +984,7 @@ const sortedReferenceFilterOptions = useMemo(
                 </button>
               )}
 
-              {(contact.passSentAt || getApprovalStatus(contact) !== "pending") && (
+              {contact.passSentAt && (
                 <button
                   type="button"
                   className="contactAction__item contactAction__itemReject"
@@ -1103,6 +1127,15 @@ const sortedReferenceFilterOptions = useMemo(
           {passContacts && (
             <SendPassModal
               contacts={passContacts}
+              defaultEventId={
+                passContacts.every(
+                  (c) =>
+                    c.editionEventId &&
+                    c.editionEventId === passContacts[0].editionEventId
+                )
+                  ? passContacts[0].editionEventId
+                  : ""
+              }
               onClose={handleClosePass}
               onDone={handlePassDone}
             />
@@ -1246,15 +1279,6 @@ const sortedReferenceFilterOptions = useMemo(
               )}
               <button
                 type="button"
-                className="contactPage__bulkBtn contactPage__bulkBtn--reject"
-                disabled={statusBusy}
-                title="Delete the pass booking of the selected contacts (contacts without a booking are skipped)"
-                onClick={() => handleDeleteBooking(selectedContacts)}
-              >
-                <FaTrash /> Delete Booking ({selectedCount})
-              </button>
-              <button
-                type="button"
                 className="contactPage__bulkBtn contactPage__bulkBtn--clear"
                 onClick={clearSelection}
               >
@@ -1313,6 +1337,21 @@ const sortedReferenceFilterOptions = useMemo(
             placeholder="All References"
             loading={uniqueReferencesLoading}
             options={sortedReferenceFilterOptions}
+          />
+
+          <CommonSelect
+            className="contactPage__filterSelect"
+            value={editionFilter}
+            onChange={(e) => {
+              setEditionFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            placeholder="All Editions"
+            loading={editionsLoading}
+            options={editionOptions.map((e) => ({
+              value: e.value,
+              label: e.label,
+            }))}
           />
         </div>
 

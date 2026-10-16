@@ -30,15 +30,13 @@ import "react-toastify/dist/ReactToastify.css";
 import Profile from "./Pages/Profile";
 import Admin from "./Pages/Admin";
 import ContactList from "./Pages/ContactList";
+import MemberList from "./Pages/MemberList";
 import EventHistory from "./Pages/EventHistory";
 import CompanyCategory from "./Pages/CompanyCategory";
 import TopProgressLoader from "./Components/TopProgressLoader";
 
-// Public marketing site pages
-import Home from "./Pages/Site/Home";
-import CitySparkle from "./Pages/Site/Sparkle";
-import Parv from "./Pages/Site/Parv";
-import Contact from "./Pages/Site/Contact";
+// Public home page (City Lifestyle)
+import Home from "./Pages/Home";
 
 const privateRoutes = [
   "/dashboard",
@@ -55,6 +53,7 @@ const privateRoutes = [
   "/entry-report",
   "/admin",
   "/contact-list",
+  "/member-list",
   "/event-history",
   "/company-categories",
   // Staff login page — City Lifestyle branding too.
@@ -74,9 +73,11 @@ function SiteMetaHandler() {
   const location = useLocation();
 
   useEffect(() => {
-    const isPrivate = privateRoutes.some((route) =>
-      location.pathname.startsWith(route)
-    );
+    // Home page ("/") now is City Lifestyle too, so it gets the same
+    // City Lifestyle favicon and title as the rest of the app.
+    const isPrivate =
+      location.pathname === "/" ||
+      privateRoutes.some((route) => location.pathname.startsWith(route));
 
     updateSiteMeta(isPrivate);
   }, [location.pathname]);
@@ -95,16 +96,11 @@ function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    // Public marketing pages don't need the admin profile — skipping it
-    // there means a slow / cold server can never keep a loader running on
-    // the Home page. Every private page still loads the profile as before.
+    // Public pages don't need the admin profile — skipping it there means
+    // a slow / cold server can never keep a loader running on the Home page.
+    // Every private page still loads the profile as before.
     const path = window.location.pathname;
-    const isPublicSitePage =
-      path === "/" ||
-      path === "/city-sparkle" ||
-      path === "/parv" ||
-      path === "/contact" ||
-      path === "/city-lifestyle";
+    const isPublicSitePage = path === "/" || path === "/city-lifestyle";
 
     if (localStorage.getItem("token") && !isPublicSitePage) {
       dispatch(getProfile());
@@ -132,9 +128,6 @@ function App() {
 
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/city-sparkle" element={<CitySparkle />} />
-          <Route path="/parv" element={<Parv />} />
-          <Route path="/contact" element={<Contact />} />
 
           <Route path="/home" element={<Navigate to="/" replace />} />
 
@@ -158,6 +151,7 @@ function App() {
             <Route path="/register-users/:id" element={<RegisterUsers />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/contact-list" element={<ContactList />} />
+            <Route path="/member-list" element={<MemberList />} />
             <Route path="/event-history" element={<EventHistory />} />
             <Route path="/company-categories" element={<CompanyCategory />} />
           </Route>

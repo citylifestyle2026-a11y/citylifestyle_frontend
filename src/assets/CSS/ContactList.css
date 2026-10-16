@@ -872,3 +872,16 @@
   font-weight: 600;
   white-space: nowrap;
 }
+
+/* Edition (event) a guest was moved into from Member List. */
+.contactPage__editionTag {
+  display: inline-block;
+  background: #eaf0ff;
+  color: #2a4a9a;
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  font-family: "Poppins", sans-serif;
+}
