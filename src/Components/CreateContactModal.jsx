@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FaTimes } from "react-icons/fa";
 import { createContact, updateContact, getAllContacts, getUniqueReferences, getReferenceSummary } from "../redux/contact/contactThunk";
+import { getContactPassApi, updateContactPassApi } from "../services/contactService";
 import { clearContactState } from "../redux/contact/contactSlice";
 import "../assets/CSS/CreateContactModal.css";
 import { showError, showSuccess } from "../utilits/toast";
@@ -69,6 +70,11 @@ export default function CreateContactModal({
   const { loading: reduxLoading, error: reduxError } = useSelector((state) => state.contact);
   const { companyCategories } = useSelector((state) => state.companyCategory);
 
+  // Edit mode only, for a contact whose pass was already sent: the guest
+  // count of that pass can be changed here too.
+  const [passInfo, setPassInfo] = useState(null); // { quantity, editable, maxGuests }
+  const [passGuests, setPassGuests] = useState("");
+  const [passResend, setPassResend] = useState(false);
   const [publicCategories, setPublicCategories] = useState([]);
   const [publicSaving, setPublicSaving] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -132,6 +138,30 @@ export default function CreateContactModal({
   useEffect(() => {
     if (!publicMode) dispatch(clearContactState());
   }, [dispatch, publicMode]);
+
+  useEffect(() => {
+    if (!isEditMode || !editContactData?._id || !editContactData.passSentAt) {
+      setPassInfo(null);
+      return undefined;
+    }
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const res = await getContactPassApi(editContactData._id);
+        if (cancelled || !res?.data?.hasPass) return;
+        setPassInfo(res.data);
+        setPassGuests(String(res.data.quantity));
+      } catch {
+        if (!cancelled) setPassInfo(null);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isEditMode, editContactData]);
 
   useEffect(() => {
     if (isEditMode && editContactData) {
@@ -543,6 +573,23 @@ export default function CreateContactModal({
         ).unwrap();
 
         showSuccess(res?.message || "Contact updated successfully");
+
+        // Pass guest count (only when it was changed). The contact itself
+        // is already saved above, so a failure here is just reported.
+        const newGuests = Number(passGuests);
+        if (passInfo?.editable && newGuests && newGuests !== passInfo.quantity) {
+          try {
+            const passRes = await updateContactPassApi(editContactData._id, {
+              quantity: newGuests,
+              resendInvitation: passResend,
+            });
+            showSuccess(passRes?.message || "Pass updated");
+          } catch (passErr) {
+            showError(
+              passErr?.response?.data?.message || "Contact saved, but the pass could not be updated."
+            );
+          }
+        }
       } else {
         const res = await dispatch(createContact(payload)).unwrap();
 
@@ -832,6 +879,39 @@ export default function CreateContactModal({
               <p className="contactFieldError">{formErrors.profilePhoto}</p>
             )}
           </div>
+
+          {isEditMode && passInfo && (
+            <div className="contactFieldGroup contactFieldGroupFull">
+              <label className="contactFieldLabel">
+                Pass Guests (Quantity)
+              </label>
+              <input
+                type="number"
+                className="contactFieldInput"
+                min={1}
+                max={passInfo.maxGuests || 10}
+                step={1}
+                value={passGuests}
+                disabled={!passInfo.editable}
+                onChange={(e) => setPassGuests(e.target.value)}
+              />
+              <p className="contactPassNote">
+                {passInfo.editable
+                  ? `Pass ${passInfo.bookingNumber} admits ${passInfo.quantity} guest${passInfo.quantity === 1 ? "" : "s"} now. Change it here (1 - ${passInfo.maxGuests || 10}).`
+                  : "This older pass cannot change its guest count."}
+              </p>
+              {passInfo.editable && Number(passGuests) !== passInfo.quantity && (
+                <label className="contactPassCheck">
+                  <input
+                    type="checkbox"
+                    checked={passResend}
+                    onChange={(e) => setPassResend(e.target.checked)}
+                  />
+                  Send the updated pass on WhatsApp after saving
+                </label>
+              )}
+            </div>
+          )}
 
           <div className="contactFieldGroup contactFieldGroupFull">
             <label className="contactFieldLabel">

@@ -42,6 +42,7 @@ import { clearContactState } from "../redux/contact/contactSlice";
 import { getAllCompanyCategories } from "../redux/companyCategory/companyCategoryThunk";
 
 import { showError, showSuccess } from "../utilits/toast";
+import { resendContactPassApi } from "../services/contactService";
 import "../assets/CSS/ContactList.css";
 
 // Options for the "rows per page" select. Lives in the page (not inside
@@ -134,6 +135,8 @@ export default function ContactList() {
 
   // Tracks which row's Action dropdown is currently open.
   const [openActionMenuId, setOpenActionMenuId] = useState(null);
+  // Contact whose pass is currently being re-sent (disables its menu item).
+  const [resendBusyId, setResendBusyId] = useState(null);
 
   // Delete modal state.
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -420,6 +423,41 @@ export default function ContactList() {
       if (!targets.length || statusBusy) return;
 
       setOpenActionMenuId(null);
+
+      // Warn before cancelling a pass that was already sent, and before the
+      // automatic "next Parv" WhatsApp message goes out on Reject.
+      if (status !== "approved") {
+        const withPass = targets.filter((contact) => contact.passSentAt);
+        const lines = [];
+
+        if (withPass.length) {
+          lines.push(
+            `${withPass.length === 1 ? "A pass was" : `${withPass.length} passes were`} already sent. ` +
+              "Marking as " +
+              STATUS_LABELS[status] +
+              " will CANCEL the pass - its QR will stop working at the gate."
+          );
+        }
+
+        if (status === "rejected") {
+          const newlyRejected = targets.filter(
+            (contact) => getApprovalStatus(contact) !== "rejected"
+          );
+          if (newlyRejected.length) {
+            lines.push(
+              'A polite WhatsApp message ("we will invite you to the next Parv") will be sent to ' +
+                (newlyRejected.length === 1
+                  ? "this contact."
+                  : `${newlyRejected.length} contacts.`)
+            );
+          }
+        }
+
+        if (lines.length && !window.confirm(`${lines.join("\n\n")}\n\nContinue?`)) {
+          return;
+        }
+      }
+
       setStatusBusy(true);
 
       try {
@@ -446,6 +484,28 @@ export default function ContactList() {
       }
     },
     [dispatch, statusBusy]
+  );
+
+  // Re-sends the same pass (same QR link) to a contact who already has one.
+  const handleResendPass = useCallback(
+    async (contact) => {
+      if (resendBusyId) return;
+
+      setOpenActionMenuId(null);
+      setResendBusyId(contact._id);
+
+      try {
+        const res = await resendContactPassApi({ ids: [contact._id] });
+        showSuccess(res.message || "Pass sent again.");
+      } catch (err) {
+        showError(
+          err?.response?.data?.message || err?.message || "Failed to resend pass"
+        );
+      } finally {
+        setResendBusyId(null);
+      }
+    },
+    [resendBusyId]
   );
 
   const handleOpenPass = useCallback((targets) => {
@@ -801,6 +861,17 @@ const sortedReferenceFilterOptions = useMemo(
                 View
               </button>
 
+              {getApprovalStatus(contact) === "approved" && contact.passSentAt && (
+                <button
+                  type="button"
+                  className="contactAction__item contactAction__itemApprove"
+                  disabled={resendBusyId === contact._id}
+                  onClick={() => handleResendPass(contact)}
+                >
+                  {resendBusyId === contact._id ? "Sending..." : "Resend Pass"}
+                </button>
+              )}
+
               {getApprovalStatus(contact) !== "approved" && (
                 <button
                   type="button"
@@ -854,6 +925,8 @@ const sortedReferenceFilterOptions = useMemo(
   }, [
     renderSortableHeader,
     openActionMenuId,
+    resendBusyId,
+    handleResendPass,
     handleToggleActionMenu,
     handleViewClick,
     handleEditClick,

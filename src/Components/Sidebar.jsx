@@ -32,24 +32,14 @@ const menuItems = [
     icon: <BsCalendarEventFill />,
     path: '/event',
   },
-  {
-    label: 'Booking',
-    icon: <BsFillTicketFill />,
-    path: '/booking',
-  },
-  {
-    label: 'Entry Report',
-    icon: <FaFlag />,
-    path: '/entry-report',
-  },
    {
-    label: 'Contact List',
+    label: 'Guest List',
     icon: <FaAddressBook />,
     submenu: [
       // Admin Contact List lives at /contact-list — '/contact' is the
       // PUBLIC marketing contact page (see App.jsx) and must stay that
       // way.
-      { label: 'Contact List', path: '/contact-list' },
+      { label: 'Guest List', path: '/contact-list' },
       { label: 'Company Category', path: '/company-categories' },
       // Edition master data — feeds the Edition checkboxes on the Event
       // History page below (see models/contactEventHistory.model.js).
@@ -58,6 +48,11 @@ const menuItems = [
       // the Contact itself from a dropdown inside the modal.
       { label: 'Event History', path: '/event-history' },
     ],
+  },
+  {
+    label: 'Entry Report',
+    icon: <FaFlag />,
+    path: '/entry-report',
   },
    {
     label: 'User Management',
@@ -68,6 +63,11 @@ const menuItems = [
       // { label: 'Permissions', path: '/permission' },
       { label: 'Admins', path: '/admin' },
     ],
+  },
+  {
+    label: 'Manual Booking',
+    icon: <BsFillTicketFill />,
+    path: '/booking',
   },
 ];
 

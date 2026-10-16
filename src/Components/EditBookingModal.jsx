@@ -70,11 +70,8 @@ export default function EditBookingModal({ booking, onClose, onSuccess }) {
     normalizeMobileNumber(formData.mobile) !== normalizeMobileNumber(booking.mobileNumber);
   const structuralChanged = qty !== booking.quantity || !sameType;
 
-  // Suggest a WhatsApp resend whenever something the guest should know changed.
-  useEffect(() => {
-    if (!isSingleQr || resendTouched) return;
-    setResend(mobileChanged || structuralChanged);
-  }, [isSingleQr, resendTouched, mobileChanged, structuralChanged]);
+  // The "Re-send invitation on WhatsApp" checkbox is NEVER ticked for the
+  // admin: it starts unchecked and only changes when they click it.
 
   const handleChange = (field) => (e) => {
     setFormData((prev) => ({ ...prev, [field]: e.target.value }));

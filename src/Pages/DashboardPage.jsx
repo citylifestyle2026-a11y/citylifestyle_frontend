@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useCallback, useState } from "react";
+import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import Sidebar from "../Components/Sidebar";
 import Header from "../Components/Header";
@@ -131,70 +132,61 @@ export default function DashboardPage() {
     return `${fmt(activeEvent.startDateTime)} - ${fmt(activeEvent.endDateTime)}`;
   }, [activeEvent?.startDateTime, activeEvent?.endDateTime]);
 
-  // The overall stat counts from dashboard.service.js's
-  // getDashboardCounts(). Each is a single number — the backend doesn't
-  // return a date-wise or ticket-wise breakdown for these, so every
-  // card here renders as amount-only (hideBody: true). `infoText` is the
-  // plain-language explanation shown when the card's "i" button is
-  // hovered, so anyone reading the dashboard knows what each number is.
-  const statCards = useMemo(
+  // The dashboard now shows only two sections - Booking and Entry Report -
+  // fed by dashboard.service.js's getDashboardCounts(). Every tile is a
+  // single number, so each renders as amount-only (hideBody: true).
+  // `infoText` is the plain-language explanation of the "i" button.
+  const bookingCards = useMemo(
     () => [
       {
         key: "totalBookings",
         title: "Total Bookings",
         amountValue: String(dashboardData?.totalBookings ?? 0),
-        amountLabel: "Total Bookings",
-        hideBody: true,
         infoText:
           "Total number of tickets booked for this event (sum of the quantity of every booking). Deleted bookings are not counted.",
-      },
-      {
-        key: "registeredTickets",
-        title: "Registered Tickets",
-        amountValue: String(dashboardData?.registeredTickets ?? 0),
-        amountLabel: "Registered Tickets",
-        hideBody: true,
-        infoText:
-          "Tickets whose attendee has completed registration (name and details filled in), so a QR pass has been issued.",
-      },
-      {
-        key: "pendingRegistrations",
-        title: "Pending Registrations",
-        amountValue: String(dashboardData?.pendingRegistrations ?? 0),
-        amountLabel: "Pending Registrations",
-        hideBody: true,
-        infoText:
-          "Tickets that are booked but whose attendee has not completed registration yet.",
-      },
-      {
-        key: "scannedEntries",
-        title: "Scanned Entries",
-        amountValue: String(dashboardData?.scannedEntries ?? 0),
-        amountLabel: "Scanned Entries",
-        hideBody: true,
-        infoText:
-          "Tickets already scanned at the entry gate — people who actually came to the event.",
       },
     ],
     [dashboardData]
   );
 
-  // Registered but never scanned: e.g. 2 tickets registered and only 1
-  // scanned means 1 person registered but did not come to the event.
-  // Counted directly by the backend (registeredNotScanned), not as
-  // registeredTickets - scannedEntries.
-  const notScannedCard = useMemo(
-    () => ({
-      key: "registeredNotScanned",
-      title: "Registered but Not Scanned",
-      amountValue: String(dashboardData?.registeredNotScanned ?? 0),
-      amountLabel: "Registered but Not Scanned",
-      hideBody: true,
-      infoText:
-        "Tickets that are registered but have not been scanned at entry — these people registered but did not attend the event. Cancelled tickets are not counted.",
-    }),
+  const entryCards = useMemo(
+    () => [
+      {
+        key: "scannedEntries",
+        title: "Scanned Entries",
+        amountValue: String(dashboardData?.scannedEntries ?? 0),
+        infoText:
+          "Tickets already scanned at the entry gate - people who actually came to the event.",
+      },
+      {
+        key: "registeredNotScanned",
+        title: "Pass Sent but Not Scanned",
+        amountValue: String(dashboardData?.registeredNotScanned ?? 0),
+        infoText:
+          "Tickets whose pass was sent (or that are registered) but have not been scanned at entry - these people did not attend the event. Cancelled passes are not counted.",
+      },
+    ],
     [dashboardData]
   );
+
+  const sections = [
+    {
+      key: "booking",
+      title: "Booking",
+      subtitle: "Tickets booked for this event",
+      to: "/booking",
+      linkLabel: "View Bookings",
+      cards: bookingCards,
+    },
+    {
+      key: "entry",
+      title: "Entry Report",
+      subtitle: "Who came in at the gate",
+      to: "/entry-report",
+      linkLabel: "View Entry Report",
+      cards: entryCards,
+    },
+  ];
 
   return (
     <div className="dashboardPage appPage">
@@ -244,9 +236,11 @@ export default function DashboardPage() {
                   <div className="skeletonBlock skeletonAmount" />
                   <div className="skeletonBlock skeletonRow" style={{ marginTop: 14 }} />
                 </section>
-                <div className="statGrid">
-                  {[0, 1, 2, 3, 4].map((i) => (
-                    <DashboardCardSkeleton key={i} />
+                <div className="dashSections">
+                  {[0, 1].map((i) => (
+                    <section className="dashSection" key={i}>
+                      <DashboardCardSkeleton />
+                    </section>
                   ))}
                 </div>
               </>
@@ -286,17 +280,33 @@ export default function DashboardPage() {
                   )}
                 </section>
 
-                <div className="statGrid">
-                  {[...statCards, notScannedCard].map((card) => (
-                    <DashboardCard
-                      key={card.key}
-                      compact
-                      title={card.title}
-                      amountValue={card.amountValue}
-                      amountLabel={card.amountLabel}
-                      hideBody={card.hideBody}
-                      infoText={card.infoText}
-                    />
+                <div className="dashSections">
+                  {sections.map((section) => (
+                    <section className="dashSection" key={section.key}>
+                      <div className="dashSection__head">
+                        <div>
+                          <h2 className="dashSection__title">{section.title}</h2>
+                          <p className="dashSection__sub">{section.subtitle}</p>
+                        </div>
+                        <Link className="dashSection__link" to={section.to}>
+                          {section.linkLabel} &rarr;
+                        </Link>
+                      </div>
+
+                      <div className="dashSection__cards">
+                        {section.cards.map((card) => (
+                          <DashboardCard
+                            key={card.key}
+                            compact
+                            title={card.title}
+                            amountValue={card.amountValue}
+                            amountLabel={card.title}
+                            hideBody
+                            infoText={card.infoText}
+                          />
+                        ))}
+                      </div>
+                    </section>
                   ))}
                 </div>
               </>

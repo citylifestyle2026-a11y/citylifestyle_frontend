@@ -9,8 +9,10 @@ import { sendContactPass } from "../redux/contact/contactThunk";
 import { showError } from "../utilits/toast";
 import "../assets/CSS/SendPassModal.css";
 
-// Passes per contact: a Couple gets 2 guests on one pass, Single gets 1.
-const guestsFor = (contact) => (contact.relationship === "Couple" ? 2 : 1);
+// Default guests per pass: a Couple gets 2, Single gets 1. The admin can
+// change it per contact in the list below (1 - MAX_GUESTS).
+const defaultGuestsFor = (contact) => (contact.relationship === "Couple" ? 2 : 1);
+const MAX_GUESTS = 10;
 
 /**
  * SendPassModal
@@ -31,6 +33,20 @@ export default function SendPassModal({ contacts = [], onClose, onDone }) {
 
   const [sending, setSending] = useState(false);
   const [report, setReport] = useState(null);
+
+  // { [contactId]: guests } - starts from Single = 1 / Couple = 2.
+  const [quantities, setQuantities] = useState(() =>
+    Object.fromEntries(contacts.map((c) => [c._id, defaultGuestsFor(c)]))
+  );
+
+  const guestsFor = (contact) => quantities[contact._id] ?? defaultGuestsFor(contact);
+
+  const changeGuests = (contact, delta) =>
+    setQuantities((prev) => {
+      const current = prev[contact._id] ?? defaultGuestsFor(contact);
+      const next = Math.min(MAX_GUESTS, Math.max(1, current + delta));
+      return { ...prev, [contact._id]: next };
+    });
 
   // Upcoming / active events only.
   useEffect(() => {
@@ -96,8 +112,12 @@ export default function SendPassModal({ contacts = [], onClose, onDone }) {
   }, [eventId]);
 
   const totalGuests = useMemo(
-    () => contacts.reduce((sum, contact) => sum + guestsFor(contact), 0),
-    [contacts]
+    () =>
+      contacts.reduce(
+        (sum, contact) => sum + (quantities[contact._id] ?? defaultGuestsFor(contact)),
+        0
+      ),
+    [contacts, quantities]
   );
 
   const selectedTicket = ticketTypes.find((t) => t._id === ticketTypeId);
@@ -116,6 +136,9 @@ export default function SendPassModal({ contacts = [], onClose, onDone }) {
           ids: contacts.map((contact) => contact._id),
           eventId,
           ticketTypeId,
+          quantities: Object.fromEntries(
+            contacts.map((contact) => [contact._id, guestsFor(contact)])
+          ),
         })
       ).unwrap();
 
@@ -161,19 +184,37 @@ export default function SendPassModal({ contacts = [], onClose, onDone }) {
 
         {!report && (
           <>
-            <div className="sendPass__chips">
-              {contacts.slice(0, 6).map((contact) => (
-                <span key={contact._id} className="sendPass__chip">
-                  {contact.fullName}
-                  {guestsFor(contact) === 2 ? " (+1)" : ""}
-                </span>
+            <label className="sendPass__label">Guests per pass</label>
+            <ul className="sendPass__guestList">
+              {contacts.map((contact) => (
+                <li key={contact._id} className="sendPass__guestRow">
+                  <span className="sendPass__guestName" title={contact.fullName}>
+                    {contact.fullName}
+                    <small>{contact.relationship}</small>
+                  </span>
+
+                  <span className="sendPass__stepper">
+                    <button
+                      type="button"
+                      aria-label={`Fewer guests for ${contact.fullName}`}
+                      onClick={() => changeGuests(contact, -1)}
+                      disabled={sending || guestsFor(contact) <= 1}
+                    >
+                      &minus;
+                    </button>
+                    <b>{guestsFor(contact)}</b>
+                    <button
+                      type="button"
+                      aria-label={`More guests for ${contact.fullName}`}
+                      onClick={() => changeGuests(contact, 1)}
+                      disabled={sending || guestsFor(contact) >= MAX_GUESTS}
+                    >
+                      +
+                    </button>
+                  </span>
+                </li>
               ))}
-              {contacts.length > 6 && (
-                <span className="sendPass__chip sendPass__chipMore">
-                  +{contacts.length - 6} more
-                </span>
-              )}
-            </div>
+            </ul>
 
             <label className="sendPass__label">Event</label>
             <CommonSelect
@@ -217,8 +258,9 @@ export default function SendPassModal({ contacts = [], onClose, onDone }) {
             )}
 
             <p className="sendPass__hint">
-              Single contact = 1 guest, Couple = 2 guests. One pass is sent to
-              each contact&apos;s WhatsApp number.
+              Starts at 1 guest for Single and 2 for Couple - change it above if
+              they are bringing more (max {MAX_GUESTS}). One pass is sent to each
+              contact&apos;s WhatsApp number.
             </p>
 
             <div className="sendPass__actions">

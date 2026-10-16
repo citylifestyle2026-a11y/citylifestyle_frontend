@@ -165,7 +165,7 @@ export default function AddToEventHistoryModal({
               You are about to save the attendance of <strong>{eventTitle}</strong> to
               Event History. Everyone you selected will be marked{" "}
               <span className="addHistory__word addHistory__word--green">Attended</span>,
-              and everyone who registered but never entered will be marked{" "}
+              and everyone who registered or was sent a pass but never entered will be marked{" "}
               <span className="addHistory__word addHistory__word--red">Not Attended</span>.
             </p>
 
@@ -182,7 +182,7 @@ export default function AddToEventHistoryModal({
                 <div className="addHistory__stats">
                   <div className="addHistory__stat">
                     <span className="addHistory__statValue">{summary.registeredCount}</span>
-                    <span className="addHistory__statLabel">Registered</span>
+                    <span className="addHistory__statLabel">Registered / Pass sent</span>
                   </div>
                   <div className="addHistory__stat addHistory__stat--green">
                     <span className="addHistory__statValue">{selectedCount}</span>

@@ -97,6 +97,27 @@ export const sendContactPassApi = async (data) => {
   return response.data;
 };
 
+// ================= PASS GUEST COUNT (EDIT CONTACT) =================
+// GET -> { data: { hasPass, quantity, editable, maxGuests, bookingNumber } }
+export const getContactPassApi = async (id) => {
+  const response = await api.get(`/contacts/${id}/pass`);
+  return response.data;
+};
+
+// body: { quantity, resendInvitation }
+export const updateContactPassApi = async (id, data) => {
+  const response = await api.put(`/contacts/${id}/pass`, data);
+  return response.data;
+};
+
+// ================= RESEND PASS (WHATSAPP) =================
+// body: { ids: string[] } - sends the SAME pass again to contacts that
+// already have an active pass.
+export const resendContactPassApi = async (data) => {
+  const response = await api.post("/contacts/resend-pass", data);
+  return response.data;
+};
+
 // ================= IMPORT CONTACTS (CSV) =================
 // file: browser File. options.dryRun = true only checks the file (nothing
 // is saved); options.approvalStatus = "approved" | "pending" for real imports.
