@@ -153,17 +153,17 @@ export default function DashboardPage() {
     () => [
       {
         key: "scannedEntries",
-        title: "Scanned Entries",
+        title: "Checked In",
         amountValue: String(dashboardData?.scannedEntries ?? 0),
         infoText:
-          "Tickets already scanned at the entry gate - people who actually came to the event.",
+          "Guests whose pass was scanned at the gate - they have arrived at the event.",
       },
       {
         key: "registeredNotScanned",
-        title: "Pass Sent but Not Scanned",
+        title: "Not Checked In",
         amountValue: String(dashboardData?.registeredNotScanned ?? 0),
         infoText:
-          "Tickets whose pass was sent (or that are registered) but have not been scanned at entry - these people did not attend the event. Cancelled passes are not counted.",
+          "Guests who have a pass (sent or registered) but have not been scanned at the gate yet. Cancelled or deleted passes are not counted.",
       },
     ],
     [dashboardData]

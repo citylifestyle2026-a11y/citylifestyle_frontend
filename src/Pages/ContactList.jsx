@@ -13,6 +13,7 @@ import {
   FaTimes,
   FaClock,
   FaFileCsv,
+  FaTrash,
 } from "react-icons/fa";
 
 import CommonListLayout from "../Components/CommonListLayout";
@@ -42,7 +43,7 @@ import { clearContactState } from "../redux/contact/contactSlice";
 import { getAllCompanyCategories } from "../redux/companyCategory/companyCategoryThunk";
 
 import { showError, showSuccess } from "../utilits/toast";
-import { resendContactPassApi } from "../services/contactService";
+import { resendContactPassApi, deleteContactBookingApi } from "../services/contactService";
 import { confirmDialog, noticeDialog } from "../utilits/appSwal";
 import "../assets/CSS/ContactList.css";
 
@@ -506,6 +507,73 @@ export default function ContactList() {
     [dispatch, statusBusy]
   );
 
+  // Deletes the booking (pass) made by Send Pass - for one contact (row
+  // menu) or all selected ones (bulk bar). Works for live and already
+  // cancelled bookings; contacts without a booking are skipped by the
+  // server. The contact itself stays in the list.
+  const handleDeleteBooking = useCallback(
+    async (targets) => {
+      const withPass = targets;
+      if (!withPass.length || statusBusy) return;
+      setOpenActionMenuId(null);
+
+      const one = withPass.length === 1;
+      const confirmed = await confirmDialog({
+        title: `Delete booking: ${one ? withPass[0].fullName : `${withPass.length} contacts`}?`,
+        text: "This removes the booking made by Send Pass. Contacts without a booking are skipped.",
+        points: [
+          { icon: "🎟️", text: "The pass QR stops working at the gate." },
+          { icon: "↩️", text: "The seats go back to the ticket stock." },
+          { icon: "📲", text: "The contact stays in the list - you can send a new pass later." },
+        ],
+        confirmText: "Yes, Delete Booking",
+        tone: "danger",
+      });
+
+      if (!confirmed) return;
+
+      setStatusBusy(true);
+
+      try {
+        const res = await deleteContactBookingApi({
+          ids: withPass.map((contact) => contact._id),
+        });
+
+        if (res?.data?.failed) {
+          await noticeDialog({
+            icon: res.data.deleted ? "warning" : "error",
+            title: res.data.deleted ? "Some bookings were not deleted" : "Booking not deleted",
+            text: `${res.message}${res.data.failedReason ? ` Reason: ${res.data.failedReason}` : ""}`,
+          });
+        } else if (!res?.data?.deleted) {
+          await noticeDialog({
+            icon: "info",
+            title: "Nothing to delete",
+            text: res.message,
+          });
+        } else {
+          showSuccess(res.message || "Booking deleted");
+        }
+
+        setSelected((prev) => {
+          const next = { ...prev };
+          withPass.forEach((contact) => delete next[contact._id]);
+          return next;
+        });
+        setRefreshKey((key) => key + 1);
+      } catch (err) {
+        showError(
+          err?.response?.status === 404
+            ? "Delete Booking is not available on the server yet - please deploy / restart the backend."
+            : err?.response?.data?.message || err?.message || "Failed to delete booking"
+        );
+      } finally {
+        setStatusBusy(false);
+      }
+    },
+    [statusBusy]
+  );
+
   // Re-sends the same pass (same QR link) to a contact who already has one.
   const handleResendPass = useCallback(
     async (contact) => {
@@ -892,6 +960,16 @@ const sortedReferenceFilterOptions = useMemo(
                 </button>
               )}
 
+              {(contact.passSentAt || getApprovalStatus(contact) !== "pending") && (
+                <button
+                  type="button"
+                  className="contactAction__item contactAction__itemReject"
+                  onClick={() => handleDeleteBooking([contact])}
+                >
+                  Delete Booking
+                </button>
+              )}
+
               {getApprovalStatus(contact) !== "approved" && (
                 <button
                   type="button"
@@ -1166,6 +1244,15 @@ const sortedReferenceFilterOptions = useMemo(
                   <FaWhatsapp /> Send Pass ({selectedApproved.length})
                 </button>
               )}
+              <button
+                type="button"
+                className="contactPage__bulkBtn contactPage__bulkBtn--reject"
+                disabled={statusBusy}
+                title="Delete the pass booking of the selected contacts (contacts without a booking are skipped)"
+                onClick={() => handleDeleteBooking(selectedContacts)}
+              >
+                <FaTrash /> Delete Booking ({selectedCount})
+              </button>
               <button
                 type="button"
                 className="contactPage__bulkBtn contactPage__bulkBtn--clear"

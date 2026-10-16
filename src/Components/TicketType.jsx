@@ -248,6 +248,7 @@ const TicketType = () => {
                 <span className="eventList__searchIcon"><FaSearch /></span>
                 <input
                   type="search"
+                  placeholder="Search..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="eventList__searchInput"

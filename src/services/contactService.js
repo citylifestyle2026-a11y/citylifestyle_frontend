@@ -97,6 +97,13 @@ export const sendContactPassApi = async (data) => {
   return response.data;
 };
 
+// ================= DELETE BOOKING (PASS) =================
+// body: { ids: string[] }
+export const deleteContactBookingApi = async (data) => {
+  const response = await api.post("/contacts/delete-booking", data);
+  return response.data;
+};
+
 // ================= PASS GUEST COUNT (EDIT CONTACT) =================
 // GET -> { data: { hasPass, quantity, editable, maxGuests, bookingNumber } }
 export const getContactPassApi = async (id) => {
