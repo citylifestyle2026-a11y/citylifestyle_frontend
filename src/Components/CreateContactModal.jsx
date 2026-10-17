@@ -397,30 +397,34 @@ export default function CreateContactModal({
   const validate = () => {
     const errors = {};
 
-    if (!formData.fullName.trim()) {
+    // Edit mode: nothing is compulsory - only the format of values that are
+    // filled in is checked. Create / public form keep every required rule.
+    const req = !isEditMode;
+
+    if (req && !formData.fullName.trim()) {
       errors.fullName = "Full Name is required.";
     }
 
     if (!formData.whatsappNumber.trim()) {
-      errors.whatsappNumber = "WhatsApp Number is required.";
+      if (req) errors.whatsappNumber = "WhatsApp Number is required.";
     } else if (!isValidWhatsappNumber(formData.whatsappNumber)) {
       errors.whatsappNumber =
         "Enter a valid 10-digit WhatsApp number (with or without 91).";
     }
 
-    if (!formData.companyName.trim()) {
+    if (req && !formData.companyName.trim()) {
       errors.companyName = "Company Name is required.";
     }
 
-    if (!formData.designation.trim()) {
+    if (req && !formData.designation.trim()) {
       errors.designation = "Designation is required.";
     }
 
-    if (!formData.companyCategory) {
+    if (req && !formData.companyCategory) {
       errors.companyCategory = "Company Category is required.";
     }
 
-    if (!formData.area.trim()) {
+    if (req && !formData.area.trim()) {
       errors.area = "Area is required.";
     }
 
@@ -433,7 +437,7 @@ export default function CreateContactModal({
     // below — mirrors validators/contact.validator.js's `relationship`
     // rule. No gender is inferred from this value anywhere in this
     // form.
-    if (!formData.relationship) {
+    if (req && !formData.relationship) {
       errors.relationship = "Relationship is required.";
     }
 
@@ -445,12 +449,12 @@ export default function CreateContactModal({
     // currently Couple, or the admin just switched away from Couple —
     // handleRelationshipChange already clears them in that case.
     if (formData.relationship === "Couple") {
-      if (!formData.spouseName.trim()) {
+      if (req && !formData.spouseName.trim()) {
         errors.spouseName = "Spouse Name is required for Couple.";
       }
 
       if (!formData.spouseMobile.trim()) {
-        errors.spouseMobile = "Spouse Mobile Number is required for Couple.";
+        if (req) errors.spouseMobile = "Spouse Mobile Number is required for Couple.";
       } else if (!isValidWhatsappNumber(formData.spouseMobile)) {
         errors.spouseMobile =
           "Enter a valid 10-digit Spouse Mobile Number (with or without 91).";
@@ -459,12 +463,12 @@ export default function CreateContactModal({
       const spouseInstagramError = instagramLinkError(formData.spouseInstagramId);
       if (spouseInstagramError) errors.spouseInstagramId = spouseInstagramError;
 
-      if (!formData.professionCategory) {
+      if (req && !formData.professionCategory) {
         errors.professionCategory = "Category is required for Couple.";
       }
     }
 
-    if (resolvePendingReferences().length === 0) {
+    if (req && resolvePendingReferences().length === 0) {
       errors.references = "At least one Reference is required.";
     }
 
@@ -733,7 +737,7 @@ export default function CreateContactModal({
         <div className="contactFormGrid">
           <div className="contactFieldGroup">
             <label className="contactFieldLabel">
-              Full Name <span className="contactRequired">*</span>
+              Full Name {!isEditMode && <span className="contactRequired">*</span>}
             </label>
             <input
               type="text"
@@ -748,7 +752,7 @@ export default function CreateContactModal({
 
           <div className="contactFieldGroup">
             <label className="contactFieldLabel">
-              WhatsApp Number <span className="contactRequired">*</span>
+              WhatsApp Number {!isEditMode && <span className="contactRequired">*</span>}
             </label>
             <input
               type="text"
@@ -765,7 +769,7 @@ export default function CreateContactModal({
 
           <div className="contactFieldGroup">
             <label className="contactFieldLabel">
-              Company Name <span className="contactRequired">*</span>
+              Company Name {!isEditMode && <span className="contactRequired">*</span>}
             </label>
             <input
               type="text"
@@ -782,7 +786,7 @@ export default function CreateContactModal({
 
           <div className="contactFieldGroup">
             <label className="contactFieldLabel">
-              Designation <span className="contactRequired">*</span>
+              Designation {!isEditMode && <span className="contactRequired">*</span>}
             </label>
             <input
               type="text"
@@ -799,7 +803,7 @@ export default function CreateContactModal({
 
           <div className="contactFieldGroup contactFieldGroupFull">
             <label className="contactFieldLabel">
-              Company Category <span className="contactRequired">*</span>
+              Company Category {!isEditMode && <span className="contactRequired">*</span>}
             </label>
             <select
               className="contactFieldSelect"
@@ -834,7 +838,7 @@ export default function CreateContactModal({
 
           <div className="contactFieldGroup">
             <label className="contactFieldLabel">
-              Area <span className="contactRequired">*</span>
+              Area {!isEditMode && <span className="contactRequired">*</span>}
             </label>
             <input
               type="text"
@@ -915,7 +919,7 @@ export default function CreateContactModal({
 
           <div className="contactFieldGroup contactFieldGroupFull">
             <label className="contactFieldLabel">
-              Relationship <span className="contactRequired">*</span>
+              Relationship {!isEditMode && <span className="contactRequired">*</span>}
             </label>
             <select
               className="contactFieldSelect"
@@ -941,7 +945,7 @@ export default function CreateContactModal({
             <>
               <div className="contactFieldGroup">
                 <label className="contactFieldLabel">
-                  Spouse Name <span className="contactRequired">*</span>
+                  Spouse Name {!isEditMode && <span className="contactRequired">*</span>}
                 </label>
                 <input
                   type="text"
@@ -958,7 +962,7 @@ export default function CreateContactModal({
 
               <div className="contactFieldGroup">
                 <label className="contactFieldLabel">
-                  Spouse Mobile Number <span className="contactRequired">*</span>
+                  Spouse Mobile Number {!isEditMode && <span className="contactRequired">*</span>}
                 </label>
                 <input
                   type="text"
@@ -1008,7 +1012,7 @@ export default function CreateContactModal({
 
               <div className="contactFieldGroup contactFieldGroupFull">
                 <label className="contactFieldLabel">
-                  Category <span className="contactRequired">*</span>
+                  Category {!isEditMode && <span className="contactRequired">*</span>}
                 </label>
                 <select
                   className="contactFieldSelect"
@@ -1032,7 +1036,7 @@ export default function CreateContactModal({
 
           <div className="contactFieldGroup contactFieldGroupFull">
             <label className="contactFieldLabel">
-              Reference <span className="contactRequired">*</span>
+              Reference {!isEditMode && <span className="contactRequired">*</span>}
             </label>
             <div className="referenceInputRow">
               <input

@@ -1,0 +1,243 @@
+.inviteCards__top {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.inviteCards__panel {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(27, 42, 78, 0.06);
+}
+
+.inviteCards__panelTitle {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1b2a4e;
+}
+
+.inviteCards__nameInput {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #d7dae1;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.inviteCards__previewBox {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  background: #f2f3f6;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9a9ca8;
+  font-size: 13px;
+}
+
+.inviteCards__previewBox img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.inviteCards__right {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.inviteCards__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.inviteCards__stat {
+  border: none;
+  background: #f2f3f6;
+  color: #4a4d5e;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.inviteCards__stat b {
+  margin-left: 6px;
+  background: rgba(255, 255, 255, 0.85);
+  color: #1b2a4e;
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-size: 12px;
+}
+
+.inviteCards__statActive {
+  background: var(--admin-accent, #4a82c0);
+  color: #fff;
+}
+
+.inviteCards__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.inviteCards__btn {
+  border: 1px solid var(--admin-accent, #4a82c0);
+  background: #fff;
+  color: var(--admin-accent, #4a82c0);
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.inviteCards__btnPrimary {
+  background: var(--admin-accent, #4a82c0);
+  color: #fff;
+}
+
+.inviteCards__btnDanger {
+  border-color: #d64545;
+  color: #d64545;
+}
+
+.inviteCards__btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.inviteCards__hint {
+  margin: 12px 0 0;
+  font-size: 12.5px;
+  color: #7b7f93;
+  line-height: 1.5;
+}
+
+.inviteCards__tableWrap {
+  overflow-x: auto;
+}
+
+.inviteCards__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.inviteCards__table th {
+  text-align: left;
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #7b7f93;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e7e9ef;
+  white-space: nowrap;
+}
+
+.inviteCards__table td {
+  padding: 12px;
+  border-bottom: 1px solid #f0f1f5;
+  color: #1b2a4e;
+  vertical-align: middle;
+}
+
+.inviteCards__badge {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 3px 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.inviteCards__badge--pending { background: #fff4e0; color: #b7791f; }
+.inviteCards__badge--sending { background: #e6f0fb; color: #2b6cb0; }
+.inviteCards__badge--sent { background: #e3f6ea; color: #23823f; }
+.inviteCards__badge--failed { background: #fde8e8; color: #c53030; }
+
+.inviteCards__error {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #c53030;
+  max-width: 320px;
+}
+
+.inviteCards__rowBtn {
+  background: none;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  color: var(--admin-accent, #4a82c0);
+}
+
+.inviteCards__rowBtnDanger { color: #d64545; }
+.inviteCards__rowBtn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.inviteCards__pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+  font-size: 13px;
+  color: #7b7f93;
+}
+
+.inviteCards__empty {
+  text-align: center;
+  padding: 40px 10px;
+  color: #7b7f93;
+}
+
+@media (max-width: 900px) {
+  .inviteCards__top { grid-template-columns: 1fr; }
+  .inviteCards__previewBox { max-width: 320px; }
+}
+
+.inviteCards__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100000;
+  padding: 16px;
+}
+
+.inviteCards__modal {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+}
+
+.inviteCards__label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4a4d5e;
+  margin-bottom: 6px;
+}
+
+.inviteCards__formError {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: #c53030;
+}

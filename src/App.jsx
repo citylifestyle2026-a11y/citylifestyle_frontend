@@ -30,6 +30,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Profile from "./Pages/Profile";
 import Admin from "./Pages/Admin";
 import ContactList from "./Pages/ContactList";
+import InviteCards from "./Pages/InviteCards";
 import MemberList from "./Pages/MemberList";
 import EventHistory from "./Pages/EventHistory";
 import CompanyCategory from "./Pages/CompanyCategory";
@@ -53,6 +54,7 @@ const privateRoutes = [
   "/entry-report",
   "/admin",
   "/contact-list",
+  "/invite-cards",
   "/member-list",
   "/event-history",
   "/company-categories",
@@ -159,6 +161,7 @@ function App() {
           <Route element={<ProtectedRoute adminOnly />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/invite-cards" element={<InviteCards />} />
           </Route>
 
           <Route element={<ProtectedRoute permission="Entry Report" />}>

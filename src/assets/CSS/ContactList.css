@@ -216,7 +216,7 @@
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: 200px; /* dropdown mate space — must fit the full 4-item Action menu (View/Edit/Event History/Delete), not just part of it */
+  padding-bottom: 340px; /* room for the full Action menu (up to 7 items: View/Resend/Delete Booking/Approve/Reject/Pending/Edit/Delete) */
   box-sizing: border-box;
 }
 
