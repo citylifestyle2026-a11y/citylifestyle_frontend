@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { FaTimes, FaUserEdit } from "react-icons/fa";
+import { FaTimes, FaUserEdit, FaUserPlus } from "react-icons/fa";
 
-import { updateMemberApi } from "../services/memberService";
+import { createMemberApi, updateMemberApi } from "../services/memberService";
 import { getErrorText } from "../utilits/apiError";
 import { showError, showSuccess } from "../utilits/toast";
 import "../assets/CSS/EditMemberModal.css";
@@ -9,10 +9,14 @@ import "../assets/CSS/EditMemberModal.css";
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
- * Edit one member's details (Member List -> Action -> Edit).
+ * Edit one member's details (Member List -> Action -> Edit), or - when no
+ * `member` is passed - add a new one (Member List -> Add Member).
  * professions: existing professions, offered as suggestions while typing.
  */
-export default function EditMemberModal({ member, professions = [], onClose, onSaved }) {
+export default function EditMemberModal({ member = null, professions = [], onClose, onSaved }) {
+  const isEdit = Boolean(member?._id);
+  member = member || {};
+
   const [form, setForm] = useState({
     name: member.name || "",
     mobile: member.mobile || "",
@@ -59,12 +63,14 @@ export default function EditMemberModal({ member, professions = [], onClose, onS
 
     setSaving(true);
     try {
-      const res = await updateMemberApi(member._id, form);
-      showSuccess(res?.message || "Member updated successfully");
+      const res = isEdit
+        ? await updateMemberApi(member._id, form)
+        : await createMemberApi(form);
+      showSuccess(res?.message || (isEdit ? "Member updated successfully" : "Member added successfully"));
       onSaved?.(res?.data);
       onClose();
     } catch (err) {
-      showError(getErrorText(err, "Failed to update member"));
+      showError(getErrorText(err, isEdit ? "Failed to update member" : "Failed to add member"));
     } finally {
       setSaving(false);
     }
@@ -101,13 +107,20 @@ export default function EditMemberModal({ member, professions = [], onClose, onS
       >
         <div className="editMember__header">
           <div className="editMember__titleWrap">
-            <span className="editMember__titleIcon"><FaUserEdit /></span>
-            <h2 className="editMember__title">Edit Member</h2>
+            <span className="editMember__titleIcon">{isEdit ? <FaUserEdit /> : <FaUserPlus />}</span>
+            <h2 className="editMember__title">{isEdit ? "Edit Member" : "Add Member"}</h2>
           </div>
           <button type="button" className="editMember__close" onClick={onClose} disabled={saving} aria-label="Close">
             <FaTimes />
           </button>
         </div>
+
+        {isEdit && member.mobileStatus && member.mobileStatus !== "valid" && (
+          <p className="editMember__error" style={{ margin: "0 0 12px" }}>
+            Imported with a problem: {member.importNote || "details need fixing"}. Correct the
+            details and save to remove it from Needs Fix.
+          </p>
+        )}
 
         <div className="editMember__grid">
           {field("name", "Name", { required: true })}
@@ -136,7 +149,7 @@ export default function EditMemberModal({ member, professions = [], onClose, onS
             Cancel
           </button>
           <button type="submit" className="editMember__btn editMember__btn--primary" disabled={saving}>
-            {saving ? "Saving..." : "Save Changes"}
+            {saving ? "Saving..." : isEdit ? "Save Changes" : "Add Member"}
           </button>
         </div>
       </form>

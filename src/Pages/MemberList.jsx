@@ -45,6 +45,7 @@ const MOVED_TABS = [
   { value: "", label: "All", countKey: "all", tone: "all" },
   { value: "notInGuestList", label: "Not in Guest List", countKey: "notInGuestList", tone: "pending" },
   { value: "inGuestList", label: "In Guest List", countKey: "inGuestList", tone: "approved" },
+  { value: "needsFix", label: "Needs Fix", countKey: "needsFix", tone: "rejected" },
 ];
 
 // Columns the server can sort by (see SORTABLE in services/member.service.js).
@@ -66,7 +67,7 @@ export default function MemberList() {
   const [movedFilter, setMovedFilter] = useState("");
   const [professions, setProfessions] = useState([]);
   const [references, setReferences] = useState([]);
-  const [counts, setCounts] = useState({ all: 0, inGuestList: 0, notInGuestList: 0 });
+  const [counts, setCounts] = useState({ all: 0, inGuestList: 0, notInGuestList: 0, needsFix: 0 });
 
   const [sortBy, setSortBy] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
@@ -84,6 +85,7 @@ export default function MemberList() {
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [moveTarget, setMoveTarget] = useState(null);
   const [editMember, setEditMember] = useState(null);
+  const [isAddOpen, setIsAddOpen] = useState(false);
 
   const filters = useMemo(
     () => ({
@@ -368,21 +370,44 @@ export default function MemberList() {
         label: "Guest List",
         sortable: false,
         render: (m) => {
-          const last = m.movedTo?.[m.movedTo.length - 1];
-          return last ? (
-            <span
-              className="memberPage__movedTag"
-              title={m.movedTo.map((x) => x.editionName).join(", ")}
-            >
-              In {last.editionName}
-              {m.movedTo.length > 1 ? ` +${m.movedTo.length - 1}` : ""}
+          // "In ..." only for editions that are still running. Editions that
+          // have ended (or were deleted) stay in the tooltip as history, and
+          // the member can be moved again.
+          const current = m.currentMovedTo || [];
+          const all = m.movedTo || [];
+          const last = current[current.length - 1];
+          const history = all.map((x) => x.editionName).join(", ");
+
+          if (last) {
+            return (
+              <span className="memberPage__movedTag" title={history}>
+                In {last.editionName}
+                {current.length > 1 ? ` +${current.length - 1}` : ""}
+              </span>
+            );
+          }
+
+          return all.length ? (
+            <span style={{ opacity: 0.6 }} title={history}>
+              Past: {all[all.length - 1].editionName}
             </span>
           ) : (
             "-"
           );
         },
       },
-      sortableColumn("mobile", "Mobile", { render: (m) => m.mobile || "-" }),
+      sortableColumn("mobile", "Mobile", {
+        render: (m) => (
+          <span>
+            {m.mobile || "-"}
+            {m.mobileStatus && m.mobileStatus !== "valid" && (
+              <span className="memberPage__fixTag" title={m.importNote || ""}>
+                {m.mobileStatus === "duplicate" ? "Duplicate" : "Invalid"}
+              </span>
+            )}
+          </span>
+        ),
+      }),
       sortableColumn("profession", "Profession", { render: (m) => m.profession || "-" }),
       sortableColumn("companyName", "Company / Brand", { render: (m) => m.companyName || "-" }),
       sortableColumn("city", "Area / City", {
@@ -482,6 +507,15 @@ export default function MemberList() {
             />
           )}
 
+          {isAddOpen && (
+            <EditMemberModal
+              member={null}
+              professions={professions}
+              onClose={() => setIsAddOpen(false)}
+              onSaved={() => setRefreshKey((k) => k + 1)}
+            />
+          )}
+
           {editMember && (
             <EditMemberModal
               member={editMember}
@@ -520,6 +554,15 @@ export default function MemberList() {
         }
         actions={
           <div className="contactPage__headerActions">
+            <button
+              type="button"
+              className="contactPage__createButton"
+              onClick={() => setIsAddOpen(true)}
+            >
+              <FaUserPlus />
+              Add Member
+            </button>
+
             <button
               type="button"
               className="contactPage__createButton"

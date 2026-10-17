@@ -1,0 +1,80 @@
+/* Extra styles for the Member import dialog (on top of ImportContactsModal.css) */
+
+.importMembers__tabs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 8px;
+}
+
+.importMembers__tab {
+  border: 1px solid #e3e6ef;
+  background: #fff;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #55607a;
+}
+
+.importMembers__tab--fail.importMembers__tab--active {
+  background: #fdecec;
+  border-color: #f3b4b4;
+  color: #d63a3a;
+}
+
+.importMembers__tab--dup.importMembers__tab--active {
+  background: #fff4e5;
+  border-color: #f2cf9a;
+  color: #b36a00;
+}
+
+.importMembers__report {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #cfd6e6;
+  background: #fff;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #1b2a4e;
+}
+
+.importMembers__report:hover {
+  background: #f3f5fb;
+}
+
+.importMembers__empty {
+  margin: 8px 2px;
+  font-size: 13px;
+  color: #7a849c;
+}
+
+.importMembers__note {
+  margin: 10px 2px 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #55607a;
+}
+
+.importMembers__footer {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Second button ("Import all") - outlined so the two are easy to tell apart */
+.importMembers__btnAll {
+  background: #fff;
+  color: #2f6fed;
+  border: 1.5px solid #2f6fed;
+}
+
+.importMembers__btnAll:hover:not(:disabled) {
+  background: #eef4ff;
+}

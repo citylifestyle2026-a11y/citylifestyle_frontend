@@ -19,12 +19,13 @@ export const getMemberReferencesApi = async () => {
 
 // ================= IMPORT (.xlsx / .csv) =================
 // dryRun = true only checks the file (nothing is saved).
-export const importMembersApi = async (file, { dryRun = false } = {}) => {
+// mode "all" also saves duplicate / invalid rows (flagged "Needs Fix").
+export const importMembersApi = async (file, { dryRun = false, mode = "valid" } = {}) => {
   const formData = new FormData();
   formData.append("file", file);
 
   const response = await api.post("/members/import", formData, {
-    params: dryRun ? { dryRun: true } : undefined,
+    params: dryRun ? { dryRun: true } : mode === "all" ? { mode: "all" } : undefined,
   });
   return response.data;
 };
@@ -33,6 +34,12 @@ export const importMembersApi = async (file, { dryRun = false } = {}) => {
 // body: { ids: string[] } or { selectAll: true, filters: {...} }, + eventId
 export const moveMembersToGuestListApi = async (data) => {
   const response = await api.post("/members/move-to-guest-list", data);
+  return response.data;
+};
+
+// ================= CREATE (ONE MEMBER) =================
+export const createMemberApi = async (data) => {
+  const response = await api.post("/members", data);
   return response.data;
 };
 

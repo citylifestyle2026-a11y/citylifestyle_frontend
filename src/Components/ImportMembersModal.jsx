@@ -6,27 +6,133 @@ import { getErrorText } from "../utilits/apiError";
 import { showError, showSuccess, showWarning } from "../utilits/toast";
 // Same look as the Guest List import dialog.
 import "../assets/CSS/ImportContactsModal.css";
+import "../assets/CSS/ImportMembersModal.css";
 
 const SAMPLE_CSV = [
   "#,Name,Contact,Email,Profession,Company / Brand,Objective,Area,City,State,Reference,Reference 2,Reference 3,Source,Remark,Status",
   '1,Rahul Shah,9876543210,rahul@example.com,Real Estate & Developers,Shah Infra,,Vesu,Surat,Gujarat,Karan Patel,Rasik Savani,,,,Active',
 ].join("\n");
 
-const downloadSample = () => {
-  const blob = new Blob([SAMPLE_CSV], { type: "text/csv;charset=utf-8;" });
+const saveCsv = (text, fileName) => {
+  // BOM so Excel opens Gujarati / Hindi text correctly.
+  const blob = new Blob(["\uFEFF" + text], { type: "text/csv;charset=utf-8;" });
   const url = window.URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = "members_sample.csv";
+  link.download = fileName;
   document.body.appendChild(link);
   link.click();
   link.remove();
   window.URL.revokeObjectURL(url);
 };
 
+const downloadSample = () => saveCsv(SAMPLE_CSV, "members_sample.csv");
+
+// Report columns: the first three explain the problem, the rest use the same
+// headings as the import file, so the report can be corrected and imported again.
+const REPORT_COLUMNS = [
+  ["Type", (r) => (r.duplicate ? "Duplicate" : "Invalid")],
+  ["Row", (r) => r.row],
+  ["Reason", (r) => r.error],
+  ["Name", (r) => r.data?.name ?? r.name],
+  ["Contact", (r) => r.data?.mobile ?? r.mobileNumber],
+  ["Email", (r) => r.data?.email],
+  ["Profession", (r) => r.data?.profession],
+  ["Company / Brand", (r) => r.data?.companyName],
+  ["Objective", (r) => r.data?.objective],
+  ["Area", (r) => r.data?.area],
+  ["City", (r) => r.data?.city],
+  ["State", (r) => r.data?.state],
+  ["Reference", (r) => r.data?.reference1],
+  ["Reference 2", (r) => r.data?.reference2],
+  ["Reference 3", (r) => r.data?.reference3],
+  ["Source", (r) => r.data?.source],
+  ["Remark", (r) => r.data?.remark],
+  ["Status", (r) => r.data?.memberStatus],
+];
+
+const csvCell = (value) => {
+  const text = value === undefined || value === null ? "" : String(value);
+  return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+};
+
+const downloadReport = (rows) => {
+  const lines = [REPORT_COLUMNS.map(([title]) => csvCell(title)).join(",")];
+  rows.forEach((row) => {
+    lines.push(REPORT_COLUMNS.map(([, get]) => csvCell(get(row))).join(","));
+  });
+
+  const stamp = new Date().toISOString().slice(0, 10);
+  saveCsv(lines.join("\r\n"), `members_import_report_${stamp}.csv`);
+};
+
+// Invalid and duplicate rows, each in its own tab.
+function ProblemTabs({ problems, tall = false }) {
+  const invalidRows = problems.filter((r) => !r.duplicate);
+  const duplicateRows = problems.filter((r) => r.duplicate);
+  const [tab, setTab] = useState(invalidRows.length > 0 ? "invalid" : "duplicate");
+
+  const rows = tab === "invalid" ? invalidRows : duplicateRows;
+
+  return (
+    <>
+      <div className="importMembers__tabs" role="tablist">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === "invalid"}
+          className={`importMembers__tab importMembers__tab--fail ${tab === "invalid" ? "importMembers__tab--active" : ""}`}
+          onClick={() => setTab("invalid")}
+        >
+          Invalid ({invalidRows.length})
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === "duplicate"}
+          className={`importMembers__tab importMembers__tab--dup ${tab === "duplicate" ? "importMembers__tab--active" : ""}`}
+          onClick={() => setTab("duplicate")}
+        >
+          Duplicate ({duplicateRows.length})
+        </button>
+
+        <button
+          type="button"
+          className="importMembers__report"
+          onClick={() => downloadReport(problems)}
+        >
+          <FaDownload /> Download report ({problems.length})
+        </button>
+      </div>
+
+      {rows.length > 0 ? (
+        <ul className={`importContacts__problems ${tall ? "importContacts__problems--tall" : ""}`}>
+          {rows.map((row) => (
+            <li key={row.row}>
+              <FaExclamationTriangle className={row.duplicate ? "importContacts__warnIcon" : "importContacts__failIcon"} />
+              <span>
+                <b>Row {row.row}</b>
+                {row.name ? ` - ${row.name}` : ""}
+                {row.mobileNumber ? ` (${row.mobileNumber})` : ""}: {row.error}
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="importMembers__empty">No {tab} rows.</p>
+      )}
+    </>
+  );
+}
+
 /**
- * Choose a .xlsx / .csv -> it is checked right away (nothing is saved) ->
- * Import adds the new members. Numbers already in Member List are skipped.
+ * Choose a .xlsx / .csv -> it is checked right away (nothing is saved).
+ * Then either:
+ *   - "Import N"      saves only the good rows (duplicates / invalid skipped), or
+ *   - "Import all N"  saves every row; duplicate / invalid ones are kept too,
+ *                     marked "Needs Fix", so they can be edited later.
+ * The invalid / duplicate rows are listed separately and can be downloaded
+ * as a report.
  */
 export default function ImportMembersModal({ onClose, onSuccess }) {
   const fileInputRef = useRef(null);
@@ -76,20 +182,21 @@ export default function ImportMembersModal({ onClose, onSuccess }) {
     e.target.value = "";
   };
 
-  const handleImport = async () => {
+  const handleImport = async (mode) => {
     if (!file || importing) return;
 
     setImporting(true);
     try {
-      const res = await importMembersApi(file);
+      const res = await importMembersApi(file, { mode });
       const data = res?.data || {};
       setResult(data);
 
-      if (data.successCount === 0) showError(res?.message || "No members were added.");
-      else if (data.duplicateCount > 0 || data.failureCount > 0) showWarning(res?.message);
+      const added = (data.successCount || 0) + (data.flaggedCount || 0);
+      if (added === 0) showError(res?.message || "No members were added.");
+      else if (data.flaggedCount > 0 || data.duplicateCount > 0 || data.failureCount > 0) showWarning(res?.message);
       else showSuccess(res?.message);
 
-      if (data.successCount > 0) onSuccess?.();
+      if (added > 0) onSuccess?.();
     } catch (err) {
       showError(getErrorText(err, "Failed to import members."));
     } finally {
@@ -105,6 +212,7 @@ export default function ImportMembersModal({ onClose, onSuccess }) {
   };
 
   const problems = (result || check)?.problems || [];
+  const hasProblems = check ? check.duplicateCount + check.failureCount > 0 : false;
 
   return (
     <div className="importContacts__overlay" onMouseDown={importing ? undefined : onClose}>
@@ -121,7 +229,7 @@ export default function ImportMembersModal({ onClose, onSuccess }) {
             <div className="importContacts__sampleRow">
               <p className="importContacts__hint">
                 One member per row. A mobile number that is already in Member List
-                (or repeated in the file) is skipped, never overwritten.
+                (or repeated in the file) is a duplicate and is never overwritten.
               </p>
               <button type="button" className="importContacts__sampleBtn" onClick={downloadSample}>
                 <FaDownload /> Sample CSV
@@ -165,24 +273,18 @@ export default function ImportMembersModal({ onClose, onSuccess }) {
                   <span className="importContacts__chip importContacts__chip--fail">{check.failureCount} invalid</span>
                 </div>
 
-                {problems.length > 0 ? (
-                  <ul className="importContacts__problems">
-                    {problems.map((row) => (
-                      <li key={row.row}>
-                        <FaExclamationTriangle className={row.duplicate ? "importContacts__warnIcon" : "importContacts__failIcon"} />
-                        <span>
-                          <b>Row {row.row}</b>
-                          {row.name ? ` - ${row.name}` : ""}
-                          {row.mobileNumber ? ` (${row.mobileNumber})` : ""}: {row.error}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+                {hasProblems ? (
+                  <ProblemTabs problems={problems} />
                 ) : (
                   <p className="importContacts__ok"><FaCheckCircle /> File looks good - every row can be imported.</p>
                 )}
-                {check.problemsTruncated && (
-                  <p className="importContacts__hint">Showing the first {problems.length} problem rows.</p>
+
+                {hasProblems && (
+                  <p className="importMembers__note">
+                    <b>Import {check.successCount}</b> adds only the ready rows.{" "}
+                    <b>Import all {check.totalRows}</b> adds every row; the invalid and duplicate
+                    ones are marked <b>Needs Fix</b> so you can edit them later.
+                  </p>
                 )}
               </div>
             )}
@@ -193,29 +295,31 @@ export default function ImportMembersModal({ onClose, onSuccess }) {
           <div className="importContacts__result">
             <div className="importContacts__chips">
               <span className="importContacts__chip importContacts__chip--total">Total rows: {result.totalRows}</span>
-              <span className="importContacts__chip importContacts__chip--ok">Added: {result.successCount}</span>
-              <span className="importContacts__chip importContacts__chip--dup">Duplicates skipped: {result.duplicateCount}</span>
-              <span className="importContacts__chip importContacts__chip--fail">Invalid: {result.failureCount}</span>
+              <span className="importContacts__chip importContacts__chip--ok">
+                Added: {(result.successCount || 0) + (result.flaggedCount || 0)}
+              </span>
+              {result.mode === "all" ? (
+                <span className="importContacts__chip importContacts__chip--fail">Needs Fix: {result.flaggedCount}</span>
+              ) : (
+                <>
+                  <span className="importContacts__chip importContacts__chip--dup">Duplicates skipped: {result.duplicateCount}</span>
+                  <span className="importContacts__chip importContacts__chip--fail">Invalid skipped: {result.failureCount}</span>
+                </>
+              )}
             </div>
 
-            {problems.length > 0 && (
-              <ul className="importContacts__problems importContacts__problems--tall">
-                {problems.map((row) => (
-                  <li key={row.row}>
-                    <FaExclamationTriangle className={row.duplicate ? "importContacts__warnIcon" : "importContacts__failIcon"} />
-                    <span>
-                      <b>Row {row.row}</b>
-                      {row.name ? ` - ${row.name}` : ""}
-                      {row.mobileNumber ? ` (${row.mobileNumber})` : ""}: {row.error}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+            {result.mode === "all" && result.flaggedCount > 0 && (
+              <p className="importMembers__note">
+                These rows were added and are under the <b>Needs Fix</b> tab. Edit each one to
+                correct the name / mobile number.
+              </p>
             )}
+
+            {problems.length > 0 && <ProblemTabs problems={problems} tall />}
           </div>
         )}
 
-        <div className="importContacts__footer">
+        <div className="importContacts__footer importMembers__footer">
           <button type="button" className="importContacts__btn importContacts__btn--ghost" onClick={onClose} disabled={importing}>
             Close
           </button>
@@ -224,18 +328,31 @@ export default function ImportMembersModal({ onClose, onSuccess }) {
               Import Another File
             </button>
           ) : (
-            <button
-              type="button"
-              className="importContacts__btn importContacts__btn--primary"
-              onClick={handleImport}
-              disabled={!file || importing || checking || Boolean(fileError) || !check || check.successCount === 0}
-            >
-              {importing
-                ? "Importing..."
-                : check?.successCount
-                ? `Import ${check.successCount} member${check.successCount === 1 ? "" : "s"}`
-                : "Import"}
-            </button>
+            <>
+              <button
+                type="button"
+                className="importContacts__btn importContacts__btn--primary"
+                onClick={() => handleImport("valid")}
+                disabled={!file || importing || checking || Boolean(fileError) || !check || check.successCount === 0}
+              >
+                {importing
+                  ? "Importing..."
+                  : check?.successCount
+                  ? `Import ${check.successCount}`
+                  : "Import"}
+              </button>
+
+              {hasProblems && (
+                <button
+                  type="button"
+                  className="importContacts__btn importContacts__btn--primary importMembers__btnAll"
+                  onClick={() => handleImport("all")}
+                  disabled={!file || importing || checking || Boolean(fileError) || !check}
+                >
+                  {importing ? "Importing..." : `Import all ${check.totalRows}`}
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>
