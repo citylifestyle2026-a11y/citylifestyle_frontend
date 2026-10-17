@@ -535,7 +535,7 @@ export default function EventHistory() {
             columns={historyTableColumns}
             data={history}
             rowKey="_id"
-            loading={loading}
+            loading={loading && history.length === 0}
             loadingMessage="Loading event history..."
             error={error}
             errorMessage="Failed to load event history."

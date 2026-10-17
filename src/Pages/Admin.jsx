@@ -326,7 +326,7 @@ export default function Admin() {
             columns={adminTableColumns}
             data={admins}
             rowKey="_id"
-            loading={loading}
+            loading={loading && admins.length === 0}
             loadingMessage="Loading admins..."
             error={error}
             errorMessage="Failed to load admins."

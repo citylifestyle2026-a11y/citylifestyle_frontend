@@ -382,7 +382,7 @@ export default function EditBookingModal({ booking, onClose, onSuccess }) {
             onClick={onClose}
             disabled={saving}
           >
-            Close
+            Cancel
           </button>
           {duplicateFound && (
             <button

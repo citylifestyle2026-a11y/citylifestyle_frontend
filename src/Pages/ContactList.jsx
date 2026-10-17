@@ -1361,7 +1361,7 @@ const sortedReferenceFilterOptions = useMemo(
             columns={contactTableColumns}
             data={contacts}
             rowKey="_id"
-            loading={loading}
+            loading={loading && contacts.length === 0}
             loadingMessage="Loading contacts..."
             error={error}
             errorMessage="Failed to load contacts."

@@ -1152,8 +1152,8 @@ export default function EntryReport() {
               </tr>
             </thead>
             <tbody>
-              {/* Loading state */}
-              {loading && (
+              {/* Loading state (only until the first rows arrive) */}
+              {loading && rows.length === 0 && (
                 <tr className="erPage__emptyRow">
                   <td colSpan={columnCount} className="erPage__emptyCell">
                     <CommonLoader
@@ -1166,7 +1166,7 @@ export default function EntryReport() {
               )}
 
               {/* Error state */}
-              {!loading && errorMessage && (
+              {!(loading && rows.length === 0) && errorMessage && (
                 <tr className="erPage__emptyRow">
                   <td colSpan={columnCount} className="erPage__emptyCell">
                     <div className="erPage__emptyState">
@@ -1201,8 +1201,7 @@ export default function EntryReport() {
               )}
 
               {/* Data rows */}
-              {!loading &&
-                !errorMessage &&
+              {!errorMessage &&
                 rows.map((row, idx) => {
                   const rowKey = row?._id ?? idx;
                   const serial = (currentPage - 1) * limit + idx + 1;

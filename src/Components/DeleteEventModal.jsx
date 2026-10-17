@@ -175,7 +175,7 @@ export default function DeleteEventModal({
             onClick={onClose}
             disabled={isSubmitting}
           >
-            Close
+            Cancel
           </button>
           <button
             type="button"

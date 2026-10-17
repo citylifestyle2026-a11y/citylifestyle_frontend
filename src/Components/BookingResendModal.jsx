@@ -64,14 +64,24 @@ export default function BookingResendModal({
         </p>
         <span className="bookingResendMobile">{mobileNumber}</span>
 
-        <button
-          type="button"
-          className="bookingResendOkayBtn"
-          onClick={handleResend}
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? "Sending..." : "Okay"}
-        </button>
+        <div className="bookingResendActions">
+          <button
+            type="button"
+            className="bookingResendCancelBtn"
+            onClick={onClose}
+            disabled={isSubmitting}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="bookingResendOkayBtn"
+            onClick={handleResend}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Sending..." : "Okay"}
+          </button>
+        </div>
       </div>
     </div>
   );

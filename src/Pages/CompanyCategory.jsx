@@ -461,7 +461,7 @@ export default function CompanyCategory() {
             columns={categoryTableColumns}
             data={companyCategories}
             rowKey="_id"
-            loading={loading}
+            loading={loading && companyCategories.length === 0}
             loadingMessage="Loading company categories..."
             error={error}
             errorMessage="Failed to load company categories."

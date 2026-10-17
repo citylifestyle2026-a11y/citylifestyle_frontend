@@ -396,7 +396,7 @@ export default function User() {
             columns={userTableColumns}
             data={users}
             rowKey="_id"
-            loading={loading}
+            loading={loading && users.length === 0}
             loadingMessage="Loading users..."
             error={error}
             errorMessage="Failed to load users."

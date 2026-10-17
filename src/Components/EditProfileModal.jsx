@@ -208,6 +208,14 @@ export default function EditProfileModal({ user, onClose }) {
         <div className="modalActions">
           <button
             type="button"
+            className="profileCancelButton"
+            onClick={onClose}
+            disabled={updateLoading}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
             className="primaryButton"
             onClick={handleSave}
             disabled={updateLoading}

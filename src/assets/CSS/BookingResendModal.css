@@ -103,3 +103,31 @@
     width: 100%;
   }
 }
+
+.bookingResendActions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.bookingResendCancelBtn {
+  background-color: #ffffff;
+  color: #4a4d5e;
+  border: 1px solid #dcdde4;
+  border-radius: 8px;
+  padding: 12px 32px;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.bookingResendCancelBtn:hover:not(:disabled) {
+  background-color: #f2f3f6;
+}
+
+.bookingResendCancelBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

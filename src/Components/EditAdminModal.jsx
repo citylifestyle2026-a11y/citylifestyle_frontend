@@ -437,7 +437,7 @@ export default function EditAdminModal({ admin, onClose, isEditingSelf = true })
             onClick={onClose}
             disabled={loading}
           >
-            Close
+            Cancel
           </button>
           <button
             type="button"

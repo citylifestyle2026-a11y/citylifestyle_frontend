@@ -74,6 +74,29 @@
   color: #1b2a4e;
 }
 
+.userDelete__actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.userDelete__cancelBtn {
+  background-color: #ffffff;
+  color: #4a4d5e;
+  border: 1px solid #dcdde4;
+  border-radius: 8px;
+  padding: 12px 32px;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.userDelete__cancelBtn:hover {
+  background-color: #f2f3f6;
+}
+
 .userDelete__okayBtn {
   background-color: var(--admin-accent);
   color: #ffffff;
@@ -113,7 +136,8 @@
     font-size: 19px;
   }
 
-  .userDelete__okayBtn {
+  .userDelete__okayBtn,
+  .userDelete__cancelBtn {
     width: 100%;
   }
 }

@@ -505,7 +505,7 @@ const CreateTicketTypeModal = ({
             className="ticketTypeCreate-closeBtn"
             onClick={handleClose}
           >
-            Close
+            Cancel
           </button>
           <button
             type="button"

@@ -452,7 +452,7 @@ export default function CreateUserModal({
 
         <div className="modalFooter">
           <button type="button" className="modalCloseButton" onClick={onClose} disabled={loading}>
-            Close
+            Cancel
           </button>
           <button
             type="button"

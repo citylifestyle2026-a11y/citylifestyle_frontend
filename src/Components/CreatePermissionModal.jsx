@@ -37,7 +37,7 @@ export default function CreatePermissionModal({ onClose, isEditMode = false, sel
 
         <div className="permissionCreateFooter">
           <button type="button" className="permissionCreateCloseButton" onClick={onClose}>
-            Close
+            Cancel
           </button>
           <button type="button" className="permissionCreateCreateButton">
             {isEditMode ? "Save" : "Create"}

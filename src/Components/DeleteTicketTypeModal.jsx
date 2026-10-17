@@ -56,7 +56,7 @@ const DeleteTicketTypeModal = ({
             onClick={handleClose}
             disabled={loading}
           >
-            Close
+            Cancel
           </button>
           <button
             type="button"

@@ -11,7 +11,7 @@ export default function DeleteRoleModal({ roleName, onClose }) {
 
         <div className="roleDeleteFooter">
           <button type="button" className="roleDeleteCloseBtn" onClick={onClose}>
-            Close
+            Cancel
           </button>
           <button type="button" className="roleDeleteDeleteBtn">
             Delete

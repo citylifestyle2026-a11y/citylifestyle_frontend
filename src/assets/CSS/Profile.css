@@ -439,7 +439,30 @@
 .modalActions {
   display: flex;
   justify-content: flex-end;
+  gap: 10px;
   margin-top: 24px;
+}
+
+.profileCancelButton {
+  height: 40px;
+  padding: 0 18px;
+  border: 1px solid #dcdde4;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #4a4d5e;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.profileCancelButton:hover:not(:disabled) {
+  background: #f2f3f6;
+}
+
+.profileCancelButton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 /* ===== Loading / Error states (new — Step 3) ===== */

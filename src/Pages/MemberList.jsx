@@ -19,6 +19,7 @@ import CommonEmptyState from "../Components/CommonEmptyState";
 import CommonPagination from "../Components/CommonPagination";
 import ImportMembersModal from "../Components/ImportMembersModal";
 import MoveToGuestListModal from "../Components/MoveToGuestListModal";
+import EditMemberModal from "../Components/EditMemberModal";
 import { ContactPerson } from "../Components/ContactAvatar";
 
 import {
@@ -82,6 +83,7 @@ export default function MemberList() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [moveTarget, setMoveTarget] = useState(null);
+  const [editMember, setEditMember] = useState(null);
 
   const filters = useMemo(
     () => ({
@@ -419,6 +421,17 @@ export default function MemberList() {
             >
               <button
                 type="button"
+                className="contactAction__item contactAction__itemEdit"
+                onClick={() => {
+                  setOpenActionMenuId(null);
+                  setEditMember(member);
+                }}
+              >
+                Edit
+              </button>
+
+              <button
+                type="button"
                 className="contactAction__item contactAction__itemApprove"
                 onClick={() => openMove([member])}
               >
@@ -466,6 +479,15 @@ export default function MemberList() {
             <ImportMembersModal
               onClose={() => setIsImportOpen(false)}
               onSuccess={() => setRefreshKey((k) => k + 1)}
+            />
+          )}
+
+          {editMember && (
+            <EditMemberModal
+              member={editMember}
+              professions={professions}
+              onClose={() => setEditMember(null)}
+              onSaved={() => setRefreshKey((k) => k + 1)}
             />
           )}
 
@@ -619,7 +641,7 @@ export default function MemberList() {
             columns={columns}
             data={members}
             rowKey="_id"
-            loading={loading}
+            loading={loading && members.length === 0}
             loadingMessage="Loading members..."
             error={error}
             errorMessage="Failed to load members."

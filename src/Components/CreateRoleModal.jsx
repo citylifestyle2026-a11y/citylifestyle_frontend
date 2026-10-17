@@ -105,7 +105,7 @@ export default function CreateRoleModal({ onClose, isEditMode = false, selectedR
 
         <div className="roleModalFooter">
           <button type="button" className="roleModalCloseButton" onClick={onClose}>
-            Close
+            Cancel
           </button>
           <button type="button" className="roleModalCreateButton">
             {isEditMode ? "Update" : "Create"}

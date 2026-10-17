@@ -211,7 +211,7 @@ export default function CreateCompanyCategoryModal({
             onClick={onClose}
             disabled={loading}
           >
-            Close
+            Cancel
           </button>
           <button
             type="button"

@@ -141,14 +141,24 @@ export default function ResendTicketModal({ bookingId, onClose, onSuccess }) {
           </>
         )}
 
-        <button
-          type="button"
-          className="bookingResendOkayBtn"
-          onClick={handleResend}
-          disabled={isSubmitting || isLoadingTickets || !ticketToResendId}
-        >
-          {isSubmitting ? "Sending..." : "Okay"}
-        </button>
+        <div className="bookingResendActions">
+          <button
+            type="button"
+            className="bookingResendCancelBtn"
+            onClick={onClose}
+            disabled={isSubmitting}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="bookingResendOkayBtn"
+            onClick={handleResend}
+            disabled={isSubmitting || isLoadingTickets || !ticketToResendId}
+          >
+            {isSubmitting ? "Sending..." : "Okay"}
+          </button>
+        </div>
       </div>
     </div>
   );

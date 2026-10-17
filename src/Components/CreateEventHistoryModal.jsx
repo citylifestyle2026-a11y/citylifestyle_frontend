@@ -402,7 +402,7 @@ export default function CreateEventHistoryModal({
               onClick={onClose}
               disabled={actionLoading}
             >
-              Close
+              Cancel
             </button>
             <button
               type="submit"

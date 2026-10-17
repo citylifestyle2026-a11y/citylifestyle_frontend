@@ -36,6 +36,12 @@ export const moveMembersToGuestListApi = async (data) => {
   return response.data;
 };
 
+// ================= UPDATE =================
+export const updateMemberApi = async (id, data) => {
+  const response = await api.put(`/members/${id}`, data);
+  return response.data;
+};
+
 // ================= DELETE (HARD) =================
 export const deleteMemberApi = async (id) => {
   const response = await api.delete(`/members/${id}`);

@@ -1,11 +1,13 @@
-const PUBLIC_FAVICON = "/favicon - 1.png";
-const PRIVATE_FAVICON = "/favicon.png";
+// One brand for the whole site: every route - the public pages (home, parv,
+// contact, login ...) and the admin pages after login - shows the City
+// Lifestyle tab title and favicon.
+const FAVICON = "/favicon.png";
+const TITLE = "City Lifestyle";
 
-const PUBLIC_TITLE = "City Toppers";
-const PRIVATE_TITLE = "City Lifestyle";
-
-export const updateSiteMeta = (isPrivate) => {
-  document.title = isPrivate ? PRIVATE_TITLE : PUBLIC_TITLE;
+// The argument is ignored; kept so existing callers
+// (updateSiteMeta(isPrivate) in App.jsx) keep working unchanged.
+export const updateSiteMeta = () => {
+  document.title = TITLE;
 
   let favicon = document.querySelector('link[rel="icon"]');
 
@@ -16,5 +18,5 @@ export const updateSiteMeta = (isPrivate) => {
   }
 
   favicon.type = "image/png";
-  favicon.href = isPrivate ? PRIVATE_FAVICON : PUBLIC_FAVICON;
+  favicon.href = FAVICON;
 };

@@ -292,7 +292,7 @@ export default function BookingUserModal({ onClose, ticketId, onSuccess }) {
 
         <div className="bookingUserFooter">
           <button type="button" className="bookingUserCloseButton" onClick={onClose}>
-            Close
+            Cancel
           </button>
           <button
             type="button"

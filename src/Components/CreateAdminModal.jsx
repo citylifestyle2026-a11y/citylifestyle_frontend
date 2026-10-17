@@ -261,7 +261,7 @@ export default function CreateAdminModal({ onClose }) {
             onClick={onClose}
             disabled={loading}
           >
-            Close
+            Cancel
           </button>
           <button
             type="button"

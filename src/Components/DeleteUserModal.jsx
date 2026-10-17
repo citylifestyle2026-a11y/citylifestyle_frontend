@@ -40,9 +40,14 @@ export default function DeleteUserModal({
           </span>{" "} {entityLabel}?
         </p>
          
-        <button type="button" className="userDelete__okayBtn" onClick={onDelete}>
-          Okay
-        </button>
+        <div className="userDelete__actions">
+          <button type="button" className="userDelete__cancelBtn" onClick={onClose}>
+            Cancel
+          </button>
+          <button type="button" className="userDelete__okayBtn" onClick={onDelete}>
+            Yes, Delete
+          </button>
+        </div>
       </div>
     </div>
   );

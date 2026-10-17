@@ -340,7 +340,7 @@ const Event = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {loading ? (
+                  {loading && events.length === 0 ? (
                     <tr>
                       <td colSpan="9" style={{ textAlign: "center" }}>
                         <CommonLoader message="Loading events..." />

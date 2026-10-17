@@ -541,7 +541,7 @@ export default function CreateBookingModal({ onClose, onSuccess }) {
               onClick={onClose}
               disabled={createLoading}
             >
-              Close
+              Cancel
             </button>
             {duplicateFound && (
               <button

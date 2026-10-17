@@ -81,7 +81,7 @@ export default function DeleteBookingModal({ bookingId,
             onClick={onClose}
             disabled={isSubmitting}
           >
-            Close
+            Cancel
           </button>
           <button
             type="button"

@@ -1084,7 +1084,7 @@ export default function CreateContactModal({
               onClick={onClose}
               disabled={loading}
             >
-              Close
+              Cancel
             </button>
           )}
           <button
