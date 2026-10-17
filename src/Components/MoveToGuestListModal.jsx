@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaTimes, FaUserPlus, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
 
@@ -18,7 +18,8 @@ import "../assets/CSS/MoveToGuestListModal.css";
  */
 export default function MoveToGuestListModal({ payload, count, label, onClose, onDone }) {
   const navigate = useNavigate();
-  const { editions, loading } = useEditionOptions();
+  // Only editions of currently active events.
+  const { editions, loading } = useEditionOptions({ activeOnly: true });
 
   const [eventId, setEventId] = useState("");
   const [moving, setMoving] = useState(false);
@@ -38,6 +39,11 @@ export default function MoveToGuestListModal({ payload, count, label, onClose, o
       setMoving(false);
     }
   };
+
+  // Exactly one active edition -> nothing to choose, select it.
+  useEffect(() => {
+    if (!eventId && editions.length === 1) setEventId(editions[0].value);
+  }, [editions, eventId]);
 
   const edition = editions.find((e) => e.value === eventId);
 
@@ -63,7 +69,13 @@ export default function MoveToGuestListModal({ payload, count, label, onClose, o
               className="moveGuest__select"
               value={eventId}
               onChange={(e) => setEventId(e.target.value)}
-              placeholder={loading ? "Loading editions..." : "Select edition"}
+              placeholder={
+                loading
+                  ? "Loading editions..."
+                  : editions.length === 0
+                  ? "No active edition"
+                  : "Select edition"
+              }
               loading={loading}
               options={editions.map((e) => ({ value: e.value, label: e.label }))}
             />

@@ -124,8 +124,9 @@ export default function ContactList() {
   const [editionFilter, setEditionFilter] = useState(
     searchParams.get("edition") || ""
   );
+  // Only editions of active events (the selected one always stays listed).
   const { editions: editionOptions, loading: editionsLoading } =
-    useEditionOptions();
+    useEditionOptions({ activeOnly: true, include: editionFilter });
 
   // Checkbox selection (id -> contact). Kept across pages so many contacts
   // can be approved / rejected / sent a pass in one go.

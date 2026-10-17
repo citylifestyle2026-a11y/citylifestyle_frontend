@@ -12,6 +12,11 @@ export const getMemberProfessionsApi = async () => {
   return response.data;
 };
 
+export const getMemberReferencesApi = async () => {
+  const response = await api.get("/members/references");
+  return response.data;
+};
+
 // ================= IMPORT (.xlsx / .csv) =================
 // dryRun = true only checks the file (nothing is saved).
 export const importMembersApi = async (file, { dryRun = false } = {}) => {

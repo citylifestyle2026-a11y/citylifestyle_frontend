@@ -1,6 +1,14 @@
 import { Link } from "react-router-dom";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { FaSearch, FaFileExcel, FaUserPlus, FaTrash } from "react-icons/fa";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  FaSearch,
+  FaFileExcel,
+  FaUserPlus,
+  FaChevronDown,
+  FaSort,
+  FaSortUp,
+  FaSortDown,
+} from "react-icons/fa";
 
 import CommonListLayout from "../Components/CommonListLayout";
 import CommonPageHeader from "../Components/CommonPageHeader";
@@ -11,11 +19,12 @@ import CommonEmptyState from "../Components/CommonEmptyState";
 import CommonPagination from "../Components/CommonPagination";
 import ImportMembersModal from "../Components/ImportMembersModal";
 import MoveToGuestListModal from "../Components/MoveToGuestListModal";
-import { ContactAvatar } from "../Components/ContactAvatar";
+import { ContactPerson } from "../Components/ContactAvatar";
 
 import {
   getAllMembersApi,
   getMemberProfessionsApi,
+  getMemberReferencesApi,
   deleteMemberApi,
 } from "../services/memberService";
 import { confirmDialog } from "../utilits/appSwal";
@@ -30,10 +39,15 @@ const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, 100, 200].map((n) => ({
   label: String(n),
 }));
 
-const MOVED_OPTIONS = [
-  { value: "notInGuestList", label: "Not in Guest List" },
-  { value: "inGuestList", label: "In Guest List" },
+// Tabs on top of the table. "" = every member.
+const MOVED_TABS = [
+  { value: "", label: "All", countKey: "all", tone: "all" },
+  { value: "notInGuestList", label: "Not in Guest List", countKey: "notInGuestList", tone: "pending" },
+  { value: "inGuestList", label: "In Guest List", countKey: "inGuestList", tone: "approved" },
 ];
+
+// Columns the server can sort by (see SORTABLE in services/member.service.js).
+const SORTABLE_COLUMNS = ["name", "mobile", "profession", "companyName", "city"];
 
 export default function MemberList() {
   const [members, setMembers] = useState([]);
@@ -47,8 +61,18 @@ export default function MemberList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [search, setSearch] = useState("");
   const [professionFilter, setProfessionFilter] = useState("");
+  const [referenceFilter, setReferenceFilter] = useState("");
   const [movedFilter, setMovedFilter] = useState("");
   const [professions, setProfessions] = useState([]);
+  const [references, setReferences] = useState([]);
+  const [counts, setCounts] = useState({ all: 0, inGuestList: 0, notInGuestList: 0 });
+
+  const [sortBy, setSortBy] = useState("name");
+  const [sortOrder, setSortOrder] = useState("asc");
+
+  // Row "Action" dropdown (same as Guest List).
+  const [openActionMenuId, setOpenActionMenuId] = useState(null);
+  const actionMenuRef = useRef(null);
 
   // Checkbox selection: id -> member for the rows picked by hand, or
   // "select all matching" = every member that matches the current filters.
@@ -63,9 +87,10 @@ export default function MemberList() {
     () => ({
       search: search || undefined,
       profession: professionFilter || undefined,
+      reference: referenceFilter || undefined,
       moved: movedFilter || undefined,
     }),
-    [search, professionFilter, movedFilter]
+    [search, professionFilter, referenceFilter, movedFilter]
   );
 
   // Debounced search box.
@@ -77,18 +102,84 @@ export default function MemberList() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  const loadProfessions = useCallback(async () => {
+  const loadFilterOptions = useCallback(async () => {
     try {
-      const res = await getMemberProfessionsApi();
-      setProfessions(res?.data || []);
+      const [prof, refs] = await Promise.all([
+        getMemberProfessionsApi(),
+        getMemberReferencesApi(),
+      ]);
+      setProfessions(prof?.data || []);
+      setReferences(refs?.data || []);
     } catch {
       setProfessions([]);
+      setReferences([]);
     }
   }, []);
 
   useEffect(() => {
-    loadProfessions();
-  }, [loadProfessions, refreshKey]);
+    loadFilterOptions();
+  }, [loadFilterOptions, refreshKey]);
+
+  // Close the Action dropdown on an outside click (same as Guest List).
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (actionMenuRef.current && !actionMenuRef.current.contains(event.target)) {
+        setOpenActionMenuId(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleToggleActionMenu = useCallback((id) => {
+    setOpenActionMenuId((prev) => (prev === id ? null : id));
+  }, []);
+
+  // Same sort behaviour as Guest List: same column flips direction, a new
+  // column starts ascending, and the list returns to page 1.
+  const handleSort = useCallback((field) => {
+    setSortBy((prevField) => {
+      if (prevField === field) {
+        setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+        return prevField;
+      }
+      setSortOrder("asc");
+      return field;
+    });
+    setCurrentPage(1);
+  }, []);
+
+  const renderSortableHeader = useCallback(
+    (label, field) => (
+      <span
+        className="contactPage__sortHeader"
+        role="button"
+        tabIndex={0}
+        aria-label={`Sort by ${label}`}
+        onClick={() => handleSort(field)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleSort(field);
+          }
+        }}
+      >
+        <span
+          className={`contactPage__sortIcon ${
+            sortBy === field ? "contactPage__sortIconActive" : ""
+          }`}
+        >
+          {sortBy === field ? (
+            sortOrder === "asc" ? <FaSortUp /> : <FaSortDown />
+          ) : (
+            <FaSort />
+          )}
+        </span>
+        {label}
+      </span>
+    ),
+    [sortBy, sortOrder, handleSort]
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -101,9 +192,12 @@ export default function MemberList() {
           ...filters,
           page: currentPage,
           limit: rowsPerPage,
+          sortBy,
+          sortOrder,
         });
         if (cancelled) return;
         setMembers(res.data || []);
+        if (res.counts) setCounts(res.counts);
         setTotal(res.pagination?.total || 0);
         setTotalPages(res.pagination?.totalPages || 1);
       } catch {
@@ -116,7 +210,7 @@ export default function MemberList() {
     return () => {
       cancelled = true;
     };
-  }, [filters, currentPage, rowsPerPage, refreshKey]);
+  }, [filters, currentPage, rowsPerPage, sortBy, sortOrder, refreshKey]);
 
   // A different filter / page size means a different "all matching" set.
   useEffect(() => {
@@ -162,6 +256,7 @@ export default function MemberList() {
 
   // ---------- actions ----------
   const openMove = (list) => {
+    setOpenActionMenuId(null);
     if (selectAllMatching && !list) {
       setMoveTarget({
         payload: { selectAll: true, filters },
@@ -182,6 +277,7 @@ export default function MemberList() {
   };
 
   const handleDelete = async (member) => {
+    setOpenActionMenuId(null);
     const confirmed = await confirmDialog({
       title: `Delete ${member.name}?`,
       text: "This member will be permanently deleted from Member List.",
@@ -210,8 +306,20 @@ export default function MemberList() {
   };
 
   // ---------- table ----------
-  const columns = useMemo(
-    () => [
+  const columns = useMemo(() => {
+    // Sortable columns get a clickable header, the rest keep CommonTable's
+    // default header - exactly like the Guest List table.
+    const sortableColumn = (key, label, extra = {}) => {
+      const isSortable = SORTABLE_COLUMNS.includes(key);
+      return {
+        key,
+        label: isSortable ? renderSortableHeader(label, key) : label,
+        ...(isSortable ? { sortable: false } : {}),
+        ...extra,
+      };
+    };
+
+    return [
       {
         key: "select",
         sortable: false,
@@ -241,32 +349,10 @@ export default function MemberList() {
           />
         ),
       },
-      {
-        key: "name",
-        label: "Name",
-        sortable: false,
-        render: (member) => (
-          <span className="memberPage__person">
-            <ContactAvatar name={member.name} />
-            <span className="memberPage__personName">{member.name}</span>
-          </span>
-        ),
-      },
-      { key: "mobile", label: "Mobile", sortable: false, render: (m) => m.mobile || "-" },
-      { key: "profession", label: "Profession", sortable: false, render: (m) => m.profession || "-" },
-      { key: "companyName", label: "Company / Brand", sortable: false, render: (m) => m.companyName || "-" },
-      {
-        key: "location",
-        label: "Area / City",
-        sortable: false,
-        render: (m) => [m.area, m.city].filter(Boolean).join(", ") || "-",
-      },
-      {
-        key: "references",
-        label: "Reference",
-        sortable: false,
-        render: (m) => (m.references?.length ? m.references.join(", ") : "-"),
-      },
+      sortableColumn("name", "Name", {
+        cellClassName: "contactPage__contactName",
+        render: (member) => <ContactPerson name={member.name} />,
+      }),
       {
         key: "memberStatus",
         label: "Status",
@@ -294,43 +380,79 @@ export default function MemberList() {
           );
         },
       },
+      sortableColumn("mobile", "Mobile", { render: (m) => m.mobile || "-" }),
+      sortableColumn("profession", "Profession", { render: (m) => m.profession || "-" }),
+      sortableColumn("companyName", "Company / Brand", { render: (m) => m.companyName || "-" }),
+      sortableColumn("city", "Area / City", {
+        render: (m) => [m.area, m.city].filter(Boolean).join(", ") || "-",
+      }),
+      {
+        key: "references",
+        label: "Reference",
+        render: (m) => (m.references?.length ? m.references.join(", ") : "-"),
+      },
       {
         key: "action",
         label: "Actions",
         sortable: false,
+        // Pinned to the right edge, like Guest List.
         headerClassName: "contactPage__actionCol",
         cellClassName: "contactPage__actionCol",
         render: (member) => (
-          <div className="memberPage__actions">
+          <div
+            className="contactAction__wrapper"
+            ref={openActionMenuId === member._id ? actionMenuRef : null}
+          >
             <button
               type="button"
-              className="memberPage__moveBtn"
-              onClick={() => openMove([member])}
-              title="Move to Guest List"
+              className="contactAction__button"
+              onClick={() => handleToggleActionMenu(member._id)}
             >
-              <FaUserPlus /> Guest List
+              Action
+              <FaChevronDown className="contactAction__icon" />
             </button>
-            <button
-              type="button"
-              className="memberPage__deleteBtn"
-              onClick={() => handleDelete(member)}
-              title="Delete member"
-              aria-label={`Delete ${member.name}`}
+
+            <div
+              className={`contactAction__menu ${
+                openActionMenuId === member._id ? "contactAction__menuOpen" : ""
+              }`}
             >
-              <FaTrash />
-            </button>
+              <button
+                type="button"
+                className="contactAction__item contactAction__itemApprove"
+                onClick={() => openMove([member])}
+              >
+                Move to Guest List
+              </button>
+
+              <button
+                type="button"
+                className="contactAction__item contactAction__itemDelete"
+                onClick={() => handleDelete(member)}
+              >
+                Delete
+              </button>
+            </div>
           </div>
         ),
       },
-    ],
+    ];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [members, selected, selectAllMatching, allOnPageSelected, someOnPageSelected]
-  );
+  }, [
+    members,
+    selected,
+    selectAllMatching,
+    allOnPageSelected,
+    someOnPageSelected,
+    openActionMenuId,
+    renderSortableHeader,
+  ]);
 
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = Math.min(startIndex + members.length, total);
 
   const professionOptions = professions.map((p) => ({ value: p, label: p }));
+  const referenceOptions = references.map((r) => ({ value: r, label: r }));
 
   return (
     <CommonListLayout
@@ -389,6 +511,29 @@ export default function MemberList() {
       />
 
       <div className="contactPage__tableCard appCard">
+        <div className="contactPage__statusTabs" role="tablist">
+          {MOVED_TABS.map((tab) => (
+            <button
+              key={tab.countKey}
+              type="button"
+              role="tab"
+              aria-selected={movedFilter === tab.value}
+              className={`contactPage__statusTab contactPage__statusTab--${tab.tone} ${
+                movedFilter === tab.value ? "contactPage__statusTabActive" : ""
+              }`}
+              onClick={() => {
+                setMovedFilter(tab.value);
+                setCurrentPage(1);
+              }}
+            >
+              {tab.label}
+              <span className="contactPage__statusTabCount">
+                {counts[tab.countKey] ?? 0}
+              </span>
+            </button>
+          ))}
+        </div>
+
         {selectedCount > 0 && (
           <div className="contactPage__bulkBar">
             <span className="contactPage__bulkCount">
@@ -459,13 +604,13 @@ export default function MemberList() {
 
           <CommonSelect
             className="contactPage__filterSelect"
-            value={movedFilter}
+            value={referenceFilter}
             onChange={(e) => {
-              setMovedFilter(e.target.value);
+              setReferenceFilter(e.target.value);
               setCurrentPage(1);
             }}
-            placeholder="All Members"
-            options={MOVED_OPTIONS}
+            placeholder="All References"
+            options={referenceOptions}
           />
         </div>
 
@@ -487,6 +632,9 @@ export default function MemberList() {
             }
             stateCellClassName="contactPage__stateCell"
             stateCellStyle={{}}
+            rowClassName={(member) =>
+              openActionMenuId === member._id ? "contactPage__rowActive" : ""
+            }
             tableClassName="contactPage__table"
             thContentClassName="contactPage__thContent"
             sortIconClassName="contactPage__sortIcon"
