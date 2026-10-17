@@ -86,6 +86,17 @@ export default function CreateEventHistoryModal({
   );
   const entryEventId = (e) => e.eventId?._id || e.eventId || "";
 
+  // Entries of events that were deleted: the edition is no longer in
+  // `events`, but its history is kept, so it is still shown (read-only).
+  const deletedEditionEntries = useMemo(
+    () =>
+      rowEntries.filter(
+        (e) => !(events || []).some((ev) => ev._id === entryEventId(e))
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [rowEntries, events]
+  );
+
   useEffect(() => {
     if (isEditMode && editRow) {
       // "<id>:spouse" = the spouse option of that contact (see contactOptions).
@@ -366,6 +377,21 @@ export default function CreateEventHistoryModal({
                     </label>
                   );
                 })}
+                {isEditMode &&
+                  !eventsLoading &&
+                  deletedEditionEntries.map((entry) => (
+                    <label
+                      key={entry._id}
+                      className={`eventHistoryCheckboxItem eventHistoryCheckboxItem--disabled${
+                        entry.status === ATTENDED ? " eventHistoryCheckboxItem--checked" : ""
+                      }`}
+                    >
+                      <input type="checkbox" checked={entry.status === ATTENDED} disabled readOnly />
+                      <span title={`${editionLabel(entry.eventId)} (event deleted)`}>
+                        {editionLabel(entry.eventId)} (event deleted)
+                      </span>
+                    </label>
+                  ))}
               </div>
               <p className="eventHistoryFieldHint">
                 {isEditMode

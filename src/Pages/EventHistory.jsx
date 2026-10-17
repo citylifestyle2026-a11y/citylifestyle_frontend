@@ -15,7 +15,7 @@ import DeleteUserModal from "../Components/DeleteUserModal";
 
 import { getAllEventHistory, deleteEventHistory } from "../redux/contactEventHistory/contactEventHistoryThunk";
 import { clearContactEventHistoryState } from "../redux/contactEventHistory/contactEventHistorySlice";
-import useEventOptions from "../hooks/useEventOptions";
+import { getHistoryEditionsApi } from "../services/contactEventHistoryService";
 
 import { showError, showSuccess } from "../utilits/toast";
 import { getErrorText } from "../utilits/apiError";
@@ -61,11 +61,27 @@ export default function EventHistory() {
   const { history, loading, error, total, totalPages, limit } = useSelector(
     (state) => state.contactEventHistory
   );
-  const { events } = useEventOptions();
+  // Filter options come from the history itself, so a deleted event's
+  // edition (e.g. "Parv 5") is still listed and can still be filtered.
+  const [editionOptions, setEditionOptions] = useState([]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [eventFilter, setEventFilter] = useState("");
+
+  const loadEditions = useCallback(async () => {
+    try {
+      const res = await getHistoryEditionsApi();
+      setEditionOptions(res?.data || []);
+    } catch {
+      setEditionOptions([]);
+    }
+  }, []);
+
+  // Reload when the list changes (an entry added / deleted).
+  useEffect(() => {
+    loadEditions();
+  }, [loadEditions, history]);
 
   // searchTerm tracks the raw input value; search is the debounced value
   // actually sent to the API — same pattern as ContactList.jsx.
@@ -511,7 +527,7 @@ export default function EventHistory() {
               setCurrentPage(1);
             }}
             placeholder="All Editions"
-            options={(events || []).map((ev) => ({ value: ev._id, label: editionLabel(ev) }))}
+            options={editionOptions.map((ed) => ({ value: ed.value, label: ed.label }))}
           />
         </div>
 

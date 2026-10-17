@@ -11,6 +11,13 @@ export const getAllEventHistoryApi = async (params) => {
   return response.data;
 };
 
+// ================= EDITIONS THAT HAVE HISTORY =================
+// Includes editions whose event was deleted (kept from the saved snapshot).
+export const getHistoryEditionsApi = async () => {
+  const response = await api.get("/contact-event-history/editions");
+  return response.data;
+};
+
 // ================= CREATE EVENT HISTORY =================
 export const createEventHistoryApi = async (data) => {
   const response = await api.post("/contact-event-history/create", data);

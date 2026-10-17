@@ -137,7 +137,7 @@ function App() {
           {/* NEW: single-QR invitation page opened from the WhatsApp link */}
           <Route path="/ticket" element={<Ticket />} />
           {/* NEW: public contact form (no login, no button - open by URL) */}
-          <Route path="/city-lifestyle" element={<PublicContactForm />} />
+          <Route path="/form" element={<PublicContactForm />} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/user" element={<User />} />

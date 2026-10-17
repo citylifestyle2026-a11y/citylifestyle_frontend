@@ -78,3 +78,8 @@
 .importMembers__btnAll:hover:not(:disabled) {
   background: #eef4ff;
 }
+
+.importMembers__report:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

@@ -56,14 +56,16 @@ const csvCell = (value) => {
   return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 };
 
-const downloadReport = (rows) => {
+// kind = "invalid" | "duplicate" - each report has only its own rows, in its
+// own file, so invalid and duplicate rows are never mixed together.
+const downloadReport = (rows, kind) => {
   const lines = [REPORT_COLUMNS.map(([title]) => csvCell(title)).join(",")];
   rows.forEach((row) => {
     lines.push(REPORT_COLUMNS.map(([, get]) => csvCell(get(row))).join(","));
   });
 
   const stamp = new Date().toISOString().slice(0, 10);
-  saveCsv(lines.join("\r\n"), `members_import_report_${stamp}.csv`);
+  saveCsv(lines.join("\r\n"), `members_${kind}_report_${stamp}.csv`);
 };
 
 // Invalid and duplicate rows, each in its own tab.
@@ -99,9 +101,10 @@ function ProblemTabs({ problems, tall = false }) {
         <button
           type="button"
           className="importMembers__report"
-          onClick={() => downloadReport(problems)}
+          onClick={() => downloadReport(rows, tab)}
+          disabled={rows.length === 0}
         >
-          <FaDownload /> Download report ({problems.length})
+          <FaDownload /> Download {tab === "invalid" ? "invalid" : "duplicate"} report ({rows.length})
         </button>
       </div>
 
