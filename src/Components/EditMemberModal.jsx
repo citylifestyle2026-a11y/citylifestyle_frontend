@@ -6,6 +6,7 @@ import { getAllCompanyCategoriesApi } from "../services/companyCategoryService";
 import { getErrorText } from "../utilits/apiError";
 import { showError, showSuccess } from "../utilits/toast";
 import { getInstagramUrl, instagramLinkError } from "../utilits/instagram";
+import { newReferencesFrom } from "../utilits/references";
 // Same look as Create Contact (Guest List) and the other pages' popups.
 import "../assets/CSS/CreateContactModal.css";
 
@@ -37,7 +38,6 @@ export default function EditMemberModal({ member = null, onClose, onSaved }) {
     email: member.email || "",
     profession: member.profession || "",
     companyName: member.companyName || "",
-    objective: member.objective || "",
     area: member.area || "",
     city: member.city || "",
     state: member.state || "",
@@ -120,12 +120,14 @@ export default function EditMemberModal({ member = null, onClose, onSaved }) {
     const text = referenceInput.trim();
     if (!text) return;
 
-    if (references.some((r) => r.toLowerCase() === text.toLowerCase())) {
+    // "Ramesh & Suresh" / "Ramesh/Suresh" / "Ramesh-Suresh" = two references.
+    const fresh = newReferencesFrom(text, references);
+    if (fresh.length === 0) {
       setErrors((prev) => ({ ...prev, references: "This reference has already been added." }));
       return;
     }
 
-    setReferences((prev) => [...prev, text]);
+    setReferences((prev) => [...prev, ...fresh]);
     setReferenceInput("");
     setErrors((prev) => ({ ...prev, references: "" }));
   };
@@ -141,9 +143,8 @@ export default function EditMemberModal({ member = null, onClose, onSaved }) {
 
   // A reference typed but not yet "Add"-ed is not lost on save.
   const finalReferences = () => {
-    const text = referenceInput.trim();
-    if (!text || references.some((r) => r.toLowerCase() === text.toLowerCase())) return references;
-    return [...references, text];
+    const fresh = newReferencesFrom(referenceInput, references);
+    return fresh.length === 0 ? references : [...references, ...fresh];
   };
 
   const validate = () => {
@@ -288,11 +289,10 @@ export default function EditMemberModal({ member = null, onClose, onSaved }) {
             {errors.profession && <p className="contactFieldError">{errors.profession}</p>}
           </div>
           {field("email", "Email", { placeholder: "name@example.com" })}
-          {field("objective", "Objective")}
           {field("area", "Area")}
           {field("city", "City")}
           {field("state", "State")}
-          {field("designation", "Company Designation")}
+          {field("designation", "Company Designation", { wide: true })}
           {field("address", "Address", { wide: true })}
           {field("instagramId", "Instagram Link", { placeholder: "https://instagram.com/username" })}
 

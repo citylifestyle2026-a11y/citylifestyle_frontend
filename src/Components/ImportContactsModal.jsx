@@ -165,15 +165,15 @@ export default function ImportContactsModal({ onClose, onSuccess }) {
             </div>
 
             <p className="importContacts__columns">
-              <b>Required:</b> <code>fullName</code>, <code>whatsappNumber</code>,{" "}
-              <code>companyName</code>, <code>designation</code>,{" "}
+              <b>Required:</b> <code>fullName</code>, <code>whatsappNumber</code>.{" "}
+              <b>Optional:</b> <code>companyName</code>, <code>designation</code>,{" "}
               <code>companyCategory</code> (name), <code>area</code>,{" "}
-              <code>references</code> (separate several with <code>|</code>).{" "}
-              <b>Optional:</b> <code>address</code>, <code>instagramId</code>,{" "}
-              <code>email</code>, <code>relationship</code> (Single / Couple,
-              blank = Single). <b>For Couple:</b> <code>spouseName</code>,{" "}
-              <code>spouseMobile</code>, <code>spouseCategory</code>{" "}
-              (+ optional <code>spouseInstagramId</code>).
+              <code>references</code> (separate several with <code>|</code>),{" "}
+              <code>address</code>, <code>instagramId</code>, <code>email</code>,{" "}
+              <code>relationship</code> (Single / Couple, blank = Single),{" "}
+              <code>spouseName</code>, <code>spouseMobile</code>,{" "}
+              <code>spouseCategory</code>, <code>spouseInstagramId</code>.
+              Import the same number again later to fill the empty details.
             </p>
 
             <label className="importContacts__label">Import contacts as</label>

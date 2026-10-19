@@ -124,8 +124,8 @@ export default function ContactList() {
   const [referenceFilter, setReferenceFilter] = useState([]);
   const [statusFilter, setStatusFilter] = useState("");
 
-  // Edition (event) the guests were moved into from Member List. Can be
-  // preset with /contact-list?edition=<eventId>.
+  // Edition (event) the guests were moved into from Contact Book. Can be
+  // preset with /gust-list?edition=<eventId>.
   const [searchParams] = useSearchParams();
   const [editionFilter, setEditionFilter] = useState(
     searchParams.get("edition") || ""

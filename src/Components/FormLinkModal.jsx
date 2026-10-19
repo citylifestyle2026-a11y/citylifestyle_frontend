@@ -154,7 +154,7 @@ export default function FormLinkModal({ onClose, onSaved, link = null }) {
               onChange={(e) => setTarget(e.target.value)}
             >
               <option value="contact">Guest List</option>
-              <option value="member">Member List</option>
+              <option value="member">Contact Book</option>
             </select>
           </div>
 

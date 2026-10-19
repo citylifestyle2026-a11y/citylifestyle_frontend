@@ -31,9 +31,9 @@ const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100].map((n) => ({ value: n, label
 const TARGET_OPTIONS = [
   { value: "", label: "All lists" },
   { value: "contact", label: "Guest List" },
-  { value: "member", label: "Member List" },
+  { value: "member", label: "Contact Book" },
 ];
-const TARGET_LABEL = { contact: "Guest List", member: "Member List" };
+const TARGET_LABEL = { contact: "Guest List", member: "Contact Book" };
 const STATE_LABEL = { active: "Open", full: "Full", closed: "Closed" };
 
 // Only these are sortable on the server (see SORTABLE in formLink.service.js).

@@ -292,7 +292,7 @@ export default function MemberList() {
     setOpenActionMenuId(null);
     const confirmed = await confirmDialog({
       title: `Delete ${member.name}?`,
-      text: "This member will be permanently deleted from Member List.",
+      text: "This contact will be permanently deleted from Contact Book.",
       points: [
         { icon: "🗑️", text: "This cannot be undone." },
         { icon: "👥", text: "Guests already in the Guest List are not affected." },
@@ -533,7 +533,7 @@ export default function MemberList() {
       pageClassName="contactPage__page"
       mainAreaClassName="contactPage__mainArea"
       contentClassName="contactPage__content"
-      headerTitle="Member List"
+      headerTitle="Contact Book"
       outsideMainArea={
         <>
           {isImportOpen && (
@@ -576,14 +576,14 @@ export default function MemberList() {
     >
       <CommonPageHeader
         containerClassName="contactPage__topRow"
-        title="Member List"
+        title="Contact Book"
         titleClassName="contactPage__pageTitle"
         titleStyle={{ textAlign: "start", display: "block" }}
         breadcrumb={
           <div className="contactPage__breadcrumb">
             <Link to="/dashboard" className="appBreadcrumbLink">Dashboard</Link>
             <span>-</span>
-            <span className="contactPage__breadcrumbActive">Member List</span>
+            <span className="contactPage__breadcrumbActive">Contact Book</span>
           </div>
         }
         actions={

@@ -129,7 +129,7 @@ export default function MoveToGuestListModal({ payload, count, label, onClose, o
               <button
                 type="button"
                 className="moveGuest__btn moveGuest__btn--primary"
-                onClick={() => navigate(`/contact-list?edition=${eventId}`)}
+                onClick={() => navigate(`/gust-list?edition=${eventId}`)}
               >
                 Open Guest List
               </button>

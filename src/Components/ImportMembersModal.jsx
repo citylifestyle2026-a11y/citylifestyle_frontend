@@ -9,9 +9,9 @@ import "../assets/CSS/ImportContactsModal.css";
 import "../assets/CSS/ImportMembersModal.css";
 
 const SAMPLE_CSV = [
-  "#,Name,Contact,Email,Profession,Company / Brand,Objective,Area,City,State,Reference,Reference 2,Reference 3,Source,Remark,Status,Company Designation,Address,Instagram Link,Relationship,Spouse Name,Spouse Mobile,Spouse Instagram Link,Spouse Profession",
-  '1,Rahul Shah,9876543210,rahul@example.com,Real Estate & Developers,Shah Infra,,Vesu,Surat,Gujarat,Karan Patel,Rasik Savani,,,,Active,Owner,"12 Green Park, Vesu",https://instagram.com/rahul.shah,Couple,Priya Shah,9876501234,https://instagram.com/priya.shah,Interior Designers',
-  "2,Amit Desai,9123456780,,Textile,Desai Fabrics,,Adajan,Surat,Gujarat,Karan Patel,,,,,Active,Manager,,,Single,,,,",
+  "#,Name,Contact,Email,Profession,Company / Brand,Area,City,State,Reference,Reference 2,Reference 3,Source,Remark,Status,Company Designation,Address,Instagram Link,Relationship,Spouse Name,Spouse Mobile,Spouse Instagram Link,Spouse Profession",
+  '1,Rahul Shah,9876543210,rahul@example.com,Real Estate & Developers,Shah Infra,Vesu,Surat,Gujarat,Karan Patel,Rasik Savani,,,,Active,Owner,"12 Green Park, Vesu",https://instagram.com/rahul.shah,Couple,Priya Shah,9876501234,https://instagram.com/priya.shah,Interior Designers',
+  "2,Amit Desai,9123456780,,Textile,Desai Fabrics,Adajan,Surat,Gujarat,Karan Patel,,,,,Active,Manager,,,Single,,,,",
 ].join("\n");
 
 const saveCsv = (text, fileName) => {
@@ -40,7 +40,6 @@ const REPORT_COLUMNS = [
   ["Email", (r) => r.data?.email],
   ["Profession", (r) => r.data?.profession],
   ["Company / Brand", (r) => r.data?.companyName],
-  ["Objective", (r) => r.data?.objective],
   ["Area", (r) => r.data?.area],
   ["City", (r) => r.data?.city],
   ["State", (r) => r.data?.state],
@@ -240,10 +239,11 @@ export default function ImportMembersModal({ onClose, onSuccess }) {
           <>
             <div className="importContacts__sampleRow">
               <p className="importContacts__hint">
-                One member per row. A mobile number that is already in Member List
-                is not a duplicate: that member is updated with the details in the file
+                One contact per row. A mobile number that is already in Contact Book
+                is not a duplicate: that contact is updated with the details in the file
                 (empty cells keep the old value). New references are added to the
-                existing ones.
+                existing ones. A reference like "Ramesh &amp; Suresh", "Ramesh / Suresh"
+                or "Ramesh - Suresh" is saved as two separate references.
               </p>
               <button type="button" className="importContacts__sampleBtn" onClick={downloadSample}>
                 <FaDownload /> Sample CSV
@@ -253,7 +253,7 @@ export default function ImportMembersModal({ onClose, onSuccess }) {
             <p className="importContacts__columns">
               <b>Required columns:</b> <code>Name</code>, <code>Contact</code> (10-digit mobile).{" "}
               <b>Optional:</b> <code>Email</code>, <code>Profession</code>,{" "}
-              <code>Company / Brand</code>, <code>Objective</code>, <code>Area</code>,{" "}
+              <code>Company / Brand</code>, <code>Area</code>,{" "}
               <code>City</code>, <code>State</code>, <code>Reference</code>,{" "}
               <code>Reference 2</code>, <code>Reference 3</code>, <code>Source</code>,{" "}
               <code>Remark</code>, <code>Status</code>,{" "}

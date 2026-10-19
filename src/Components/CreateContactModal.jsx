@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FaTimes } from "react-icons/fa";
+import { newReferencesFrom } from "../utilits/references";
 import { createContact, updateContact, getAllContacts, getUniqueReferences, getReferenceSummary } from "../redux/contact/contactThunk";
 import { getContactPassApi, updateContactPassApi } from "../services/contactService";
 import { clearContactState } from "../redux/contact/contactSlice";
@@ -336,16 +337,17 @@ export default function CreateContactModal({
   // enforce (see models/contact.model.js's normalizeReferences), applied
   // here too so the duplicate is rejected with an inline message instead
   // of silently vanishing after the backend normalizes it away.
+  //
+  // "Ramesh & Suresh" / "Ramesh/Suresh" / "Ramesh-Suresh" is added as TWO
+  // references - the name before and after & / - are kept separate.
   const handleAddReference = () => {
     const trimmed = referenceInput.trim();
 
     if (!trimmed) return;
 
-    const isDuplicate = references.some(
-      (reference) => reference.toLowerCase() === trimmed.toLowerCase()
-    );
+    const fresh = newReferencesFrom(trimmed, references);
 
-    if (isDuplicate) {
+    if (fresh.length === 0) {
       setFormErrors((prev) => ({
         ...prev,
         references: "This reference has already been added.",
@@ -353,7 +355,7 @@ export default function CreateContactModal({
       return;
     }
 
-    setReferences((prev) => [...prev, trimmed]);
+    setReferences((prev) => [...prev, ...fresh]);
     setReferenceInput("");
     setFormErrors((prev) => ({ ...prev, references: undefined }));
   };
@@ -389,14 +391,12 @@ export default function CreateContactModal({
 
     if (tokens.length !== 1) return references;
 
-    const singleValue = tokens[0];
-    const isDuplicate = references.some(
-      (reference) => reference.toLowerCase() === singleValue.toLowerCase()
-    );
+    // One typed value; "A & B" still becomes two references (A and B).
+    const fresh = newReferencesFrom(tokens[0], references);
 
-    if (isDuplicate) return references;
+    if (fresh.length === 0) return references;
 
-    return [...references, singleValue];
+    return [...references, ...fresh];
   };
 
   // Every field is compulsory EXCEPT Address — mirrors the backend's

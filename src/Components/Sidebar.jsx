@@ -41,7 +41,7 @@ const menuItems = [
     label: 'Guest List',
     icon: <FaAddressBook />,
     submenu: [
-      // Admin Contact List lives at /contact-list — '/contact' is the
+      // Admin Guest List lives at /gust-list — '/contact' is the
       // PUBLIC marketing contact page (see App.jsx) and must stay that
       // way.
       { label: 'Guest List', path: '/gust-list' },
