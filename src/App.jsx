@@ -154,8 +154,8 @@ function App() {
             <Route path="/view-booking/:id" element={<ViewBooking />} />
             <Route path="/register-users/:id" element={<RegisterUsers />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/contact-list" element={<ContactList />} />
-            <Route path="/member-list" element={<MemberList />} />
+            <Route path="/gust-list" element={<ContactList />} />
+            <Route path="/contact-book" element={<MemberList />} />
             <Route path="/form-links" element={<FormLinks />} />
             <Route path="/event-history" element={<EventHistory />} />
             <Route path="/company-categories" element={<CompanyCategory />} />

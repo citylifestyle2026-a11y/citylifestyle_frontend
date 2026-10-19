@@ -33,9 +33,9 @@ const menuItems = [
     path: '/event',
   },
   {
-    label: 'Member List',
+    label: 'Contact Book',
     icon: <FaUserFriends />,
-    path: '/member-list',
+    path: '/contact-book',
   },
    {
     label: 'Guest List',
@@ -44,7 +44,7 @@ const menuItems = [
       // Admin Contact List lives at /contact-list — '/contact' is the
       // PUBLIC marketing contact page (see App.jsx) and must stay that
       // way.
-      { label: 'Guest List', path: '/contact-list' },
+      { label: 'Guest List', path: '/gust-list' },
       { label: 'Company Category', path: '/company-categories' },
       // Edition master data — feeds the Edition checkboxes on the Event
       // History page below (see models/contactEventHistory.model.js).
