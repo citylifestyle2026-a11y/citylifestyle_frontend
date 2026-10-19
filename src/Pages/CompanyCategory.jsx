@@ -49,7 +49,7 @@ export default function CompanyCategory() {
   const {
     companyCategories,
     loading,
-    error,
+    listError,
     total,
     totalPages,
     limit,
@@ -463,7 +463,7 @@ export default function CompanyCategory() {
             rowKey="_id"
             loading={loading && companyCategories.length === 0}
             loadingMessage="Loading company categories..."
-            error={error}
+            error={listError}
             errorMessage="Failed to load company categories."
             emptyMessage="No company categories found."
             tableClassName="companyCategoryPage__table"

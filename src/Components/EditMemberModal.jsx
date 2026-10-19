@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { FaTimes } from "react-icons/fa";
 
 import { createMemberApi, updateMemberApi } from "../services/memberService";
+import { getAllCompanyCategoriesApi } from "../services/companyCategoryService";
 import { getErrorText } from "../utilits/apiError";
 import { showError, showSuccess } from "../utilits/toast";
 // Same look as Create Contact (Guest List) and the other pages' popups.
@@ -19,9 +20,13 @@ const normalizeStatus = (value) =>
  *
  * Required: Name, Mobile, Company / Brand, Profession, at least one Reference.
  * Status is a dropdown: Active / Inactive.
- * professions: existing professions, offered as suggestions while typing.
+ * Profession is a dropdown of the Company Categories (Guest List -> Company
+ * Category) — the same list the Guest List uses — so the two always match.
+ * There is no "No category" option: Profession is required.
+ * The modal loads the categories itself (all of them, A-Z), so it never
+ * depends on whatever page/search the Company Category screen was left on.
  */
-export default function EditMemberModal({ member = null, professions = [], onClose, onSaved }) {
+export default function EditMemberModal({ member = null, onClose, onSaved }) {
   const isEdit = Boolean(member?._id);
   member = member || {};
 
@@ -43,6 +48,8 @@ export default function EditMemberModal({ member = null, professions = [], onClo
   const [referenceInput, setReferenceInput] = useState("");
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
 
   // Page behind the popup does not scroll (same as Create Contact).
   useEffect(() => {
@@ -51,6 +58,37 @@ export default function EditMemberModal({ member = null, professions = [], onClo
       document.body.style.overflow = "";
     };
   }, []);
+
+  // Profession options = every Company Category name.
+  useEffect(() => {
+    let cancelled = false;
+
+    getAllCompanyCategoriesApi({ page: 1, limit: 1000, sortBy: "name", sortOrder: "asc" })
+      .then((res) => {
+        if (!cancelled) setCategories(res?.data || []);
+      })
+      .catch((err) => {
+        if (!cancelled) showError(getErrorText(err, "Unable to load professions. Please try again."));
+      })
+      .finally(() => {
+        if (!cancelled) setCategoriesLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // An older member may hold a profession that is not (or no longer) a
+  // Company Category. Keep it selectable so editing never silently drops it.
+  const professionOptions = (() => {
+    const names = categories.map((c) => c.name).filter(Boolean);
+    const current = form.profession.trim();
+    if (current && !names.some((n) => n.toLowerCase() === current.toLowerCase())) {
+      names.unshift(current);
+    }
+    return names;
+  })();
 
   const setField = (key) => (e) => {
     const value = key === "mobile" ? e.target.value.replace(/[^\d+\s]/g, "") : e.target.value;
@@ -151,7 +189,6 @@ export default function EditMemberModal({ member = null, professions = [], onClo
         placeholder={extra.placeholder || label}
         value={form[key]}
         onChange={setField(key)}
-        list={extra.list}
         inputMode={extra.inputMode}
         maxLength={extra.maxLength}
       />
@@ -196,7 +233,28 @@ export default function EditMemberModal({ member = null, professions = [], onClo
             placeholder: "Mobile (91 optional)",
           })}
           {field("companyName", "Company / Brand", { required: true })}
-          {field("profession", "Profession", { required: true, list: "member-professions" })}
+          <div className="contactFieldGroup">
+            <label className="contactFieldLabel" htmlFor="member-profession">
+              Profession <span className="contactRequired">*</span>
+            </label>
+            <select
+              id="member-profession"
+              className="contactFieldSelect"
+              value={form.profession}
+              onChange={setField("profession")}
+              disabled={categoriesLoading}
+            >
+              <option value="" disabled>
+                {categoriesLoading ? "Loading professions..." : "Select Profession"}
+              </option>
+              {professionOptions.map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+            </select>
+            {errors.profession && <p className="contactFieldError">{errors.profession}</p>}
+          </div>
           {field("email", "Email", { placeholder: "name@example.com" })}
           {field("objective", "Objective")}
           {field("area", "Area")}
@@ -263,12 +321,6 @@ export default function EditMemberModal({ member = null, professions = [], onClo
             {errors.references && <p className="contactFieldError">{errors.references}</p>}
           </div>
         </div>
-
-        <datalist id="member-professions">
-          {professions.map((p) => (
-            <option key={p} value={p} />
-          ))}
-        </datalist>
 
         <div className="contactModalFooter">
           <button type="button" className="contactModalCloseButton" onClick={onClose} disabled={saving}>

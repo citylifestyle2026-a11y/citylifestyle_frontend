@@ -43,7 +43,11 @@ import { clearContactState } from "../redux/contact/contactSlice";
 import { getAllCompanyCategories } from "../redux/companyCategory/companyCategoryThunk";
 
 import { showError, showSuccess } from "../utilits/toast";
-import { resendContactPassApi, deleteContactBookingApi } from "../services/contactService";
+import {
+  resendContactPassApi,
+  deleteContactBookingApi,
+  cancelContactPassApi,
+} from "../services/contactService";
 import { confirmDialog, noticeDialog } from "../utilits/appSwal";
 import "../assets/CSS/ContactList.css";
 
@@ -91,7 +95,7 @@ export default function ContactList() {
   const {
     contacts,
     loading,
-    error,
+    listError: error,
     total,
     totalPages,
     limit,
@@ -394,6 +398,25 @@ export default function ContactList() {
   const selectedContacts = useMemo(() => Object.values(selected), [selected]);
   const selectedCount = selectedContacts.length;
 
+  // Approved guests who already have a pass -> can have it cancelled.
+  const selectedCancellable = useMemo(
+    () =>
+      selectedContacts.filter(
+        (contact) =>
+          getApprovalStatus(contact) === "approved" && contact.passSentAt
+      ),
+    [selectedContacts]
+  );
+
+  // An approved guest can no longer be "rejected" (use Cancel Pass instead).
+  const selectedRejectable = useMemo(
+    () =>
+      selectedContacts.filter(
+        (contact) => getApprovalStatus(contact) === "pending"
+      ),
+    [selectedContacts]
+  );
+
   const selectedApproved = useMemo(
     () =>
       selectedContacts.filter(
@@ -519,6 +542,89 @@ export default function ContactList() {
       }
     },
     [dispatch, statusBusy]
+  );
+
+  // Cancels the pass of approved guest(s): the QR stops working, the guest
+  // moves to Rejected and receives a "your pass has been cancelled"
+  // WhatsApp message (see POST /contacts/cancel-pass).
+  const handleCancelPass = useCallback(
+    async (targets) => {
+      if (!targets.length || statusBusy) return;
+      setOpenActionMenuId(null);
+
+      const one = targets.length === 1;
+      const confirmed = await confirmDialog({
+        title: `Cancel pass: ${one ? targets[0].fullName : `${targets.length} guests`}?`,
+        text: one
+          ? "This guest's pass will be cancelled."
+          : "These guests' passes will be cancelled.",
+        points: [
+          { icon: "🎟️", text: "The pass QR code stops working at the gate straight away." },
+          { icon: "↩️", text: "The seat goes back to the ticket stock." },
+          {
+            icon: "💬",
+            text: `A WhatsApp message - "your pass has been cancelled" - is sent to ${one ? "the guest" : "each guest"}.`,
+          },
+          { icon: "📋", text: "The guest moves to Rejected. You can approve and send a new pass later." },
+        ],
+        confirmText: "Yes, Cancel Pass",
+        tone: "danger",
+      });
+
+      if (!confirmed) return;
+
+      setStatusBusy(true);
+
+      try {
+        const res = await cancelContactPassApi({
+          ids: targets.map((contact) => contact._id),
+        });
+        const data = res?.data || {};
+
+        if (data.messageFailed) {
+          await noticeDialog({
+            icon: "warning",
+            title: "Pass cancelled, message not sent",
+            text: `${res.message}${data.messageError ? ` Reason: ${data.messageError}` : ""}`,
+            hint: data.usedTemplate
+              ? "Check that the template name in .env is approved and the language matches."
+              : "A normal WhatsApp text only reaches people who messaged your number in the last 24 hours. Create an approved template and set CHATBOX_PASS_CANCEL_TEMPLATE_NAME in the backend .env.",
+          });
+        } else if (data.failed) {
+          await noticeDialog({
+            icon: "warning",
+            title: "Some passes were not cancelled",
+            text: `${res.message}${data.failedReason ? ` Reason: ${data.failedReason}` : ""}`,
+          });
+        } else {
+          showSuccess(res.message || "Pass cancelled");
+        }
+
+        setSelected((prev) => {
+          const next = { ...prev };
+          targets.forEach((contact) => delete next[contact._id]);
+          return next;
+        });
+        setRefreshKey((key) => key + 1);
+      } catch (err) {
+        const body = err?.response?.data;
+
+        if (err?.response?.status === 404 && !body?.message) {
+          showError("Cancel Pass is not available on the server yet - please deploy / restart the backend.");
+        } else {
+          await noticeDialog({
+            icon: "error",
+            title: "Pass not cancelled",
+            text: `${body?.message || err?.message || "Failed to cancel the pass."}${
+              body?.data?.failedReason ? ` Reason: ${body.data.failedReason}` : ""
+            }`,
+          });
+        }
+      } finally {
+        setStatusBusy(false);
+      }
+    },
+    [statusBusy]
   );
 
   // Deletes the booking (pass) made by Send Pass - for one contact (row
@@ -821,6 +927,16 @@ const sortedReferenceFilterOptions = useMemo(
                   <FaWhatsapp /> Pass sent
                 </span>
               )}
+              {status === "rejected" && contact.passCancelledAt && (
+                <span
+                  className="contactPage__passCancelledTag"
+                  title={`Pass cancelled on ${new Date(
+                    contact.passCancelledAt
+                  ).toLocaleString("en-GB")}`}
+                >
+                  <FaTimes /> Pass cancelled
+                </span>
+              )}
             </span>
           );
         },
@@ -1005,13 +1121,25 @@ const sortedReferenceFilterOptions = useMemo(
                 </button>
               )}
 
-              {getApprovalStatus(contact) !== "rejected" && (
+              {/* Reject is only for people who are still Pending. After
+                  approval the pass is cancelled with "Cancel Pass". */}
+              {getApprovalStatus(contact) === "pending" && (
                 <button
                   type="button"
                   className="contactAction__item contactAction__itemReject"
                   onClick={() => handleChangeStatus([contact], "rejected")}
                 >
                   Reject
+                </button>
+              )}
+
+              {getApprovalStatus(contact) === "approved" && contact.passSentAt && (
+                <button
+                  type="button"
+                  className="contactAction__item contactAction__itemReject"
+                  onClick={() => handleCancelPass([contact])}
+                >
+                  Cancel Pass
                 </button>
               )}
 
@@ -1061,6 +1189,7 @@ const sortedReferenceFilterOptions = useMemo(
     someOnPageSelected,
     handleToggleSelect,
     handleChangeStatus,
+    handleCancelPass,
     handleOpenPass,
   ]);
 
@@ -1093,6 +1222,7 @@ const sortedReferenceFilterOptions = useMemo(
                 sortOrder={sortOrder}
                 companyCategoryFilter={categoryFilter}
                 referenceFilter={referenceFilter}
+                onSaved={() => setRefreshKey((key) => key + 1)}
               />
             </div>
           )}
@@ -1247,14 +1377,32 @@ const sortedReferenceFilterOptions = useMemo(
               >
                 <FaCheck /> Approve
               </button>
-              <button
-                type="button"
-                className="contactPage__bulkBtn contactPage__bulkBtn--reject"
-                disabled={statusBusy}
-                onClick={() => handleChangeStatus(selectedContacts, "rejected")}
-              >
-                <FaTimes /> Reject
-              </button>
+              {selectedRejectable.length > 0 && (
+                <button
+                  type="button"
+                  className="contactPage__bulkBtn contactPage__bulkBtn--reject"
+                  disabled={statusBusy}
+                  title={
+                    selectedRejectable.length < selectedCount
+                      ? "Only pending contacts can be rejected"
+                      : "Reject the selected contacts"
+                  }
+                  onClick={() => handleChangeStatus(selectedRejectable, "rejected")}
+                >
+                  <FaTimes /> Reject ({selectedRejectable.length})
+                </button>
+              )}
+              {selectedCancellable.length > 0 && (
+                <button
+                  type="button"
+                  className="contactPage__bulkBtn contactPage__bulkBtn--reject"
+                  disabled={statusBusy}
+                  title="Cancel the pass of the selected approved guests"
+                  onClick={() => handleCancelPass(selectedCancellable)}
+                >
+                  <FaTimes /> Cancel Pass ({selectedCancellable.length})
+                </button>
+              )}
               <button
                 type="button"
                 className="contactPage__bulkBtn contactPage__bulkBtn--pending"

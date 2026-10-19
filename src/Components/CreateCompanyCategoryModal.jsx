@@ -41,8 +41,14 @@ export default function CreateCompanyCategoryModal({
     };
   }, []);
 
+  // Start clean, and clean up again when the modal goes away (Cancel, X,
+  // Esc, overlay click) so a failed save can never leak into the page.
   useEffect(() => {
     dispatch(clearCompanyCategoryState());
+
+    return () => {
+      dispatch(clearCompanyCategoryState());
+    };
   }, [dispatch]);
 
   useEffect(() => {
@@ -65,6 +71,10 @@ export default function CreateCompanyCategoryModal({
       ...prev,
       [name]: value,
     }));
+
+    if (formErrors[name]) {
+      setFormErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
   };
 
   const validate = () => {

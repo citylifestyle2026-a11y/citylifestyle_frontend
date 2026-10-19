@@ -12,6 +12,8 @@ const initialState = {
 
   loading: false,
   error: null,
+  // Only the list load writes here (see adminSlice for the reason).
+  listError: null,
   success: false,
   message: "",
 };
@@ -24,6 +26,7 @@ const userSlice = createSlice({
     clearUserState: (state) => {
       state.loading = false;
       state.error = null;
+      state.listError = null;
       state.success = false;
       state.message = "";
     },
@@ -52,6 +55,7 @@ const userSlice = createSlice({
     builder
       .addCase(getUsers.pending, (state) => {
         state.loading = true;
+        state.listError = null;
       })
       .addCase(getUsers.fulfilled, (state, action) => {
         state.loading = false;
@@ -61,7 +65,7 @@ const userSlice = createSlice({
       })
       .addCase(getUsers.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.listError = action.payload;
       });
 
     // ================= UPDATE USER =================

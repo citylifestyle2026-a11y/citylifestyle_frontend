@@ -12,6 +12,9 @@ const initialState = {
 
   loading: false,
   error: null,
+  // Only the list load writes here; the table reads this one, so a failed
+  // create/edit/delete can no longer replace the table with its message.
+  listError: null,
   success: false,
   message: "",
 };
@@ -24,6 +27,7 @@ const adminSlice = createSlice({
     clearAdminState: (state) => {
       state.loading = false;
       state.error = null;
+      state.listError = null;
       state.success = false;
       state.message = "";
     },
@@ -55,7 +59,7 @@ const adminSlice = createSlice({
     builder
       .addCase(getAllAdmins.pending, (state) => {
         state.loading = true;
-        state.error = null;
+        state.listError = null;
       })
       .addCase(getAllAdmins.fulfilled, (state, action) => {
         state.loading = false;
@@ -63,7 +67,7 @@ const adminSlice = createSlice({
       })
       .addCase(getAllAdmins.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.listError = action.payload;
       });
 
     // ================= UPDATE OWN ADMIN =================

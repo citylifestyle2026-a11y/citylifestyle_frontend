@@ -46,6 +46,10 @@ const initialState = {
 
   loading: false,
   error: null,
+  // Only the list load (getAllContacts) writes here. The table reads this
+  // one, so a failed create/edit/delete (e.g. a duplicate mobile) can't
+  // replace the table with that message.
+  listError: null,
   success: false,
   message: "",
 };
@@ -59,6 +63,7 @@ const contactSlice = createSlice({
     clearContactState: (state) => {
       state.loading = false;
       state.error = null;
+      state.listError = null;
       state.success = false;
       state.message = "";
     },
@@ -100,7 +105,7 @@ const contactSlice = createSlice({
     builder
       .addCase(getAllContacts.pending, (state) => {
         state.loading = true;
-        state.error = null;
+        state.listError = null;
       })
       .addCase(getAllContacts.fulfilled, (state, action) => {
         state.loading = false;
@@ -118,7 +123,7 @@ const contactSlice = createSlice({
       })
       .addCase(getAllContacts.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.listError = action.payload;
       });
 
     // ================= EXPORT CONTACTS =================

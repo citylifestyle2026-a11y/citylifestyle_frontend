@@ -15,7 +15,7 @@ import { Link } from "react-router-dom";
 
 export default function Admin() {
   const dispatch = useDispatch();
-  const { admins, loading, error } = useSelector((state) => state.admin);
+  const { admins, loading, listError: error } = useSelector((state) => state.admin);
 
   // Current logged-in admin's id. `profile` (from GET /auth/profile) is a
   // raw Mongo document → `_id`; the login-time `user` cached in

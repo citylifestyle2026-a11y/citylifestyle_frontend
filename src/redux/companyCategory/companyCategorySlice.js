@@ -17,7 +17,12 @@ const initialState = {
   totalPages: 1,
 
   loading: false,
+  // `error` = failure of a create / update / delete (shown INSIDE the modal).
+  // `listError` = failure of loading the list (the only thing the table may
+  // show). They were one field before, so a failed "Create" (e.g. "Category
+  // name already exists") replaced the whole table with that message.
   error: null,
+  listError: null,
   success: false,
   message: "",
 };
@@ -31,6 +36,7 @@ const companyCategorySlice = createSlice({
     clearCompanyCategoryState: (state) => {
       state.loading = false;
       state.error = null;
+      state.listError = null;
       state.success = false;
       state.message = "";
     },
@@ -72,7 +78,7 @@ const companyCategorySlice = createSlice({
     builder
       .addCase(getAllCompanyCategories.pending, (state) => {
         state.loading = true;
-        state.error = null;
+        state.listError = null;
       })
       .addCase(getAllCompanyCategories.fulfilled, (state, action) => {
         state.loading = false;
@@ -86,7 +92,7 @@ const companyCategorySlice = createSlice({
       })
       .addCase(getAllCompanyCategories.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.listError = action.payload;
       });
 
     // ================= UPDATE COMPANY CATEGORY =================

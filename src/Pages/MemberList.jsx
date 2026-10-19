@@ -510,7 +510,6 @@ export default function MemberList() {
           {isAddOpen && (
             <EditMemberModal
               member={null}
-              professions={professions}
               onClose={() => setIsAddOpen(false)}
               onSaved={() => setRefreshKey((k) => k + 1)}
             />
@@ -519,7 +518,6 @@ export default function MemberList() {
           {editMember && (
             <EditMemberModal
               member={editMember}
-              professions={professions}
               onClose={() => setEditMember(null)}
               onSaved={() => setRefreshKey((k) => k + 1)}
             />

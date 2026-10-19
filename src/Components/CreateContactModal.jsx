@@ -61,6 +61,8 @@ export default function CreateContactModal({
   sortOrder = "desc",
   companyCategoryFilter = "",
   referenceFilter = "",
+  // Called after a successful save so the list can refetch itself.
+  onSaved = null,
   // true = the PUBLIC page at /city-lifestyle: no login, shown as a normal
   // page (not a popup), saved through the public API, no admin lists refreshed.
   publicMode = false,
@@ -616,7 +618,14 @@ export default function CreateContactModal({
       if (companyCategoryFilter) params.companyCategory = companyCategoryFilter;
       if (referenceFilter) params.reference = referenceFilter;
 
-      dispatch(getAllContacts(params));
+      // The list (Guest List) refetches itself with every active filter
+      // (status tab, edition, ...) when it passes onSaved; without it fall
+      // back to the filters this modal knows about.
+      if (typeof onSaved === "function") {
+        onSaved();
+      } else {
+        dispatch(getAllContacts(params));
+      }
 
       // A newly added reference (or the last contact holding a removed
       // one) can change which values are valid filter options — refresh

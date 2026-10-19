@@ -142,3 +142,11 @@ export const importContactsCsvApi = async (
   });
   return response.data;
 };
+
+// ================= CANCEL PASS (APPROVED GUEST) =================
+// body: { ids: string[] } - cancels the pass (QR stops working), moves the
+// guest to Rejected and sends the "your pass has been cancelled" message.
+export const cancelContactPassApi = async (data) => {
+  const response = await api.post("/contacts/cancel-pass", data);
+  return response.data;
+};

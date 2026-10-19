@@ -30,7 +30,7 @@ export default function User() {
   const dispatch = useDispatch();
   const [activePage, setActivePage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const { users, loading, error, pagination } = useSelector(
+  const { users, loading, listError: error, pagination } = useSelector(
     (state) => state.user
   );
   // searchTerm tracks the raw input value; search is the debounced value
