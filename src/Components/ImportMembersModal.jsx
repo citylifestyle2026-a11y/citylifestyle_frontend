@@ -242,7 +242,8 @@ export default function ImportMembersModal({ onClose, onSuccess }) {
               <p className="importContacts__hint">
                 One member per row. A mobile number that is already in Member List
                 is not a duplicate: that member is updated with the details in the file
-                (empty cells keep the old value).
+                (empty cells keep the old value). New references are added to the
+                existing ones.
               </p>
               <button type="button" className="importContacts__sampleBtn" onClick={downloadSample}>
                 <FaDownload /> Sample CSV

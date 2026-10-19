@@ -151,8 +151,9 @@ export default function ImportContactsModal({ onClose, onSuccess }) {
           <>
             <div className="importContacts__sampleRow">
               <p className="importContacts__hint">
-                One contact per row. Duplicate WhatsApp numbers (already saved,
-                or repeated in the file) are skipped, never overwritten.
+                One contact per row. A WhatsApp number that is already saved
+                is not skipped: that contact is updated with the row, and new
+                references are added to the existing ones.
               </p>
               <button
                 type="button"
@@ -225,6 +226,7 @@ export default function ImportContactsModal({ onClose, onSuccess }) {
                 <div className="importContacts__chips">
                   <span className="importContacts__chip importContacts__chip--ok">
                     {check.successCount} ready
+                    {check.updatedCount > 0 ? ` (${check.updatedCount} update)` : ""}
                   </span>
                   <span className="importContacts__chip importContacts__chip--dup">
                     {check.duplicateCount} duplicate
@@ -271,7 +273,10 @@ export default function ImportContactsModal({ onClose, onSuccess }) {
                 Total rows: {result.totalRows}
               </span>
               <span className="importContacts__chip importContacts__chip--ok">
-                Created: {result.successCount}
+                Created: {result.successCount - (result.updatedCount || 0)}
+              </span>
+              <span className="importContacts__chip importContacts__chip--ok">
+                Updated: {result.updatedCount || 0}
               </span>
               <span className="importContacts__chip importContacts__chip--dup">
                 Duplicates skipped: {result.duplicateCount}
