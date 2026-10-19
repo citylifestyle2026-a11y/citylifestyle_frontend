@@ -14,6 +14,8 @@ export const createContactApi = async (data) => {
 export const getAllContactsApi = async (params) => {
   const response = await api.get("/contacts/get-all-contacts", {
     params,
+    // reference: ["a","b"] -> reference=a&reference=b
+    paramsSerializer: { indexes: null },
   });
 
   return response.data;
@@ -28,6 +30,7 @@ export const exportContactsApi = async (params) => {
   try {
     const response = await api.get("/contacts/export", {
       params,
+      paramsSerializer: { indexes: null },
       responseType: "blob",
     });
 

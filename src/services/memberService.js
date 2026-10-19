@@ -3,7 +3,11 @@ import api from "../api/axios";
 // ================= LIST =================
 // params: { page, limit, search, profession, moved, sortBy, sortOrder }
 export const getAllMembersApi = async (params) => {
-  const response = await api.get("/members", { params });
+  const response = await api.get("/members", {
+    params,
+    // reference: ["a","b"] -> reference=a&reference=b
+    paramsSerializer: { indexes: null },
+  });
   return response.data;
 };
 

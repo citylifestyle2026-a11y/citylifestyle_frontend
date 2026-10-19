@@ -900,3 +900,20 @@
   white-space: nowrap;
   font-family: "Poppins", sans-serif;
 }
+
+/* Address / reference cells must wrap inside their column. The generic
+   `.contactPage__table tbody td { white-space: nowrap }` rule above is more
+   specific than `.contactPage__addressCell`, which is why long addresses ran
+   over the neighbouring columns. */
+.contactPage__table tbody td.contactPage__addressCell {
+  white-space: normal;
+  min-width: 220px;
+  max-width: 280px;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  line-height: 1.5;
+}
+
+.contactPage__table tbody td {
+  vertical-align: middle;
+}

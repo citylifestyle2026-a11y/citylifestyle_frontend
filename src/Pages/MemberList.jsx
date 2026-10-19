@@ -20,7 +20,8 @@ import CommonPagination from "../Components/CommonPagination";
 import ImportMembersModal from "../Components/ImportMembersModal";
 import MoveToGuestListModal from "../Components/MoveToGuestListModal";
 import EditMemberModal from "../Components/EditMemberModal";
-import { ContactPerson } from "../Components/ContactAvatar";
+import MultiSelect from "../Components/MultiSelect";
+import { ContactPerson, InstagramLink } from "../Components/ContactAvatar";
 
 import {
   getAllMembersApi,
@@ -63,7 +64,7 @@ export default function MemberList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [search, setSearch] = useState("");
   const [professionFilter, setProfessionFilter] = useState("");
-  const [referenceFilter, setReferenceFilter] = useState("");
+  const [referenceFilter, setReferenceFilter] = useState([]);
   const [movedFilter, setMovedFilter] = useState("");
   const [professions, setProfessions] = useState([]);
   const [references, setReferences] = useState([]);
@@ -91,10 +92,17 @@ export default function MemberList() {
     () => ({
       search: search || undefined,
       profession: professionFilter || undefined,
-      reference: referenceFilter || undefined,
+      // Nothing ticked, or EVERY reference ticked ("Select all") = no
+      // reference filter, so all members show. Otherwise one "|" joined
+      // param (short URL, no array-parsing limits).
+      reference:
+        referenceFilter.length === 0 ||
+        (references.length > 0 && referenceFilter.length >= references.length)
+          ? undefined
+          : referenceFilter.join("|"),
       moved: movedFilter || undefined,
     }),
-    [search, professionFilter, referenceFilter, movedFilter]
+    [search, professionFilter, referenceFilter, references, movedFilter]
   );
 
   // Debounced search box.
@@ -418,6 +426,34 @@ export default function MemberList() {
         label: "Reference",
         render: (m) => (m.references?.length ? m.references.join(", ") : "-"),
       },
+      { key: "designation", label: "Designation", sortable: false, render: (m) => m.designation || "-" },
+      { key: "address", label: "Address", sortable: false, render: (m) => m.address || "-" },
+      {
+        key: "instagramId",
+        label: "Instagram",
+        sortable: false,
+        render: (m) => <InstagramLink id={m.instagramId} />,
+      },
+      {
+        key: "relationship",
+        label: "Relationship",
+        sortable: false,
+        render: (m) => m.relationship || "Single",
+      },
+      { key: "spouseName", label: "Spouse Name", sortable: false, render: (m) => m.spouseName || "-" },
+      { key: "spouseMobile", label: "Spouse Mobile", sortable: false, render: (m) => m.spouseMobile || "-" },
+      {
+        key: "spouseInstagramId",
+        label: "Spouse Instagram",
+        sortable: false,
+        render: (m) => <InstagramLink id={m.spouseInstagramId} />,
+      },
+      {
+        key: "spouseProfession",
+        label: "Spouse Profession",
+        sortable: false,
+        render: (m) => m.spouseProfession || "-",
+      },
       {
         key: "action",
         label: "Actions",
@@ -665,14 +701,14 @@ export default function MemberList() {
             options={professionOptions}
           />
 
-          <CommonSelect
-            className="contactPage__filterSelect"
+          <MultiSelect
             value={referenceFilter}
-            onChange={(e) => {
-              setReferenceFilter(e.target.value);
+            onChange={(next) => {
+              setReferenceFilter(next);
               setCurrentPage(1);
             }}
             placeholder="All References"
+            searchPlaceholder="Search reference..."
             options={referenceOptions}
           />
         </div>

@@ -29,6 +29,7 @@ import CommonExportButton from "../Components/CommonExportButton";
 import SendPassModal from "../Components/SendPassModal";
 import ImportContactsModal from "../Components/ImportContactsModal";
 import useEditionOptions from "../hooks/useEditionOptions";
+import MultiSelect from "../Components/MultiSelect";
 import { ContactPerson, InstagramLink } from "../Components/ContactAvatar";
 
 import {
@@ -119,7 +120,8 @@ export default function ContactList() {
   // Filters. Empty string = "no filter", which is why both are omitted
   // from the request params below rather than sent as "".
   const [categoryFilter, setCategoryFilter] = useState("");
-  const [referenceFilter, setReferenceFilter] = useState("");
+  // Several references can be ticked; a guest matches when it has ANY of them.
+  const [referenceFilter, setReferenceFilter] = useState([]);
   const [statusFilter, setStatusFilter] = useState("");
 
   // Edition (event) the guests were moved into from Member List. Can be
@@ -198,7 +200,7 @@ export default function ContactList() {
     };
 
     if (categoryFilter) params.companyCategory = categoryFilter;
-    if (referenceFilter) params.reference = referenceFilter;
+    if (referenceFilter.length) params.reference = referenceFilter;
     if (statusFilter) params.approvalStatus = statusFilter;
     if (editionFilter) params.editionEventId = editionFilter;
 
@@ -300,7 +302,7 @@ export default function ContactList() {
     };
 
     if (categoryFilter) params.companyCategory = categoryFilter;
-    if (referenceFilter) params.reference = referenceFilter;
+    if (referenceFilter.length) params.reference = referenceFilter;
     if (statusFilter) params.approvalStatus = statusFilter;
     if (editionFilter) params.editionEventId = editionFilter;
 
@@ -368,7 +370,7 @@ export default function ContactList() {
       };
 
       if (categoryFilter) params.companyCategory = categoryFilter;
-      if (referenceFilter) params.reference = referenceFilter;
+      if (referenceFilter.length) params.reference = referenceFilter;
       if (statusFilter) params.approvalStatus = statusFilter;
       if (editionFilter) params.editionEventId = editionFilter;
 
@@ -1476,14 +1478,14 @@ const sortedReferenceFilterOptions = useMemo(
             options={categoryFilterOptions}
           />
 
-          <CommonSelect
-            className="contactPage__filterSelect"
+          <MultiSelect
             value={referenceFilter}
-            onChange={(e) => {
-              setReferenceFilter(e.target.value);
+            onChange={(next) => {
+              setReferenceFilter(next);
               setCurrentPage(1);
             }}
             placeholder="All References"
+            searchPlaceholder="Search reference..."
             loading={uniqueReferencesLoading}
             options={sortedReferenceFilterOptions}
           />

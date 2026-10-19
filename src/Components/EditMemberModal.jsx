@@ -5,6 +5,7 @@ import { createMemberApi, updateMemberApi } from "../services/memberService";
 import { getAllCompanyCategoriesApi } from "../services/companyCategoryService";
 import { getErrorText } from "../utilits/apiError";
 import { showError, showSuccess } from "../utilits/toast";
+import { getInstagramUrl, instagramLinkError } from "../utilits/instagram";
 // Same look as Create Contact (Guest List) and the other pages' popups.
 import "../assets/CSS/CreateContactModal.css";
 
@@ -43,6 +44,15 @@ export default function EditMemberModal({ member = null, onClose, onSaved }) {
     source: member.source || "",
     remark: member.remark || "",
     memberStatus: normalizeStatus(member.memberStatus),
+    // Same extra details as the Guest List.
+    designation: member.designation || "",
+    address: member.address || "",
+    instagramId: getInstagramUrl(member.instagramId),
+    relationship: member.relationship === "Couple" ? "Couple" : "Single",
+    spouseName: member.spouseName || "",
+    spouseMobile: member.spouseMobile || "",
+    spouseInstagramId: getInstagramUrl(member.spouseInstagramId),
+    spouseProfession: member.spouseProfession || "",
   });
   const [references, setReferences] = useState(member.references || []);
   const [referenceInput, setReferenceInput] = useState("");
@@ -81,18 +91,27 @@ export default function EditMemberModal({ member = null, onClose, onSaved }) {
 
   // An older member may hold a profession that is not (or no longer) a
   // Company Category. Keep it selectable so editing never silently drops it.
-  const professionOptions = (() => {
+  const optionsWith = (currentValue) => {
     const names = categories.map((c) => c.name).filter(Boolean);
-    const current = form.profession.trim();
+    const current = String(currentValue || "").trim();
     if (current && !names.some((n) => n.toLowerCase() === current.toLowerCase())) {
       names.unshift(current);
     }
     return names;
-  })();
+  };
+  const professionOptions = optionsWith(form.profession);
+  const spouseProfessionOptions = optionsWith(form.spouseProfession);
 
   const setField = (key) => (e) => {
-    const value = key === "mobile" ? e.target.value.replace(/[^\d+\s]/g, "") : e.target.value;
-    setForm((prev) => ({ ...prev, [key]: value }));
+    const value = key === "mobile" || key === "spouseMobile" ? e.target.value.replace(/[^\d+\s]/g, "") : e.target.value;
+    setForm((prev) => ({
+      ...prev,
+      [key]: value,
+      // Single = no spouse details.
+      ...(key === "relationship" && value !== "Couple"
+        ? { spouseName: "", spouseMobile: "", spouseInstagramId: "", spouseProfession: "" }
+        : {}),
+    }));
     setErrors((prev) => ({ ...prev, [key]: "" }));
   };
 
@@ -142,6 +161,19 @@ export default function EditMemberModal({ member = null, onClose, onSaved }) {
 
     if (form.email.trim() && !EMAIL_REGEX.test(form.email.trim())) {
       next.email = "Enter a valid email.";
+    }
+
+    const instagramError = instagramLinkError(form.instagramId);
+    if (instagramError) next.instagramId = instagramError;
+
+    if (form.relationship === "Couple") {
+      if (form.spouseMobile.trim()) {
+        const sDigits = form.spouseMobile.replace(/\D/g, "");
+        const sLocal = sDigits.length === 12 && sDigits.startsWith("91") ? sDigits.slice(2) : sDigits;
+        if (!/^[6-9]\d{9}$/.test(sLocal)) next.spouseMobile = "Enter a valid 10-digit mobile number.";
+      }
+      const spouseInstagramError = instagramLinkError(form.spouseInstagramId);
+      if (spouseInstagramError) next.spouseInstagramId = spouseInstagramError;
     }
 
     setErrors(next);
@@ -260,6 +292,59 @@ export default function EditMemberModal({ member = null, onClose, onSaved }) {
           {field("area", "Area")}
           {field("city", "City")}
           {field("state", "State")}
+          {field("designation", "Company Designation")}
+          {field("address", "Address", { wide: true })}
+          {field("instagramId", "Instagram Link", { placeholder: "https://instagram.com/username" })}
+
+          <div className="contactFieldGroup">
+            <label className="contactFieldLabel" htmlFor="member-relationship">
+              Relationship
+            </label>
+            <select
+              id="member-relationship"
+              className="contactFieldSelect"
+              value={form.relationship}
+              onChange={setField("relationship")}
+            >
+              <option value="Single">Single</option>
+              <option value="Couple">Couple</option>
+            </select>
+          </div>
+
+          {form.relationship === "Couple" && (
+            <>
+              {field("spouseName", "Spouse Name")}
+              {field("spouseMobile", "Spouse Mobile", {
+                inputMode: "tel",
+                maxLength: 16,
+                placeholder: "Spouse Mobile (91 optional)",
+              })}
+              {field("spouseInstagramId", "Spouse Instagram Link", {
+                placeholder: "https://instagram.com/username",
+              })}
+              <div className="contactFieldGroup">
+                <label className="contactFieldLabel" htmlFor="member-spouseProfession">
+                  Spouse Profession
+                </label>
+                <select
+                  id="member-spouseProfession"
+                  className="contactFieldSelect"
+                  value={form.spouseProfession}
+                  onChange={setField("spouseProfession")}
+                  disabled={categoriesLoading}
+                >
+                  <option value="">
+                    {categoriesLoading ? "Loading professions..." : "Select Spouse Profession"}
+                  </option>
+                  {spouseProfessionOptions.map((name) => (
+                    <option key={name} value={name}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </>
+          )}
 
           <div className="contactFieldGroup">
             <label className="contactFieldLabel" htmlFor="member-memberStatus">

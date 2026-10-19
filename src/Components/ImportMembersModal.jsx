@@ -9,8 +9,9 @@ import "../assets/CSS/ImportContactsModal.css";
 import "../assets/CSS/ImportMembersModal.css";
 
 const SAMPLE_CSV = [
-  "#,Name,Contact,Email,Profession,Company / Brand,Objective,Area,City,State,Reference,Reference 2,Reference 3,Source,Remark,Status",
-  '1,Rahul Shah,9876543210,rahul@example.com,Real Estate & Developers,Shah Infra,,Vesu,Surat,Gujarat,Karan Patel,Rasik Savani,,,,Active',
+  "#,Name,Contact,Email,Profession,Company / Brand,Objective,Area,City,State,Reference,Reference 2,Reference 3,Source,Remark,Status,Company Designation,Address,Instagram Link,Relationship,Spouse Name,Spouse Mobile,Spouse Instagram Link,Spouse Profession",
+  '1,Rahul Shah,9876543210,rahul@example.com,Real Estate & Developers,Shah Infra,,Vesu,Surat,Gujarat,Karan Patel,Rasik Savani,,,,Active,Owner,"12 Green Park, Vesu",https://instagram.com/rahul.shah,Couple,Priya Shah,9876501234,https://instagram.com/priya.shah,Interior Designers',
+  "2,Amit Desai,9123456780,,Textile,Desai Fabrics,,Adajan,Surat,Gujarat,Karan Patel,,,,,Active,Manager,,,Single,,,,",
 ].join("\n");
 
 const saveCsv = (text, fileName) => {
@@ -49,6 +50,14 @@ const REPORT_COLUMNS = [
   ["Source", (r) => r.data?.source],
   ["Remark", (r) => r.data?.remark],
   ["Status", (r) => r.data?.memberStatus],
+  ["Company Designation", (r) => r.data?.designation],
+  ["Address", (r) => r.data?.address],
+  ["Instagram Link", (r) => r.data?.instagramId],
+  ["Relationship", (r) => r.data?.relationship],
+  ["Spouse Name", (r) => r.data?.spouseName],
+  ["Spouse Mobile", (r) => r.data?.spouseMobile],
+  ["Spouse Instagram Link", (r) => r.data?.spouseInstagramId],
+  ["Spouse Profession", (r) => r.data?.spouseProfession],
 ];
 
 const csvCell = (value) => {
@@ -232,7 +241,8 @@ export default function ImportMembersModal({ onClose, onSuccess }) {
             <div className="importContacts__sampleRow">
               <p className="importContacts__hint">
                 One member per row. A mobile number that is already in Member List
-                (or repeated in the file) is a duplicate and is never overwritten.
+                is not a duplicate: that member is updated with the details in the file
+                (empty cells keep the old value).
               </p>
               <button type="button" className="importContacts__sampleBtn" onClick={downloadSample}>
                 <FaDownload /> Sample CSV
@@ -245,7 +255,11 @@ export default function ImportMembersModal({ onClose, onSuccess }) {
               <code>Company / Brand</code>, <code>Objective</code>, <code>Area</code>,{" "}
               <code>City</code>, <code>State</code>, <code>Reference</code>,{" "}
               <code>Reference 2</code>, <code>Reference 3</code>, <code>Source</code>,{" "}
-              <code>Remark</code>, <code>Status</code>.
+              <code>Remark</code>, <code>Status</code>,{" "}
+              <code>Company Designation</code>, <code>Address</code>,{" "}
+              <code>Instagram Link</code>, <code>Relationship</code> (Single / Couple),{" "}
+              <code>Spouse Name</code>, <code>Spouse Mobile</code>,{" "}
+              <code>Spouse Instagram Link</code>, <code>Spouse Profession</code>.
             </p>
 
             <div className="importContacts__drop" onClick={() => fileInputRef.current?.click()}>
@@ -271,7 +285,7 @@ export default function ImportMembersModal({ onClose, onSuccess }) {
               <div className="importContacts__check">
                 <div className="importContacts__chips">
                   <span className="importContacts__chip importContacts__chip--total">{check.totalRows} rows</span>
-                  <span className="importContacts__chip importContacts__chip--ok">{check.successCount} ready</span>
+                  <span className="importContacts__chip importContacts__chip--ok">{check.successCount} ready{check.updatedCount > 0 ? ` (${check.updatedCount} update)` : ""}</span>
                   <span className="importContacts__chip importContacts__chip--dup">{check.duplicateCount} duplicate</span>
                   <span className="importContacts__chip importContacts__chip--fail">{check.failureCount} invalid</span>
                 </div>
@@ -299,7 +313,10 @@ export default function ImportMembersModal({ onClose, onSuccess }) {
             <div className="importContacts__chips">
               <span className="importContacts__chip importContacts__chip--total">Total rows: {result.totalRows}</span>
               <span className="importContacts__chip importContacts__chip--ok">
-                Added: {(result.successCount || 0) + (result.flaggedCount || 0)}
+                Added: {(result.successCount || 0) - (result.updatedCount || 0) + (result.flaggedCount || 0)}
+              </span>
+              <span className="importContacts__chip importContacts__chip--ok">
+                Updated: {result.updatedCount || 0}
               </span>
               {result.mode === "all" ? (
                 <span className="importContacts__chip importContacts__chip--fail">Needs Fix: {result.flaggedCount}</span>
