@@ -416,18 +416,37 @@ export default function MemberList() {
           </span>
         ),
       }),
-      sortableColumn("profession", "Profession", { render: (m) => m.profession || "-" }),
-      sortableColumn("companyName", "Company / Brand", { render: (m) => m.companyName || "-" }),
+      sortableColumn("profession", "Profession", {
+        cellClassName: "contactPage__wrapCell",
+        render: (m) => m.profession || "-",
+      }),
+      sortableColumn("companyName", "Company / Brand", {
+        cellClassName: "contactPage__wrapCell",
+        render: (m) => m.companyName || "-",
+      }),
       sortableColumn("city", "Area / City", {
         render: (m) => [m.area, m.city].filter(Boolean).join(", ") || "-",
       }),
       {
         key: "references",
         label: "Reference",
+        cellClassName: "contactPage__wrapCell",
         render: (m) => (m.references?.length ? m.references.join(", ") : "-"),
       },
-      { key: "designation", label: "Designation", sortable: false, render: (m) => m.designation || "-" },
-      { key: "address", label: "Address", sortable: false, render: (m) => m.address || "-" },
+      {
+        key: "designation",
+        label: "Designation",
+        sortable: false,
+        cellClassName: "contactPage__wrapCell",
+        render: (m) => m.designation || "-",
+      },
+      {
+        key: "address",
+        label: "Address",
+        sortable: false,
+        cellClassName: "contactPage__addressCell",
+        render: (m) => m.address || "-",
+      },
       {
         key: "instagramId",
         label: "Instagram",

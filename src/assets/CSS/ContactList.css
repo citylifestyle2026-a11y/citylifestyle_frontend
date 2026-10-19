@@ -917,3 +917,15 @@
 .contactPage__table tbody td {
   vertical-align: middle;
 }
+
+/* Generic "wrap inside the column" cell (Member List: profession, company,
+   designation, reference). Needs the table + tbody prefix to beat the nowrap
+   td rule. */
+.contactPage__table tbody td.contactPage__wrapCell {
+  white-space: normal;
+  min-width: 160px;
+  max-width: 260px;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  line-height: 1.5;
+}

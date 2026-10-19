@@ -362,8 +362,8 @@ const Event = () => {
                       <td className="eventList__titleCell">{event.title}</td>
                       <td>{formatDateTime(event.startDateTime)}</td>
                       <td>{formatDateTime(event.endDateTime)}</td>
-                      <td>{event.venueName}</td>
-                      <td>{event.createdBy?.name || "-"}</td>
+                      <td className="eventList__wrapCell">{event.venueName}</td>
+                      <td className="eventList__wrapCell">{event.createdBy?.name || "-"}</td>
                       <td>
                         {isEventExpired(event) ? (
                           <span

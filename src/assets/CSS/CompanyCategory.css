@@ -428,3 +428,15 @@
 .companyCategoryAction__item:hover {
   background-color: #f8fafc;
 }
+
+/* The generic `.companyCategoryPage__table tbody td { white-space: nowrap }`
+   rule is more specific than `.companyCategoryPage__descriptionCell`, so a
+   long description never wrapped and ran over the next column. */
+.companyCategoryPage__table tbody td.companyCategoryPage__descriptionCell {
+  white-space: normal;
+  min-width: 220px;
+  max-width: 320px;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  line-height: 1.5;
+}

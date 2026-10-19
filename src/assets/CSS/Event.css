@@ -507,3 +507,13 @@ a{
     padding: 14px;
   }
 }
+
+/* This table uses table-layout: fixed, so a nowrap cell cannot grow - a long
+   venue name or creator name used to spill over the next column. These
+   cells now wrap inside their own column. */
+.eventList__table tbody td.eventList__wrapCell {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  line-height: 1.5;
+}

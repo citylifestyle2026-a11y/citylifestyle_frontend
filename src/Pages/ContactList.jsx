@@ -621,6 +621,8 @@ export default function ContactList() {
               body?.data?.failedReason ? ` Reason: ${body.data.failedReason}` : ""
             }`,
           });
+          // The row may be stale (deleted / changed elsewhere) - reload it.
+          setRefreshKey((key) => key + 1);
         }
       } finally {
         setStatusBusy(false);
