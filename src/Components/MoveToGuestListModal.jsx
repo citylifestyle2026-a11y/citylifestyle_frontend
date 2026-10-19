@@ -34,7 +34,7 @@ export default function MoveToGuestListModal({ payload, count, label, onClose, o
       setResult(res.data);
       onDone?.(res);
     } catch (err) {
-      showError(getErrorText(err, "Failed to move members."));
+      showError(getErrorText(err, "Failed to move contacts."));
     } finally {
       setMoving(false);
     }

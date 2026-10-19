@@ -58,3 +58,27 @@ export const deleteMemberApi = async (id) => {
   const response = await api.delete(`/members/${id}`);
   return response.data;
 };
+
+// ================= NEEDS FIX: DELETE ALL / EXPORT =================
+// body: { ids } or { selectAll: true, filters } (only Needs Fix rows are deleted)
+export const bulkDeleteMembersApi = async (data) => {
+  const response = await api.post("/members/bulk-delete", data);
+  return response.data;
+};
+
+// Downloads the rows that match `params` (same filters as the list) as a .csv file.
+export const exportMembersApi = async (params, fileName = "members.csv") => {
+  const response = await api.get("/members/export", {
+    params,
+    responseType: "blob",
+  });
+
+  const url = window.URL.createObjectURL(new Blob([response.data], { type: "text/csv;charset=utf-8" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
+};

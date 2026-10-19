@@ -27,12 +27,17 @@
   gap: 10px;
 }
 
+/* Same round logo (with the soft ring) as the Login page, bigger so it is
+   clearly visible on the dark sidebar. */
 .logoIcon {
-  width: 34px;
-  height: 34px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
+  box-shadow:
+    0 0 0 2px rgba(74, 144, 194, 0.35),
+    0 4px 12px rgba(0, 0, 0, 0.45);
 }
 
 .logoText {

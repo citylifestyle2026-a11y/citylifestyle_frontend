@@ -39,6 +39,13 @@ const EMPTY_FORM = {
   spouseInstagramId: "",
   profession: "",
   professionCategory: "",
+  // Extra details (same as Contact Book) - shown at the end of the admin
+  // form only, never on the public page.
+  email: "",
+  city: "",
+  state: "",
+  source: "",
+  remark: "",
 };
 
 // Same image rules as the User profile photo (CreateUserModal.jsx) and the
@@ -194,6 +201,11 @@ export default function CreateContactModal({
         profession: editContactData.profession || "",
         // populated as { _id, name } by contact.service.js
         professionCategory: editContactData.professionCategory?._id || "",
+        email: editContactData.email || "",
+        city: editContactData.city || "",
+        state: editContactData.state || "",
+        source: editContactData.source || "",
+        remark: editContactData.remark || "",
       });
 
       setReferences(
@@ -439,6 +451,15 @@ export default function CreateContactModal({
       errors.area = "Area is required.";
     }
 
+    // Email is optional (Contact Book field), checked only when filled.
+    if (
+      !publicMode &&
+      formData.email.trim() &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())
+    ) {
+      errors.email = "Enter a valid email.";
+    }
+
     // Instagram is OPTIONAL, but when filled it must be a profile LINK -
     // a plain name is rejected. Photos are optional too.
     const instagramError = instagramLinkError(formData.instagramId);
@@ -498,6 +519,7 @@ export default function CreateContactModal({
       spouseMobile: errors.spouseMobile,
       professionCategory: errors.professionCategory,
       references: errors.references,
+      email: errors.email,
     }));
 
     return Object.keys(errors).length === 0;
@@ -540,6 +562,16 @@ export default function CreateContactModal({
       spouseInstagramId: isCouple ? formData.spouseInstagramId.trim() : "",
       profession: formData.profession.trim(),
     };
+
+    // Contact Book extras: admin form only (blank values are still sent on
+    // Edit so clearing a field clears it in the database too).
+    if (!publicMode) {
+      fields.email = formData.email.trim();
+      fields.city = formData.city.trim();
+      fields.state = formData.state.trim();
+      fields.source = formData.source.trim();
+      fields.remark = formData.remark.trim();
+    }
 
     Object.entries(fields).forEach(([key, value]) => payload.append(key, value));
 
@@ -1037,7 +1069,7 @@ export default function CreateContactModal({
 
               <div className="contactFieldGroup contactFieldGroupFull">
                 <label className="contactFieldLabel">
-                  Category {!isEditMode && <span className="contactRequired">*</span>}
+                  Spouse Category {!isEditMode && <span className="contactRequired">*</span>}
                 </label>
                 <select
                   className="contactFieldSelect"
@@ -1107,6 +1139,75 @@ export default function CreateContactModal({
               <p className="contactFieldError">{formErrors.references}</p>
             )}
           </div>
+
+          {/* Fields that are not on the public form: kept at the very end
+              (same names as the Contact Book form). */}
+          {!publicMode && (
+            <>
+              <div className="contactFieldGroup">
+                <label className="contactFieldLabel">Email</label>
+                <input
+                  type="text"
+                  className="contactFieldInput"
+                  placeholder="name@example.com"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                />
+                {formErrors.email && (
+                  <p className="contactFieldError">{formErrors.email}</p>
+                )}
+              </div>
+
+              <div className="contactFieldGroup">
+                <label className="contactFieldLabel">City</label>
+                <input
+                  type="text"
+                  className="contactFieldInput"
+                  placeholder="City"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="contactFieldGroup">
+                <label className="contactFieldLabel">State</label>
+                <input
+                  type="text"
+                  className="contactFieldInput"
+                  placeholder="State"
+                  name="state"
+                  value={formData.state}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="contactFieldGroup">
+                <label className="contactFieldLabel">Source</label>
+                <input
+                  type="text"
+                  className="contactFieldInput"
+                  placeholder="Source"
+                  name="source"
+                  value={formData.source}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="contactFieldGroup contactFieldGroupFull">
+                <label className="contactFieldLabel">Remark</label>
+                <input
+                  type="text"
+                  className="contactFieldInput"
+                  placeholder="Remark"
+                  name="remark"
+                  value={formData.remark}
+                  onChange={handleChange}
+                />
+              </div>
+            </>
+          )}
         </div>
 
         <div className="contactModalFooter">

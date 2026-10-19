@@ -783,6 +783,7 @@
 .contactPage__statusTab--pending::before { background: #f0a020; }
 .contactPage__statusTab--approved::before { background: #25b562; }
 .contactPage__statusTab--rejected::before { background: #e5484d; }
+.contactPage__statusTab--passCancelled::before { background: #8e44ad; }
 
 .contactPage__statusTabActive::before {
   background: #ffffff !important;

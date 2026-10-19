@@ -77,6 +77,8 @@ const STATUS_TABS = [
   { value: "pending", label: "Pending", countKey: "pending" },
   { value: "approved", label: "Approved", countKey: "approved" },
   { value: "rejected", label: "Rejected", countKey: "rejected" },
+  // Guests whose pass was cancelled (also counted under Rejected).
+  { value: "passCancelled", label: "Pass Cancelled", countKey: "passCancelled" },
 ];
 
 const STATUS_LABELS = {
@@ -201,7 +203,8 @@ export default function ContactList() {
 
     if (categoryFilter) params.companyCategory = categoryFilter;
     if (referenceFilter.length) params.reference = referenceFilter;
-    if (statusFilter) params.approvalStatus = statusFilter;
+    if (statusFilter === "passCancelled") params.passStatus = "cancelled";
+    else if (statusFilter) params.approvalStatus = statusFilter;
     if (editionFilter) params.editionEventId = editionFilter;
 
     dispatch(getAllContacts(params));
@@ -303,7 +306,8 @@ export default function ContactList() {
 
     if (categoryFilter) params.companyCategory = categoryFilter;
     if (referenceFilter.length) params.reference = referenceFilter;
-    if (statusFilter) params.approvalStatus = statusFilter;
+    if (statusFilter === "passCancelled") params.passStatus = "cancelled";
+    else if (statusFilter) params.approvalStatus = statusFilter;
     if (editionFilter) params.editionEventId = editionFilter;
 
     dispatch(exportContacts(params));
@@ -371,7 +375,8 @@ export default function ContactList() {
 
       if (categoryFilter) params.companyCategory = categoryFilter;
       if (referenceFilter.length) params.reference = referenceFilter;
-      if (statusFilter) params.approvalStatus = statusFilter;
+      if (statusFilter === "passCancelled") params.passStatus = "cancelled";
+    else if (statusFilter) params.approvalStatus = statusFilter;
       if (editionFilter) params.editionEventId = editionFilter;
 
       dispatch(getAllContacts(params));
@@ -410,11 +415,12 @@ export default function ContactList() {
     [selectedContacts]
   );
 
-  // An approved guest can no longer be "rejected" (use Cancel Pass instead).
+  // Pending and Approved guests can be rejected (an approved guest with a
+  // pass has the pass cancelled).
   const selectedRejectable = useMemo(
     () =>
       selectedContacts.filter(
-        (contact) => getApprovalStatus(contact) === "pending"
+        (contact) => getApprovalStatus(contact) !== "rejected"
       ),
     [selectedContacts]
   );
@@ -498,6 +504,31 @@ export default function ContactList() {
             points,
             confirmText: status === "rejected" ? "Yes, Reject" : "Yes, Move to Pending",
             tone: status === "rejected" ? "danger" : "warning",
+          });
+
+          if (!confirmed) return;
+        }
+      }
+
+      // Approving a guest whose pass was cancelled brings the SAME pass back
+      // and sends it again on WhatsApp.
+      if (status === "approved") {
+        const restorable = targets.filter(
+          (contact) =>
+            contact.passCancelledBookingId && getApprovalStatus(contact) !== "approved"
+        );
+
+        if (restorable.length) {
+          const one = restorable.length === 1;
+          const confirmed = await confirmDialog({
+            title: `Approve Pass: ${one ? restorable[0].fullName : `${restorable.length} guests`}?`,
+            text: "The pass that was cancelled is brought back.",
+            points: [
+              { icon: "🎟️", text: "The same pass (same QR code) works again at the gate." },
+              { icon: "📲", text: `The pass is sent again on WhatsApp to ${one ? "the guest" : "each guest"}.` },
+            ],
+            confirmText: "Yes, Approve Pass",
+            tone: "info",
           });
 
           if (!confirmed) return;
@@ -985,8 +1016,11 @@ const sortedReferenceFilterOptions = useMemo(
       sortableColumn("area", "Area", {
         render: (contact) => contact.area || "-",
       }),
-      sortableColumn("instagramId", "Instagram ID", {
+      sortableColumn("instagramId", "Instagram Link", {
         render: (contact) => <InstagramLink id={contact.instagramId} />,
+      }),
+      sortableColumn("relationship", "Relationship", {
+        render: (contact) => contact.relationship || "-",
       }),
       sortableColumn("spouseName", "Spouse Name", {
         render: (contact) => (
@@ -999,10 +1033,10 @@ const sortedReferenceFilterOptions = useMemo(
       sortableColumn("spouseMobile", "Spouse Mobile Number", {
         render: (contact) => contact.spouseMobile || "-",
       }),
-      sortableColumn("spouseInstagramId", "Spouse Instagram ID", {
+      sortableColumn("spouseInstagramId", "Spouse Instagram Link", {
         render: (contact) => <InstagramLink id={contact.spouseInstagramId} />,
       }),
-      sortableColumn("profession", "Profession", {
+      sortableColumn("profession", "Spouse Category", {
         render: (contact) => contact.profession || "-",
       }),
       sortableColumn("references", "Reference", {
@@ -1044,6 +1078,24 @@ const sortedReferenceFilterOptions = useMemo(
             </span>
           );
         },
+      }),
+      // ---- Not on the public form: kept at the end, before Actions
+      // (same names/order as the Contact Book table) ----
+      sortableColumn("email", "Email", {
+        render: (contact) => contact.email || "-",
+      }),
+      sortableColumn("city", "City", {
+        render: (contact) => contact.city || "-",
+      }),
+      sortableColumn("state", "State", {
+        render: (contact) => contact.state || "-",
+      }),
+      sortableColumn("source", "Source", {
+        render: (contact) => contact.source || "-",
+      }),
+      sortableColumn("remark", "Remark", {
+        cellClassName: "contactPage__addressCell",
+        render: (contact) => contact.remark || "-",
       }),
       {
         key: "action",
@@ -1121,13 +1173,13 @@ const sortedReferenceFilterOptions = useMemo(
                   className="contactAction__item contactAction__itemApprove"
                   onClick={() => handleChangeStatus([contact], "approved")}
                 >
-                  Approve
+                  {contact.passCancelledBookingId ? "Approve Pass" : "Approve"}
                 </button>
               )}
 
-              {/* Reject is only for people who are still Pending. After
-                  approval the pass is cancelled with "Cancel Pass". */}
-              {getApprovalStatus(contact) === "pending" && (
+              {/* Reject: Pending or Approved guests (an approved guest with a
+                  pass has the pass cancelled). */}
+              {getApprovalStatus(contact) !== "rejected" && (
                 <button
                   type="button"
                   className="contactAction__item contactAction__itemReject"

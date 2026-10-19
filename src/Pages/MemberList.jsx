@@ -8,6 +8,8 @@ import {
   FaSort,
   FaSortUp,
   FaSortDown,
+  FaTrash,
+  FaDownload,
 } from "react-icons/fa";
 
 import CommonListLayout from "../Components/CommonListLayout";
@@ -28,6 +30,8 @@ import {
   getMemberProfessionsApi,
   getMemberReferencesApi,
   deleteMemberApi,
+  bulkDeleteMembersApi,
+  exportMembersApi,
 } from "../services/memberService";
 import { confirmDialog } from "../utilits/appSwal";
 import { showError, showSuccess } from "../utilits/toast";
@@ -49,6 +53,13 @@ const MOVED_TABS = [
   { value: "needsFix", label: "Needs Fix", countKey: "needsFix", tone: "rejected" },
 ];
 
+// Inside the Needs Fix tab: show every problem row, or only one kind.
+const FIX_TABS = [
+  { value: "", label: "All", countKey: "needsFix", tone: "all" },
+  { value: "invalid", label: "Invalid", countKey: "invalid", tone: "rejected" },
+  { value: "duplicate", label: "Duplicate", countKey: "duplicate", tone: "pending" },
+];
+
 // Columns the server can sort by (see SORTABLE in services/member.service.js).
 const SORTABLE_COLUMNS = ["name", "mobile", "profession", "companyName", "city"];
 
@@ -66,9 +77,11 @@ export default function MemberList() {
   const [professionFilter, setProfessionFilter] = useState("");
   const [referenceFilter, setReferenceFilter] = useState([]);
   const [movedFilter, setMovedFilter] = useState("");
+  const [fixType, setFixType] = useState(""); // "" | "invalid" | "duplicate" (Needs Fix tab only)
+  const [bulkBusy, setBulkBusy] = useState(false);
   const [professions, setProfessions] = useState([]);
   const [references, setReferences] = useState([]);
-  const [counts, setCounts] = useState({ all: 0, inGuestList: 0, notInGuestList: 0, needsFix: 0 });
+  const [counts, setCounts] = useState({ all: 0, inGuestList: 0, notInGuestList: 0, needsFix: 0, invalid: 0, duplicate: 0 });
 
   const [sortBy, setSortBy] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
@@ -101,8 +114,9 @@ export default function MemberList() {
           ? undefined
           : referenceFilter.join("|"),
       moved: movedFilter || undefined,
+      fixType: movedFilter === "needsFix" && fixType ? fixType : undefined,
     }),
-    [search, professionFilter, referenceFilter, references, movedFilter]
+    [search, professionFilter, referenceFilter, references, movedFilter, fixType]
   );
 
   // Debounced search box.
@@ -273,7 +287,7 @@ export default function MemberList() {
       setMoveTarget({
         payload: { selectAll: true, filters },
         count: total,
-        label: `All ${total} members matching your filters`,
+        label: `All ${total} contacts matching your filters`,
       });
       return;
     }
@@ -305,7 +319,7 @@ export default function MemberList() {
 
     try {
       await deleteMemberApi(member._id);
-      showSuccess("Member deleted successfully");
+      showSuccess("Contact deleted successfully");
       setSelected((prev) => {
         const next = { ...prev };
         delete next[member._id];
@@ -313,7 +327,79 @@ export default function MemberList() {
       });
       setRefreshKey((k) => k + 1);
     } catch (err) {
-      showError(getErrorText(err, "Failed to delete member"));
+      showError(getErrorText(err, "Failed to delete contact"));
+    }
+  };
+
+  // ---------- Needs Fix: delete all / export ----------
+  const fixLabel = fixType === "duplicate" ? "Duplicate" : fixType === "invalid" ? "Invalid" : "Needs Fix";
+
+  const handleDeleteAllFix = async () => {
+    if (!total || bulkBusy) return;
+    const confirmed = await confirmDialog({
+      title: `Delete all ${total} ${fixLabel} contact${total === 1 ? "" : "s"}?`,
+      text: `Every ${fixLabel} contact currently shown (all pages) will be permanently deleted from Contact Book.`,
+      points: [
+        { icon: "🗑️", text: "This cannot be undone." },
+        { icon: "📥", text: "Tip: use Export first if you want to correct and import them again." },
+      ],
+      confirmText: `Yes, Delete ${total}`,
+      tone: "danger",
+    });
+    if (!confirmed) return;
+
+    setBulkBusy(true);
+    try {
+      const res = await bulkDeleteMembersApi({ selectAll: true, filters });
+      showSuccess(res?.message || "Contacts deleted");
+      clearSelection();
+      setCurrentPage(1);
+      setRefreshKey((k) => k + 1);
+    } catch (err) {
+      showError(getErrorText(err, "Failed to delete contacts"));
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
+  // Delete only the ticked rows (Needs Fix tab).
+  const handleDeleteSelectedFix = async () => {
+    if (!selectedCount || bulkBusy) return;
+    const confirmed = await confirmDialog({
+      title: `Delete ${selectedCount} selected contact${selectedCount === 1 ? "" : "s"}?`,
+      text: "The selected contacts will be permanently deleted from Contact Book.",
+      points: [{ icon: "🗑️", text: "This cannot be undone." }],
+      confirmText: `Yes, Delete ${selectedCount}`,
+      tone: "danger",
+    });
+    if (!confirmed) return;
+
+    setBulkBusy(true);
+    try {
+      const res = await bulkDeleteMembersApi(
+        selectAllMatching
+          ? { selectAll: true, filters }
+          : { ids: Object.keys(selected) }
+      );
+      showSuccess(res?.message || "Contacts deleted");
+      clearSelection();
+      setRefreshKey((k) => k + 1);
+    } catch (err) {
+      showError(getErrorText(err, "Failed to delete contacts"));
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
+  const handleExportFix = async () => {
+    if (!total || bulkBusy) return;
+    setBulkBusy(true);
+    try {
+      await exportMembersApi(filters, `members-${(fixType || "needs-fix")}.csv`);
+    } catch (err) {
+      showError(getErrorText(err, "Failed to export contacts"));
+    } finally {
+      setBulkBusy(false);
     }
   };
 
@@ -341,7 +427,7 @@ export default function MemberList() {
           <input
             type="checkbox"
             className="contactPage__checkbox"
-            aria-label="Select all members on this page"
+            aria-label="Select all contacts on this page"
             checked={allOnPageSelected}
             ref={(el) => {
               if (el) el.indeterminate = someOnPageSelected;
@@ -361,9 +447,11 @@ export default function MemberList() {
           />
         ),
       },
-      sortableColumn("name", "Name", {
+      sortableColumn("name", "Full Name", {
         cellClassName: "contactPage__contactName",
-        render: (member) => <ContactPerson name={member.name} />,
+        render: (member) => (
+          <ContactPerson name={member.name} image={member.profileImage} />
+        ),
       }),
       {
         key: "memberStatus",
@@ -404,7 +492,8 @@ export default function MemberList() {
           );
         },
       },
-      sortableColumn("mobile", "Mobile", {
+      // ---- Same order and names as the public form (Create Contact) ----
+      sortableColumn("mobile", "WhatsApp Number", {
         render: (m) => (
           <span>
             {m.mobile || "-"}
@@ -416,23 +505,10 @@ export default function MemberList() {
           </span>
         ),
       }),
-      sortableColumn("profession", "Profession", {
-        cellClassName: "contactPage__wrapCell",
-        render: (m) => m.profession || "-",
-      }),
-      sortableColumn("companyName", "Company / Brand", {
+      sortableColumn("companyName", "Company Name", {
         cellClassName: "contactPage__wrapCell",
         render: (m) => m.companyName || "-",
       }),
-      sortableColumn("city", "Area / City", {
-        render: (m) => [m.area, m.city].filter(Boolean).join(", ") || "-",
-      }),
-      {
-        key: "references",
-        label: "Reference",
-        cellClassName: "contactPage__wrapCell",
-        render: (m) => (m.references?.length ? m.references.join(", ") : "-"),
-      },
       {
         key: "designation",
         label: "Designation",
@@ -440,6 +516,11 @@ export default function MemberList() {
         cellClassName: "contactPage__wrapCell",
         render: (m) => m.designation || "-",
       },
+      // Member "profession" = the Company Category chosen in the form.
+      sortableColumn("profession", "Company Category", {
+        cellClassName: "contactPage__wrapCell",
+        render: (m) => m.profession || "-",
+      }),
       {
         key: "address",
         label: "Address",
@@ -447,9 +528,10 @@ export default function MemberList() {
         cellClassName: "contactPage__addressCell",
         render: (m) => m.address || "-",
       },
+      { key: "area", label: "Area", sortable: false, render: (m) => m.area || "-" },
       {
         key: "instagramId",
-        label: "Instagram",
+        label: "Instagram Link",
         sortable: false,
         render: (m) => <InstagramLink id={m.instagramId} />,
       },
@@ -459,19 +541,55 @@ export default function MemberList() {
         sortable: false,
         render: (m) => m.relationship || "Single",
       },
-      { key: "spouseName", label: "Spouse Name", sortable: false, render: (m) => m.spouseName || "-" },
-      { key: "spouseMobile", label: "Spouse Mobile", sortable: false, render: (m) => m.spouseMobile || "-" },
+      {
+        key: "spouseName",
+        label: "Spouse Name",
+        sortable: false,
+        render: (m) => <ContactPerson name={m.spouseName} image={m.spouseProfileImage} />,
+      },
+      {
+        key: "spouseMobile",
+        label: "Spouse Mobile Number",
+        sortable: false,
+        render: (m) => m.spouseMobile || "-",
+      },
       {
         key: "spouseInstagramId",
-        label: "Spouse Instagram",
+        label: "Spouse Instagram Link",
         sortable: false,
         render: (m) => <InstagramLink id={m.spouseInstagramId} />,
       },
       {
         key: "spouseProfession",
-        label: "Spouse Profession",
+        label: "Spouse Category",
         sortable: false,
         render: (m) => m.spouseProfession || "-",
+      },
+      {
+        key: "references",
+        label: "Reference",
+        sortable: false,
+        cellClassName: "contactPage__wrapCell",
+        render: (m) => (m.references?.length ? m.references.join(", ") : "-"),
+      },
+      // ---- Not on the public form: kept at the end, before Actions ----
+      {
+        key: "email",
+        label: "Email",
+        sortable: false,
+        render: (m) => m.email || "-",
+      },
+      sortableColumn("city", "City", {
+        render: (m) => m.city || "-",
+      }),
+      { key: "state", label: "State", sortable: false, render: (m) => m.state || "-" },
+      { key: "source", label: "Source", sortable: false, render: (m) => m.source || "-" },
+      {
+        key: "remark",
+        label: "Remark",
+        sortable: false,
+        cellClassName: "contactPage__addressCell",
+        render: (m) => m.remark || "-",
       },
       {
         key: "action",
@@ -613,7 +731,7 @@ export default function MemberList() {
               onClick={() => setIsAddOpen(true)}
             >
               <FaUserPlus />
-              Add Member
+              Add Contact
             </button>
 
             <button
@@ -641,6 +759,7 @@ export default function MemberList() {
               }`}
               onClick={() => {
                 setMovedFilter(tab.value);
+                setFixType("");
                 setCurrentPage(1);
               }}
             >
@@ -652,6 +771,57 @@ export default function MemberList() {
           ))}
         </div>
 
+        {movedFilter === "needsFix" && (
+          <div className="contactPage__statusTabs" role="tablist" aria-label="Needs Fix type">
+            {FIX_TABS.map((tab) => (
+              <button
+                key={tab.countKey}
+                type="button"
+                role="tab"
+                aria-selected={fixType === tab.value}
+                className={`contactPage__statusTab contactPage__statusTab--${tab.tone} ${
+                  fixType === tab.value ? "contactPage__statusTabActive" : ""
+                }`}
+                onClick={() => {
+                  setFixType(tab.value);
+                  setCurrentPage(1);
+                }}
+              >
+                {tab.label}
+                <span className="contactPage__statusTabCount">{counts[tab.countKey] ?? 0}</span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {movedFilter === "needsFix" && fixType && (
+          <div className="contactPage__bulkBar">
+            <span className="contactPage__bulkCount">
+              {fixLabel}: {total} contact{total === 1 ? "" : "s"}
+            </span>
+
+            <div className="contactPage__bulkButtons">
+              <button
+                type="button"
+                className="contactPage__bulkBtn contactPage__bulkBtn--approve"
+                onClick={handleExportFix}
+                disabled={!total || bulkBusy}
+              >
+                <FaDownload /> Export {fixLabel} ({total})
+              </button>
+
+              <button
+                type="button"
+                className="contactPage__bulkBtn contactPage__bulkBtn--reject"
+                onClick={handleDeleteAllFix}
+                disabled={!total || bulkBusy}
+              >
+                <FaTrash /> Delete all {fixLabel} ({total})
+              </button>
+            </div>
+          </div>
+        )}
+
         {selectedCount > 0 && (
           <div className="contactPage__bulkBar">
             <span className="contactPage__bulkCount">
@@ -659,13 +829,24 @@ export default function MemberList() {
             </span>
 
             <div className="contactPage__bulkButtons">
-              <button
-                type="button"
-                className="contactPage__bulkBtn contactPage__bulkBtn--approve"
-                onClick={() => openMove()}
-              >
-                <FaUserPlus /> Move to Guest List ({selectedCount})
-              </button>
+              {movedFilter === "needsFix" ? (
+                <button
+                  type="button"
+                  className="contactPage__bulkBtn contactPage__bulkBtn--reject"
+                  onClick={handleDeleteSelectedFix}
+                  disabled={bulkBusy}
+                >
+                  <FaTrash /> Delete selected ({selectedCount})
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="contactPage__bulkBtn contactPage__bulkBtn--approve"
+                  onClick={() => openMove()}
+                >
+                  <FaUserPlus /> Move to Guest List ({selectedCount})
+                </button>
+              )}
 
               {!selectAllMatching && total > selectedCount && (
                 <button
@@ -716,7 +897,7 @@ export default function MemberList() {
               setProfessionFilter(e.target.value);
               setCurrentPage(1);
             }}
-            placeholder="All Professions"
+            placeholder="All Company Categories"
             options={professionOptions}
           />
 
@@ -738,14 +919,14 @@ export default function MemberList() {
             data={members}
             rowKey="_id"
             loading={loading && members.length === 0}
-            loadingMessage="Loading members..."
+            loadingMessage="Loading contacts..."
             error={error}
-            errorMessage="Failed to load members."
+            errorMessage="Failed to load contacts."
             emptyMessage={
               <CommonEmptyState
                 wrapperClassName="contactPage__stateWrap"
                 textClassName="contactPage__stateText"
-                message="No members found. Use Import Excel / CSV to add members."
+                message="No contacts found. Use Add Contact or Import Excel / CSV to add contacts."
               />
             }
             stateCellClassName="contactPage__stateCell"

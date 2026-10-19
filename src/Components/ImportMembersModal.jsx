@@ -203,7 +203,7 @@ export default function ImportMembersModal({ onClose, onSuccess }) {
       setResult(data);
 
       const added = (data.successCount || 0) + (data.flaggedCount || 0);
-      if (added === 0) showError(res?.message || "No members were added.");
+      if (added === 0) showError(res?.message || "No contacts were added.");
       else if (data.flaggedCount > 0 || data.duplicateCount > 0 || data.failureCount > 0) showWarning(res?.message);
       else showSuccess(res?.message);
 
@@ -229,7 +229,7 @@ export default function ImportMembersModal({ onClose, onSuccess }) {
     <div className="importContacts__overlay" onMouseDown={importing ? undefined : onClose}>
       <div className="importContacts__container" onMouseDown={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
         <div className="importContacts__header">
-          <h2 className="importContacts__title">Import Members (Excel / CSV)</h2>
+          <h2 className="importContacts__title">Import Contacts (Excel / CSV)</h2>
           <button type="button" className="importContacts__close" onClick={onClose} disabled={importing} aria-label="Close">
             <FaTimes />
           </button>

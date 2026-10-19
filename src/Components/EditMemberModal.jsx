@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaTimes } from "react-icons/fa";
 
 import { createMemberApi, updateMemberApi } from "../services/memberService";
@@ -7,18 +7,24 @@ import { getErrorText } from "../utilits/apiError";
 import { showError, showSuccess } from "../utilits/toast";
 import { getInstagramUrl, instagramLinkError } from "../utilits/instagram";
 import { newReferencesFrom } from "../utilits/references";
+import ContactPhotoPicker from "./ContactPhotoPicker";
 // Same look as Create Contact (Guest List) and the other pages' popups.
 import "../assets/CSS/CreateContactModal.css";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const STATUS_OPTIONS = ["Active", "Inactive"];
 
+// Same image rules as the Guest List (Create Contact) photos.
+const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
+const MAX_IMAGE_BYTES = 100 * 1024 * 1024;
+const EMPTY_PHOTO = { file: null, preview: "", remove: false };
+
 const normalizeStatus = (value) =>
   String(value || "").trim().toLowerCase() === "inactive" ? "Inactive" : "Active";
 
 /**
- * Add a member (Member List -> Add Member) or, when `member` is passed,
- * edit one (Member List -> Action -> Edit).
+ * Add a contact (Contact Book -> Add Contact) or, when `member` is passed,
+ * edit one (Contact Book -> Action -> Edit).
  *
  * Required: Name, Mobile, Company / Brand, Profession, at least one Reference.
  * Status is a dropdown: Active / Inactive.
@@ -54,6 +60,34 @@ export default function EditMemberModal({ member = null, onClose, onSaved }) {
     spouseInstagramId: getInstagramUrl(member.spouseInstagramId),
     spouseProfession: member.spouseProfession || "",
   });
+  // Photo state: `file` = newly picked (not uploaded yet), `preview` = what
+  // the circle shows, `remove` = Remove pressed on a SAVED photo.
+  const [profilePhoto, setProfilePhoto] = useState({
+    file: null,
+    preview: member.profileImage || "",
+    remove: false,
+  });
+  const [spousePhoto, setSpousePhoto] = useState({
+    file: null,
+    preview: member.spouseProfileImage || "",
+    remove: false,
+  });
+  const profilePhotoRef = useRef(profilePhoto);
+  const spousePhotoRef = useRef(spousePhoto);
+  profilePhotoRef.current = profilePhoto;
+  spousePhotoRef.current = spousePhoto;
+
+  const releasePreview = (photo) => {
+    if (photo?.file && photo.preview) URL.revokeObjectURL(photo.preview);
+  };
+
+  useEffect(() => {
+    return () => {
+      releasePreview(profilePhotoRef.current);
+      releasePreview(spousePhotoRef.current);
+    };
+  }, []);
+
   const [references, setReferences] = useState(member.references || []);
   const [referenceInput, setReferenceInput] = useState("");
   const [errors, setErrors] = useState({});
@@ -102,6 +136,30 @@ export default function EditMemberModal({ member = null, onClose, onSaved }) {
   const professionOptions = optionsWith(form.profession);
   const spouseProfessionOptions = optionsWith(form.spouseProfession);
 
+  // kind = "profile" | "spouse"
+  const pickPhoto = (kind, file) => {
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      showError("Only PNG, JPG, JPEG and WEBP files are allowed.");
+      return;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      showError("Image size should be less than 100MB.");
+      return;
+    }
+    const setter = kind === "spouse" ? setSpousePhoto : setProfilePhoto;
+    const current = kind === "spouse" ? spousePhotoRef.current : profilePhotoRef.current;
+    releasePreview(current);
+    setter({ file, preview: URL.createObjectURL(file), remove: false });
+  };
+
+  const removePhoto = (kind) => {
+    const setter = kind === "spouse" ? setSpousePhoto : setProfilePhoto;
+    const current = kind === "spouse" ? spousePhotoRef.current : profilePhotoRef.current;
+    const saved = kind === "spouse" ? member.spouseProfileImage : member.profileImage;
+    releasePreview(current);
+    setter({ file: null, preview: "", remove: Boolean(isEdit && saved) });
+  };
+
   const setField = (key) => (e) => {
     const value = key === "mobile" || key === "spouseMobile" ? e.target.value.replace(/[^\d+\s]/g, "") : e.target.value;
     setForm((prev) => ({
@@ -112,6 +170,15 @@ export default function EditMemberModal({ member = null, onClose, onSaved }) {
         ? { spouseName: "", spouseMobile: "", spouseInstagramId: "", spouseProfession: "" }
         : {}),
     }));
+    if (key === "relationship" && value !== "Couple") {
+      // Spouse photo goes away with the rest of the spouse details.
+      releasePreview(spousePhotoRef.current);
+      setSpousePhoto({
+        file: null,
+        preview: "",
+        remove: Boolean(isEdit && member.spouseProfileImage),
+      });
+    }
     setErrors((prev) => ({ ...prev, [key]: "" }));
   };
 
@@ -149,15 +216,15 @@ export default function EditMemberModal({ member = null, onClose, onSaved }) {
 
   const validate = () => {
     const next = {};
-    if (!form.name.trim()) next.name = "Name is required.";
+    if (!form.name.trim()) next.name = "Full Name is required.";
 
     const digits = form.mobile.replace(/\D/g, "");
     const local = digits.length === 12 && digits.startsWith("91") ? digits.slice(2) : digits;
-    if (!form.mobile.trim()) next.mobile = "Mobile is required.";
+    if (!form.mobile.trim()) next.mobile = "WhatsApp Number is required.";
     else if (!/^[6-9]\d{9}$/.test(local)) next.mobile = "Enter a valid 10-digit mobile number.";
 
-    if (!form.companyName.trim()) next.companyName = "Company / Brand is required.";
-    if (!form.profession.trim()) next.profession = "Profession is required.";
+    if (!form.companyName.trim()) next.companyName = "Company Name is required.";
+    if (!form.profession.trim()) next.profession = "Company Category is required.";
     if (finalReferences().length === 0) next.references = "At least one Reference is required.";
 
     if (form.email.trim() && !EMAIL_REGEX.test(form.email.trim())) {
@@ -185,21 +252,44 @@ export default function EditMemberModal({ member = null, onClose, onSaved }) {
     e?.preventDefault();
     if (saving || !validate()) return;
 
-    const payload = { ...form, references: finalReferences() };
+    const isCouple = form.relationship === "Couple";
+    const json = { ...form, references: finalReferences() };
+
+    // Plain JSON when no photo was touched (works exactly as before);
+    // multipart/form-data only when a photo is picked or removed.
+    const photoTouched =
+      profilePhoto.file || profilePhoto.remove || spousePhoto.file || spousePhoto.remove;
+    let payload = json;
+
+    if (photoTouched) {
+      payload = new FormData();
+      Object.entries(json).forEach(([key, value]) =>
+        payload.append(key, key === "references" ? JSON.stringify(value) : value)
+      );
+      if (profilePhoto.file) payload.append("profileImage", profilePhoto.file);
+      else if (profilePhoto.remove) payload.append("removeProfileImage", "true");
+
+      if (isCouple) {
+        if (spousePhoto.file) payload.append("spouseProfileImage", spousePhoto.file);
+        else if (spousePhoto.remove) payload.append("removeSpouseProfileImage", "true");
+      } else if (spousePhoto.remove) {
+        payload.append("removeSpouseProfileImage", "true");
+      }
+    }
 
     setSaving(true);
     try {
       const res = isEdit
         ? await updateMemberApi(member._id, payload)
         : await createMemberApi(payload);
-      showSuccess(res?.message || (isEdit ? "Member updated successfully" : "Member added successfully"));
+      showSuccess(res?.message || (isEdit ? "Contact updated successfully" : "Contact added successfully"));
       onSaved?.(res?.data);
       onClose();
     } catch (err) {
-      const message = getErrorText(err, isEdit ? "Failed to update member" : "Failed to add member");
+      const message = getErrorText(err, isEdit ? "Failed to update contact" : "Failed to add contact");
 
       // A mobile problem is shown under the Mobile field, like Create Contact.
-      if (typeof message === "string" && message.toLowerCase().includes("mobile")) {
+      if (typeof message === "string" && /mobile|whatsapp/i.test(message)) {
         setErrors((prev) => ({ ...prev, mobile: message }));
         return;
       }
@@ -238,7 +328,7 @@ export default function EditMemberModal({ member = null, onClose, onSaved }) {
         noValidate
       >
         <div className="contactModalHeader">
-          <h2 className="contactModalTitle">{isEdit ? "Edit Member" : "Add Member"}</h2>
+          <h2 className="contactModalTitle">{isEdit ? "Edit Contact" : "Add Contact"}</h2>
           <button
             type="button"
             className="contactCloseIconButton"
@@ -258,17 +348,19 @@ export default function EditMemberModal({ member = null, onClose, onSaved }) {
         )}
 
         <div className="contactFormGrid">
-          {field("name", "Name", { required: true })}
-          {field("mobile", "Mobile", {
+          {/* Same order and names as Guest List -> Create Contact. */}
+          {field("name", "Full Name", { required: true })}
+          {field("mobile", "WhatsApp Number", {
             required: true,
             inputMode: "tel",
             maxLength: 16,
-            placeholder: "Mobile (91 optional)",
+            placeholder: "WhatsApp Number (91 optional)",
           })}
-          {field("companyName", "Company / Brand", { required: true })}
-          <div className="contactFieldGroup">
+          {field("companyName", "Company Name", { required: true })}
+          {field("designation", "Designation")}
+          <div className="contactFieldGroup contactFieldGroupFull">
             <label className="contactFieldLabel" htmlFor="member-profession">
-              Profession <span className="contactRequired">*</span>
+              Company Category <span className="contactRequired">*</span>
             </label>
             <select
               id="member-profession"
@@ -278,7 +370,7 @@ export default function EditMemberModal({ member = null, onClose, onSaved }) {
               disabled={categoriesLoading}
             >
               <option value="" disabled>
-                {categoriesLoading ? "Loading professions..." : "Select Profession"}
+                {categoriesLoading ? "Loading categories..." : "Select Category"}
               </option>
               {professionOptions.map((name) => (
                 <option key={name} value={name}>
@@ -288,15 +380,22 @@ export default function EditMemberModal({ member = null, onClose, onSaved }) {
             </select>
             {errors.profession && <p className="contactFieldError">{errors.profession}</p>}
           </div>
-          {field("email", "Email", { placeholder: "name@example.com" })}
+          {field("address", "Address")}
           {field("area", "Area")}
-          {field("city", "City")}
-          {field("state", "State")}
-          {field("designation", "Company Designation", { wide: true })}
-          {field("address", "Address", { wide: true })}
           {field("instagramId", "Instagram Link", { placeholder: "https://instagram.com/username" })}
 
           <div className="contactFieldGroup">
+            <label className="contactFieldLabel">Profile Photo</label>
+            <ContactPhotoPicker
+              label="Profile photo"
+              preview={profilePhoto.preview}
+              onPick={(file) => pickPhoto("profile", file)}
+              onRemove={() => removePhoto("profile")}
+              disabled={saving}
+            />
+          </div>
+
+          <div className="contactFieldGroup contactFieldGroupFull">
             <label className="contactFieldLabel" htmlFor="member-relationship">
               Relationship
             </label>
@@ -314,17 +413,29 @@ export default function EditMemberModal({ member = null, onClose, onSaved }) {
           {form.relationship === "Couple" && (
             <>
               {field("spouseName", "Spouse Name")}
-              {field("spouseMobile", "Spouse Mobile", {
+              {field("spouseMobile", "Spouse Mobile Number", {
                 inputMode: "tel",
                 maxLength: 16,
-                placeholder: "Spouse Mobile (91 optional)",
+                placeholder: "Spouse Mobile Number (91 optional)",
               })}
               {field("spouseInstagramId", "Spouse Instagram Link", {
                 placeholder: "https://instagram.com/username",
               })}
+
               <div className="contactFieldGroup">
+                <label className="contactFieldLabel">Spouse Profile Photo</label>
+                <ContactPhotoPicker
+                  label="Spouse profile photo"
+                  preview={spousePhoto.preview}
+                  onPick={(file) => pickPhoto("spouse", file)}
+                  onRemove={() => removePhoto("spouse")}
+                  disabled={saving}
+                />
+              </div>
+
+              <div className="contactFieldGroup contactFieldGroupFull">
                 <label className="contactFieldLabel" htmlFor="member-spouseProfession">
-                  Spouse Profession
+                  Spouse Category
                 </label>
                 <select
                   id="member-spouseProfession"
@@ -334,7 +445,7 @@ export default function EditMemberModal({ member = null, onClose, onSaved }) {
                   disabled={categoriesLoading}
                 >
                   <option value="">
-                    {categoriesLoading ? "Loading professions..." : "Select Spouse Profession"}
+                    {categoriesLoading ? "Loading categories..." : "Select Category"}
                   </option>
                   {spouseProfessionOptions.map((name) => (
                     <option key={name} value={name}>
@@ -345,27 +456,6 @@ export default function EditMemberModal({ member = null, onClose, onSaved }) {
               </div>
             </>
           )}
-
-          <div className="contactFieldGroup">
-            <label className="contactFieldLabel" htmlFor="member-memberStatus">
-              Status
-            </label>
-            <select
-              id="member-memberStatus"
-              className="contactFieldSelect"
-              value={form.memberStatus}
-              onChange={setField("memberStatus")}
-            >
-              {STATUS_OPTIONS.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {field("source", "Source")}
-          {field("remark", "Remark", { wide: true })}
 
           <div className="contactFieldGroup contactFieldGroupFull">
             <label className="contactFieldLabel">
@@ -405,6 +495,32 @@ export default function EditMemberModal({ member = null, onClose, onSaved }) {
 
             {errors.references && <p className="contactFieldError">{errors.references}</p>}
           </div>
+
+          {/* Not on the Guest List form: kept at the very end. */}
+          {field("email", "Email", { placeholder: "name@example.com" })}
+          {field("city", "City")}
+          {field("state", "State")}
+
+          <div className="contactFieldGroup">
+            <label className="contactFieldLabel" htmlFor="member-memberStatus">
+              Status
+            </label>
+            <select
+              id="member-memberStatus"
+              className="contactFieldSelect"
+              value={form.memberStatus}
+              onChange={setField("memberStatus")}
+            >
+              {STATUS_OPTIONS.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {field("source", "Source")}
+          {field("remark", "Remark", { wide: true })}
         </div>
 
         <div className="contactModalFooter">
@@ -412,7 +528,7 @@ export default function EditMemberModal({ member = null, onClose, onSaved }) {
             Cancel
           </button>
           <button type="submit" className="contactModalCreateButton" disabled={saving}>
-            {saving ? "Saving..." : isEdit ? "Save Changes" : "Add Member"}
+            {saving ? "Saving..." : isEdit ? "Save Changes" : "Add Contact"}
           </button>
         </div>
       </form>

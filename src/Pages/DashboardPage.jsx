@@ -143,7 +143,7 @@ export default function DashboardPage() {
         title: "Total Bookings",
         amountValue: String(dashboardData?.totalBookings ?? 0),
         infoText:
-          "Total number of tickets booked for this event (sum of the quantity of every booking). Deleted bookings are not counted.",
+          "Total number of tickets booked for this event (sum of the quantity of every booking). Deleted and cancelled bookings (including cancelled passes) are not counted.",
       },
     ],
     [dashboardData]
@@ -156,7 +156,7 @@ export default function DashboardPage() {
         title: "Checked In",
         amountValue: String(dashboardData?.scannedEntries ?? 0),
         infoText:
-          "Guests whose pass was scanned at the gate - they have arrived at the event.",
+          "Guests whose pass was scanned at the gate - they have arrived at the event. Deleted bookings are not counted.",
       },
       {
         key: "registeredNotScanned",

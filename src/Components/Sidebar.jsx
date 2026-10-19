@@ -18,7 +18,8 @@ import {
 import { FaFlag } from 'react-icons/fa6';
 
 import '../assets/CSS/Sidebar.css';
-import cityLifestyleLogo from '../assets/branding/city-lifestyle-logo.jpg';
+// Same logo file as the Login page.
+import cityLifestyleLogo from '../assets/images/logo/city-lifestyle-logo.jpg';
 
 const menuItems = [
   {

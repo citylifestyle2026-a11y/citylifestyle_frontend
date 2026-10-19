@@ -154,10 +154,18 @@ export default function ContactDetailsModal({ contact, onClose }) {
           </div>
 
           <div className="contactDetailsRow">
-            <span className="contactDetailsLabel">Instagram ID</span>
+            <span className="contactDetailsLabel">Instagram Link</span>
             <span className="contactDetailsColon">:</span>
             <span className="contactDetailsValue">
               <InstagramLink id={contact.instagramId} />
+            </span>
+          </div>
+
+          <div className="contactDetailsRow">
+            <span className="contactDetailsLabel">Relationship</span>
+            <span className="contactDetailsColon">:</span>
+            <span className="contactDetailsValue">
+              {contact.relationship || "-"}
             </span>
           </div>
 
@@ -182,7 +190,7 @@ export default function ContactDetailsModal({ contact, onClose }) {
           </div>
 
           <div className="contactDetailsRow">
-            <span className="contactDetailsLabel">Spouse Instagram ID</span>
+            <span className="contactDetailsLabel">Spouse Instagram Link</span>
             <span className="contactDetailsColon">:</span>
             <span className="contactDetailsValue">
               <InstagramLink id={contact.spouseInstagramId} />
@@ -190,7 +198,7 @@ export default function ContactDetailsModal({ contact, onClose }) {
           </div>
 
           <div className="contactDetailsRow">
-            <span className="contactDetailsLabel">Profession / Occupation</span>
+            <span className="contactDetailsLabel">Spouse Category</span>
             <span className="contactDetailsColon">:</span>
             <span className="contactDetailsValue">
               {contact.profession || "-"}
@@ -198,7 +206,7 @@ export default function ContactDetailsModal({ contact, onClose }) {
           </div>
 
           <div className="contactDetailsRow">
-            <span className="contactDetailsLabel">References</span>
+            <span className="contactDetailsLabel">Reference</span>
             <span className="contactDetailsColon">:</span>
             <span className="contactDetailsValue">
               {references.length === 0 ? (
@@ -229,6 +237,46 @@ export default function ContactDetailsModal({ contact, onClose }) {
                   })}
                 </span>
               )}
+            </span>
+          </div>
+
+          <div className="contactDetailsRow">
+            <span className="contactDetailsLabel">Email</span>
+            <span className="contactDetailsColon">:</span>
+            <span className="contactDetailsValue">
+              {contact.email || "-"}
+            </span>
+          </div>
+
+          <div className="contactDetailsRow">
+            <span className="contactDetailsLabel">City</span>
+            <span className="contactDetailsColon">:</span>
+            <span className="contactDetailsValue">
+              {contact.city || "-"}
+            </span>
+          </div>
+
+          <div className="contactDetailsRow">
+            <span className="contactDetailsLabel">State</span>
+            <span className="contactDetailsColon">:</span>
+            <span className="contactDetailsValue">
+              {contact.state || "-"}
+            </span>
+          </div>
+
+          <div className="contactDetailsRow">
+            <span className="contactDetailsLabel">Source</span>
+            <span className="contactDetailsColon">:</span>
+            <span className="contactDetailsValue">
+              {contact.source || "-"}
+            </span>
+          </div>
+
+          <div className="contactDetailsRow">
+            <span className="contactDetailsLabel">Remark</span>
+            <span className="contactDetailsColon">:</span>
+            <span className="contactDetailsValue">
+              {contact.remark || "-"}
             </span>
           </div>
 
