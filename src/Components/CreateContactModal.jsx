@@ -66,6 +66,12 @@ export default function CreateContactModal({
   // true = the PUBLIC page at /city-lifestyle: no login, shown as a normal
   // page (not a popup), saved through the public API, no admin lists refreshed.
   publicMode = false,
+  // Public page opened from a "Share Form Link": { token, name, remaining }.
+  // The link's name is the Reference (locked), and every submit takes one
+  // place on the link.
+  formLink = null,
+  // Called after a successful link submission (refreshes the places left).
+  onLinkSubmitted = null,
 }) {
   const dispatch = useDispatch();
 
@@ -100,7 +106,7 @@ export default function CreateContactModal({
   // input — same separation as searchTerm/search elsewhere in the
   // project, just for a different purpose (staging one value before it's
   // committed to the list, instead of debouncing).
-  const [references, setReferences] = useState([]);
+  const [references, setReferences] = useState(formLink ? [formLink.name] : []);
   const [referenceInput, setReferenceInput] = useState("");
 
   const [formErrors, setFormErrors] = useState({});
@@ -208,13 +214,16 @@ export default function CreateContactModal({
       });
     } else {
       setFormData(EMPTY_FORM);
-      setReferences([]);
+      // A "Share Form Link" form always starts with the link's name as the
+      // (locked) Reference.
+      setReferences(formLink ? [formLink.name] : []);
       setProfilePhoto(EMPTY_PHOTO);
       setSpousePhoto(EMPTY_PHOTO);
     }
 
     setReferenceInput("");
     setFormErrors({});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEditMode, editContactData]);
 
   // ---- Profile photo / Spouse photo ----
@@ -560,8 +569,9 @@ export default function CreateContactModal({
     if (publicMode) {
       setPublicSaving(true);
       try {
-        await submitPublicContactApi(payload);
+        await submitPublicContactApi(payload, formLink?.token);
         setSubmitted(true);
+        if (onLinkSubmitted) onLinkSubmitted();
       } catch (err) {
         showError(
           err?.response?.data?.message || "Something went wrong. Please try again."
@@ -673,7 +683,7 @@ export default function CreateContactModal({
             className="contactModalCreateButton"
             onClick={() => {
               setFormData(EMPTY_FORM);
-              setReferences([]);
+              setReferences(formLink ? [formLink.name] : []);
               setReferenceInput("");
               setProfilePhoto(EMPTY_PHOTO);
               setSpousePhoto(EMPTY_PHOTO);
@@ -820,7 +830,13 @@ export default function CreateContactModal({
               value={formData.companyCategory}
               onChange={handleChange}
             >
-              <option value="">No category</option>
+              {isEditMode ? (
+                <option value="">No category</option>
+              ) : (
+                <option value="" disabled>
+                  Select Category
+                </option>
+              )}
               {categories.map((category) => (
                 <option key={category._id} value={category._id}>
                   {category.name}
@@ -1047,37 +1063,41 @@ export default function CreateContactModal({
             <label className="contactFieldLabel">
               Reference {!isEditMode && <span className="contactRequired">*</span>}
             </label>
-            <div className="referenceInputRow">
-              <input
-                type="text"
-                className="contactFieldInput"
-                placeholder="Type a reference and press Add"
-                value={referenceInput}
-                onChange={(e) => setReferenceInput(e.target.value)}
-                onKeyDown={handleReferenceKeyDown}
-              />
-              <button
-                type="button"
-                className="referenceAddButton"
-                onClick={handleAddReference}
-              >
-                Add
-              </button>
-            </div>
+            {!formLink && (
+              <div className="referenceInputRow">
+                <input
+                  type="text"
+                  className="contactFieldInput"
+                  placeholder="Type a reference and press Add"
+                  value={referenceInput}
+                  onChange={(e) => setReferenceInput(e.target.value)}
+                  onKeyDown={handleReferenceKeyDown}
+                />
+                <button
+                  type="button"
+                  className="referenceAddButton"
+                  onClick={handleAddReference}
+                >
+                  Add
+                </button>
+              </div>
+            )}
 
             {references.length > 0 && (
               <div className="referenceChipList">
                 {references.map((reference, index) => (
                   <span key={`${reference}-${index}`} className="referenceChip">
                     {reference}
-                    <button
-                      type="button"
-                      className="referenceChipRemove"
-                      onClick={() => handleRemoveReference(index)}
-                      aria-label={`Remove reference ${reference}`}
-                    >
-                      <FaTimes />
-                    </button>
+                    {!formLink && (
+                      <button
+                        type="button"
+                        className="referenceChipRemove"
+                        onClick={() => handleRemoveReference(index)}
+                        aria-label={`Remove reference ${reference}`}
+                      >
+                        <FaTimes />
+                      </button>
+                    )}
                   </span>
                 ))}
               </div>

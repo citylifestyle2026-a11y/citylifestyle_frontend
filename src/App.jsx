@@ -32,6 +32,7 @@ import Admin from "./Pages/Admin";
 import ContactList from "./Pages/ContactList";
 import InviteCards from "./Pages/InviteCards";
 import MemberList from "./Pages/MemberList";
+import FormLinks from "./Pages/FormLinks";
 import EventHistory from "./Pages/EventHistory";
 import CompanyCategory from "./Pages/CompanyCategory";
 import TopProgressLoader from "./Components/TopProgressLoader";
@@ -56,6 +57,7 @@ const privateRoutes = [
   "/contact-list",
   "/invite-cards",
   "/member-list",
+  "/form-links",
   "/event-history",
   "/company-categories",
   // Staff login page — City Lifestyle branding too.
@@ -154,6 +156,7 @@ function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/contact-list" element={<ContactList />} />
             <Route path="/member-list" element={<MemberList />} />
+            <Route path="/form-links" element={<FormLinks />} />
             <Route path="/event-history" element={<EventHistory />} />
             <Route path="/company-categories" element={<CompanyCategory />} />
           </Route>

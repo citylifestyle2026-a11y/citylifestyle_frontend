@@ -1,0 +1,77 @@
+/* Form Links page — the table, header and search reuse CompanyCategory.css
+   (companyCategoryPage__* / companyCategoryAction__*). Only what is new is here. */
+
+.formLinks__cell {
+  font-size: 13.5px;
+}
+
+.formLinks__progressWrap {
+  min-width: 120px;
+}
+
+.formLinks__progress {
+  height: 6px;
+  border-radius: 999px;
+  background: #eceef3;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.formLinks__progress span {
+  display: block;
+  height: 100%;
+  background: var(--admin-accent);
+  border-radius: 999px;
+}
+
+.formLinks__badge {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 3px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.formLinks__badge--active {
+  background: #e3f6ea;
+  color: #1a7f3c;
+}
+
+.formLinks__badge--full {
+  background: #fff1d6;
+  color: #a86400;
+}
+
+.formLinks__badge--closed {
+  background: #eceef3;
+  color: #5f6373;
+}
+
+.formLinks__note {
+  margin: 4px 0 0;
+  color: #7b7e8c;
+  font-size: 12.5px;
+}
+
+/* Table wrapper: the Action menu has 5 items, so (like Guest List) the
+   wrapper keeps room under the last row for it instead of clipping it or
+   showing a scrollbar. */
+.formLinks__tableWrapper {
+  width: 100%;
+  position: relative;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 230px;
+  box-sizing: border-box;
+}
+
+/* Wider than the 2-item Company Category menu so "Send on WhatsApp" fits. */
+.companyCategoryAction__menu.formLinks__menu {
+  width: 200px;
+}
+
+.formLinks__menu a.companyCategoryAction__item {
+  text-decoration: none;
+}

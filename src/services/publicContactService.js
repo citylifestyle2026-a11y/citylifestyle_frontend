@@ -10,7 +10,17 @@ export const getPublicCategoriesApi = async () => {
 };
 
 // `formData` is the same multipart FormData the admin form builds.
-export const submitPublicContactApi = async (formData) => {
-  const response = await publicApi.post("/public/contact", formData);
+// `linkToken` = the token of a "Share Form Link" (counts one place on it).
+export const submitPublicContactApi = async (formData, linkToken = "") => {
+  const response = await publicApi.post("/public/contact", formData, {
+    params: linkToken ? { link: linkToken } : undefined,
+  });
+  return response.data;
+};
+
+// Info for a shared form link: { name, quantity, usedCount, remaining,
+// available, message }
+export const getPublicFormLinkApi = async (token) => {
+  const response = await publicApi.get(`/public/contact/link/${token}`);
   return response.data;
 };

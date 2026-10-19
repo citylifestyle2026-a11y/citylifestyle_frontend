@@ -1,4 +1,7 @@
+import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import CreateContactModal from "../Components/CreateContactModal";
+import { getPublicFormLinkApi } from "../services/publicContactService";
 import "../assets/CSS/PublicContactForm.css";
 
 // Images live in /public/assets/images/site (same folder the marketing site uses).
@@ -11,7 +14,83 @@ const parvHero = `${IMG}/parav_image.png`;
 // Create Contact (CreateContactModal in publicMode); this page only wraps it
 // in the "पर्व by City Toppers" design: logo header, event banner, tagline
 // strip, then the form below.
+//
+// "Share Form Link": /form?link=<token> opens the same form, but limited to
+// the quantity the admin chose. The link's name is filled in as the Reference
+// (locked) and the form closes after the last place is taken.
 export default function PublicContactForm() {
+  const [searchParams] = useSearchParams();
+  const token = (searchParams.get("link") || "").trim();
+
+  const [linkInfo, setLinkInfo] = useState(null);
+  const [linkLoading, setLinkLoading] = useState(Boolean(token));
+  const [linkError, setLinkError] = useState("");
+  const [justSubmitted, setJustSubmitted] = useState(false);
+
+  const loadLink = useCallback(async () => {
+    if (!token) return;
+    try {
+      const res = await getPublicFormLinkApi(token);
+      setLinkInfo(res?.data || null);
+      setLinkError("");
+    } catch (err) {
+      setLinkError(err?.response?.data?.message || "This form link is not valid.");
+    } finally {
+      setLinkLoading(false);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    loadLink();
+  }, [loadLink]);
+
+  const renderBody = () => {
+    if (!token) return <CreateContactModal publicMode onClose={() => {}} />;
+
+    if (linkLoading) {
+      return <p className="cityFormLinkNote">Loading...</p>;
+    }
+
+    if (linkError) {
+      return (
+        <div className="cityFormLinkNote cityFormLinkNote--blocked">
+          <h2>Link not available</h2>
+          <p>{linkError}</p>
+        </div>
+      );
+    }
+
+    if (!linkInfo?.available) {
+      return (
+        <div className="cityFormLinkNote cityFormLinkNote--blocked">
+          <h2>{justSubmitted ? "Thank you!" : "Form closed"}</h2>
+          <p>
+            {justSubmitted
+              ? "Your details have been submitted successfully. All places on this link are now filled."
+              : linkInfo?.message || "This form link is closed."}
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <p className="cityFormLinkNote">
+          {linkInfo.remaining} of {linkInfo.quantity} places left
+        </p>
+        <CreateContactModal
+          publicMode
+          onClose={() => {}}
+          formLink={{ token, name: linkInfo.name }}
+          onLinkSubmitted={() => {
+            setJustSubmitted(true);
+            loadLink();
+          }}
+        />
+      </>
+    );
+  };
+
   return (
     <div className="cityForm">
       <header className="cityFormHeader">
@@ -45,7 +124,7 @@ export default function PublicContactForm() {
       </section>
 
       <main className="cityFormBody">
-        <CreateContactModal publicMode onClose={() => {}} />
+        {renderBody()}
       </main>
     </div>
   );

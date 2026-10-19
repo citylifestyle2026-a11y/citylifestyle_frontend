@@ -8,7 +8,7 @@ import {
   MdKeyboardArrowDown,
 } from 'react-icons/md';
 
-import { FaUsers, FaAddressBook, FaUserFriends, FaEnvelopeOpenText } from 'react-icons/fa';
+import { FaUsers, FaAddressBook, FaUserFriends, FaEnvelopeOpenText, FaLink } from 'react-icons/fa';
 
 import {
   BsCalendarEventFill,
@@ -53,6 +53,11 @@ const menuItems = [
       // the Contact itself from a dropdown inside the modal.
       { label: 'Event History', path: '/event-history' },
     ],
+  },
+  {
+    label: 'Form Links',
+    icon: <FaLink />,
+    path: '/form-links',
   },
   {
     label: 'Invitation Cards',
