@@ -1,7 +1,7 @@
 import api from "../api/axios";
 
 // "Form Links" module (sidebar) — admin side.
-// target: "contact" (Guest List) | "member" (Member List)
+// target: "contact" (Guest List) | "member" (Contact Book)
 
 export const createFormLinkApi = async (data) => {
   const response = await api.post("/form-links", data);

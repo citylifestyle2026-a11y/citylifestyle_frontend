@@ -49,6 +49,8 @@ import {
   deleteContactBookingApi,
   cancelContactPassApi,
 } from "../services/contactService";
+import MergeMemberModal from "../Components/MergeMemberModal";
+import DuplicateTab from "../Components/DuplicateTab";
 import { confirmDialog, noticeDialog } from "../utilits/appSwal";
 import "../assets/CSS/ContactList.css";
 
@@ -79,6 +81,8 @@ const STATUS_TABS = [
   { value: "rejected", label: "Rejected", countKey: "rejected" },
   // Guests whose pass was cancelled (also counted under Rejected).
   { value: "passCancelled", label: "Pass Cancelled", countKey: "passCancelled" },
+  // Form submissions whose WhatsApp number is already in the Guest List.
+  { value: "duplicate", label: "Duplicate", countKey: "duplicate" },
 ];
 
 const STATUS_LABELS = {
@@ -155,6 +159,8 @@ export default function ContactList() {
 
   // Tracks which row's Action dropdown is currently open.
   const [openActionMenuId, setOpenActionMenuId] = useState(null);
+  // Guest whose Merge & Sync popup is open.
+  const [mergeContact, setMergeContact] = useState(null);
   // Contact whose pass is currently being re-sent (disables its menu item).
   const [resendBusyId, setResendBusyId] = useState(null);
 
@@ -204,7 +210,7 @@ export default function ContactList() {
     if (categoryFilter) params.companyCategory = categoryFilter;
     if (referenceFilter.length) params.reference = referenceFilter;
     if (statusFilter === "passCancelled") params.passStatus = "cancelled";
-    else if (statusFilter) params.approvalStatus = statusFilter;
+    else if (statusFilter && statusFilter !== "duplicate") params.approvalStatus = statusFilter;
     if (editionFilter) params.editionEventId = editionFilter;
 
     dispatch(getAllContacts(params));
@@ -307,7 +313,7 @@ export default function ContactList() {
     if (categoryFilter) params.companyCategory = categoryFilter;
     if (referenceFilter.length) params.reference = referenceFilter;
     if (statusFilter === "passCancelled") params.passStatus = "cancelled";
-    else if (statusFilter) params.approvalStatus = statusFilter;
+    else if (statusFilter && statusFilter !== "duplicate") params.approvalStatus = statusFilter;
     if (editionFilter) params.editionEventId = editionFilter;
 
     dispatch(exportContacts(params));
@@ -376,7 +382,7 @@ export default function ContactList() {
       if (categoryFilter) params.companyCategory = categoryFilter;
       if (referenceFilter.length) params.reference = referenceFilter;
       if (statusFilter === "passCancelled") params.passStatus = "cancelled";
-    else if (statusFilter) params.approvalStatus = statusFilter;
+    else if (statusFilter && statusFilter !== "duplicate") params.approvalStatus = statusFilter;
       if (editionFilter) params.editionEventId = editionFilter;
 
       dispatch(getAllContacts(params));
@@ -576,6 +582,12 @@ export default function ContactList() {
     },
     [dispatch, statusBusy]
   );
+
+  // Opens the Merge & Sync popup (Guest List row + Contact Book row, same number).
+  const handleMergeMember = useCallback((contact) => {
+    setOpenActionMenuId(null);
+    setMergeContact(contact);
+  }, []);
 
   // Cancels the pass of approved guest(s): the QR stops working, the guest
   // moves to Rejected and receives a "your pass has been cancelled"
@@ -1209,6 +1221,16 @@ const sortedReferenceFilterOptions = useMemo(
                 </button>
               )}
 
+              {contact.memberMatch && (
+                <button
+                  type="button"
+                  className="contactAction__item contactAction__itemApprove"
+                  onClick={() => handleMergeMember(contact)}
+                >
+                  Merge &amp; Sync
+                </button>
+              )}
+
               <button
                 type="button"
                 className="contactAction__item contactAction__itemEdit"
@@ -1246,6 +1268,7 @@ const sortedReferenceFilterOptions = useMemo(
     handleToggleSelect,
     handleChangeStatus,
     handleCancelPass,
+    handleMergeMember,
     handleOpenPass,
   ]);
 
@@ -1257,6 +1280,13 @@ const sortedReferenceFilterOptions = useMemo(
       headerTitle="Guest List"
       outsideMainArea={
         <>
+          {mergeContact && (
+            <MergeMemberModal
+              contact={mergeContact}
+              onClose={() => setMergeContact(null)}
+              onDone={() => setRefreshKey((key) => key + 1)}
+            />
+          )}
           {isFormModalOpen && (
             <div
               tabIndex={-1}
@@ -1418,7 +1448,11 @@ const sortedReferenceFilterOptions = useMemo(
           ))}
         </div>
 
-        {selectedCount > 0 && (
+        {statusFilter === "duplicate" && (
+          <DuplicateTab onChanged={() => setRefreshKey((key) => key + 1)} />
+        )}
+
+        {statusFilter !== "duplicate" && selectedCount > 0 && (
           <div className="contactPage__bulkBar">
             <span className="contactPage__bulkCount">
               {selectedCount} selected
@@ -1493,6 +1527,7 @@ const sortedReferenceFilterOptions = useMemo(
           </div>
         )}
 
+        {statusFilter !== "duplicate" && (<>
         <div className="contactPage__tableControls">
           <CommonSelect
             className="contactPage__rowsSelect"
@@ -1601,6 +1636,7 @@ const sortedReferenceFilterOptions = useMemo(
           prevDisabled={currentPage === 1}
           nextDisabled={currentPage === resolvedTotalPages}
         />
+        </>)}
       </div>
     </CommonListLayout>
   );

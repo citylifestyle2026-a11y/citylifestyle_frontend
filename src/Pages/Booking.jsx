@@ -789,7 +789,7 @@ const Booking = () => {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={10} className="bookingPage-stateCell">
+                        <td colSpan={10} className="commonEmptyState__cell">
                           <CommonEmptyState
                             wrapperClassName="bookingPage-stateWrap"
                             textClassName="bookingPage-stateText"

@@ -61,14 +61,24 @@ export default function PublicContactForm() {
     }
 
     if (!linkInfo?.available) {
+      if (justSubmitted) {
+        return (
+          <div className="cityFormLinkNote cityFormLinkNote--blocked">
+            <h2>Thank you!</h2>
+            <p>Your details have been received successfully.</p>
+            <p>
+              Our team will review your submission and get back to you shortly to let you know
+              whether your participation in Parv is confirmed (Yes / No). We will contact you on
+              the WhatsApp number you have provided.
+            </p>
+          </div>
+        );
+      }
+
       return (
         <div className="cityFormLinkNote cityFormLinkNote--blocked">
-          <h2>{justSubmitted ? "Thank you!" : "Form closed"}</h2>
-          <p>
-            {justSubmitted
-              ? "Your details have been submitted successfully. All places on this link are now filled."
-              : linkInfo?.message || "This form link is closed."}
-          </p>
+          <h2>Form closed</h2>
+          <p>{linkInfo?.message || "This form link is closed."}</p>
         </div>
       );
     }

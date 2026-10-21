@@ -36,7 +36,7 @@ const initialState = {
   referenceSummaryError: null,
 
   // Numbers on the Pending / Approved / Rejected filter tabs.
-  statusCounts: { all: 0, pending: 0, approved: 0, rejected: 0 },
+  statusCounts: { all: 0, pending: 0, approved: 0, rejected: 0, passCancelled: 0, duplicate: 0 },
 
   // Isolated from the main loading/error pair, same reasoning as
   // uniqueReferences/referenceSummary above — an in-flight or failed

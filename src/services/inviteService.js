@@ -22,9 +22,20 @@ export const resetStuckInviteApi = async () =>
 export const deleteInviteGuestsApi = async (ids) =>
   (await api.post("/invite-guests/delete", { ids })).data;
 
-// Returns a PNG Blob of the card with the given name written on it.
+// Returns a JPG Blob of the card with the given name written on it.
 export const previewInviteCardApi = async (name) =>
   (await api.get("/invite-guests/preview", { params: { name }, responseType: "blob" })).data;
+
+// ----- the card design (JPG / PNG uploaded by the admin) -----
+export const getInviteDesignApi = async () => (await api.get("/invite-guests/design")).data;
+
+export const uploadInviteDesignApi = async (file) => {
+  const formData = new FormData();
+  formData.append("design", file);
+  return (await api.post("/invite-guests/design", formData)).data;
+};
+
+export const removeInviteDesignApi = async () => (await api.delete("/invite-guests/design")).data;
 
 export const createInviteGuestApi = async (data) =>
   (await api.post("/invite-guests", data)).data;

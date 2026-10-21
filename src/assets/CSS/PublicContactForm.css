@@ -368,6 +368,17 @@
   color: rgba(255, 255, 255, 0.75);
 }
 
+.cityForm .publicContactThanks .publicContactThanksNote {
+  max-width: 460px;
+  margin: 12px auto 24px;
+  line-height: 1.65;
+  font-size: 14.5px;
+}
+
+.cityForm .publicContactThanks .publicContactThanksNote b {
+  color: #fff;
+}
+
 /* placeholders: lighter + smaller than typed text */
 .cityForm .contactFieldInput::placeholder {
   font-size: 11px;
@@ -478,4 +489,9 @@
 .cityFormLinkNote--blocked p {
   margin: 0;
   font-weight: 400;
+}
+
+.cityFormLinkNote--blocked p + p {
+  margin-top: 10px;
+  line-height: 1.6;
 }

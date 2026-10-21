@@ -708,8 +708,15 @@ export default function CreateContactModal({
       <div className="publicContactPage">
         <div className="createContactModal publicContactCard publicContactThanks">
           <div className="contactModalBadge" aria-hidden="true">&#9733;</div>
-          <h2 className="contactModalTitle">Thank you!</h2>
-          <p>Your details have been submitted successfully.</p>
+          <h2 className="contactModalTitle">
+            Thank you{formData.fullName.trim() ? `, ${formData.fullName.trim().split(" ")[0]}` : ""}!
+          </h2>
+          <p>Your details have been received successfully.</p>
+          <p className="publicContactThanksNote">
+            Our team will review your submission and get back to you shortly to let you know
+            whether your participation in <b>Parv</b> is confirmed (Yes / No). We will contact you
+            on the WhatsApp number you have provided.
+          </p>
           <button
             type="button"
             className="contactModalCreateButton"

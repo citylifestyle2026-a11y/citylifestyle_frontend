@@ -1,5 +1,6 @@
 import { memo } from "react";
 import { FaSort } from "react-icons/fa";
+import CommonEmptyState from "./CommonEmptyState";
 
 /**
  * CommonTable
@@ -126,8 +127,12 @@ function CommonTable({
 
         {!loading && !error && data.length === 0 && (
           <tr>
-            <td colSpan={colSpan} className={stateCellClassName} style={stateCellStyle}>
-              {emptyMessage}
+            <td colSpan={colSpan} className="commonEmptyState__cell">
+              {typeof emptyMessage === "string" ? (
+                <CommonEmptyState message={emptyMessage} />
+              ) : (
+                emptyMessage
+              )}
             </td>
           </tr>
         )}

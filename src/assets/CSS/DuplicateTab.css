@@ -1,0 +1,167 @@
+.dupTab,
+.dupTab * {
+  font-family: "Poppins", sans-serif;
+  box-sizing: border-box;
+}
+
+.dupTab__hint {
+  margin: 4px 0 16px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #fff7e6;
+  color: #8a5a00;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.dupTab__controls {
+  display: flex;
+  margin-bottom: 14px;
+}
+
+.dupTab__search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 320px;
+  max-width: 100%;
+  padding: 0 14px;
+  height: 42px;
+  border: 1px solid #e6e8ef;
+  border-radius: 10px;
+  color: #8b91a3;
+  background: #fff;
+}
+
+.dupTab__search input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  background: transparent;
+  color: #1e2432;
+}
+
+.dupTab__tableWrap {
+  overflow-x: auto;
+  min-height: 220px;
+}
+
+.dupTab__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  color: #1e2432;
+}
+
+.dupTab__table th {
+  text-align: left;
+  padding: 12px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #6b7185;
+  border-bottom: 1px solid #e6e8ef;
+  white-space: nowrap;
+}
+
+.dupTab__table td {
+  padding: 14px 10px;
+  border-bottom: 1px solid #f0f1f5;
+  vertical-align: middle;
+}
+
+.dupTab__name {
+  font-weight: 600;
+}
+
+.dupTab__state {
+  text-align: center;
+  padding: 48px 10px !important;
+  color: #8b91a3;
+}
+
+.dupTab__state--error {
+  color: #e5484d;
+}
+
+.dupTab__badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #e6f6ec;
+  color: #1f8a4c;
+}
+
+.dupTab__badge--pending {
+  background: #fff3dc;
+  color: #b7791f;
+}
+
+.dupTab__badge--rejected {
+  background: #fde8e9;
+  color: #d23b40;
+}
+
+.dupTab__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.dupTab__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.dupTab__btn--fix {
+  background: var(--admin-accent, #4f8fd6);
+  color: #fff;
+}
+
+.dupTab__btn--ignore {
+  background: #fff;
+  color: #d23b40;
+  border-color: #f3c4c6;
+}
+
+.dupTab__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+  font-size: 13px;
+  color: #6b7185;
+}
+
+.dupTab__pager {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dupTab__pager button {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid #e6e8ef;
+  background: #fff;
+  cursor: pointer;
+}
+
+.dupTab__pager button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

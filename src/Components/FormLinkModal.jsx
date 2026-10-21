@@ -20,7 +20,6 @@ export default function FormLinkModal({ onClose, onSaved, link = null }) {
 
   const [name, setName] = useState(link?.name || "");
   const [quantity, setQuantity] = useState(link ? String(link.quantity) : "");
-  const [target, setTarget] = useState(link?.target || "contact");
   const [status, setStatus] = useState(link?.status || "active");
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
@@ -58,7 +57,6 @@ export default function FormLinkModal({ onClose, onSaved, link = null }) {
     const payload = {
       name: name.replace(/\s+/g, " ").trim(),
       quantity: Number(quantity),
-      target,
     };
 
     setSaving(true);
@@ -144,18 +142,11 @@ export default function FormLinkModal({ onClose, onSaved, link = null }) {
           </div>
 
           <div className="fieldGroup fieldGroupFull">
-            <label className="fieldLabel" htmlFor="flTarget">
-              Add the data to
-            </label>
-            <select
-              id="flTarget"
-              className="fieldInput"
-              value={target}
-              onChange={(e) => setTarget(e.target.value)}
-            >
-              <option value="contact">Guest List</option>
-              <option value="member">Contact Book</option>
-            </select>
+            <p className="formLinks__note">
+              Everyone who fills this form is added to the Guest List and the Contact Book (if the
+              number is not already in the Contact Book). A number already in the Guest List is
+              refused as "already exists".
+            </p>
           </div>
 
           {isEdit && (

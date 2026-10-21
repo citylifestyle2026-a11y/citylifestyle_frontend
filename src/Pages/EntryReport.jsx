@@ -1186,7 +1186,7 @@ export default function EntryReport() {
               {/* Empty state */}
               {!loading && !errorMessage && rows.length === 0 && (
                 <tr className="erPage__emptyRow">
-                  <td colSpan={columnCount} className="erPage__emptyCell">
+                  <td colSpan={columnCount} className="commonEmptyState__cell">
                     <CommonEmptyState
                       wrapperClassName="erPage__emptyState"
                       textClassName="erPage__emptyText"

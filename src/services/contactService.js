@@ -153,3 +153,45 @@ export const cancelContactPassApi = async (data) => {
   const response = await api.post("/contacts/cancel-pass", data);
   return response.data;
 };
+
+// ================= MERGE & SYNC WITH CONTACT BOOK =================
+// Both versions of every field of a Guest List row and the Contact Book member
+// that has the same WhatsApp number (GET /contacts/:id/merge-preview).
+export const getMergePreviewApi = async (id) => {
+  const response = await api.get(`/contacts/${id}/merge-preview`);
+  return response.data;
+};
+
+// Merges and syncs both rows (POST /contacts/:id/merge-member).
+// choices: { [fieldKey]: "contact" | "member" } for the fields that differ.
+export const mergeContactWithMemberApi = async (id, choices = {}) => {
+  const response = await api.post(`/contacts/${id}/merge-member`, { choices });
+  return response.data;
+};
+
+// ================= DUPLICATE TAB (FORM SUBMISSIONS WITH A KNOWN NUMBER) =================
+// Public-form submissions whose WhatsApp number is already in the Guest List.
+// params: { page, limit, search }
+export const getDuplicatesApi = async (params = {}) => {
+  const response = await api.get("/contacts/duplicates", { params });
+  return response.data;
+};
+
+// Existing guest vs new submission, field by field.
+export const getDuplicatePreviewApi = async (id) => {
+  const response = await api.get(`/contacts/duplicates/${id}/preview`);
+  return response.data;
+};
+
+// Writes the chosen values into the Guest List row (+ Contact Book row).
+// choices: { [fieldKey]: "existing" | "new" } for the fields that differ.
+export const fixDuplicateApi = async (id, choices = {}) => {
+  const response = await api.post(`/contacts/duplicates/${id}/fix`, { choices });
+  return response.data;
+};
+
+// Throws the submission away.
+export const ignoreDuplicateApi = async (id) => {
+  const response = await api.delete(`/contacts/duplicates/${id}`);
+  return response.data;
+};

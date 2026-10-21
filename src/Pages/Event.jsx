@@ -348,7 +348,7 @@ const Event = () => {
                     </tr>
                   ) : events.length === 0 ? (
                     <tr>
-                      <td colSpan="9" style={{ textAlign: "center" }}>
+                      <td colSpan="9" className="commonEmptyState__cell">
                         <CommonEmptyState
                           wrapperClassName="bookingPage-stateWrap"
                           textClassName="bookingPage-stateText"

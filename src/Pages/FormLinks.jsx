@@ -28,12 +28,6 @@ import "../assets/CSS/FormLinks.css";
 
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100].map((n) => ({ value: n, label: String(n) }));
 
-const TARGET_OPTIONS = [
-  { value: "", label: "All lists" },
-  { value: "contact", label: "Guest List" },
-  { value: "member", label: "Contact Book" },
-];
-const TARGET_LABEL = { contact: "Guest List", member: "Contact Book" };
 const STATE_LABEL = { active: "Open", full: "Full", closed: "Closed" };
 
 // Only these are sortable on the server (see SORTABLE in formLink.service.js).
@@ -55,7 +49,6 @@ export default function FormLinks() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [search, setSearch] = useState("");
-  const [targetFilter, setTargetFilter] = useState("");
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("desc");
   const [refreshKey, setRefreshKey] = useState(0);
@@ -84,7 +77,6 @@ export default function FormLinks() {
       page: currentPage,
       limit: rowsPerPage,
       search,
-      target: targetFilter || undefined,
       sortBy,
       sortOrder,
     })
@@ -106,7 +98,7 @@ export default function FormLinks() {
     return () => {
       cancelled = true;
     };
-  }, [currentPage, rowsPerPage, search, targetFilter, sortBy, sortOrder, refreshKey]);
+  }, [currentPage, rowsPerPage, search, sortBy, sortOrder, refreshKey]);
 
   // Close the Action dropdown on an outside click.
   const actionMenuRef = useRef(null);
@@ -233,7 +225,7 @@ export default function FormLinks() {
           );
         },
       }),
-      col("target", "Added to", { render: (link) => TARGET_LABEL[link.target] || "-" }),
+      col("target", "Added to", { sortable: false, render: () => "Guest List + Contact Book" }),
       col("state", "Status", {
         render: (link) => (
           <span className={`formLinks__badge formLinks__badge--${link.state}`}>
@@ -384,16 +376,6 @@ export default function FormLinks() {
               setCurrentPage(1);
             }}
             options={ROWS_PER_PAGE_OPTIONS}
-          />
-
-          <CommonSelect
-            className="companyCategoryPage__rowsSelect"
-            value={targetFilter}
-            onChange={(e) => {
-              setTargetFilter(e.target.value);
-              setCurrentPage(1);
-            }}
-            options={TARGET_OPTIONS}
           />
 
           <CommonSearch
