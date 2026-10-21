@@ -95,9 +95,50 @@ export const bulkUpdateContactStatusApi = async (data) => {
 
 // ================= SEND PASS (WHATSAPP) =================
 // body: { ids: string[], eventId, ticketTypeId }
+//
+// Sent in small chunks: every pass creates a booking + QR + WhatsApp message
+// (a few seconds each), so one huge request would hit the browser / server
+// timeout while the server keeps going. Results of all chunks are merged
+// into ONE response of the same shape, so callers do not change. A chunk that
+// fails (network / timeout) is reported as failed for its guests; a guest who
+// already got a pass is never sent a second one (the server checks that).
+const SEND_PASS_CHUNK = 10;
+
 export const sendContactPassApi = async (data) => {
-  const response = await api.post("/contacts/send-pass", data);
-  return response.data;
+  const ids = Array.isArray(data?.ids) ? data.ids : [];
+  const results = [];
+
+  for (let i = 0; i < ids.length; i += SEND_PASS_CHUNK) {
+    const chunk = ids.slice(i, i + SEND_PASS_CHUNK);
+    try {
+      const response = await api.post(
+        "/contacts/send-pass",
+        { ...data, ids: chunk },
+        { timeout: 180000 }
+      );
+      results.push(...(response.data?.data?.results || []));
+    } catch (error) {
+      // A request-level error with a message from the server (for example
+      // "Please select an event.") applies to every chunk: stop right away.
+      if (error?.response?.status && error.response.status < 500 && i === 0) throw error;
+      const message =
+        error?.response?.data?.message ||
+        "No answer from the server - check Pass sent status before sending again.";
+      chunk.forEach((id) => results.push({ id, name: "-", status: "failed", message }));
+    }
+  }
+
+  const sent = results.filter((r) => r.status === "sent").length;
+  const failed = results.length - sent;
+
+  return {
+    success: true,
+    message:
+      failed === 0
+        ? `Pass sent to ${sent} contact${sent === 1 ? "" : "s"}.`
+        : `Pass sent to ${sent}, failed for ${failed}.`,
+    data: { sent, failed, results },
+  };
 };
 
 // ================= DELETE BOOKING (PASS) =================
@@ -140,8 +181,12 @@ export const importContactsCsvApi = async (
   formData.append("approvalStatus", approvalStatus);
   formData.append("file", file);
 
+  // ~1500 rows are saved one by one on the server, which can take longer
+  // than the default 30 s request timeout (the import would still finish
+  // there while the page showed an error), so this request has no timeout.
   const response = await api.post("/contacts/import-csv", formData, {
     params: dryRun ? { dryRun: true } : undefined,
+    timeout: 0,
   });
   return response.data;
 };
@@ -193,5 +238,19 @@ export const fixDuplicateApi = async (id, choices = {}) => {
 // Throws the submission away.
 export const ignoreDuplicateApi = async (id) => {
   const response = await api.delete(`/contacts/duplicates/${id}`);
+  return response.data;
+};
+
+
+// Bulk Duplicate actions. body: { ids: string[] } or { all: true, search }.
+// bulk-fix keeps the Guest List value where details differ, fills the empty
+// fields from the form and syncs the Contact Book.
+export const bulkFixDuplicatesApi = async (body) => {
+  const response = await api.post("/contacts/duplicates/bulk-fix", body, { timeout: 0 });
+  return response.data;
+};
+
+export const bulkIgnoreDuplicatesApi = async (body) => {
+  const response = await api.post("/contacts/duplicates/bulk-ignore", body, { timeout: 0 });
   return response.data;
 };

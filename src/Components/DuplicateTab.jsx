@@ -2,7 +2,13 @@ import { useCallback, useEffect, useState } from "react";
 import { FaSearch, FaCodeBranch, FaTrashAlt } from "react-icons/fa";
 
 import DuplicateFixModal from "./DuplicateFixModal";
-import { getDuplicatesApi, ignoreDuplicateApi } from "../services/contactService";
+import CommonEmptyState from "./CommonEmptyState";
+import {
+  getDuplicatesApi,
+  ignoreDuplicateApi,
+  bulkFixDuplicatesApi,
+  bulkIgnoreDuplicatesApi,
+} from "../services/contactService";
 import { confirmDialog } from "../utilits/appSwal";
 import { showError, showSuccess } from "../utilits/toast";
 import { getErrorText } from "../utilits/apiError";
@@ -29,6 +35,9 @@ export default function DuplicateTab({ onChanged }) {
   const [error, setError] = useState("");
   const [fixRow, setFixRow] = useState(null);
   const [reloadKey, setReloadKey] = useState(0);
+  const [selected, setSelected] = useState([]); // ids on screen
+  const [selectAllMatching, setSelectAllMatching] = useState(false); // every row of the search
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -64,6 +73,79 @@ export default function DuplicateTab({ onChanged }) {
     setReloadKey((k) => k + 1);
     onChanged?.();
   }, [onChanged]);
+
+  const pageIds = rows.map((r) => r._id);
+  const allOnPageSelected = pageIds.length > 0 && pageIds.every((id) => selected.includes(id));
+  const selectedCount = selectAllMatching ? total : selected.length;
+
+  const clearSelection = () => {
+    setSelected([]);
+    setSelectAllMatching(false);
+  };
+
+  // Selection never survives a page / search change (it would be confusing).
+  useEffect(() => {
+    setSelected([]);
+    setSelectAllMatching(false);
+  }, [page, debounced]);
+
+  const toggleOne = (id) => {
+    setSelectAllMatching(false);
+    setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  };
+
+  const togglePage = () => {
+    setSelectAllMatching(false);
+    setSelected(allOnPageSelected ? [] : pageIds);
+  };
+
+  const bulkBody = () => (selectAllMatching ? { all: true, search: debounced } : { ids: selected });
+
+  const handleBulkFix = async () => {
+    if (busy || selectedCount === 0) return;
+    const ok = await confirmDialog({
+      title: `Fix ${selectedCount} duplicate${selectedCount === 1 ? "" : "s"}?`,
+      text: "Details are NOT asked one by one. Where the details differ the Guest List value is kept (a longer name wins), empty fields are filled from the form, references are joined, and the Contact Book is synced.",
+      confirmText: "Yes, fix & sync",
+      tone: "info",
+    });
+    if (!ok) return;
+    setBusy(true);
+    try {
+      const res = await bulkFixDuplicatesApi(bulkBody());
+      showSuccess(res.message || "Fixed");
+      clearSelection();
+      setPage(1);
+      refresh();
+    } catch (err) {
+      showError(getErrorText(err, "Bulk fix failed."));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleBulkIgnore = async () => {
+    if (busy || selectedCount === 0) return;
+    const ok = await confirmDialog({
+      title: `Ignore ${selectedCount} duplicate${selectedCount === 1 ? "" : "s"}?`,
+      text: "These form submissions will be removed. The Guest List is not changed.",
+      confirmText: "Yes, ignore",
+      tone: "danger",
+    });
+    if (!ok) return;
+    setBusy(true);
+    try {
+      const res = await bulkIgnoreDuplicatesApi(bulkBody());
+      showSuccess(res.message || "Removed");
+      clearSelection();
+      setPage(1);
+      refresh();
+    } catch (err) {
+      showError(getErrorText(err, "Bulk ignore failed."));
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const handleIgnore = async (row) => {
     const ok = await confirmDialog({
@@ -108,10 +190,35 @@ export default function DuplicateTab({ onChanged }) {
         </div>
       </div>
 
+      {selectedCount > 0 && (
+        <div className="dupTab__bulkBar">
+          <span>
+            <b>{selectedCount}</b> selected
+            {!selectAllMatching && allOnPageSelected && total > rows.length && (
+              <button type="button" className="dupTab__linkBtn" onClick={() => setSelectAllMatching(true)}>
+                Select all {total} duplicates
+              </button>
+            )}
+          </span>
+          <div className="dupTab__actions">
+            <button type="button" className="dupTab__btn dupTab__btn--fix" disabled={busy} onClick={handleBulkFix}>
+              <FaCodeBranch /> {busy ? "Working..." : "Fix & Sync selected"}
+            </button>
+            <button type="button" className="dupTab__btn dupTab__btn--ignore" disabled={busy} onClick={handleBulkIgnore}>
+              <FaTrashAlt /> Ignore selected
+            </button>
+            <button type="button" className="dupTab__btn" disabled={busy} onClick={clearSelection}>Clear</button>
+          </div>
+        </div>
+      )}
+
       <div className="dupTab__tableWrap">
         <table className="dupTab__table">
           <thead>
             <tr>
+              <th className="dupTab__check">
+                <input type="checkbox" checked={allOnPageSelected} onChange={togglePage} aria-label="Select all on this page" />
+              </th>
               <th>Full Name</th>
               <th>WhatsApp Number</th>
               <th>Company Name</th>
@@ -125,17 +232,29 @@ export default function DuplicateTab({ onChanged }) {
           </thead>
           <tbody>
             {loading && rows.length === 0 && (
-              <tr><td colSpan={9} className="dupTab__state">Loading duplicates...</td></tr>
+              <tr><td colSpan={10} className="dupTab__state">Loading duplicates...</td></tr>
             )}
             {!loading && error && (
-              <tr><td colSpan={9} className="dupTab__state dupTab__state--error">{error}</td></tr>
+              <tr><td colSpan={10} className="dupTab__state dupTab__state--error">{error}</td></tr>
             )}
             {!loading && !error && rows.length === 0 && (
-              <tr><td colSpan={9} className="dupTab__state">No duplicates. Everything is in sync.</td></tr>
+              <tr>
+                <td colSpan={10} className="dupTab__state">
+                  <CommonEmptyState message="No duplicates. Everything is in sync." />
+                </td>
+              </tr>
             )}
 
             {rows.map((row) => (
               <tr key={row._id}>
+                <td className="dupTab__check">
+                  <input
+                    type="checkbox"
+                    checked={selectAllMatching || selected.includes(row._id)}
+                    onChange={() => toggleOne(row._id)}
+                    aria-label={`Select ${row.fullName || row.whatsappNumber}`}
+                  />
+                </td>
                 <td className="dupTab__name">{row.fullName || "-"}</td>
                 <td>{row.whatsappNumber || "-"}</td>
                 <td>{row.companyName || "-"}</td>
@@ -154,7 +273,10 @@ export default function DuplicateTab({ onChanged }) {
                     "-"
                   )}
                 </td>
-                <td>{formatDateTime(row.createdAt)}</td>
+                <td>
+                  {formatDateTime(row.updatedAt || row.createdAt)}
+                  {row.submissionCount > 1 && <span className="dupTab__times"> x{row.submissionCount}</span>}
+                </td>
                 <td>
                   <div className="dupTab__actions">
                     <button type="button" className="dupTab__btn dupTab__btn--fix" onClick={() => setFixRow(row)}>

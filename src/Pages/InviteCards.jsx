@@ -29,6 +29,7 @@ import {
   previewInviteCardApi,
   getInviteDesignApi,
   uploadInviteDesignApi,
+  saveInviteNameStyleApi,
   removeInviteDesignApi,
   createInviteGuestApi,
   updateInviteGuestApi,
@@ -47,6 +48,7 @@ const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, 100].map((n) => ({ value: n, label: S
 
 const SAMPLE_CSV = "name,mobile\nRahul Shah,9876543210\nPooja Patel,9123456780\n";
 
+const DEFAULT_STYLE = { topPct: 48, centerXPct: 50, fontSizePct: 5.2, color: "#C9A24B" };
 const MAX_DESIGN_MB = 15;
 const DESIGN_EXTS = [".jpg", ".jpeg", ".png", ".webp"];
 
@@ -111,6 +113,18 @@ export default function InviteCards() {
   const [design, setDesign] = useState(null); // { hasDesign, width, height, originalName, updatedAt }
   const [designBusy, setDesignBusy] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
+  // Where the guest's name is written on the card (saved per design).
+  const [style, setStyle] = useState(DEFAULT_STYLE);
+  const [savedStyle, setSavedStyle] = useState(DEFAULT_STYLE);
+  const [savingStyle, setSavingStyle] = useState(false);
+
+  const applyDesign = useCallback((info) => {
+    setDesign(info);
+    const next = { ...DEFAULT_STYLE, ...(info?.nameStyle || {}) };
+    setStyle(next);
+    setSavedStyle(next);
+  }, []);
+  const styleChanged = JSON.stringify(style) !== JSON.stringify(savedStyle);
   const [previewName, setPreviewName] = useState("Rahul Shah");
   const [previewUrl, setPreviewUrl] = useState("");
   const [previewLoading, setPreviewLoading] = useState(false);
@@ -177,7 +191,7 @@ export default function InviteCards() {
   // ---------- design ----------
   useEffect(() => {
     getInviteDesignApi()
-      .then((res) => setDesign(res.data))
+      .then((res) => applyDesign(res.data))
       .catch(() => {});
   }, []);
 
@@ -199,7 +213,7 @@ export default function InviteCards() {
     setDesignBusy(true);
     try {
       const res = await uploadInviteDesignApi(file);
-      setDesign(res.data);
+      applyDesign(res.data);
       showSuccess(res.message);
       setPreviewOpen(true);
     } catch (err) {
@@ -221,7 +235,7 @@ export default function InviteCards() {
     setDesignBusy(true);
     try {
       const res = await removeInviteDesignApi();
-      setDesign(res.data);
+      applyDesign(res.data);
       showSuccess(res.message);
     } catch (err) {
       showError(getErrorText(err, "Failed to remove the design"));
@@ -238,7 +252,7 @@ export default function InviteCards() {
     const t = setTimeout(async () => {
       setPreviewLoading(true);
       try {
-        const blob = await previewInviteCardApi(previewName.trim() || "Guest Name");
+        const blob = await previewInviteCardApi(previewName.trim() || "Guest Name", style);
         if (cancelled) return;
         const objectUrl = URL.createObjectURL(blob);
         setPreviewUrl((old) => {
@@ -256,7 +270,45 @@ export default function InviteCards() {
       cancelled = true;
       clearTimeout(t);
     };
-  }, [previewOpen, previewName, design?.updatedAt, design?.hasDesign]);
+  }, [previewOpen, previewName, style, design?.updatedAt, design?.hasDesign]);
+
+  // Click on the card = "write the name here".
+  const placeNameOnCard = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    const xPct = ((e.clientX - rect.left) / rect.width) * 100;
+    const yPct = ((e.clientY - rect.top) / rect.height) * 100;
+
+    // The click marks the CENTRE of the name; the server wants its top edge.
+    const W = design?.width || 1080;
+    const H = design?.height || 1350;
+    const halfHeightPct = ((style.fontSizePct / 100) * W * 1.5 * 0.5 / H) * 100;
+
+    setStyle((prev) => ({
+      ...prev,
+      centerXPct: Math.round(Math.min(100, Math.max(0, xPct)) * 10) / 10,
+      topPct: Math.round(Math.min(95, Math.max(0, yPct - halfHeightPct)) * 10) / 10,
+    }));
+  };
+
+  const handleSaveStyle = async () => {
+    setSavingStyle(true);
+    try {
+      const res = await saveInviteNameStyleApi(style);
+      applyDesign(res.data); // also makes the saved position the current one
+      showSuccess(res.message);
+      setPreviewOpen(false); // saved -> close the popup
+    } catch (err) {
+      showError(getErrorText(err, "Failed to save the name position"));
+    } finally {
+      setSavingStyle(false);
+    }
+  };
+
+  const closePreview = () => {
+    setPreviewOpen(false);
+    setStyle(savedStyle); // forget anything that was not saved
+  };
 
   // ---------- guest popup ----------
   const openAdd = () => {
@@ -624,17 +676,17 @@ export default function InviteCards() {
           )}
 
           {previewOpen && (
-            <div className="companyCategoryModalOverlay" onClick={() => setPreviewOpen(false)}>
+            <div className="companyCategoryModalOverlay" onClick={closePreview}>
               <div
                 className="createCompanyCategoryModal inviteCards__previewModal"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="modalHeader">
-                  <h2 className="modalTitle">Card Preview</h2>
+                  <h2 className="modalTitle">Card Preview &amp; Name Position</h2>
                   <button
                     type="button"
                     className="closeIconButton"
-                    onClick={() => setPreviewOpen(false)}
+                    onClick={closePreview}
                     aria-label="Close modal"
                   >
                     <FaTimes />
@@ -656,14 +708,63 @@ export default function InviteCards() {
                   />
                 </div>
 
+                <p className="inviteCards__note">
+                  Click on the card where the guest&apos;s name should appear.
+                </p>
+
                 <div className="inviteCards__previewBox">
                   {previewUrl ? (
-                    <img src={previewUrl} alt="Invitation card preview" />
+                    <img
+                      src={previewUrl}
+                      alt="Invitation card preview"
+                      className="inviteCards__previewImg"
+                      onClick={placeNameOnCard}
+                      draggable={false}
+                    />
                   ) : previewLoading ? (
                     "Loading..."
                   ) : (
                     "No preview"
                   )}
+                </div>
+
+                <div className="inviteCards__styleRow">
+                  <label htmlFor="icSize">Text size</label>
+                  <input
+                    id="icSize"
+                    type="range"
+                    min="1.5"
+                    max="12"
+                    step="0.1"
+                    value={style.fontSizePct}
+                    onChange={(e) => setStyle((p) => ({ ...p, fontSizePct: Number(e.target.value) }))}
+                  />
+                  <label htmlFor="icColor">Colour</label>
+                  <input
+                    id="icColor"
+                    type="color"
+                    value={style.color}
+                    onChange={(e) => setStyle((p) => ({ ...p, color: e.target.value }))}
+                  />
+                </div>
+
+                <div className="modalFooter">
+                  <button
+                    type="button"
+                    className="modalCloseButton"
+                    disabled={savingStyle}
+                    onClick={() => setStyle({ ...DEFAULT_STYLE })}
+                  >
+                    Reset
+                  </button>
+                  <button
+                    type="button"
+                    className="modalCreateButton"
+                    disabled={savingStyle || !styleChanged}
+                    onClick={handleSaveStyle}
+                  >
+                    {savingStyle ? "Saving..." : "Save position"}
+                  </button>
                 </div>
               </div>
             </div>
@@ -736,7 +837,7 @@ export default function InviteCards() {
           </span>
           <span className="inviteCards__designLinks">
             <button type="button" className="inviteCards__linkBtn" onClick={() => setPreviewOpen(true)}>
-              Preview
+              Preview &amp; name position
             </button>
             {design?.hasDesign && (
               <button

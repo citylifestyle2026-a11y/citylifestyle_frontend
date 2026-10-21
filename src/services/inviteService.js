@@ -23,8 +23,21 @@ export const deleteInviteGuestsApi = async (ids) =>
   (await api.post("/invite-guests/delete", { ids })).data;
 
 // Returns a JPG Blob of the card with the given name written on it.
-export const previewInviteCardApi = async (name) =>
-  (await api.get("/invite-guests/preview", { params: { name }, responseType: "blob" })).data;
+// `style` (optional) = { topPct, centerXPct, fontSizePct, color } lets the
+// admin see a name position before saving it.
+export const previewInviteCardApi = async (name, style = {}) =>
+  (
+    await api.get("/invite-guests/preview", {
+      params: {
+        name,
+        top: style.topPct,
+        x: style.centerXPct,
+        size: style.fontSizePct,
+        color: style.color,
+      },
+      responseType: "blob",
+    })
+  ).data;
 
 // ----- the card design (JPG / PNG uploaded by the admin) -----
 export const getInviteDesignApi = async () => (await api.get("/invite-guests/design")).data;
@@ -34,6 +47,9 @@ export const uploadInviteDesignApi = async (file) => {
   formData.append("design", file);
   return (await api.post("/invite-guests/design", formData)).data;
 };
+
+export const saveInviteNameStyleApi = async (style) =>
+  (await api.put("/invite-guests/design/style", style)).data;
 
 export const removeInviteDesignApi = async () => (await api.delete("/invite-guests/design")).data;
 

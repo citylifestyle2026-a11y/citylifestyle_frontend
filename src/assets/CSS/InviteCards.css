@@ -95,3 +95,29 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* ----- name position (click on the card) ----- */
+.inviteCards__previewImg {
+  cursor: crosshair;
+  user-select: none;
+}
+
+.inviteCards__styleRow {
+  display: grid;
+  grid-template-columns: auto 1fr auto 44px;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  font-size: 13px;
+  color: #4b5068;
+}
+
+.inviteCards__styleRow input[type="color"] {
+  width: 44px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid #d7dae1;
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+}
