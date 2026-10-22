@@ -9,6 +9,7 @@ import { getDashboardSummary } from "../redux/dashboard/dashboardThunk";
 import { clearDashboardState } from "../redux/dashboard/dashboardSlice";
 import { getAllEvents } from "../redux/event/eventThunk";
 import '../assets/CSS/DashboardPage.css';
+import '../assets/CSS/DashboardResponsive.css';
 
 export default function DashboardPage() {
   const dispatch = useDispatch();
@@ -275,8 +276,8 @@ export default function DashboardPage() {
                   <div className="skeletonBlock skeletonRow" style={{ marginTop: 14 }} />
                 </section>
                 <div className="dashSections">
-                  {[0, 1, 2].map((i) => (
-                    <section className="dashSection" key={i}>
+                  {["booking", "entry", "attendance"].map((k) => (
+                    <section className={`dashSection dashSection--${k}`} key={k}>
                       <DashboardCardSkeleton />
                     </section>
                   ))}
@@ -321,9 +322,8 @@ export default function DashboardPage() {
                 <div className="dashSections">
                   {sections.map((section) => (
                     <section
-                      className="dashSection"
+                      className={`dashSection dashSection--${section.key}`}
                       key={section.key}
-                      style={section.key === "attendance" ? { gridColumn: "1 / -1" } : undefined}
                     >
                       <div className="dashSection__head">
                         <div>

@@ -53,6 +53,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .dashboardPage-eventSelectLabel {
@@ -73,6 +75,9 @@
   outline: none;
   cursor: pointer;
   min-width: 220px;
+  max-width: 100%;
+  box-sizing: border-box;
+  text-overflow: ellipsis;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -263,9 +268,29 @@
   }
 }
 
-@media (max-width: 720px) {
+/* Tablet: Venue + Duration side by side, long Address gets its own full row */
+@media (max-width: 900px) {
+  .eventInfoCard__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .eventInfoCard__item:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Phone: everything stacked */
+@media (max-width: 560px) {
+  .eventInfoCard {
+    padding: 14px 16px;
+  }
+
   .eventInfoCard__grid {
     grid-template-columns: 1fr;
+  }
+
+  .eventInfoCard__item:nth-child(3) {
+    grid-column: auto;
   }
 }
 
@@ -280,12 +305,17 @@
 
   .dashboardPage-topRow {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+  }
+
+  .dashboardPage-eventSelectWrap {
+    width: 100%;
   }
 
   .dashboardPage-eventSelect {
     min-width: 0;
     width: 100%;
+    flex: 1;
   }
 
   .footer {
@@ -318,11 +348,36 @@
 }
 
 /* ===== Dashboard: Booking + Entry Report sections ===== */
+/* 12-column grid so the three sections always fill the row:
+     Booking (1 card) = 4 cols, Entry Report (2 cards) = 8 cols,
+     Attendance (3 cards) = full width.
+   (The old auto-fit(300px) grid kept 5 empty tracks on wide screens, so
+   Booking / Entry Report stayed ~300px wide with blank space on the right.) */
 .dashSections {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: 16px;
   align-items: stretch;
+}
+
+.dashSection--booking {
+  grid-column: span 4;
+}
+
+.dashSection--entry {
+  grid-column: span 8;
+}
+
+.dashSection--attendance {
+  grid-column: 1 / -1;
+}
+
+/* Below ~760px each section gets its own full-width row */
+@media (max-width: 760px) {
+  .dashSection--booking,
+  .dashSection--entry {
+    grid-column: 1 / -1;
+  }
 }
 
 .dashSection {
@@ -337,7 +392,8 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 6px 12px;
   margin-bottom: 14px;
   padding-bottom: 12px;
   border-bottom: 1px solid #eef0f4;
@@ -371,10 +427,31 @@
 
 .dashSection__cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 14px;
 }
 
 .dashSection__cards > * {
   min-width: 0;
+}
+
+@media (max-width: 520px) {
+  .dashSection {
+    padding: 16px 14px 16px;
+  }
+
+  .dashSection__head {
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+  }
+
+  /* 2 stat cards per row on phones; an odd last card uses the full row */
+  .dashSection__cards {
+    grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+    gap: 10px;
+  }
+
+  .dashSection__cards > .card--compact:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
 }

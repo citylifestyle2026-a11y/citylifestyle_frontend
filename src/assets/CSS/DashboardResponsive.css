@@ -1,0 +1,129 @@
+/* DashboardResponsive.css
+   Layout + responsive rules for the Dashboard sections.
+   Imported by Pages/DashboardPage.jsx AFTER DashboardPage.css and
+   prefixed with .dashboardPage so it always wins over the older
+   auto-fit(300px) grid, whatever the CSS import order is. */
+
+/* 12-column grid: Booking = 4 cols, Entry Report = 8 cols, Attendance = full row */
+.dashboardPage .dashSections {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+}
+
+.dashboardPage .dashSection--booking {
+  grid-column: span 4;
+}
+
+.dashboardPage .dashSection--entry {
+  grid-column: span 8;
+}
+
+.dashboardPage .dashSection--attendance {
+  grid-column: 1 / -1;
+}
+
+.dashboardPage .dashSection__head {
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+
+.dashboardPage .dashSection__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 14px;
+}
+
+.dashboardPage .dashSection__cards .card--compact .cardInfoTooltip {
+  max-width: min(230px, calc(100vw - 64px));
+}
+
+/* Event selector */
+.dashboardPage .dashboardPage-eventSelectWrap {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.dashboardPage .dashboardPage-eventSelect {
+  max-width: 100%;
+  box-sizing: border-box;
+  text-overflow: ellipsis;
+}
+
+/* Active event info: tablet = 2 columns (Address on its own row) */
+@media (max-width: 900px) {
+  .dashboardPage .eventInfoCard__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboardPage .eventInfoCard__item:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Each section on its own full-width row */
+@media (max-width: 760px) {
+  .dashboardPage .dashSection--booking,
+  .dashboardPage .dashSection--entry {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboardPage .dashboardPage-topRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dashboardPage .dashboardPage-eventSelectWrap {
+    width: 100%;
+  }
+
+  .dashboardPage .dashboardPage-eventSelect {
+    min-width: 0;
+    width: 100%;
+    flex: 1;
+  }
+}
+
+/* Phone */
+@media (max-width: 560px) {
+  .dashboardPage .eventInfoCard {
+    padding: 14px 16px;
+  }
+
+  .dashboardPage .eventInfoCard__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboardPage .eventInfoCard__item:nth-child(3) {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 520px) {
+  .dashboardPage .dashSection {
+    padding: 16px 14px;
+  }
+
+  .dashboardPage .dashSection__head {
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+  }
+
+  .dashboardPage .dashSection__cards {
+    grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+    gap: 10px;
+  }
+
+  .dashboardPage .dashSection__cards > .card--compact:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  .dashboardPage .dashSection__cards > .card--compact:nth-child(odd) .cardInfoTooltip {
+    left: 0;
+    right: auto;
+    width: 200px;
+  }
+}

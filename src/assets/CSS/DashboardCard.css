@@ -445,3 +445,20 @@
     width: 200px;
   }
 }
+
+/* ===== Dashboard section cards: keep tooltips on-screen =====
+   Same idea as the .statGrid rule above, for the Dashboard's
+   .dashSection__cards grids: tooltips never exceed the viewport width and
+   the left-column card opens its tooltip to the right instead of off the
+   left edge. */
+.dashSection__cards .card--compact .cardInfoTooltip {
+  max-width: min(230px, calc(100vw - 64px));
+}
+
+@media (max-width: 520px) {
+  .dashSection__cards > .card--compact:nth-child(odd) .cardInfoTooltip {
+    left: 0;
+    right: auto;
+    width: 200px;
+  }
+}

@@ -156,6 +156,13 @@ export default function Header({ title = "Dashboard" }) {
               src={PROFILE_IMAGE_URL}
               alt={currentUser?.name || "User profile"}
               className="profileImage"
+              // If the saved profile image URL is broken / unreachable, fall
+              // back to the generated initials avatar instead of showing the
+              // browser's broken-image icon + alt text in the header.
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = LOGO_AVATAR;
+              }}
             />
           </div>
         </div>
