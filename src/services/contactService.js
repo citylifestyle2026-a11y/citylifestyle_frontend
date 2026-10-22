@@ -169,6 +169,15 @@ export const resendContactPassApi = async (data) => {
   return response.data;
 };
 
+// ================= SEND ATTENDANCE REMINDER (WHATSAPP) =================
+// body: { ids: string[], eventId?, includeResponded? } - sends the WhatsApp
+// message with Yes / No buttons to approved guests. Guests who already
+// answered are skipped unless includeResponded is true.
+export const sendContactReminderApi = async (data) => {
+  const response = await api.post("/contacts/send-reminder", data);
+  return response.data;
+};
+
 // ================= IMPORT CONTACTS (CSV) =================
 // file: browser File. options.dryRun = true only checks the file (nothing
 // is saved); options.approvalStatus = "approved" | "pending" for real imports.

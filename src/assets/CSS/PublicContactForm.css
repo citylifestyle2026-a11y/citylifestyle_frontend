@@ -463,6 +463,8 @@
 }
 
 /* ---- "Share Form Link" note shown above / instead of the form ---- */
+/* The page behind is BLACK, so every note must carry its own light/dark
+   colours - never inherit the grey text meant for a white page. */
 .cityFormLinkNote {
   max-width: 760px;
   margin: 16px auto 0;
@@ -470,28 +472,112 @@
   text-align: center;
   font-size: 14px;
   font-weight: 600;
-  color: #4a4d5e;
+  color: #ffffff;
 }
 
+/* "X of Y places left" pill above the form */
+.cityFormLinkNote--places span {
+  display: inline-block;
+  padding: 7px 18px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+
+/* Thank-you / closed / invalid card (white card on the black page) */
 .cityFormLinkNote--blocked {
+  max-width: 620px;
+  margin: 24px auto 40px;
+  padding: 36px 32px 34px;
   background: #ffffff;
-  border-radius: 14px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-  padding: 32px 20px;
+  border-radius: 18px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  color: #4a4d5e;
+  text-align: center;
+}
+
+.cityFormLinkNote__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 14px;
+  border-radius: 50%;
+  font-size: 24px;
+  color: #ffffff;
+}
+
+.cityFormLinkNote--success .cityFormLinkNote__icon {
+  background: #1fa45b;
+  box-shadow: 0 0 0 8px #e3f6ec;
+}
+
+.cityFormLinkNote--warn .cityFormLinkNote__icon {
+  background: #e0a100;
+  box-shadow: 0 0 0 8px #fff4d6;
 }
 
 .cityFormLinkNote--blocked h2 {
-  margin: 0 0 8px;
-  font-size: 22px;
+  margin: 0 0 10px;
+  font-size: 26px;
+  font-weight: 700;
   color: #1f2233;
 }
 
 .cityFormLinkNote--blocked p {
   margin: 0;
+  font-size: 14.5px;
   font-weight: 400;
+  line-height: 1.7;
+  color: #4a4d5e;
+}
+
+.cityFormLinkNote--blocked p.cityFormLinkNote__lead {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a8f4d;
 }
 
 .cityFormLinkNote--blocked p + p {
-  margin-top: 10px;
-  line-height: 1.6;
+  margin-top: 12px;
+}
+
+.cityFormLinkNote--blocked p b {
+  color: #1f2233;
+  font-weight: 600;
+}
+
+@media (max-width: 560px) {
+  .cityFormLinkNote--blocked {
+    margin: 16px 12px 32px;
+    padding: 28px 18px;
+  }
+  .cityFormLinkNote--blocked h2 { font-size: 22px; }
+}
+
+
+/* Closed / invalid-link variants */
+.cityFormLinkNote--closed .cityFormLinkNote__icon {
+  background: #d63a3a;
+  box-shadow: 0 0 0 8px #fdecec;
+  font-size: 22px;
+}
+
+.cityFormLinkNote--blocked.cityFormLinkNote--closed p.cityFormLinkNote__lead,
+.cityFormLinkNote--blocked.cityFormLinkNote--warn p.cityFormLinkNote__lead {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2233;
+}
+
+.cityFormLinkNote--blocked p.cityFormLinkNote__sub {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #eceef3;
+  font-size: 13.5px;
+  color: #6b7185;
 }

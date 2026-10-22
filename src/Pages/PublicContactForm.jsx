@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { FaCheck, FaExclamation, FaLock } from "react-icons/fa";
 import CreateContactModal from "../Components/CreateContactModal";
 import { getPublicFormLinkApi } from "../services/publicContactService";
 import "../assets/CSS/PublicContactForm.css";
@@ -53,9 +54,13 @@ export default function PublicContactForm() {
 
     if (linkError) {
       return (
-        <div className="cityFormLinkNote cityFormLinkNote--blocked">
+        <div className="cityFormLinkNote cityFormLinkNote--blocked cityFormLinkNote--warn">
+          <span className="cityFormLinkNote__icon" aria-hidden="true"><FaExclamation /></span>
           <h2>Link not available</h2>
-          <p>{linkError}</p>
+          <p className="cityFormLinkNote__lead">{linkError}</p>
+          <p className="cityFormLinkNote__sub">
+            Please check the link you received or ask the person who shared it to send it again.
+          </p>
         </div>
       );
     }
@@ -63,30 +68,38 @@ export default function PublicContactForm() {
     if (!linkInfo?.available) {
       if (justSubmitted) {
         return (
-          <div className="cityFormLinkNote cityFormLinkNote--blocked">
+          <div className="cityFormLinkNote cityFormLinkNote--blocked cityFormLinkNote--success">
+            <span className="cityFormLinkNote__icon" aria-hidden="true"><FaCheck /></span>
             <h2>Thank you!</h2>
-            <p>Your details have been received successfully.</p>
+            <p className="cityFormLinkNote__lead">Your details have been received successfully.</p>
             <p>
               Our team will review your submission and get back to you shortly to let you know
-              whether your participation in Parv is confirmed (Yes / No). We will contact you on
-              the WhatsApp number you have provided.
+              whether your participation in Parv is confirmed (<b>Yes / No</b>). We will contact
+              you on the WhatsApp number you have provided.
             </p>
           </div>
         );
       }
 
       return (
-        <div className="cityFormLinkNote cityFormLinkNote--blocked">
+        <div className="cityFormLinkNote cityFormLinkNote--blocked cityFormLinkNote--closed">
+          <span className="cityFormLinkNote__icon" aria-hidden="true"><FaLock /></span>
           <h2>Form closed</h2>
-          <p>{linkInfo?.message || "This form link is closed."}</p>
+          <p className="cityFormLinkNote__lead">
+            {linkInfo?.message || "This form link is closed."}
+          </p>
+          <p className="cityFormLinkNote__sub">
+            No more registrations are being accepted on this link. Please contact the
+            City Toppers team if you would like to take part in Parv.
+          </p>
         </div>
       );
     }
 
     return (
       <>
-        <p className="cityFormLinkNote">
-          {linkInfo.remaining} of {linkInfo.quantity} places left
+        <p className="cityFormLinkNote cityFormLinkNote--places">
+          <span>{linkInfo.remaining} of {linkInfo.quantity} places left</span>
         </p>
         <CreateContactModal
           publicMode

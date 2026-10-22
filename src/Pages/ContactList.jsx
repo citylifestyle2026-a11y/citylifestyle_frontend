@@ -13,6 +13,7 @@ import {
   FaTimes,
   FaClock,
   FaFileCsv,
+  FaBell,
 } from "react-icons/fa";
 
 import CommonListLayout from "../Components/CommonListLayout";
@@ -48,6 +49,7 @@ import {
   resendContactPassApi,
   deleteContactBookingApi,
   cancelContactPassApi,
+  sendContactReminderApi,
 } from "../services/contactService";
 import MergeMemberModal from "../Components/MergeMemberModal";
 import DuplicateTab from "../Components/DuplicateTab";
@@ -94,6 +96,13 @@ const STATUS_LABELS = {
 
 // Contacts created before approval existed have no approvalStatus -> approved.
 const getApprovalStatus = (contact) => contact?.approvalStatus || "approved";
+
+const RSVP_FILTER_OPTIONS = [
+  { value: "yes", label: "Attending (Yes)" },
+  { value: "no", label: "Not attending (No)" },
+  { value: "none", label: "No response" },
+  { value: "notSent", label: "Reminder not sent" },
+];
 
 const SORTABLE_COLUMNS = ["fullName", "whatsappNumber", "companyName", "designation", "area"];
 
@@ -165,6 +174,10 @@ export default function ContactList() {
   // Contact whose pass is currently being re-sent (disables its menu item).
   const [resendBusyId, setResendBusyId] = useState(null);
 
+  // Attendance reminder (Yes / No WhatsApp message)
+  const [reminderBusy, setReminderBusy] = useState(false);
+  const [rsvpFilter, setRsvpFilter] = useState("");
+
   // Delete modal state.
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deleteContactId, setDeleteContactId] = useState(null);
@@ -213,6 +226,7 @@ export default function ContactList() {
     if (statusFilter === "passCancelled") params.passStatus = "cancelled";
     else if (statusFilter && statusFilter !== "duplicate") params.approvalStatus = statusFilter;
     if (editionFilter) params.editionEventId = editionFilter;
+    if (rsvpFilter) params.rsvpStatus = rsvpFilter;
 
     dispatch(getAllContacts(params));
   }, [
@@ -226,6 +240,7 @@ export default function ContactList() {
     referenceFilter,
     statusFilter,
     editionFilter,
+    rsvpFilter,
     refreshKey,
   ]);
 
@@ -302,6 +317,7 @@ export default function ContactList() {
     if (statusFilter === "passCancelled") params.passStatus = "cancelled";
     else if (statusFilter && statusFilter !== "duplicate") params.approvalStatus = statusFilter;
     if (editionFilter) params.editionEventId = editionFilter;
+    if (rsvpFilter) params.rsvpStatus = rsvpFilter;
 
     dispatch(exportContacts(params));
   };
@@ -371,6 +387,7 @@ export default function ContactList() {
       if (statusFilter === "passCancelled") params.passStatus = "cancelled";
     else if (statusFilter && statusFilter !== "duplicate") params.approvalStatus = statusFilter;
       if (editionFilter) params.editionEventId = editionFilter;
+      if (rsvpFilter) params.rsvpStatus = rsvpFilter;
 
       dispatch(getAllContacts(params));
 
@@ -423,6 +440,15 @@ export default function ContactList() {
       selectedContacts.filter(
         (contact) =>
           getApprovalStatus(contact) === "approved" && !contact.passSentAt
+      ),
+    [selectedContacts]
+  );
+
+  // Every approved guest can be sent the attendance reminder (Yes / No).
+  const selectedRemindable = useMemo(
+    () =>
+      selectedContacts.filter(
+        (contact) => getApprovalStatus(contact) === "approved"
       ),
     [selectedContacts]
   );
@@ -750,6 +776,72 @@ export default function ContactList() {
     [resendBusyId]
   );
 
+  // Sends the attendance reminder (WhatsApp template with Yes / No buttons)
+  // to approved guest(s). Guests who already answered are skipped by the
+  // server. Answers show in the "Attendance" column and on the Dashboard.
+  const handleSendReminder = useCallback(
+    async (targets) => {
+      if (!targets.length || reminderBusy) return;
+      setOpenActionMenuId(null);
+
+      const one = targets.length === 1;
+      const confirmed = await confirmDialog({
+        title: `Send reminder to ${one ? targets[0].fullName : `${targets.length} guests`}?`,
+        text: "Ask the guest to confirm attendance on WhatsApp.",
+        points: [
+          { icon: "💬", text: "A WhatsApp message with the event details and two buttons - Yes and No - is sent." },
+          { icon: "✅", text: "Their answer is saved here and counted on the Dashboard." },
+          { icon: "🔁", text: "Guests who have not answered stay as \"No response\"; if they tap later, it updates automatically." },
+        ],
+        confirmText: "Send Reminder",
+      });
+
+      if (!confirmed) return;
+
+      setReminderBusy(true);
+
+      try {
+        const res = await sendContactReminderApi({
+          ids: targets.map((contact) => contact._id),
+        });
+        const data = res?.data || {};
+        const firstFail = (data.results || []).find((r) => r.status === "failed");
+
+        if (data.failed) {
+          await noticeDialog({
+            icon: "warning",
+            title: "Some reminders were not sent",
+            text: `${res.message}${firstFail?.message ? ` Reason: ${firstFail.message}` : ""}`,
+          });
+        } else {
+          showSuccess(res.message || "Reminder sent");
+        }
+
+        setSelected((prev) => {
+          const next = { ...prev };
+          targets.forEach((contact) => delete next[contact._id]);
+          return next;
+        });
+        setRefreshKey((key) => key + 1);
+      } catch (err) {
+        const body = err?.response?.data;
+
+        if (err?.response?.status === 404 && !body?.message) {
+          showError("Send Reminder is not available on the server yet - please deploy / restart the backend.");
+        } else {
+          await noticeDialog({
+            icon: "error",
+            title: "Reminder not sent",
+            text: body?.message || err?.message || "Failed to send the reminder.",
+          });
+        }
+      } finally {
+        setReminderBusy(false);
+      }
+    },
+    [reminderBusy]
+  );
+
   const handleOpenPass = useCallback((targets) => {
     setOpenActionMenuId(null);
     setPassContacts(targets);
@@ -976,6 +1068,35 @@ const sortedReferenceFilterOptions = useMemo(
         },
       },
       {
+        key: "rsvpStatus",
+        label: "Attendance",
+        sortable: false,
+        render: (contact) => {
+          if (getApprovalStatus(contact) !== "approved") return "-";
+
+          if (!contact.rsvpReminderSentAt) {
+            return <span className="contactPage__rsvp contactPage__rsvp--notSent">Not asked</span>;
+          }
+
+          const status = contact.rsvpStatus || "none";
+          const label =
+            status === "yes" ? "Yes" : status === "no" ? "No" : "No response";
+
+          return (
+            <span
+              className={`contactPage__rsvp contactPage__rsvp--${status}`}
+              title={
+                contact.rsvpRespondedAt
+                  ? `Answered on ${new Date(contact.rsvpRespondedAt).toLocaleString("en-GB")}`
+                  : `Reminder sent on ${new Date(contact.rsvpReminderSentAt).toLocaleString("en-GB")}`
+              }
+            >
+              {label}
+            </span>
+          );
+        },
+      },
+      {
         key: "editionName",
         label: "Edition",
         sortable: false,
@@ -1176,9 +1297,21 @@ const sortedReferenceFilterOptions = useMemo(
                 </button>
               )}
 
-              {/* Reject: Pending or Approved guests (an approved guest with a
-                  pass has the pass cancelled). */}
-              {getApprovalStatus(contact) !== "rejected" && (
+              {getApprovalStatus(contact) === "approved" && (
+                <button
+                  type="button"
+                  className="contactAction__item contactAction__itemApprove"
+                  disabled={reminderBusy}
+                  onClick={() => handleSendReminder([contact])}
+                >
+                  {contact.rsvpReminderSentAt ? "Resend Reminder" : "Send Reminder"}
+                </button>
+              )}
+
+              {/* Reject: Pending or Approved guests WITHOUT a pass. Once a pass
+                  is sent, only "Cancel Pass" is offered (it cancels the pass
+                  and moves the guest to Rejected). */}
+              {getApprovalStatus(contact) !== "rejected" && !contact.passSentAt && (
                 <button
                   type="button"
                   className="contactAction__item contactAction__itemReject"
@@ -1257,6 +1390,8 @@ const sortedReferenceFilterOptions = useMemo(
     handleCancelPass,
     handleMergeMember,
     handleOpenPass,
+    handleSendReminder,
+    reminderBusy,
   ]);
 
   return (
@@ -1480,6 +1615,21 @@ const sortedReferenceFilterOptions = useMemo(
                   <FaTimes /> Cancel Pass ({selectedCancellable.length})
                 </button>
               )}
+              {selectedRemindable.length > 0 && (
+                <button
+                  type="button"
+                  className="contactPage__bulkBtn contactPage__bulkBtn--reminder"
+                  disabled={statusBusy || reminderBusy}
+                  title={
+                    selectedRemindable.length < selectedCount
+                      ? "Only approved guests will get the reminder"
+                      : "Ask the selected guests to confirm attendance"
+                  }
+                  onClick={() => handleSendReminder(selectedRemindable)}
+                >
+                  <FaBell /> {reminderBusy ? "Sending..." : `Send Reminder (${selectedRemindable.length})`}
+                </button>
+              )}
               <button
                 type="button"
                 className="contactPage__bulkBtn contactPage__bulkBtn--pending"
@@ -1579,6 +1729,17 @@ const sortedReferenceFilterOptions = useMemo(
               value: e.value,
               label: e.label,
             }))}
+          />
+
+          <CommonSelect
+            className="contactPage__filterSelect"
+            value={rsvpFilter}
+            onChange={(e) => {
+              setRsvpFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            placeholder="All Attendance"
+            options={RSVP_FILTER_OPTIONS}
           />
         </div>
 

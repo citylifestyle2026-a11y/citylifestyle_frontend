@@ -683,6 +683,7 @@
 .contactPage__bulkBtn--reject { background: #fdecec; color: #d63a3a; }
 .contactPage__bulkBtn--pending { background: #fff4e5; color: #b36a00; }
 .contactPage__bulkBtn--whatsapp { background: #25d366; color: #ffffff; }
+.contactPage__bulkBtn--reminder { background: #1b2a4e; color: #ffffff; }
 .contactPage__bulkBtn--clear { background: #ffffff; color: #4a4d5e; border: 1px solid #dcdde4; }
 
 .contactPage__checkCol {
@@ -931,3 +932,18 @@
   word-break: normal;
   line-height: 1.5;
 }
+
+/* Attendance (Yes / No answer of the WhatsApp reminder) */
+.contactPage__rsvp {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.contactPage__rsvp--yes { background: #e8f8ee; color: #1a9b4b; }
+.contactPage__rsvp--no { background: #fdecec; color: #d63a3a; }
+.contactPage__rsvp--none { background: #fff4e0; color: #b36a00; }
+.contactPage__rsvp--notSent { background: #f1f2f6; color: #7b7e91; }

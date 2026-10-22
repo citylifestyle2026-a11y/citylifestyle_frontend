@@ -21,6 +21,7 @@ const RegisterUsers = lazy(() => import("./Components/RegisterUsers"));
 const PublicRegisterUser = lazy(() => import("./Components/PublicRegisterUser"));
 const PublicContactForm = lazy(() => import("./Pages/PublicContactForm"));
 const Ticket = lazy(() => import("./Pages/Ticket"));
+const PublicRsvp = lazy(() => import("./Pages/PublicRsvp"));
 const EntryReport = lazy(() => import("./Pages/EntryReport"));
 const CreateEvent = lazy(() => import("./Pages/CreateEvent"));
 const ViewEvent = lazy(() => import("./Pages/ViewEvent"));
@@ -71,6 +72,8 @@ const privateRoutes = [
   "/ticket",
   // Public contact form (type /city-lifestyle in the URL) — City Lifestyle branding.
   "/city-lifestyle",
+  // Attendance reminder Yes / No pages opened from WhatsApp (/rsvp/yes/:token).
+  "/rsvp",
 ];
 
 function SiteMetaHandler() {
@@ -143,6 +146,9 @@ function App() {
           <Route path="/ticket" element={<Ticket />} />
           {/* NEW: public contact form (no login, no button - open by URL) */}
           <Route path="/form" element={<PublicContactForm />} />
+          {/* Attendance reminder: Yes / No pages opened from the WhatsApp buttons.
+              Not linked anywhere on the website and set to noindex. */}
+          <Route path="/rsvp/:answer/:token" element={<PublicRsvp />} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/user" element={<User />} />

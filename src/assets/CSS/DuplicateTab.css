@@ -196,3 +196,100 @@
 }
 
 .dupTab__btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+
+/* ===== Row "Action" dropdown (same look as Contact List) ===== */
+.dupTab__actionCol {
+  width: 1%;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.dupTab__table th:last-child {
+  text-align: right;
+}
+
+.dupAction__wrapper {
+  display: inline-block;
+}
+
+.dupAction__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 14px;
+  background: #ffffff;
+  color: #3a3d4d;
+  border: 1px solid #e2e5eb;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.dupAction__button:hover,
+.dupAction__button--open {
+  background: #f8fafc;
+  border-color: #cfd4de;
+}
+
+.dupAction__icon {
+  font-size: 11px;
+  color: #9a9ca8;
+  transition: transform 0.18s ease;
+}
+
+.dupAction__button--open .dupAction__icon {
+  transform: rotate(180deg);
+}
+
+.dupAction__menu {
+  position: fixed;
+  width: 172px;
+  padding: 6px;
+  background: #ffffff;
+  border: 1px solid #eef0f4;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+  z-index: 99999;
+}
+
+.dupAction__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 500;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.dupAction__item svg {
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.dupAction__item--fix {
+  color: var(--admin-accent, #4f8fd6);
+}
+
+.dupAction__item--fix:hover {
+  background: #eef5fd;
+}
+
+.dupAction__item--ignore {
+  color: #d63a3a;
+}
+
+.dupAction__item--ignore:hover {
+  background: #fdecec;
+}

@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
-import { FaSearch, FaCodeBranch, FaTrashAlt } from "react-icons/fa";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { FaSearch, FaCodeBranch, FaTrashAlt, FaChevronDown } from "react-icons/fa";
 
 import DuplicateFixModal from "./DuplicateFixModal";
 import CommonEmptyState from "./CommonEmptyState";
@@ -13,6 +13,7 @@ import { confirmDialog } from "../utilits/appSwal";
 import { showError, showSuccess } from "../utilits/toast";
 import { getErrorText } from "../utilits/apiError";
 import { formatDateTime } from "../utilits/dateFormat";
+import useClickOutside from "../hooks/useClickOutside";
 import "../assets/CSS/DuplicateTab.css";
 
 const PAGE_SIZE = 10;
@@ -38,6 +39,39 @@ export default function DuplicateTab({ onChanged }) {
   const [selected, setSelected] = useState([]); // ids on screen
   const [selectAllMatching, setSelectAllMatching] = useState(false); // every row of the search
   const [busy, setBusy] = useState(false);
+
+  // Row "Action" dropdown. The menu is position: fixed (placed from the
+  // button's screen position) so the scrolling table never clips it.
+  const [menu, setMenu] = useState(null); // { id, top, right, up }
+  const menuRef = useRef(null);
+  useClickOutside(menuRef, () => setMenu(null));
+
+  useEffect(() => {
+    if (!menu) return undefined;
+    const close = () => setMenu(null);
+    window.addEventListener("scroll", close, true);
+    window.addEventListener("resize", close);
+    return () => {
+      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("resize", close);
+    };
+  }, [menu]);
+
+  const toggleMenu = (event, id) => {
+    if (menu?.id === id) {
+      setMenu(null);
+      return;
+    }
+    const rect = event.currentTarget.getBoundingClientRect();
+    const MENU_HEIGHT = 112;
+    const up = window.innerHeight - rect.bottom < MENU_HEIGHT + 12;
+    setMenu({
+      id,
+      right: Math.max(8, window.innerWidth - rect.right),
+      top: up ? rect.top - MENU_HEIGHT - 6 : rect.bottom + 6,
+      up,
+    });
+  };
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -277,14 +311,49 @@ export default function DuplicateTab({ onChanged }) {
                   {formatDateTime(row.updatedAt || row.createdAt)}
                   {row.submissionCount > 1 && <span className="dupTab__times"> x{row.submissionCount}</span>}
                 </td>
-                <td>
-                  <div className="dupTab__actions">
-                    <button type="button" className="dupTab__btn dupTab__btn--fix" onClick={() => setFixRow(row)}>
-                      <FaCodeBranch /> Fix
+                <td className="dupTab__actionCol">
+                  <div className="dupAction__wrapper" ref={menu?.id === row._id ? menuRef : null}>
+                    <button
+                      type="button"
+                      className={`dupAction__button ${menu?.id === row._id ? "dupAction__button--open" : ""}`}
+                      aria-haspopup="menu"
+                      aria-expanded={menu?.id === row._id}
+                      onClick={(e) => toggleMenu(e, row._id)}
+                    >
+                      Action
+                      <FaChevronDown className="dupAction__icon" />
                     </button>
-                    <button type="button" className="dupTab__btn dupTab__btn--ignore" onClick={() => handleIgnore(row)}>
-                      <FaTrashAlt /> Ignore
-                    </button>
+
+                    {menu?.id === row._id && (
+                      <div
+                        className="dupAction__menu"
+                        role="menu"
+                        style={{ top: menu.top, right: menu.right }}
+                      >
+                        <button
+                          type="button"
+                          role="menuitem"
+                          className="dupAction__item dupAction__item--fix"
+                          onClick={() => {
+                            setMenu(null);
+                            setFixRow(row);
+                          }}
+                        >
+                          <FaCodeBranch /> Fix &amp; Sync
+                        </button>
+                        <button
+                          type="button"
+                          role="menuitem"
+                          className="dupAction__item dupAction__item--ignore"
+                          onClick={() => {
+                            setMenu(null);
+                            handleIgnore(row);
+                          }}
+                        >
+                          <FaTrashAlt /> Ignore
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </td>
               </tr>

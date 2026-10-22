@@ -169,6 +169,36 @@ export default function DashboardPage() {
     [dashboardData]
   );
 
+  // Attendance reminder answers (WhatsApp Yes / No buttons) for this event.
+  // "No response" = reminder sent but the guest has not tapped anything yet;
+  // it changes to Yes / No by itself when they do.
+  const attendanceCards = useMemo(
+    () => [
+      {
+        key: "rsvpYes",
+        title: "Attending (Yes)",
+        amountValue: String(dashboardData?.rsvp?.yes ?? 0),
+        infoText:
+          "Guests who tapped Yes on the attendance reminder (WhatsApp). If a guest changes their answer, the count updates automatically.",
+      },
+      {
+        key: "rsvpNo",
+        title: "Not Attending (No)",
+        amountValue: String(dashboardData?.rsvp?.no ?? 0),
+        infoText:
+          "Guests who tapped No on the attendance reminder (WhatsApp).",
+      },
+      {
+        key: "rsvpNoResponse",
+        title: "No Response",
+        amountValue: String(dashboardData?.rsvp?.noResponse ?? 0),
+        infoText:
+          "Guests who were sent the reminder but have not tapped Yes or No yet. When they tap, they move to Yes or No automatically.",
+      },
+    ],
+    [dashboardData]
+  );
+
   const sections = [
     {
       key: "booking",
@@ -185,6 +215,14 @@ export default function DashboardPage() {
       to: "/entry-report",
       linkLabel: "View Entry Report",
       cards: entryCards,
+    },
+    {
+      key: "attendance",
+      title: "Attendance Confirmation",
+      subtitle: `Reminders sent: ${dashboardData?.rsvp?.reminderSent ?? 0}`,
+      to: "/gust-list",
+      linkLabel: "View Guest List",
+      cards: attendanceCards,
     },
   ];
 
@@ -237,7 +275,7 @@ export default function DashboardPage() {
                   <div className="skeletonBlock skeletonRow" style={{ marginTop: 14 }} />
                 </section>
                 <div className="dashSections">
-                  {[0, 1].map((i) => (
+                  {[0, 1, 2].map((i) => (
                     <section className="dashSection" key={i}>
                       <DashboardCardSkeleton />
                     </section>
@@ -282,7 +320,11 @@ export default function DashboardPage() {
 
                 <div className="dashSections">
                   {sections.map((section) => (
-                    <section className="dashSection" key={section.key}>
+                    <section
+                      className="dashSection"
+                      key={section.key}
+                      style={section.key === "attendance" ? { gridColumn: "1 / -1" } : undefined}
+                    >
                       <div className="dashSection__head">
                         <div>
                           <h2 className="dashSection__title">{section.title}</h2>
