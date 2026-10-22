@@ -29,7 +29,6 @@ export default function CreateBookingModal({ onClose, onSuccess }) {
   const dispatch = useDispatch();
   const [ticketTypes, setTicketTypes] = useState([]);
   const { events } = useSelector((state) => state.event);
-  const activeEvent = events?.find((event) => event.isActive === true);
   const [fieldErrors, setFieldErrors] = useState({});
   // true after the server reports a duplicate (same mobile number) —
   // shows the "Book Anyway" button until mobile/event/ticket changes.

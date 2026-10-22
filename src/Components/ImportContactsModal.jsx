@@ -11,6 +11,7 @@ import { importContactsCsvApi } from "../services/contactService";
 import { getErrorText } from "../utilits/apiError";
 import { showError, showSuccess, showWarning } from "../utilits/toast";
 import "../assets/CSS/ImportContactsModal.css";
+import { saveCsvText } from "../utilits/download";
 
 // Header + two example rows (one Single, one Couple) for "Download sample".
 const SAMPLE_CSV = [
@@ -19,17 +20,7 @@ const SAMPLE_CSV = [
   'Amit Patel,9123456780,Patel Jewels,Director,Jewellery,Adajan,,,,Couple,Pooja Patel,9988776655,https://instagram.com/pooja.patel,Fashion,Karan',
 ].join("\n");
 
-const downloadSampleCsv = () => {
-  const blob = new Blob([SAMPLE_CSV], { type: "text/csv;charset=utf-8;" });
-  const url = window.URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "contacts_sample.csv";
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  window.URL.revokeObjectURL(url);
-};
+const downloadSampleCsv = () => saveCsvText(SAMPLE_CSV, "contacts_sample.csv");
 
 const STATUS_OPTIONS = [
   { value: "approved", label: "Approved", hint: "Visible & ready to send pass" },

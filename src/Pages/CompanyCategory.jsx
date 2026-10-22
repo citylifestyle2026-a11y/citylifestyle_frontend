@@ -28,6 +28,7 @@ import { clearCompanyCategoryState } from "../redux/companyCategory/companyCateg
 
 import { showError, showSuccess } from "../utilits/toast";
 import "../assets/CSS/CompanyCategory.css";
+import useClickOutside from "../hooks/useClickOutside";
 
 // Options for the "rows per page" select. Lives in the page (not inside
 // CommonSelect) since CommonSelect must never hardcode page-specific
@@ -114,21 +115,7 @@ export default function CompanyCategory() {
   // Ref for detecting outside clicks to close the action dropdown —
   // same pattern as actionMenuRef in Pages/User.jsx/ContactList.jsx.
   const actionMenuRef = useRef(null);
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        actionMenuRef.current &&
-        !actionMenuRef.current.contains(event.target)
-      ) {
-        setOpenActionMenuId(null);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+  useClickOutside(actionMenuRef, () => setOpenActionMenuId(null));
 
   const handleToggleActionMenu = useCallback((categoryId) => {
     setOpenActionMenuId((prev) => (prev === categoryId ? null : categoryId));

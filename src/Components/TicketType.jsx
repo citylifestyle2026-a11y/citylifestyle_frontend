@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, Link, useLocation } from "react-router-dom";
 import Sidebar from "./Sidebar";
@@ -11,6 +11,7 @@ import { FaChevronLeft, FaChevronRight, FaChevronDown, FaSearch, FaSort } from "
 import Swal from "sweetalert2";
 import CommonEmptyState from "./CommonEmptyState";
 import { clearTicketTypeState } from "../redux/ticketType/ticketTypeSlice";
+import useClickOutside from "../hooks/useClickOutside";
 
 // Shown in place of the table rows when there is no ticket type data to
 // display (rows.length === 0) — see the "No ticket types found" branch
@@ -47,16 +48,7 @@ const TicketType = () => {
   // Close the open Action menu when the person clicks anywhere outside it
   // (same behaviour as the other list pages, e.g. Event History).
   const actionMenuRef = useRef(null);
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (actionMenuRef.current && !actionMenuRef.current.contains(event.target)) {
-        setOpenActionId(null);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  useClickOutside(actionMenuRef, () => setOpenActionId(null));
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);

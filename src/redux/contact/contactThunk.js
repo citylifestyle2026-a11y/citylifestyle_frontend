@@ -12,6 +12,7 @@ import {
   sendContactPassApi,
 } from "../../services/contactService";
 import { getApiErrorMessage } from "../../utilits/apiError";
+import { saveBlob, XLSX_MIME } from "../../utilits/download";
 
 // ================= CREATE CONTACT =================
 export const createContact = createAsyncThunk(
@@ -52,21 +53,10 @@ export const exportContacts = createAsyncThunk(
     try {
       const response = await exportContactsApi(params);
 
-      const blob = new Blob([response.data], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-
-      const url = window.URL.createObjectURL(blob);
-
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `ContactList_${Date.now()}.xlsx`;
-
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-
-      window.URL.revokeObjectURL(url);
+      saveBlob(
+        new Blob([response.data], { type: XLSX_MIME }),
+        `ContactList_${Date.now()}.xlsx`
+      );
 
       return true;
     } catch (error) {

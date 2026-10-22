@@ -17,6 +17,7 @@ import { showError, showSuccess } from "../utilits/toast";
 import { clearUserState } from "../redux/user/userSlice";
 import { Link } from "react-router-dom";
 import { getErrorText } from "../utilits/apiError";
+import useClickOutside from "../hooks/useClickOutside";
 const LOGO_AVATAR = "https://ui-avatars.com/api/?name=SA&background=17a2b8&color=fff&bold=true";
 
 // Options for the "rows per page" select. Lives in the page (not inside
@@ -86,18 +87,7 @@ export default function User() {
   // Ref for detecting outside clicks to close the action dropdown
   const actionMenuRef = useRef(null);
   // action drpdown
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (actionMenuRef.current && !actionMenuRef.current.contains(event.target)) {
-        setOpenActionMenuId(null);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+  useClickOutside(actionMenuRef, () => setOpenActionMenuId(null));
   // Wrapped in useCallback (stable identity, empty deps — this only calls
   // the setState updater form, which never changes) so it doesn't force
   // userTableColumns/CommonTable to recompute/re-render on every render.

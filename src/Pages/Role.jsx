@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FaSort, FaSearch } from "react-icons/fa";
+import { FaSort } from "react-icons/fa";
 import Sidebar from "../Components/Sidebar";
 import Header from "../Components/Header";
 import "../assets/CSS/Role.css";
@@ -11,8 +11,7 @@ import { getApiErrorMessage } from "../utilits/apiError";
 const columns = ["Name", "Permissions"];
 
 export default function Role() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [rowsPerPage, setRowsPerPage] = useState("10");
+  const [searchTerm] = useState("");
   const [permissionModalRole, setPermissionModalRole] = useState(null);
 
   const [role, setRole] = useState(null);
@@ -73,30 +72,6 @@ export default function Role() {
           </div>
 
           <div className="tableCard appCard">
-            {/* <div className="tableControls">
-              <select
-                className="rowsSelect"
-                value={rowsPerPage}
-                onChange={(e) => setRowsPerPage(e.target.value)}
-              >
-                <option value="5">5</option>
-                <option value="10">10</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
-              </select>
-
-              <div className="searchRoleBox">
-                <FaSearch />
-                <input
-                  type="text"
-                  className="searchRoleInput"
-                  placeholder="Search..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-            </div> */}
-
             <div className="tableWrapper">
               <table className="roleTable">
                 <thead>

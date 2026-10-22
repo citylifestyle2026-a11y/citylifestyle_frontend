@@ -4,6 +4,7 @@ import "../assets/CSS/MultipleDatePicker.css";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { format, isSameDay } from "date-fns";
+import useClickOutside from "../hooks/useClickOutside";
 const MultipleDatePicker = ({
     value = [],
     onChange,
@@ -24,24 +25,7 @@ const MultipleDatePicker = ({
     useEffect(() => {
         setTempDates(value);
     }, [value]);
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (
-                wrapperRef.current &&
-                !wrapperRef.current.contains(event.target)
-            ) {
-                setOpen(false);
-            }
-        };
-
-        document.addEventListener("mousedown", handleClickOutside);
-
-        return () =>
-            document.removeEventListener(
-                "mousedown",
-                handleClickOutside
-            );
-    }, []);
+    useClickOutside(wrapperRef, () => setOpen(false));
 
     // react-day-picker's own `disabled` matcher — dates before minDate or
     // after maxDate become genuinely unclickable in the grid, not just

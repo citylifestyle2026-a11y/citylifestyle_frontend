@@ -39,6 +39,7 @@ import { getErrorText } from "../utilits/apiError";
 
 import "../assets/CSS/ContactList.css";
 import "../assets/CSS/MemberList.css";
+import useClickOutside from "../hooks/useClickOutside";
 
 const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, 100, 200].map((n) => ({
   value: n,
@@ -147,15 +148,7 @@ export default function MemberList() {
   }, [loadFilterOptions, refreshKey]);
 
   // Close the Action dropdown on an outside click (same as Guest List).
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (actionMenuRef.current && !actionMenuRef.current.contains(event.target)) {
-        setOpenActionMenuId(null);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  useClickOutside(actionMenuRef, () => setOpenActionMenuId(null));
 
   const handleToggleActionMenu = useCallback((id) => {
     setOpenActionMenuId((prev) => (prev === id ? null : id));

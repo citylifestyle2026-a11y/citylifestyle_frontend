@@ -43,6 +43,8 @@ import { showError, showSuccess, showWarning } from "../utilits/toast";
 import "../assets/CSS/ContactList.css";
 import "../assets/CSS/CreateCompanyCategoryModal.css";
 import "../assets/CSS/InviteCards.css";
+import { saveCsvText } from "../utilits/download";
+import useClickOutside from "../hooks/useClickOutside";
 
 const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, 100].map((n) => ({ value: n, label: String(n) }));
 
@@ -67,17 +69,7 @@ const STATUS_BADGE = {
   failed: { tone: "rejected", label: "Failed" },
 };
 
-const downloadSample = () => {
-  const blob = new Blob([SAMPLE_CSV], { type: "text/csv;charset=utf-8;" });
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "invitation_guests_sample.csv";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  window.URL.revokeObjectURL(url);
-};
+const downloadSample = () => saveCsvText(SAMPLE_CSV, "invitation_guests_sample.csv");
 
 const shortMobile = (value) => String(value || "").replace(/^91(?=\d{10}$)/, "");
 
@@ -178,15 +170,7 @@ export default function InviteCards() {
   }, [counts.sending, load]);
 
   // Close the Action dropdown on an outside click.
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (actionMenuRef.current && !actionMenuRef.current.contains(event.target)) {
-        setOpenActionMenuId(null);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  useClickOutside(actionMenuRef, () => setOpenActionMenuId(null));
 
   // ---------- design ----------
   useEffect(() => {

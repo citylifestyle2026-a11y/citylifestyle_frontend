@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { DateRange } from "react-date-range";
 import "react-date-range/dist/styles.css";
@@ -38,6 +38,7 @@ import { showSuccess, showError } from "../utilits/toast";
 import useEventExpiryRefetch from "../hooks/useEventExpiryRefetch";
 import { FaSort } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { saveBlob, XLSX_MIME } from "../utilits/download";
 
 // Options for the "rows per page" select. Lives in the page (not inside
 // CommonSelect) since CommonSelect must never hardcode page-specific options.
@@ -729,31 +730,10 @@ export default function EntryReport() {
     );
 
     if (exportEntryReport.fulfilled.match(resultAction)) {
-      const blob = new Blob(
-        [resultAction.payload],
-        {
-          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        }
-      );
-
-      const downloadUrl = window.URL.createObjectURL(blob);
-
-      const link = document.createElement("a");
-
-      link.href = downloadUrl;
-
-      link.setAttribute(
-        "download",
+      saveBlob(
+        new Blob([resultAction.payload], { type: XLSX_MIME }),
         `entry-report-${formatDate(new Date())}.xlsx`
       );
-
-      document.body.appendChild(link);
-
-      link.click();
-
-      link.remove();
-
-      window.URL.revokeObjectURL(downloadUrl);
 
       showSuccess("Entry report exported successfully.");
     } else if (exportEntryReport.rejected.match(resultAction)) {

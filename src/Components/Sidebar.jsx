@@ -104,7 +104,6 @@ export default function Sidebar() {
   // a gap in one response can't blank out a value the other already has.
   const profile = useSelector((state) => state.auth.profile);
   const authUser = useSelector((state) => state.auth.user);
-  const currentUser = profile || authUser;
   const role = profile?.role ?? authUser?.role;
   const userPermissions = Array.isArray(profile?.permissions)
     ? profile.permissions

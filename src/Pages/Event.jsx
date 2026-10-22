@@ -14,6 +14,7 @@ import CommonListLayout from "../Components/CommonListLayout";
 import CommonLoader from "../Components/CommonLoader";
 import CommonEmptyState from "../Components/CommonEmptyState";
 import DeleteEventModal from "../Components/DeleteEventModal";
+import { formatDate, formatDateTime } from "../utilits/dateFormat";
 
 const columns = [
   { key: "title", label: "Title" },
@@ -31,38 +32,6 @@ const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100].map((n) => ({
   value: String(n),
   label: String(n),
 }));
-
-// DD-MM-YYYY — used for "Created On", and reused below by formatDateTime so
-// the date portion of Start/End Date & Time stays in the exact same format
-// instead of duplicating the padding/format logic a second time.
-const formatDate = (dateStr) => {
-  if (!dateStr) return "-";
-  const d = new Date(dateStr);
-  if (Number.isNaN(d.getTime())) return "-";
-  const dd = String(d.getDate()).padStart(2, "0");
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const yyyy = d.getFullYear();
-  return `${dd}-${mm}-${yyyy}`;
-};
-
-// DD-MM-YYYY hh:mm AM/PM — for Start/End Date & Time. The API returns raw
-// ISO strings (e.g. "2026-09-02T08:51:00.000Z"); this renders them in the
-// viewer's local time via the standard Date getters, which is correct here
-// since events are stored as proper UTC instants (see CreateEvent.jsx's
-// IST-offset fix) — it does not touch or reformat the stored value itself,
-// only how it's displayed.
-const formatDateTime = (dateStr) => {
-  if (!dateStr) return "-";
-  const d = new Date(dateStr);
-  if (Number.isNaN(d.getTime())) return "-";
-  let hours = d.getHours();
-  const minutes = String(d.getMinutes()).padStart(2, "0");
-  const ampm = hours >= 12 ? "PM" : "AM";
-  hours = hours % 12;
-  hours = hours === 0 ? 12 : hours;
-  const hh = String(hours).padStart(2, "0");
-  return `${formatDate(dateStr)} ${hh}:${minutes} ${ampm}`;
-};
 
 // Single source of truth for "has this event's window closed" — compares
 // endDateTime against the current time. Reuse this wherever expiry needs

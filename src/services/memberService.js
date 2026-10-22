@@ -1,4 +1,5 @@
 import api from "../api/axios";
+import { saveBlob } from "../utilits/download";
 
 // ================= LIST =================
 // params: { page, limit, search, profession, moved, sortBy, sortOrder }
@@ -73,12 +74,5 @@ export const exportMembersApi = async (params, fileName = "members.csv") => {
     responseType: "blob",
   });
 
-  const url = window.URL.createObjectURL(new Blob([response.data], { type: "text/csv;charset=utf-8" }));
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = fileName;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  window.URL.revokeObjectURL(url);
+  saveBlob(new Blob([response.data], { type: "text/csv;charset=utf-8" }), fileName);
 };

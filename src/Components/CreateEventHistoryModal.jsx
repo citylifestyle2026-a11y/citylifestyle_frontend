@@ -5,7 +5,6 @@ import { FaTimes } from "react-icons/fa";
 import {
   createEventHistory,
   updateEventHistory,
-  deleteEventHistory,
   getAllEventHistory,
 } from "../redux/contactEventHistory/contactEventHistoryThunk";
 import { clearContactEventHistoryState } from "../redux/contactEventHistory/contactEventHistorySlice";
@@ -79,10 +78,6 @@ export default function CreateEventHistoryModal({
   const lockedEntries = useMemo(
     () => rowEntries.filter((e) => e.source === "entry-report"),
     [rowEntries]
-  );
-  const lockedEventIds = useMemo(
-    () => lockedEntries.map((e) => e.eventId?._id || e.eventId),
-    [lockedEntries]
   );
   const entryEventId = (e) => e.eventId?._id || e.eventId || "";
 

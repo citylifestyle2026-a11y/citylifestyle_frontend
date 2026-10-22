@@ -12,6 +12,7 @@ import { clearAdminState } from "../redux/admin/adminSlice";
 import { showError, showSuccess } from "../utilits/toast";
 import "../assets/CSS/Admin.css";
 import { Link } from "react-router-dom";
+import useClickOutside from "../hooks/useClickOutside";
 
 export default function Admin() {
   const dispatch = useDispatch();
@@ -54,18 +55,7 @@ export default function Admin() {
   // Ref for detecting outside clicks to close the action dropdown —
   // same pattern as actionMenuRef in Pages/User.jsx.
   const actionMenuRef = useRef(null);
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (actionMenuRef.current && !actionMenuRef.current.contains(event.target)) {
-        setOpenActionMenuId(null);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+  useClickOutside(actionMenuRef, () => setOpenActionMenuId(null));
 
   const handleToggleActionMenu = useCallback((adminId) => {
     setOpenActionMenuId((prev) => (prev === adminId ? null : adminId));

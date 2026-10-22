@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import "../assets/CSS/ViewBooking.css";
 import Sidebar from "../Components/Sidebar";
 import Header from "../Components/Header";
@@ -44,7 +44,6 @@ const ViewBooking = () => {
   const dispatch = useDispatch();
 
   const { booking, detailsLoading, detailsError } = useSelector((state) => state.booking);
-  const { registerUser } = useSelector((state)=>state.bookingTicket)
   const [openMenuId, setOpenMenuId] = useState(null);
   const [menuPos, setMenuPos] = useState(null);
   const [isBookingUserModalOpen, setIsBookingUserModalOpen] = useState(false);

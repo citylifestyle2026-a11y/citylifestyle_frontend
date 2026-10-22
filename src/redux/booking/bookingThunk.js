@@ -10,6 +10,7 @@ import {
   exportBookings,
 } from "../../services/bookingService";
 import { getApiErrorMessage, UPLOAD_NETWORK_MESSAGE } from "../../utilits/apiError";
+import { saveBlob, XLSX_MIME } from "../../utilits/download";
 
 // ================= CREATE BOOKING =================
 export const createBooking = createAsyncThunk(
@@ -123,21 +124,10 @@ export const exportBookingReport = createAsyncThunk(
     try {
       const response = await exportBookings(params);
 
-      const blob = new Blob([response.data], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-
-      const url = window.URL.createObjectURL(blob);
-
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `BookingReport_${Date.now()}.xlsx`;
-
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-
-      window.URL.revokeObjectURL(url);
+      saveBlob(
+        new Blob([response.data], { type: XLSX_MIME }),
+        `BookingReport_${Date.now()}.xlsx`
+      );
 
       return true;
     } catch (error) {

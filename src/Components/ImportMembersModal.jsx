@@ -7,6 +7,7 @@ import { showError, showSuccess, showWarning } from "../utilits/toast";
 // Same look as the Guest List import dialog.
 import "../assets/CSS/ImportContactsModal.css";
 import "../assets/CSS/ImportMembersModal.css";
+import { saveCsvText } from "../utilits/download";
 
 const SAMPLE_CSV = [
   "#,Name,Contact,Email,Profession,Company / Brand,Area,City,State,Reference,Reference 2,Reference 3,Source,Remark,Status,Company Designation,Address,Instagram Link,Relationship,Spouse Name,Spouse Mobile,Spouse Instagram Link,Spouse Profession",
@@ -14,18 +15,8 @@ const SAMPLE_CSV = [
   "2,Amit Desai,9123456780,,Textile,Desai Fabrics,Adajan,Surat,Gujarat,Karan Patel,,,,,Active,Manager,,,Single,,,,",
 ].join("\n");
 
-const saveCsv = (text, fileName) => {
-  // BOM so Excel opens Gujarati / Hindi text correctly.
-  const blob = new Blob(["\uFEFF" + text], { type: "text/csv;charset=utf-8;" });
-  const url = window.URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = fileName;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  window.URL.revokeObjectURL(url);
-};
+// BOM so Excel opens Gujarati / Hindi text correctly.
+const saveCsv = (text, fileName) => saveCsvText(text, fileName, { bom: true });
 
 const downloadSample = () => saveCsv(SAMPLE_CSV, "members_sample.csv");
 

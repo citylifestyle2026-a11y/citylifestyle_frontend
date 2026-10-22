@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import "../assets/CSS/RegisterUsers.css";
@@ -6,11 +6,18 @@ import { getBookingById } from "../redux/booking/bookingThunk";
 import { updateRegisterUser } from "../redux/bookingTicket/bookingTicketThunk";
 import { showError, showSuccess } from "../utilits/toast";
 import {
-  isValidMobileNumber,
-  MOBILE_ERROR_MESSAGE,
   normalizeMobileNumber,
   sanitizeMobileInput,
 } from "../utilits/mobileNumber";
+import {
+  makeRegisterIcons,
+  emptyForm,
+  getFieldErrors,
+  mapBackendMessageToField,
+} from "./registerShared";
+
+const { UploadPhotoPlaceholder, EditIcon, RegisteredAvatarPlaceholder } =
+  makeRegisterIcons("bookingRegister");
 
 // ================= LAYOUT PARITY WITH PublicRegisterUser.jsx =================
 // This component intentionally mirrors PublicRegisterUser.jsx's structure —
@@ -22,103 +29,6 @@ import {
 // ticket's QR thumbnail (staff-only — the public/attendee flow deliberately
 // doesn't expose it), and this page's Redux-backed data source
 // (getBookingById / updateRegisterUser) instead of the public token API.
-
-function UploadPhotoPlaceholder() {
-  return (
-    <svg
-      className="bookingRegister-avatarIcon"
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <circle cx="12" cy="8" r="4" fill="#ffffff" />
-      <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7" fill="#ffffff" />
-    </svg>
-  );
-}
-
-function EditIcon() {
-  return (
-    <svg
-      className="bookingRegister-editIcon"
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M4 20l1-4 11-11 3 3-11 11-4 1z"
-        fill="none"
-        stroke="#3a3d4d"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function RegisteredAvatarPlaceholder() {
-  return (
-    <svg
-      className="bookingRegister-registeredAvatarIcon"
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <circle cx="12" cy="8" r="4" fill="#ffffff" />
-      <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7" fill="#ffffff" />
-    </svg>
-  );
-}
-
-const emptyForm = {
-  name: "",
-  mobileNumber: "",
-  email: "",
-  profileImage: null,
-  previewImage: "",
-};
-
-// Same validation rules used by BookingUserModal's single-ticket form, kept
-// in sync here since each pending slot below submits through the same
-// updateRegisterUser API.
-//
-// Mirrors PublicRegisterUser.jsx's getFieldErrors: returns a
-// { fieldName: message } map (instead of a single string) so each error
-// can be rendered directly below its own field, exactly like the Public
-// Registration flow, rather than as a generic toast.
-const getFieldErrors = (form) => {
-  const errors = {};
-
-  if (!form.name.trim()) {
-    errors.name = "Please enter name.";
-  } else if (!/^[A-Za-z ]+$/.test(form.name)) {
-    errors.name = "Name is invalid.";
-  }
-
-  // Valid with OR without 91 (9876543210 / 919876543210).
-  if (!isValidMobileNumber(form.mobileNumber)) {
-    errors.mobileNumber = MOBILE_ERROR_MESSAGE;
-  }
-
-  if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-    errors.email = "Please enter valid email.";
-  }
-
-  return errors;
-};
-
-// Maps a backend validation message to the field it's about, so it can be
-// shown inline under that field (like Public Registration) instead of a
-// generic toast. Backend responses here only carry a `message` string (see
-// bookingTicketThunk.js), so the mapping is done by keyword — if the
-// message doesn't clearly belong to one of these fields (e.g. "booking not
-// found", "already registered", server errors), it falls back to the
-// existing toast behavior below.
-const mapBackendMessageToField = (message) => {
-  if (!message) return null;
-  if (/mobile/i.test(message)) return "mobileNumber";
-  if (/email/i.test(message)) return "email";
-  if (/\bname\b/i.test(message)) return "name";
-  return null;
-};
 
 const RegisterUsers = () => {
   const { id } = useParams();

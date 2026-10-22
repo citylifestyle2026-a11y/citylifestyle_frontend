@@ -1,10 +1,8 @@
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import "../assets/CSS/PublicRegisterUser.css";
 import { showError, showSuccess } from "../utilits/toast";
 import {
-  isValidMobileNumber,
-  MOBILE_ERROR_MESSAGE,
   normalizeMobileNumber,
   sanitizeMobileInput,
 } from "../utilits/mobileNumber";
@@ -13,6 +11,15 @@ import {
   submitPublicRegistrationApi,
 } from "../services/publicRegistrationService";
 import { getApiErrorMessage, UPLOAD_NETWORK_MESSAGE } from "../utilits/apiError";
+import {
+  makeRegisterIcons,
+  emptyForm,
+  getFieldErrors,
+  mapBackendMessageToField,
+} from "./registerShared";
+
+const { UploadPhotoPlaceholder, EditIcon, RegisteredAvatarPlaceholder } =
+  makeRegisterIcons("publicRegister");
 
 // Public, no-login registration page for a BOOKING, opened from a
 // WhatsApp link at /r/:token. The token is the ONLY ticket/booking
@@ -28,100 +35,6 @@ import { getApiErrorMessage, UPLOAD_NETWORK_MESSAGE } from "../utilits/apiError"
 // backend). No localStorage/sessionStorage is used to remember which
 // slots are registered: a slot shows as registered because the DB says
 // so, which is exactly what makes this correct after a page refresh.
-
-function UploadPhotoPlaceholder() {
-  return (
-    <svg
-      className="publicRegister-avatarIcon"
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <circle cx="12" cy="8" r="4" fill="#ffffff" />
-      <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7" fill="#ffffff" />
-    </svg>
-  );
-}
-
-function EditIcon() {
-  return (
-    <svg
-      className="publicRegister-editIcon"
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M4 20l1-4 11-11 3 3-11 11-4 1z"
-        fill="none"
-        stroke="#3a3d4d"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-// Same registered-avatar placeholder used by the authenticated
-// RegisterUsers.jsx page, reused here so a registered slot's UI matches
-// exactly (per the requirement to reuse the existing Private
-// Registration registered-user UI wherever possible).
-function RegisteredAvatarPlaceholder() {
-  return (
-    <svg
-      className="publicRegister-registeredAvatarIcon"
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <circle cx="12" cy="8" r="4" fill="#ffffff" />
-      <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7" fill="#ffffff" />
-    </svg>
-  );
-}
-
-const emptyForm = {
-  name: "",
-  mobileNumber: "",
-  email: "",
-  profileImage: null,
-  previewImage: "",
-};
-
-// Same validation rules as RegisterUsers.jsx / BookingUserModal.
-// Returns a { fieldName: message } map so each error can render
-// directly below its own field.
-const getFieldErrors = (form) => {
-  const errors = {};
-
-  if (!form.name.trim()) {
-    errors.name = "Please enter name.";
-  } else if (!/^[A-Za-z ]+$/.test(form.name)) {
-    errors.name = "Name is invalid.";
-  }
-
-  // Valid with OR without 91 (9876543210 / 919876543210).
-  if (!isValidMobileNumber(form.mobileNumber)) {
-    errors.mobileNumber = MOBILE_ERROR_MESSAGE;
-  }
-
-  if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-    errors.email = "Please enter valid email.";
-  }
-
-  return errors;
-};
-
-// Maps a backend validation message to the field it is about, so it is
-// shown right under that field instead of only as a toast. Backend
-// responses carry a plain `message` string, so this is keyword based; a
-// message that does not clearly belong to a field (link expired, ticket
-// already registered, server error...) still falls back to the toast.
-const mapBackendMessageToField = (message) => {
-  if (!message) return null;
-  if (/mobile/i.test(message)) return "mobileNumber";
-  if (/email/i.test(message)) return "email";
-  if (/\bname\b/i.test(message)) return "name";
-  return null;
-};
 
 // Maps a failed axios call to one clean, customer-facing message — never
 // a raw server/stack-trace string. Falls back to the backend's own

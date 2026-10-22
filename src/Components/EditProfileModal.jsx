@@ -9,8 +9,6 @@ import "../assets/CSS/Profile.css";
 // Same format rules already used by the backend validator, mirrored here
 // for instant feedback — the backend remains the source of truth for
 // duplicate email/mobile checks.
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const MOBILE_REGEX = /^[0-9]{10}$/;
 
 export default function EditProfileModal({ user, onClose }) {
   const dispatch = useDispatch();

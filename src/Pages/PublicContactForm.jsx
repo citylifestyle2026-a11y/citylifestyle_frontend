@@ -7,7 +7,7 @@ import "../assets/CSS/PublicContactForm.css";
 // Images live in /public/assets/images/site (same folder the marketing site uses).
 const IMG = "/assets/images/site";
 const cityToppersLogo = `${IMG}/logo__1_-removebg-preview.png`;
-const parvHero = `${IMG}/parav_image.png`;
+const parvHero = `${IMG}/parav_image.webp`;
 
 // Public contact form, opened by typing /city-lifestyle in the address bar
 // (no login, no button). The form itself is the same one as Contact List ->

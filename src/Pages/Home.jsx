@@ -28,7 +28,7 @@ export default function Home() {
       {/* ============ HERO ============ */}
       <section className="cl-hero">
         <div className="cl-hero-bg">
-          <img src={`${IMG}/hero.png`} alt="Crowd dancing at a nightclub event" loading="lazy" />
+          <img src={`${IMG}/hero.webp`} alt="Crowd dancing at a nightclub event" loading="lazy" />
           <div className="cl-hero-shade-1"></div>
           <div className="cl-hero-shade-2"></div>
         </div>

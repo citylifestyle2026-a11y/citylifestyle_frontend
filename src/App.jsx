@@ -1,7 +1,7 @@
 import "./App.css";
 import "./assets/CSS/PageShell.css";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { useDispatch } from "react-redux";
 
 import { getProfile } from "./redux/auth/authSlice";
@@ -10,31 +10,31 @@ import useIdleLogout from "./hooks/useIdleLogout";
 
 import ProtectedRoute from "./routes/ProtectedRoute";
 
-import Login from "./Pages/Login";
-import DashboardPage from "./Pages/DashboardPage";
-import User from "./Pages/User";
-import Role from "./Pages/Role";
-import Event from "./Pages/Event";
-import Booking from "./Pages/Booking";
-import ViewBooking from "./Pages/ViewBooking";
-import RegisterUsers from "./Components/RegisterUsers";
-import PublicRegisterUser from "./Components/PublicRegisterUser";
-import PublicContactForm from "./Pages/PublicContactForm";
-import Ticket from "./Pages/Ticket";
-import EntryReport from "./Pages/EntryReport";
-import CreateEvent from "./Pages/CreateEvent";
-import ViewEvent from "./Pages/ViewEvent";
-import TicketType from "./Components/TicketType";
+const Login = lazy(() => import("./Pages/Login"));
+const DashboardPage = lazy(() => import("./Pages/DashboardPage"));
+const User = lazy(() => import("./Pages/User"));
+const Role = lazy(() => import("./Pages/Role"));
+const Event = lazy(() => import("./Pages/Event"));
+const Booking = lazy(() => import("./Pages/Booking"));
+const ViewBooking = lazy(() => import("./Pages/ViewBooking"));
+const RegisterUsers = lazy(() => import("./Components/RegisterUsers"));
+const PublicRegisterUser = lazy(() => import("./Components/PublicRegisterUser"));
+const PublicContactForm = lazy(() => import("./Pages/PublicContactForm"));
+const Ticket = lazy(() => import("./Pages/Ticket"));
+const EntryReport = lazy(() => import("./Pages/EntryReport"));
+const CreateEvent = lazy(() => import("./Pages/CreateEvent"));
+const ViewEvent = lazy(() => import("./Pages/ViewEvent"));
+const TicketType = lazy(() => import("./Components/TicketType"));
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Profile from "./Pages/Profile";
-import Admin from "./Pages/Admin";
-import ContactList from "./Pages/ContactList";
-import InviteCards from "./Pages/InviteCards";
-import MemberList from "./Pages/MemberList";
-import FormLinks from "./Pages/FormLinks";
-import EventHistory from "./Pages/EventHistory";
-import CompanyCategory from "./Pages/CompanyCategory";
+const Profile = lazy(() => import("./Pages/Profile"));
+const Admin = lazy(() => import("./Pages/Admin"));
+const ContactList = lazy(() => import("./Pages/ContactList"));
+const InviteCards = lazy(() => import("./Pages/InviteCards"));
+const MemberList = lazy(() => import("./Pages/MemberList"));
+const FormLinks = lazy(() => import("./Pages/FormLinks"));
+const EventHistory = lazy(() => import("./Pages/EventHistory"));
+const CompanyCategory = lazy(() => import("./Pages/CompanyCategory"));
 import TopProgressLoader from "./Components/TopProgressLoader";
 
 // Public home page (City Lifestyle)
@@ -130,6 +130,7 @@ function App() {
 
         <TopProgressLoader />
 
+        <Suspense fallback={null}>
         <Routes>
           <Route path="/" element={<Home />} />
 
@@ -171,6 +172,7 @@ function App() {
             <Route path="/entry-report" element={<EntryReport />} />
           </Route>
         </Routes>
+        </Suspense>
       </BrowserRouter>
     </>
   );

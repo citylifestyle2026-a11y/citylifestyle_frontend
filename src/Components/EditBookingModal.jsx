@@ -30,7 +30,6 @@ export default function EditBookingModal({ booking, onClose, onSuccess }) {
   const [fieldErrors, setFieldErrors] = useState({});
   const [duplicateFound, setDuplicateFound] = useState(false);
   const [resend, setResend] = useState(false);
-  const [resendTouched, setResendTouched] = useState(false);
 
   const [formData, setFormData] = useState({
     ticketType: originalTicketId,
@@ -66,9 +65,6 @@ export default function EditBookingModal({ booking, onClose, onSuccess }) {
   const discount = Number(formData.discount || 0);
   const totalPay = Math.max(subtotal - discount, 0);
 
-  const mobileChanged =
-    normalizeMobileNumber(formData.mobile) !== normalizeMobileNumber(booking.mobileNumber);
-  const structuralChanged = qty !== booking.quantity || !sameType;
 
   // The "Re-send invitation on WhatsApp" checkbox is NEVER ticked for the
   // admin: it starts unchecked and only changes when they click it.
@@ -353,7 +349,6 @@ export default function EditBookingModal({ booking, onClose, onSuccess }) {
               type="checkbox"
               checked={resend}
               onChange={(e) => {
-                setResendTouched(true);
                 setResend(e.target.checked);
               }}
             />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { EmptyStateIcon } from "../Components/CommonEmptyState";
 import { Link, useNavigate } from "react-router-dom";
 import "../assets/CSS/ViewEvent.css";
@@ -8,39 +8,7 @@ import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getEventById } from "../redux/event/eventThunk";
 import DOMPurify from "dompurify";
-
-// DD-MM-YYYY — matches Event.jsx's formatDate exactly, so "Created On"
-// here renders identically to the same field on the Event list page.
-// Reused below by formatDateTime for the date portion, same as Event.jsx.
-const formatDate = (dateStr) => {
-  if (!dateStr) return "-";
-  const d = new Date(dateStr);
-  if (Number.isNaN(d.getTime())) return "-";
-  const dd = String(d.getDate()).padStart(2, "0");
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const yyyy = d.getFullYear();
-  return `${dd}-${mm}-${yyyy}`;
-};
-
-// DD-MM-YYYY hh:mm AM/PM — matches Event.jsx's formatDateTime exactly, used
-// here for Start/End Date & Time instead of the raw new Date(...).toLocaleString()
-// this page previously called directly. The API returns proper UTC instants
-// (see CreateEvent.jsx's toISTISOString, which attaches the explicit +05:30
-// offset on save so the stored value is unambiguous regardless of the
-// server's own timezone); rendering via the standard local Date getters here
-// only controls *display*, so the actual event date/time is never altered.
-const formatDateTime = (dateStr) => {
-  if (!dateStr) return "-";
-  const d = new Date(dateStr);
-  if (Number.isNaN(d.getTime())) return "-";
-  let hours = d.getHours();
-  const minutes = String(d.getMinutes()).padStart(2, "0");
-  const ampm = hours >= 12 ? "PM" : "AM";
-  hours = hours % 12;
-  hours = hours === 0 ? 12 : hours;
-  const hh = String(hours).padStart(2, "0");
-  return `${formatDate(dateStr)} ${hh}:${minutes} ${ampm}`;
-};
+import { formatDate, formatDateTime } from "../utilits/dateFormat";
 
 // Shared "empty media slot" styling so the photo and video containers stay
 // visually consistent, and so the fallback text is always centered both

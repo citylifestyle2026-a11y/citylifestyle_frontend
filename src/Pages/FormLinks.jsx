@@ -25,6 +25,7 @@ import { getErrorText } from "../utilits/apiError";
 // The table, header and search box reuse the Company Category page styles.
 import "../assets/CSS/CompanyCategory.css";
 import "../assets/CSS/FormLinks.css";
+import useClickOutside from "../hooks/useClickOutside";
 
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100].map((n) => ({ value: n, label: String(n) }));
 
@@ -102,15 +103,7 @@ export default function FormLinks() {
 
   // Close the Action dropdown on an outside click.
   const actionMenuRef = useRef(null);
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (actionMenuRef.current && !actionMenuRef.current.contains(event.target)) {
-        setOpenActionMenuId(null);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  useClickOutside(actionMenuRef, () => setOpenActionMenuId(null));
 
   const handleSort = useCallback((field) => {
     setSortBy((prevField) => {

@@ -53,6 +53,7 @@ import MergeMemberModal from "../Components/MergeMemberModal";
 import DuplicateTab from "../Components/DuplicateTab";
 import { confirmDialog, noticeDialog } from "../utilits/appSwal";
 import "../assets/CSS/ContactList.css";
+import useClickOutside from "../hooks/useClickOutside";
 
 // Options for the "rows per page" select. Lives in the page (not inside
 // CommonSelect) since CommonSelect must never hardcode page-specific
@@ -253,21 +254,7 @@ export default function ContactList() {
   // Ref for detecting outside clicks to close the action dropdown —
   // same pattern as actionMenuRef in Pages/User.jsx.
   const actionMenuRef = useRef(null);
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        actionMenuRef.current &&
-        !actionMenuRef.current.contains(event.target)
-      ) {
-        setOpenActionMenuId(null);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+  useClickOutside(actionMenuRef, () => setOpenActionMenuId(null));
 
   const handleToggleActionMenu = useCallback((contactId) => {
     setOpenActionMenuId((prev) => (prev === contactId ? null : contactId));

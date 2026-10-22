@@ -3,10 +3,8 @@ import { loginApi } from "../../services/authService";
 import { getProfileApi } from "../../services/authService";
 import { updateProfileApi } from "../../services/authService";
 import { resetPasswordApi } from "../../services/authService";
-import { logoutApi } from "../../services/authService";
 import {
   forgotPasswordApi,
-  verifyResetOtpApi,
   resetPasswordWithOtpApi,
 } from "../../services/authService";
 import { getApiErrorMessage, UPLOAD_NETWORK_MESSAGE } from "../../utilits/apiError";
@@ -106,20 +104,6 @@ export const forgotPassword = createAsyncThunk(
   }
 );
 
-// post api verify reset otp — accepts ONLY { email, otp }
-export const verifyResetOtp = createAsyncThunk(
-  "auth/verifyResetOtp",
-  async (data, thunkAPI) => {
-    try {
-      return await verifyResetOtpApi(data);
-    } catch (error) {
-      return thunkAPI.rejectWithValue(
-        getApiErrorMessage(error, "Invalid or expired OTP")
-      );
-    }
-  }
-);
-
 // post api reset password with otp — accepts ONLY
 // { email, otp, newPassword, confirmPassword }
 export const resetPasswordWithOtp = createAsyncThunk(
@@ -135,29 +119,7 @@ export const resetPasswordWithOtp = createAsyncThunk(
   }
 );
 
-// post api logout — best-effort backend notification only. The backend
-// uses stateless JWT (confirmed: it does nothing except return
-// { success: true }), so the UI never waits on this. Local logout
-// (clearAuth) is what actually logs the user out and is dispatched
-// synchronously by the caller, independent of this thunk's result.
-export const logout = createAsyncThunk(
-  "auth/logout",
-  async (_, thunkAPI) => {
-    try {
-      return await logoutApi();
-    } catch (error) {
-      return thunkAPI.rejectWithValue(
-        getApiErrorMessage(error, "Logout failed")
-      );
-    }
-  }
-);
-
-// Shared local cleanup. Used by the synchronous clearAuth reducer (the
-// instant path, dispatched directly by the UI) AND as a safety net by
-// logout.fulfilled/logout.rejected in case something dispatches the
-// logout thunk directly without clearing first — either way the result
-// is the same, nothing is duplicated.
+// Shared local cleanup used by the synchronous clearAuth reducer.
 const clearAuthState = (state) => {
   state.user = null;
   state.token = null;
@@ -179,15 +141,10 @@ const clearAuthState = (state) => {
   state.forgotPasswordError = null;
   state.forgotPasswordSuccess = null;
 
-  state.verifyResetOtpLoading = false;
-  state.verifyResetOtpError = null;
-  state.verifyResetOtpSuccess = null;
 
   state.resetPasswordWithOtpLoading = false;
   state.resetPasswordWithOtpError = null;
   state.resetPasswordWithOtpSuccess = null;
-
-  state.logoutLoading = false;
 
   localStorage.removeItem("token");
   localStorage.removeItem("user");
@@ -247,16 +204,11 @@ const authSlice = createSlice({
     forgotPasswordError: null,
     forgotPasswordSuccess: null,
 
-    verifyResetOtpLoading: false,
-    verifyResetOtpError: null,
-    verifyResetOtpSuccess: null,
 
     resetPasswordWithOtpLoading: false,
     resetPasswordWithOtpError: null,
     resetPasswordWithOtpSuccess: null,
 
-    // Logout state
-    logoutLoading: false,
   },
 
   reducers: {
@@ -284,9 +236,6 @@ const authSlice = createSlice({
       state.forgotPasswordError = null;
       state.forgotPasswordSuccess = null;
 
-      state.verifyResetOtpLoading = false;
-      state.verifyResetOtpError = null;
-      state.verifyResetOtpSuccess = null;
 
       state.resetPasswordWithOtpLoading = false;
       state.resetPasswordWithOtpError = null;
@@ -409,23 +358,6 @@ const authSlice = createSlice({
         state.forgotPasswordError = action.payload;
       })
 
-      .addCase(verifyResetOtp.pending, (state) => {
-        state.verifyResetOtpLoading = true;
-        state.verifyResetOtpError = null;
-        state.verifyResetOtpSuccess = null;
-      })
-
-      .addCase(verifyResetOtp.fulfilled, (state, action) => {
-        state.verifyResetOtpLoading = false;
-        state.verifyResetOtpSuccess =
-          action.payload?.message || "OTP verified. You can now set a new password.";
-      })
-
-      .addCase(verifyResetOtp.rejected, (state, action) => {
-        state.verifyResetOtpLoading = false;
-        state.verifyResetOtpError = action.payload;
-      })
-
       .addCase(resetPasswordWithOtp.pending, (state) => {
         state.resetPasswordWithOtpLoading = true;
         state.resetPasswordWithOtpError = null;
@@ -441,20 +373,6 @@ const authSlice = createSlice({
       .addCase(resetPasswordWithOtp.rejected, (state, action) => {
         state.resetPasswordWithOtpLoading = false;
         state.resetPasswordWithOtpError = action.payload;
-      })
-
-      .addCase(logout.pending, (state) => {
-        state.logoutLoading = true;
-      })
-
-      // Safety net only — under normal use the UI has already called
-      // clearAuth() synchronously before this ever settles.
-      .addCase(logout.fulfilled, (state) => {
-        clearAuthState(state);
-      })
-
-      .addCase(logout.rejected, (state) => {
-        clearAuthState(state);
       });
   },
 

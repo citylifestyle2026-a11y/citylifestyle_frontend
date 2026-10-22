@@ -20,6 +20,8 @@ import { getHistoryEditionsApi } from "../services/contactEventHistoryService";
 import { showError, showSuccess } from "../utilits/toast";
 import { getErrorText } from "../utilits/apiError";
 import "../assets/CSS/EventHistory.css";
+import { formatDateTime } from "../utilits/dateFormat";
+import useClickOutside from "../hooks/useClickOutside";
 
 // Sidebar -> Event History: a standalone page listing EVERY contact's
 // event history (not scoped to one contact via a URL param anymore —
@@ -31,22 +33,6 @@ const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100].map((n) => ({
   value: n,
   label: String(n),
 }));
-
-const formatDateTime = (dateStr) => {
-  if (!dateStr) return "-";
-  const d = new Date(dateStr);
-  if (Number.isNaN(d.getTime())) return "-";
-  const dd = String(d.getDate()).padStart(2, "0");
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const yyyy = d.getFullYear();
-  let hours = d.getHours();
-  const minutes = String(d.getMinutes()).padStart(2, "0");
-  const ampm = hours >= 12 ? "PM" : "AM";
-  hours = hours % 12;
-  hours = hours === 0 ? 12 : hours;
-  const hh = String(hours).padStart(2, "0");
-  return `${dd}-${mm}-${yyyy} ${hh}:${minutes} ${ampm}`;
-};
 
 // Edition (e.g. "Parv 6") is what the admin sees; events created before the
 // Edition field existed fall back to their title.
@@ -133,16 +119,7 @@ export default function EventHistory() {
   }, [dispatch, currentQuery]);
 
   const actionMenuRef = useRef(null);
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (actionMenuRef.current && !actionMenuRef.current.contains(event.target)) {
-        setOpenActionMenuId(null);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  useClickOutside(actionMenuRef, () => setOpenActionMenuId(null));
 
   const handleToggleActionMenu = useCallback((entryId) => {
     setOpenActionMenuId((prev) => (prev === entryId ? null : entryId));

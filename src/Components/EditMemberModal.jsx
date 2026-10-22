@@ -17,7 +17,6 @@ const STATUS_OPTIONS = ["Active", "Inactive"];
 // Same image rules as the Guest List (Create Contact) photos.
 const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
 const MAX_IMAGE_BYTES = 100 * 1024 * 1024;
-const EMPTY_PHOTO = { file: null, preview: "", remove: false };
 
 const normalizeStatus = (value) =>
   String(value || "").trim().toLowerCase() === "inactive" ? "Inactive" : "Active";

@@ -13,7 +13,6 @@ import {
   normalizeMobileNumber,
   sanitizeMobileInput,
 } from "../utilits/mobileNumber";
-import { getBookingById } from "../redux/booking/bookingThunk";
 
 export default function BookingUserModal({ onClose, ticketId, onSuccess }) {
   //Redux connect
