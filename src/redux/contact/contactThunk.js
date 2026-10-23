@@ -7,6 +7,7 @@ import {
   updateContactApi,
   deleteContactApi,
   getUniqueReferencesApi,
+  getUniqueAreasApi,
   getReferenceSummaryApi,
   bulkUpdateContactStatusApi,
   sendContactPassApi,
@@ -104,6 +105,20 @@ export const deleteContact = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(
         getApiErrorMessage(error, "Failed to delete contact")
+      );
+    }
+  }
+);
+
+// ================= GET UNIQUE AREAS =================
+export const getUniqueAreas = createAsyncThunk(
+  "contact/getUniqueAreas",
+  async (_, thunkAPI) => {
+    try {
+      return await getUniqueAreasApi();
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        getApiErrorMessage(error, "Failed to fetch areas")
       );
     }
   }

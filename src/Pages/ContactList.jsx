@@ -36,6 +36,7 @@ import { ContactPerson, InstagramLink } from "../Components/ContactAvatar";
 import {
   getAllContacts,
   getUniqueReferences,
+  getUniqueAreas,
   getReferenceSummary,
   deleteContact,
   exportContacts,
@@ -118,6 +119,8 @@ export default function ContactList() {
     limit,
     uniqueReferences,
     uniqueReferencesLoading,
+    uniqueAreas,
+    uniqueAreasLoading,
     referenceSummary,
     exportLoading,
     statusCounts,
@@ -138,6 +141,8 @@ export default function ContactList() {
   const [categoryFilter, setCategoryFilter] = useState("");
   // Several references can be ticked; a guest matches when it has ANY of them.
   const [referenceFilter, setReferenceFilter] = useState([]);
+  // Same for areas: several can be ticked, a guest matches when its area is ANY of them.
+  const [areaFilter, setAreaFilter] = useState([]);
   const [statusFilter, setStatusFilter] = useState("");
 
   // Edition (event) the guests were moved into from Contact Book. Can be
@@ -223,6 +228,7 @@ export default function ContactList() {
 
     if (categoryFilter) params.companyCategory = categoryFilter;
     if (referenceFilter.length) params.reference = referenceFilter;
+    if (areaFilter.length) params.area = areaFilter;
     if (statusFilter === "passCancelled") params.passStatus = "cancelled";
     else if (statusFilter && statusFilter !== "duplicate") params.approvalStatus = statusFilter;
     if (editionFilter) params.editionEventId = editionFilter;
@@ -238,6 +244,7 @@ export default function ContactList() {
     sortOrder,
     categoryFilter,
     referenceFilter,
+    areaFilter,
     statusFilter,
     editionFilter,
     rsvpFilter,
@@ -265,6 +272,12 @@ export default function ContactList() {
   useEffect(() => {
     dispatch(getReferenceSummary());
   }, [dispatch]);
+
+  // Area dropdown options. Re-fetched whenever the list is refreshed (guest
+  // added / edited / imported), so a new area shows up in the filter.
+  useEffect(() => {
+    dispatch(getUniqueAreas());
+  }, [dispatch, refreshKey]);
 
   // Ref for detecting outside clicks to close the action dropdown —
   // same pattern as actionMenuRef in Pages/User.jsx.
@@ -314,6 +327,7 @@ export default function ContactList() {
 
     if (categoryFilter) params.companyCategory = categoryFilter;
     if (referenceFilter.length) params.reference = referenceFilter;
+    if (areaFilter.length) params.area = areaFilter;
     if (statusFilter === "passCancelled") params.passStatus = "cancelled";
     else if (statusFilter && statusFilter !== "duplicate") params.approvalStatus = statusFilter;
     if (editionFilter) params.editionEventId = editionFilter;
@@ -384,6 +398,7 @@ export default function ContactList() {
 
       if (categoryFilter) params.companyCategory = categoryFilter;
       if (referenceFilter.length) params.reference = referenceFilter;
+      if (areaFilter.length) params.area = areaFilter;
       if (statusFilter === "passCancelled") params.passStatus = "cancelled";
     else if (statusFilter && statusFilter !== "duplicate") params.approvalStatus = statusFilter;
       if (editionFilter) params.editionEventId = editionFilter;
@@ -917,6 +932,23 @@ const sortedReferenceFilterOptions = useMemo(
     ),
   [referenceFilterOptions]
 );
+
+  // Area options, A-Z. The API already merges "Vesu" / "vesu " into one; the
+  // second pass only guards against a duplicate option key.
+  const areaFilterOptions = useMemo(() => {
+    const seen = new Set();
+    return (uniqueAreas || [])
+      .reduce((options, area) => {
+        if (typeof area !== "string") return options;
+        const trimmed = area.trim();
+        const key = trimmed.toLowerCase();
+        if (!trimmed || seen.has(key)) return options;
+        seen.add(key);
+        options.push({ value: trimmed, label: trimmed });
+        return options;
+      }, [])
+      .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()));
+  }, [uniqueAreas]);
 
   // Reference (normalized, case-insensitive) -> every contact name that
   // holds it, e.g. Karan -> [a,b,c,d] and Ramesh -> [a,g,h,p] becomes
@@ -1534,7 +1566,9 @@ const sortedReferenceFilterOptions = useMemo(
             <CommonExportButton
               onClick={handleExport}
               loading={exportLoading}
-              disabled={exportLoading || total === 0}
+              // The Duplicate tab is a separate list, so exporting there would give the
+              // whole (unfiltered) guest list - keep the button off on that tab.
+              disabled={exportLoading || total === 0 || statusFilter === "duplicate"}
               label="Export Guest List"
               className="contactPage__exportButton"
               iconClassName="contactPage__exportIcon"
@@ -1721,6 +1755,18 @@ const sortedReferenceFilterOptions = useMemo(
             searchPlaceholder="Search reference..."
             loading={uniqueReferencesLoading}
             options={sortedReferenceFilterOptions}
+          />
+
+          <MultiSelect
+            value={areaFilter}
+            onChange={(next) => {
+              setAreaFilter(next);
+              setCurrentPage(1);
+            }}
+            placeholder="All Areas"
+            searchPlaceholder="Search area..."
+            loading={uniqueAreasLoading}
+            options={areaFilterOptions}
           />
 
           <CommonSelect

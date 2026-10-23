@@ -23,7 +23,7 @@ export const getAllContactsApi = async (params) => {
 
 // ================= EXPORT CONTACTS =================
 // params supports: search, sortBy, sortOrder, companyCategory,
-// reference — same filter/sort params as getAllContactsApi (minus
+// reference, area (reference / area can be arrays) — same filter/sort params as getAllContactsApi (minus
 // page/limit, since every matching contact is exported). Must stay in
 // sync with the backend's GET /contacts/export route.
 export const exportContactsApi = async (params) => {
@@ -69,6 +69,14 @@ export const getUniqueReferencesApi = async (params) => {
     params,
   });
 
+  return response.data;
+};
+
+// ================= GET UNIQUE AREAS =================
+// Powers the Guest List "All Areas" multi-select filter. Must stay in sync
+// with the backend's GET /contacts/unique-areas route.
+export const getUniqueAreasApi = async () => {
+  const response = await api.get("/contacts/unique-areas");
   return response.data;
 };
 

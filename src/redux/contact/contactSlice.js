@@ -7,6 +7,7 @@ import {
   updateContact,
   deleteContact,
   getUniqueReferences,
+  getUniqueAreas,
   getReferenceSummary,
 } from "./contactThunk";
 
@@ -27,6 +28,11 @@ const initialState = {
   uniqueReferences: [],
   uniqueReferencesLoading: false,
   uniqueReferencesError: null,
+
+  // Area filter options (Guest List "All Areas" dropdown).
+  uniqueAreas: [],
+  uniqueAreasLoading: false,
+  uniqueAreasError: null,
 
   // Same isolation as uniqueReferences above, but for the grouped
   // "Reference Summary" section shown below the Contact List table —
@@ -200,6 +206,21 @@ const contactSlice = createSlice({
       .addCase(getUniqueReferences.rejected, (state, action) => {
         state.uniqueReferencesLoading = false;
         state.uniqueReferencesError = action.payload;
+      });
+
+    // ================= GET UNIQUE AREAS =================
+    builder
+      .addCase(getUniqueAreas.pending, (state) => {
+        state.uniqueAreasLoading = true;
+        state.uniqueAreasError = null;
+      })
+      .addCase(getUniqueAreas.fulfilled, (state, action) => {
+        state.uniqueAreasLoading = false;
+        state.uniqueAreas = action.payload.data;
+      })
+      .addCase(getUniqueAreas.rejected, (state, action) => {
+        state.uniqueAreasLoading = false;
+        state.uniqueAreasError = action.payload;
       });
 
     // ================= GET REFERENCE SUMMARY (GROUPED) =================
