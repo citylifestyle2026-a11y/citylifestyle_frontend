@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { FaCheckCircle, FaRegCalendarCheck, FaMapMarkerAlt, FaClock } from "react-icons/fa";
 
 import { getPublicRsvpApi, submitPublicRsvpApi } from "../services/publicRsvpService";
-import logo from "../assets/images/logo/city-lifestyle-logo.jpg";
+import logo from "../assets/images/parv-logo.png";
 import "../assets/CSS/PublicRsvp.css";
 
 // Public page opened from the Yes / No buttons of the attendance-reminder
@@ -38,7 +38,7 @@ export default function PublicRsvp() {
     document.head.appendChild(meta);
 
     const previousTitle = document.title;
-    document.title = "Attendance Confirmation | City Lifestyle";
+    document.title = "Attendance Confirmation | Parv";
 
     return () => {
       document.head.removeChild(meta);
@@ -94,7 +94,7 @@ export default function PublicRsvp() {
   return (
     <div className="rsvpPage">
       <div className="rsvpCard">
-        <img className="rsvpCard__logo" src={logo} alt="City Lifestyle" />
+        <img className="rsvpCard__logo" src={logo} alt="Parv" />
 
         {state === "loading" && (
           <div className="rsvpCard__center">
@@ -108,7 +108,7 @@ export default function PublicRsvp() {
             <h1 className="rsvpCard__title">Unable to process your response</h1>
             <p className="rsvpCard__text">{error}</p>
             <p className="rsvpCard__muted">
-              If you need any help, please contact the City Lifestyle team.
+              If you need any help, please contact the Parv team.
             </p>
           </div>
         )}
@@ -177,7 +177,7 @@ export default function PublicRsvp() {
             <p className="rsvpCard__footer">
               Warm regards,
               <br />
-              Team City Lifestyle
+              Team Parv
             </p>
           </>
         )}

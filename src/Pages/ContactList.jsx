@@ -829,10 +829,17 @@ export default function ContactList() {
         if (err?.response?.status === 404 && !body?.message) {
           showError("Send Reminder is not available on the server yet - please deploy / restart the backend.");
         } else {
+          // When every guest fails the server answers with an error status, so
+          // the per-guest reason (e.g. the WhatsApp / Meta error) is in
+          // body.data.results - show it instead of only "0 guests, 1 failed".
+          const failedResults = (body?.data?.results || []).filter((r) => r.status === "failed");
+          const reasons = [...new Set(failedResults.map((r) => r.message).filter(Boolean))];
+          const baseText = body?.message || err?.message || "Failed to send the reminder.";
+
           await noticeDialog({
             icon: "error",
             title: "Reminder not sent",
-            text: body?.message || err?.message || "Failed to send the reminder.",
+            text: reasons.length ? `${baseText} Reason: ${reasons.slice(0, 3).join(" | ")}` : baseText,
           });
         }
       } finally {

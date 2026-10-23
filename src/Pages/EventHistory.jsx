@@ -38,6 +38,28 @@ const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100].map((n) => ({
 // Edition field existed fall back to their title.
 const editionLabel = (ev) => ev?.edition || ev?.title || "-";
 
+// The person a history row belongs to. History is a permanent record, so it
+// must still read properly when the live contact has lost a detail (e.g. the
+// spouse was removed from a Couple contact):
+//  - contactId       -> the live contact (populated by the backend)
+//  - contactSnapshot -> copy of the person saved by the backend, used for any
+//                       field the live contact has blank
+// (A guest deleted from Guest List stays in the backend as a hidden
+// history-only contact, so its row keeps showing normally.)
+// A row with NO live contact at all (very old data) is flagged as "deleted".
+const personOf = (row) => {
+  const live = row?.contactId || {};
+  const saved = row?.contactSnapshot || {};
+  return {
+    fullName: live.fullName || saved.fullName || "",
+    whatsappNumber: live.whatsappNumber || saved.whatsappNumber || "",
+    spouseName: live.spouseName || saved.spouseName || "",
+    spouseMobile: live.spouseMobile || saved.spouseMobile || "",
+  };
+};
+const isContactDeleted = (row) => !row?.contactId;
+const DELETED_LABEL = "Deleted guest";
+
 // Event badges shown per row before "+N more".
 const MAX_VISIBLE_EVENTS = 3;
 
@@ -158,7 +180,7 @@ export default function EventHistory() {
     setOpenActionMenuId(null);
     setDeleteEntryIds((row.entries || []).map((e) => e._id));
     setDeleteEntryName(
-      (row.isSpouse ? row.contactId?.spouseName : row.contactId?.fullName) ||
+      (row.isSpouse ? personOf(row).spouseName : personOf(row).fullName) ||
         "this entry"
     );
     setIsDeleteOpen(true);
@@ -200,26 +222,39 @@ export default function EventHistory() {
         key: "contact",
         label: "Contact",
         cellClassName: "eventHistoryPage__contactCell",
-        render: (entry) =>
-          entry.isSpouse ? (
+        render: (entry) => {
+          const person = personOf(entry);
+          const deleted = isContactDeleted(entry);
+          const deletedTag = deleted ? (
+            <small style={{ color: "#c0392b", fontWeight: 600, marginLeft: 6 }}>
+              ({DELETED_LABEL})
+            </small>
+          ) : null;
+
+          return entry.isSpouse ? (
             <>
-              {entry.contactId?.spouseName || "-"}
+              {person.spouseName || (deleted ? DELETED_LABEL : "-")}
+              {deletedTag}
               <br />
               <small style={{ color: "#8a8fa3", fontWeight: 400 }}>
-                Spouse of {entry.contactId?.fullName || "-"}
+                Spouse of {person.fullName || "-"}
               </small>
             </>
           ) : (
-            entry.contactId?.fullName || "-"
-          ),
+            <>
+              {person.fullName || (deleted ? DELETED_LABEL : "-")}
+              {person.fullName ? deletedTag : null}
+            </>
+          );
+        },
       },
       {
         key: "mobile",
         label: "WhatsApp Number",
         render: (entry) =>
           (entry.isSpouse
-            ? entry.contactId?.spouseMobile
-            : entry.contactId?.whatsappNumber) || "-",
+            ? personOf(entry).spouseMobile
+            : personOf(entry).whatsappNumber) || "-",
       },
       {
         key: "event",
@@ -381,7 +416,8 @@ export default function EventHistory() {
             >
               {/* Edit only for rows added from the "Add Details" modal; rows
                   that came from Entry Report can only be deleted. */}
-              {(entry.entries || []).some((e) => e.source !== "entry-report") && (
+              {!isContactDeleted(entry) &&
+                (entry.entries || []).some((e) => e.source !== "entry-report") && (
                 <button
                   type="button"
                   className="eventHistoryAction__item eventHistoryAction__itemEdit"

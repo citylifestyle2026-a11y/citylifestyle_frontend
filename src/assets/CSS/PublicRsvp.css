@@ -20,11 +20,11 @@
 }
 
 .rsvpCard__logo {
-  height: 56px;
+  height: 64px;
   width: auto;
+  max-width: 100%;
   object-fit: contain;
   margin-bottom: 18px;
-  border-radius: 8px;
 }
 
 .rsvpCard__icon {

@@ -45,6 +45,7 @@ import "../assets/CSS/CreateCompanyCategoryModal.css";
 import "../assets/CSS/InviteCards.css";
 import { saveCsvText } from "../utilits/download";
 import useClickOutside from "../hooks/useClickOutside";
+import { formatDateTime } from "../utilits/dateFormat";
 
 const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, 100].map((n) => ({ value: n, label: String(n) }));
 
@@ -525,7 +526,7 @@ export default function InviteCards() {
         key: "sentAt",
         label: "Sent At",
         sortable: false,
-        render: (g) => (g.sentAt ? new Date(g.sentAt).toLocaleString("en-GB") : "-"),
+        render: (g) => formatDateTime(g.sentAt),
       },
       {
         key: "action",
