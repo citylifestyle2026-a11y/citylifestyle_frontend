@@ -10,6 +10,7 @@ import {
   FaSortDown,
   FaWhatsapp,
   FaCheck,
+  FaGift,
   FaTimes,
   FaClock,
   FaFileCsv,
@@ -50,6 +51,7 @@ import {
   resendContactPassApi,
   deleteContactBookingApi,
   cancelContactPassApi,
+  updateContactHamperApi,
   sendContactReminderApi,
 } from "../services/contactService";
 import MergeMemberModal from "../Components/MergeMemberModal";
@@ -82,11 +84,19 @@ const STATUS_TABS = [
   { value: "", label: "All", countKey: "all" },
   { value: "pending", label: "Pending", countKey: "pending" },
   { value: "approved", label: "Approved", countKey: "approved" },
+  { value: "hamper", label: "Hamper", countKey: "hamper" },
   { value: "rejected", label: "Rejected", countKey: "rejected" },
   // Guests whose pass was cancelled (also counted under Rejected).
   { value: "passCancelled", label: "Pass Cancelled", countKey: "passCancelled" },
   // Form submissions whose WhatsApp number is already in the Guest List.
   { value: "duplicate", label: "Duplicate", countKey: "duplicate" },
+];
+
+// Inside the Hamper tab: every guest in the hamper, or only sent / not sent.
+const HAMPER_TABS = [
+  { value: "", label: "All", countKey: "hamper", tone: "all" },
+  { value: "pending", label: "Not Sent", countKey: "hamperPending", tone: "pending" },
+  { value: "sent", label: "Sent", countKey: "hamperSent", tone: "approved" },
 ];
 
 const STATUS_LABELS = {
@@ -144,6 +154,7 @@ export default function ContactList() {
   // Same for areas: several can be ticked, a guest matches when its area is ANY of them.
   const [areaFilter, setAreaFilter] = useState([]);
   const [statusFilter, setStatusFilter] = useState("");
+  const [hamperFilter, setHamperFilter] = useState(""); // "" | "pending" | "sent" (Hamper tab only)
 
   // Edition (event) the guests were moved into from Contact Book. Can be
   // preset with /gust-list?edition=<eventId>.
@@ -230,7 +241,8 @@ export default function ContactList() {
     if (referenceFilter.length) params.reference = referenceFilter;
     if (areaFilter.length) params.area = areaFilter;
     if (statusFilter === "passCancelled") params.passStatus = "cancelled";
-    else if (statusFilter && statusFilter !== "duplicate") params.approvalStatus = statusFilter;
+    else if (statusFilter && statusFilter !== "duplicate" && statusFilter !== "hamper") params.approvalStatus = statusFilter;
+    if (statusFilter === "hamper") params.hamper = hamperFilter || "all";
     if (editionFilter) params.editionEventId = editionFilter;
     if (rsvpFilter) params.rsvpStatus = rsvpFilter;
 
@@ -246,6 +258,7 @@ export default function ContactList() {
     referenceFilter,
     areaFilter,
     statusFilter,
+    hamperFilter,
     editionFilter,
     rsvpFilter,
     refreshKey,
@@ -329,7 +342,8 @@ export default function ContactList() {
     if (referenceFilter.length) params.reference = referenceFilter;
     if (areaFilter.length) params.area = areaFilter;
     if (statusFilter === "passCancelled") params.passStatus = "cancelled";
-    else if (statusFilter && statusFilter !== "duplicate") params.approvalStatus = statusFilter;
+    else if (statusFilter && statusFilter !== "duplicate" && statusFilter !== "hamper") params.approvalStatus = statusFilter;
+    if (statusFilter === "hamper") params.hamper = hamperFilter || "all";
     if (editionFilter) params.editionEventId = editionFilter;
     if (rsvpFilter) params.rsvpStatus = rsvpFilter;
 
@@ -400,7 +414,8 @@ export default function ContactList() {
       if (referenceFilter.length) params.reference = referenceFilter;
       if (areaFilter.length) params.area = areaFilter;
       if (statusFilter === "passCancelled") params.passStatus = "cancelled";
-    else if (statusFilter && statusFilter !== "duplicate") params.approvalStatus = statusFilter;
+    else if (statusFilter && statusFilter !== "duplicate" && statusFilter !== "hamper") params.approvalStatus = statusFilter;
+    if (statusFilter === "hamper") params.hamper = hamperFilter || "all";
       if (editionFilter) params.editionEventId = editionFilter;
       if (rsvpFilter) params.rsvpStatus = rsvpFilter;
 
@@ -466,6 +481,28 @@ export default function ContactList() {
         (contact) => getApprovalStatus(contact) === "approved"
       ),
     [selectedContacts]
+  );
+
+  // Hamper: approved guests not in the hamper yet can be added; guests already
+  // in it can be marked sent / not sent or removed.
+  const selectedHamperAddable = useMemo(
+    () =>
+      selectedContacts.filter(
+        (contact) => getApprovalStatus(contact) === "approved" && !contact.inHamper
+      ),
+    [selectedContacts]
+  );
+  const selectedInHamper = useMemo(
+    () => selectedContacts.filter((contact) => contact.inHamper),
+    [selectedContacts]
+  );
+  const selectedHamperUnsent = useMemo(
+    () => selectedInHamper.filter((contact) => !contact.hamperSent),
+    [selectedInHamper]
+  );
+  const selectedHamperSent = useMemo(
+    () => selectedInHamper.filter((contact) => contact.hamperSent),
+    [selectedInHamper]
   );
 
   const allOnPageSelected =
@@ -616,6 +653,39 @@ export default function ContactList() {
     setOpenActionMenuId(null);
     setMergeContact(contact);
   }, []);
+
+  // Hamper: add to the Hamper tab / remove / mark sent / mark not sent.
+  const handleHamper = useCallback(
+    async (targets, action) => {
+      if (!targets.length || statusBusy) return;
+      setOpenActionMenuId(null);
+      setStatusBusy(true);
+
+      try {
+        const res = await updateContactHamperApi({
+          ids: targets.map((contact) => contact._id),
+          action,
+        });
+        showSuccess(res?.message || "Hamper updated");
+        setSelected((prev) => {
+          const next = { ...prev };
+          targets.forEach((contact) => delete next[contact._id]);
+          return next;
+        });
+        setRefreshKey((key) => key + 1);
+      } catch (err) {
+        const body = err?.response?.data;
+        if (err?.response?.status === 404 && !body?.message) {
+          showError("Hamper is not available on the server yet - please deploy / restart the backend.");
+        } else {
+          showError(body?.message || err?.message || "Failed to update the hamper.");
+        }
+      } finally {
+        setStatusBusy(false);
+      }
+    },
+    [statusBusy]
+  );
 
   // Cancels the pass of approved guest(s): the QR stops working, the guest
   // moves to Rejected and receives a "your pass has been cancelled"
@@ -1092,6 +1162,18 @@ const sortedReferenceFilterOptions = useMemo(
                   <FaWhatsapp /> Pass sent
                 </span>
               )}
+              {contact.inHamper && (
+                <span
+                  className={`contactPage__hamperTag ${contact.hamperSent ? "contactPage__hamperTag--sent" : ""}`}
+                  title={
+                    contact.hamperSent && contact.hamperSentAt
+                      ? `Hamper sent on ${new Date(contact.hamperSentAt).toLocaleString("en-GB")}`
+                      : "Added to Hamper - not sent yet"
+                  }
+                >
+                  {contact.hamperSent ? "Hamper sent" : "Hamper: not sent"}
+                </span>
+              )}
               {status === "rejected" && contact.passCancelledAt && (
                 <span
                   className="contactPage__passCancelledTag"
@@ -1336,6 +1418,35 @@ const sortedReferenceFilterOptions = useMemo(
                 </button>
               )}
 
+              {getApprovalStatus(contact) === "approved" && !contact.inHamper && (
+                <button
+                  type="button"
+                  className="contactAction__item contactAction__itemApprove"
+                  onClick={() => handleHamper([contact], "add")}
+                >
+                  Add to Hamper
+                </button>
+              )}
+
+              {contact.inHamper && (
+                <>
+                  <button
+                    type="button"
+                    className="contactAction__item contactAction__itemApprove"
+                    onClick={() => handleHamper([contact], contact.hamperSent ? "notSent" : "sent")}
+                  >
+                    {contact.hamperSent ? "Mark Hamper Not Sent" : "Mark Hamper Sent"}
+                  </button>
+                  <button
+                    type="button"
+                    className="contactAction__item contactAction__itemReject"
+                    onClick={() => handleHamper([contact], "remove")}
+                  >
+                    Remove from Hamper
+                  </button>
+                </>
+              )}
+
               {getApprovalStatus(contact) === "approved" && (
                 <button
                   type="button"
@@ -1430,6 +1541,7 @@ const sortedReferenceFilterOptions = useMemo(
     handleMergeMember,
     handleOpenPass,
     handleSendReminder,
+    handleHamper,
     reminderBusy,
   ]);
 
@@ -1600,6 +1712,7 @@ const sortedReferenceFilterOptions = useMemo(
               }`}
               onClick={() => {
                 setStatusFilter(tab.value);
+                setHamperFilter("");
                 setCurrentPage(1);
               }}
             >
@@ -1610,6 +1723,29 @@ const sortedReferenceFilterOptions = useMemo(
             </button>
           ))}
         </div>
+
+        {statusFilter === "hamper" && (
+          <div className="contactPage__statusTabs" role="tablist" aria-label="Hamper status">
+            {HAMPER_TABS.map((tab) => (
+              <button
+                key={tab.countKey}
+                type="button"
+                role="tab"
+                aria-selected={hamperFilter === tab.value}
+                className={`contactPage__statusTab contactPage__statusTab--${tab.tone} ${
+                  hamperFilter === tab.value ? "contactPage__statusTabActive" : ""
+                }`}
+                onClick={() => {
+                  setHamperFilter(tab.value);
+                  setCurrentPage(1);
+                }}
+              >
+                {tab.label}
+                <span className="contactPage__statusTabCount">{statusCounts?.[tab.countKey] ?? 0}</span>
+              </button>
+            ))}
+          </div>
+        )}
 
         {statusFilter === "duplicate" && (
           <DuplicateTab onChanged={() => setRefreshKey((key) => key + 1)} />
@@ -1669,6 +1805,47 @@ const sortedReferenceFilterOptions = useMemo(
                   onClick={() => handleSendReminder(selectedRemindable)}
                 >
                   <FaBell /> {reminderBusy ? "Sending..." : `Send Reminder (${selectedRemindable.length})`}
+                </button>
+              )}
+              {selectedHamperAddable.length > 0 && (
+                <button
+                  type="button"
+                  className="contactPage__bulkBtn contactPage__bulkBtn--hamper"
+                  disabled={statusBusy}
+                  title="Add the selected approved guests to the Hamper tab"
+                  onClick={() => handleHamper(selectedHamperAddable, "add")}
+                >
+                  <FaGift /> Add to Hamper ({selectedHamperAddable.length})
+                </button>
+              )}
+              {selectedHamperUnsent.length > 0 && (
+                <button
+                  type="button"
+                  className="contactPage__bulkBtn contactPage__bulkBtn--approve"
+                  disabled={statusBusy}
+                  onClick={() => handleHamper(selectedHamperUnsent, "sent")}
+                >
+                  <FaCheck /> Hamper Sent ({selectedHamperUnsent.length})
+                </button>
+              )}
+              {selectedHamperSent.length > 0 && (
+                <button
+                  type="button"
+                  className="contactPage__bulkBtn contactPage__bulkBtn--pending"
+                  disabled={statusBusy}
+                  onClick={() => handleHamper(selectedHamperSent, "notSent")}
+                >
+                  <FaClock /> Hamper Not Sent ({selectedHamperSent.length})
+                </button>
+              )}
+              {selectedInHamper.length > 0 && (
+                <button
+                  type="button"
+                  className="contactPage__bulkBtn contactPage__bulkBtn--reject"
+                  disabled={statusBusy}
+                  onClick={() => handleHamper(selectedInHamper, "remove")}
+                >
+                  <FaTimes /> Remove from Hamper ({selectedInHamper.length})
                 </button>
               )}
               <button

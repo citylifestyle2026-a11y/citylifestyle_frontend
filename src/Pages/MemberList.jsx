@@ -32,6 +32,7 @@ import {
   deleteMemberApi,
   bulkDeleteMembersApi,
   exportMembersApi,
+  exportMembersExcelApi,
 } from "../services/memberService";
 import { confirmDialog } from "../utilits/appSwal";
 import { showError, showSuccess } from "../utilits/toast";
@@ -396,6 +397,32 @@ export default function MemberList() {
     }
   };
 
+  // Excel export of whatever is on screen: current tab + fixType + search +
+  // profession + reference. If rows are ticked by hand, only those are exported.
+  const [exporting, setExporting] = useState(false);
+  const handleExportExcel = async () => {
+    if (!total || exporting) return;
+    setExporting(true);
+    try {
+      const ids = !selectAllMatching && selectedCount > 0 ? Object.keys(selected).join(",") : undefined;
+      const tab = { needsFix: "needs-fix", inGuestList: "in-guest-list", notInGuestList: "not-in-guest-list" }[movedFilter];
+      const fileName = [
+        "contact-book",
+        tab,
+        movedFilter === "needsFix" ? fixType : "",
+        new Date().toISOString().slice(0, 10),
+      ]
+        .filter(Boolean)
+        .join("-");
+      await exportMembersExcelApi({ ...filters, ids }, `${fileName}.xlsx`);
+      showSuccess("Excel downloaded");
+    } catch (err) {
+      showError(getErrorText(err, "Failed to export Excel"));
+    } finally {
+      setExporting(false);
+    }
+  };
+
   // ---------- table ----------
   const columns = useMemo(() => {
     // Sortable columns get a clickable header, the rest keep CommonTable's
@@ -725,6 +752,18 @@ export default function MemberList() {
             >
               <FaUserPlus />
               Add Contact
+            </button>
+
+            <button
+              type="button"
+              className="contactPage__createButton"
+              onClick={handleExportExcel}
+              disabled={!total || exporting}
+            >
+              <FaDownload />
+              {exporting
+                ? "Exporting..."
+                : `Export Excel (${!selectAllMatching && selectedCount > 0 ? selectedCount : total})`}
             </button>
 
             <button

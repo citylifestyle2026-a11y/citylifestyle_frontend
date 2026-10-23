@@ -947,3 +947,20 @@
 .contactPage__rsvp--no { background: #fdecec; color: #d63a3a; }
 .contactPage__rsvp--none { background: #fff4e0; color: #b36a00; }
 .contactPage__rsvp--notSent { background: #f1f2f6; color: #7b7e91; }
+
+/* Hamper tab / tags */
+.contactPage__statusTab--hamper::before { background: #d6409f; }
+.contactPage__bulkBtn--hamper { background: #d6409f; color: #ffffff; }
+.contactPage__hamperTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #fff4e5;
+  color: #b36a00;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.contactPage__hamperTag--sent { background: #e8f8ee; color: #1a9b4b; }

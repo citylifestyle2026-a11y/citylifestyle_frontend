@@ -149,6 +149,13 @@ export const sendContactPassApi = async (data) => {
   };
 };
 
+// ================= HAMPER =================
+// body: { ids: string[], action: "add" | "remove" | "sent" | "notSent" }
+export const updateContactHamperApi = async (data) => {
+  const response = await api.post("/contacts/hamper", data);
+  return response.data;
+};
+
 // ================= DELETE BOOKING (PASS) =================
 // body: { ids: string[] }
 export const deleteContactBookingApi = async (data) => {

@@ -76,3 +76,19 @@ export const exportMembersApi = async (params, fileName = "members.csv") => {
 
   saveBlob(new Blob([response.data], { type: "text/csv;charset=utf-8" }), fileName);
 };
+
+// Downloads the rows that match `params` (same filters as the list) as an
+// Excel (.xlsx) file. params.ids (comma separated) = only the ticked rows.
+export const exportMembersExcelApi = async (params, fileName = "contact-book.xlsx") => {
+  const response = await api.get("/members/export", {
+    params: { ...params, format: "xlsx" },
+    responseType: "blob",
+  });
+
+  saveBlob(
+    new Blob([response.data], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    }),
+    fileName
+  );
+};
