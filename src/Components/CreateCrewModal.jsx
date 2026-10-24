@@ -54,6 +54,12 @@ export default function CreateCrewModal({ crew = null, onClose, onSaved }) {
     setErrors({});
   }, [crew]);
 
+  // No "Select category" placeholder: the first category is selected by default.
+  useEffect(() => {
+    if (categories.length === 0) return;
+    setForm((prev) => (prev.crewCategory ? prev : { ...prev, crewCategory: categories[0]._id }));
+  }, [categories, form.crewCategory]);
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -200,7 +206,6 @@ export default function CreateCrewModal({ crew = null, onClose, onSaved }) {
                   value={form.crewCategory}
                   onChange={handleChange}
                 >
-                  <option value="">Select category</option>
                   {categories.map((category) => (
                     <option key={category._id} value={category._id}>
                       {category.name}

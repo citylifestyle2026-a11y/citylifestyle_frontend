@@ -11,7 +11,8 @@ import "../assets/CSS/SendPassModal.css";
 
 // Default guests per pass: a Couple gets 2, Single gets 1. The admin can
 // change it per contact in the list below (1 - MAX_GUESTS).
-const defaultGuestsFor = (contact) => (contact.relationship === "Couple" ? 2 : 1);
+const defaultGuestsFor = (contact) =>
+  (contact.entryType || contact.relationship) === "Couple" ? 2 : 1;
 const MAX_GUESTS = 10;
 
 /**

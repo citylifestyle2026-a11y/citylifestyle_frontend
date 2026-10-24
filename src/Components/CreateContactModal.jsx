@@ -24,6 +24,13 @@ import {
 // utilits/mobileNumber.js). The number is always sent as 10 digits.
 const isValidWhatsappNumber = (value) => isValidMobileNumber(value);
 
+// Relationship (Single / Couple) + the whole spouse section is switched OFF in
+// this form. The code is all still here: set this to true to bring it back
+// (the form then sends relationship + spouse details exactly as before).
+// Meanwhile the new "Entry Type" field below decides how many people the pass
+// admits (Single = 1, Couple = 2).
+const SHOW_SPOUSE_FIELDS = false;
+
 const EMPTY_FORM = {
   fullName: "",
   whatsappNumber: "",
@@ -34,6 +41,7 @@ const EMPTY_FORM = {
   instagramId: "",
   companyCategory: "",
   relationship: "",
+  entryType: "Single", // first option is selected by default
   spouseName: "",
   spouseMobile: "",
   spouseInstagramId: "",
@@ -195,6 +203,8 @@ export default function CreateContactModal({
         // the <select> below needs the bare id.
         companyCategory: editContactData.companyCategory?._id || "",
         relationship: editContactData.relationship || "",
+        // Old contacts only have relationship - it is their entry type.
+        entryType: editContactData.entryType || editContactData.relationship || "Single",
         spouseName: editContactData.spouseName || "",
         spouseMobile: editContactData.spouseMobile || "",
         spouseInstagramId: getInstagramUrl(editContactData.spouseInstagramId),
@@ -276,6 +286,15 @@ export default function CreateContactModal({
     releasePreview(current);
     setter({ file: null, preview: "", remove: Boolean(isEditMode && saved) });
   };
+
+  // No "Select Category" placeholder on a new contact: the first category is
+  // selected by default (it is filled in as soon as the list has loaded).
+  useEffect(() => {
+    if (isEditMode || categories.length === 0) return;
+    setFormData((prev) =>
+      prev.companyCategory ? prev : { ...prev, companyCategory: categories[0]._id }
+    );
+  }, [categories, isEditMode, formData.companyCategory]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -469,7 +488,11 @@ export default function CreateContactModal({
     // below — mirrors validators/contact.validator.js's `relationship`
     // rule. No gender is inferred from this value anywhere in this
     // form.
-    if (req && !formData.relationship) {
+    if (req && !formData.entryType) {
+      errors.entryType = "Entry Type is required.";
+    }
+
+    if (SHOW_SPOUSE_FIELDS && req && !formData.relationship) {
       errors.relationship = "Relationship is required.";
     }
 
@@ -480,7 +503,7 @@ export default function CreateContactModal({
     // in practice they can only be non-empty here if relationship is
     // currently Couple, or the admin just switched away from Couple —
     // handleRelationshipChange already clears them in that case.
-    if (formData.relationship === "Couple") {
+    if (SHOW_SPOUSE_FIELDS && formData.relationship === "Couple") {
       if (req && !formData.spouseName.trim()) {
         errors.spouseName = "Spouse Name is required for Couple.";
       }
@@ -515,6 +538,7 @@ export default function CreateContactModal({
       instagramId: errors.instagramId,
       spouseInstagramId: errors.spouseInstagramId,
       relationship: errors.relationship,
+      entryType: errors.entryType,
       spouseName: errors.spouseName,
       spouseMobile: errors.spouseMobile,
       professionCategory: errors.professionCategory,
@@ -540,6 +564,7 @@ export default function CreateContactModal({
     // in the database too.
     const payload = new FormData();
     const fields = {
+      entryType: formData.entryType,
       fullName: formData.fullName.trim(),
       whatsappNumber: toLocalMobileNumber(formData.whatsappNumber),
       companyName: formData.companyName.trim(),
@@ -563,6 +588,19 @@ export default function CreateContactModal({
       profession: formData.profession.trim(),
     };
 
+    // Relationship / spouse details are not part of the form while
+    // SHOW_SPOUSE_FIELDS is off: leave them out so a saved Couple contact keeps
+    // its spouse details untouched when it is edited.
+    if (!SHOW_SPOUSE_FIELDS) {
+      [
+        "relationship",
+        "spouseName",
+        "spouseMobile",
+        "spouseInstagramId",
+        "profession",
+      ].forEach((key) => delete fields[key]);
+    }
+
     // Contact Book extras: admin form only (blank values are still sent on
     // Edit so clearing a field clears it in the database too).
     if (!publicMode) {
@@ -580,7 +618,7 @@ export default function CreateContactModal({
     if (formData.companyCategory) {
       payload.append("companyCategory", formData.companyCategory);
     }
-    if (isCouple && formData.professionCategory) {
+    if (SHOW_SPOUSE_FIELDS && isCouple && formData.professionCategory) {
       payload.append("professionCategory", formData.professionCategory);
     }
 
@@ -590,7 +628,7 @@ export default function CreateContactModal({
       payload.append("removeProfileImage", "true");
     }
 
-    if (isCouple) {
+    if (SHOW_SPOUSE_FIELDS && isCouple) {
       if (spousePhoto.file) {
         payload.append("spouseProfileImage", spousePhoto.file);
       } else if (spousePhoto.remove) {
@@ -869,13 +907,7 @@ export default function CreateContactModal({
               value={formData.companyCategory}
               onChange={handleChange}
             >
-              {isEditMode ? (
-                <option value="">No category</option>
-              ) : (
-                <option value="" disabled>
-                  Select Category
-                </option>
-              )}
+              {isEditMode && <option value="">No category</option>}
               {categories.map((category) => (
                 <option key={category._id} value={category._id}>
                   {category.name}
@@ -981,6 +1013,31 @@ export default function CreateContactModal({
             </div>
           )}
 
+          <div className="contactFieldGroup contactFieldGroupFull">
+            <label className="contactFieldLabel">
+              Entry Type {!isEditMode && <span className="contactRequired">*</span>}
+            </label>
+            <select
+              className="contactFieldSelect"
+              name="entryType"
+              value={formData.entryType}
+              onChange={(e) => {
+                handleChange(e);
+                setFormErrors((prev) => ({ ...prev, entryType: undefined }));
+              }}
+            >
+              <option value="Single">Single</option>
+              <option value="Couple">Couple</option>
+            </select>
+            {formErrors.entryType && (
+              <p className="contactFieldError">{formErrors.entryType}</p>
+            )}
+          </div>
+
+          {/* OFF for now (SHOW_SPOUSE_FIELDS) - Relationship + spouse details.
+              Set SHOW_SPOUSE_FIELDS = true at the top of this file to use it. */}
+          {SHOW_SPOUSE_FIELDS && (
+            <>
           <div className="contactFieldGroup contactFieldGroupFull">
             <label className="contactFieldLabel">
               Relationship {!isEditMode && <span className="contactRequired">*</span>}
@@ -1095,6 +1152,8 @@ export default function CreateContactModal({
                   <p className="contactFieldError">{formErrors.professionCategory}</p>
                 )}
               </div>
+            </>
+          )}
             </>
           )}
 

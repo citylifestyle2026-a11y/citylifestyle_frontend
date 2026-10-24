@@ -151,10 +151,10 @@ export default function ContactDetailsModal({ contact, onClose }) {
           </div>
 
           <div className="contactDetailsRow">
-            <span className="contactDetailsLabel">Relationship</span>
+            <span className="contactDetailsLabel">Entry Type</span>
             <span className="contactDetailsColon">:</span>
             <span className="contactDetailsValue">
-              {contact.relationship || "-"}
+              {contact.entryType || contact.relationship || "-"}
             </span>
           </div>
 

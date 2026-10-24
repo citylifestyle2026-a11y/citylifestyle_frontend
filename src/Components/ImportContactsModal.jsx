@@ -15,9 +15,9 @@ import { saveCsvText } from "../utilits/download";
 
 // Header + two example rows (one Single, one Couple) for "Download sample".
 const SAMPLE_CSV = [
-  "fullName,whatsappNumber,companyName,designation,companyCategory,area,address,instagramId,email,relationship,spouseName,spouseMobile,spouseInstagramId,spouseCategory,references",
-  'Rahul Shah,9876543210,Shah Textiles,Owner,Textile,Vesu,"12, Main Road",https://instagram.com/rahul.shah,rahul@example.com,Single,,,,,Karan|Mahesh',
-  'Amit Patel,9123456780,Patel Jewels,Director,Jewellery,Adajan,,,,Couple,Pooja Patel,9988776655,https://instagram.com/pooja.patel,Fashion,Karan',
+  "fullName,whatsappNumber,companyName,designation,companyCategory,area,address,instagramId,email,entryType,references",
+  'Rahul Shah,9876543210,Shah Textiles,Owner,Textile,Vesu,"12, Main Road",https://instagram.com/rahul.shah,rahul@example.com,Single,Karan|Mahesh',
+  'Amit Patel,9123456780,Patel Jewels,Director,Jewellery,Adajan,,,,Couple,Karan',
 ].join("\n");
 
 const downloadSampleCsv = () => saveCsvText(SAMPLE_CSV, "contacts_sample.csv");
@@ -161,9 +161,7 @@ export default function ImportContactsModal({ onClose, onSuccess }) {
               <code>companyCategory</code> (name), <code>area</code>,{" "}
               <code>references</code> (separate several with <code>|</code>),{" "}
               <code>address</code>, <code>instagramId</code>, <code>email</code>,{" "}
-              <code>relationship</code> (Single / Couple, blank = Single),{" "}
-              <code>spouseName</code>, <code>spouseMobile</code>,{" "}
-              <code>spouseCategory</code>, <code>spouseInstagramId</code>.
+              <code>entryType</code> (Single = 1 entry / Couple = 2 entry, blank = Single).
               Import the same number again later to fill the empty details.
             </p>
 

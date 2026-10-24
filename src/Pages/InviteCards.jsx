@@ -382,7 +382,9 @@ export default function InviteCards() {
     async (body, label) => {
       setOpenActionMenuId(null);
 
-      if (!design?.hasDesign) {
+      const textMode = Boolean(design?.textMode);
+
+      if (!textMode && !design?.hasDesign) {
         await noticeDialog({
           icon: "warning",
           title: "Upload the card design first",
@@ -393,9 +395,13 @@ export default function InviteCards() {
 
       const ok = await confirmDialog({
         title: label,
-        text: "Your invitation card (JPG) with the guest's name on it will be sent on WhatsApp.",
+        text: textMode
+          ? "The invitation message with the guest's name will be sent on WhatsApp."
+          : "Your invitation card (JPG) with the guest's name on it will be sent on WhatsApp.",
         points: [
-          { icon: "🖼️", text: "The card you uploaded is used for everyone, only the name changes." },
+          textMode
+            ? { icon: "💬", text: "Each guest gets the approved text invitation with their name." }
+            : { icon: "🖼️", text: "The card you uploaded is used for everyone, only the name changes." },
           { icon: "📲", text: "Sending runs in the background - you can keep this page open." },
         ],
         confirmText: "Yes, send",
@@ -415,7 +421,7 @@ export default function InviteCards() {
         setBusy(false);
       }
     },
-    [design?.hasDesign, load]
+    [design?.hasDesign, design?.textMode, load]
   );
 
   const handleDelete = useCallback(
