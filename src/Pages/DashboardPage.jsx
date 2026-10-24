@@ -210,24 +210,6 @@ export default function DashboardPage() {
         infoText: "All crew members in the Crew list (any status). Deleted crew are not counted.",
       },
       {
-        key: "crewPending",
-        title: "Pending",
-        amountValue: String(dashboardData?.crew?.pending ?? 0),
-        infoText: "New crew members start as Pending until an admin approves them. Only approved crew can receive a pass.",
-      },
-      {
-        key: "crewApproved",
-        title: "Approved",
-        amountValue: String(dashboardData?.crew?.approved ?? 0),
-        infoText: "Crew members who are approved and can be sent a pass.",
-      },
-      {
-        key: "crewPassSent",
-        title: "Pass Sent",
-        amountValue: String(dashboardData?.crew?.passSent ?? 0),
-        infoText: "Crew members whose pass for this event is live (cancelled passes are not counted).",
-      },
-      {
         key: "crewCheckedIn",
         title: "Crew Checked In",
         amountValue: String(dashboardData?.crew?.checkedIn ?? 0),

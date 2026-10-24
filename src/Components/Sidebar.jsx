@@ -56,14 +56,6 @@ const menuItems = [
     ],
   },
   {
-    label: 'Crew',
-    icon: <FaIdBadge />,
-    submenu: [
-      { label: 'Crew List', path: '/crew' },
-      { label: 'Crew Category', path: '/crew-categories' },
-    ],
-  },
-  {
     label: 'Form Links',
     icon: <FaLink />,
     path: '/form-links',
@@ -92,6 +84,14 @@ const menuItems = [
     label: 'Manual Booking',
     icon: <BsFillTicketFill />,
     path: '/booking',
+  },
+    {
+    label: 'Crew',
+    icon: <FaIdBadge />,
+    submenu: [
+      { label: 'Crew List', path: '/crew' },
+      { label: 'Crew Category', path: '/crew-categories' },
+    ],
   },
 ];
 
@@ -142,7 +142,21 @@ export default function Sidebar() {
   });
 
   const [isOpen, setIsOpen] = useState(false);
-  const [expandedMenu, setExpandedMenu] = useState(null);
+  // Label of the submenu that contains the current page (if any).
+  const activeSubmenuLabel =
+    visibleMenuItems.find((item) =>
+      item.submenu?.some((sub) => location.pathname === sub.path)
+    )?.label || null;
+
+  // Starts open for the current page's menu, but it is plain user-controlled
+  // state afterwards - so clicking the menu again closes it, even while one
+  // of its pages is open.
+  const [expandedMenu, setExpandedMenu] = useState(activeSubmenuLabel);
+
+  // Opening a page from another menu (or via a link) opens its parent menu.
+  useEffect(() => {
+    if (activeSubmenuLabel) setExpandedMenu(activeSubmenuLabel);
+  }, [location.pathname]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const closeSidebar = () => setIsOpen(false);
 
@@ -226,14 +240,9 @@ export default function Sidebar() {
             // SUBMENU ITEM
             // =========================
             if (item.submenu) {
-              // Check if current route belongs to submenu
-              const hasActiveSubmenu = item.submenu.some(
-                (sub) => location.pathname === sub.path
-              );
-
-              // Open dropdown when clicked OR when route is active
-              const isExpanded =
-                expandedMenu === item.label || hasActiveSubmenu;
+              // Open / closed is controlled only by expandedMenu (set on
+              // click, and to the current page's menu on navigation).
+              const isExpanded = expandedMenu === item.label;
 
               return (
                 <div key={item.label}>

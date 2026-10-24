@@ -249,7 +249,6 @@ export default function CrewList() {
             icon: "🎟️",
             text: `${withPass.length === 1 ? "The pass that was sent is" : `${withPass.length} passes that were sent are`} CANCELLED - the QR will stop working at the gate.`,
           });
-          points.push({ icon: "💬", text: 'A WhatsApp message - "your pass has been cancelled" - is sent.' });
         }
         const confirmed = await confirmDialog({
           title: `Reject: ${label}?`,

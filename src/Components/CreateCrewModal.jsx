@@ -82,6 +82,7 @@ export default function CreateCrewModal({ crew = null, onClose, onSaved }) {
         [...prev, created].sort((a, b) => a.name.localeCompare(b.name))
       );
       setForm((prev) => ({ ...prev, crewCategory: created._id }));
+      setErrors((prev) => ({ ...prev, crewCategory: undefined }));
       setNewCategoryName(null);
       showSuccess("Crew Category added");
     } catch (err) {
@@ -104,6 +105,7 @@ export default function CreateCrewModal({ crew = null, onClose, onSaved }) {
     else if (!/^\+?[\d\s\-().]{10,16}$/.test(form.whatsappNumber.trim())) {
       next.whatsappNumber = "Enter a valid 10-digit WhatsApp number.";
     }
+    if (!form.crewCategory) next.crewCategory = "Crew category is required.";
     if (form.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
       next.email = "Enter a valid email address.";
     }
@@ -189,7 +191,7 @@ export default function CreateCrewModal({ crew = null, onClose, onSaved }) {
 
 
           <div className="fieldGroup">
-            <label className="fieldLabel">Crew Category</label>
+            <label className="fieldLabel">Crew Category <span className="required">*</span></label>
             {newCategoryName === null ? (
               <>
                 <select
@@ -205,6 +207,7 @@ export default function CreateCrewModal({ crew = null, onClose, onSaved }) {
                     </option>
                   ))}
                 </select>
+                {errors.crewCategory && <p className="fieldError">{errors.crewCategory}</p>}
                 <button
                   type="button"
                   onClick={() => setNewCategoryName("")}
