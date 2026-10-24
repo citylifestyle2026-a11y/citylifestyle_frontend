@@ -95,6 +95,9 @@ const Booking = () => {
   // The Action menu opens ONLY on click (no hover). It closes by: clicking
   // its button again, clicking outside, Escape, or scroll/resize.
   const [activePage, setActivePage] = useState(1);
+  // Guest / Crew tab (same split as the Entry Report): crew passes are listed
+  // only under Crew, every other booking under Guest.
+  const [bookingType, setBookingType] = useState("guest");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [resendTarget, setResendTarget] = useState(null);
@@ -119,9 +122,10 @@ const Booking = () => {
         page: activePage,
         limit: rowsPerPage,
         ...appliedFilters,
+        type: bookingType,
       })
     );
-  }, [dispatch, activePage, rowsPerPage, appliedFilters]);
+  }, [dispatch, activePage, rowsPerPage, appliedFilters, bookingType]);
   const handleFilterChange = (field) => (e) => {
     setFilters((prev) => ({
       ...prev,
@@ -326,6 +330,7 @@ const Booking = () => {
         page: activePage,
         limit: rowsPerPage,
         ...appliedFilters,
+        type: bookingType,
       })
     );
   };
@@ -373,6 +378,7 @@ const Booking = () => {
       fromDate: appliedFilters.fromDate || "",
       toDate: appliedFilters.toDate || "",
       search: appliedFilters.search || "",
+      type: bookingType,
     };
 
     dispatch(exportBookingReport(params));
@@ -569,6 +575,29 @@ const Booking = () => {
             </div>
 
             <div className="bookingPage-card appCard">
+              <div className="erPage__typeTabs" role="tablist" aria-label="Booking type">
+                {[
+                  { value: "guest", label: "Guest" },
+                  { value: "crew", label: "Crew" },
+                ].map((tab) => (
+                  <button
+                    key={tab.value}
+                    type="button"
+                    role="tab"
+                    aria-selected={bookingType === tab.value}
+                    className={`erPage__typeTab erPage__typeTab--${tab.value} ${bookingType === tab.value ? "erPage__typeTab--active" : ""}`}
+                    disabled={listLoading}
+                    onClick={() => {
+                      if (bookingType === tab.value) return;
+                      setActivePage(1);
+                      setBookingType(tab.value);
+                    }}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
               <div className="erPage__tableToolbar">
                 <div className="erPage__toolbarLeft">
                   <CommonSelect

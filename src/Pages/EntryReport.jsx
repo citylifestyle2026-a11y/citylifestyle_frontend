@@ -191,7 +191,10 @@ export default function EntryReport() {
   const authProfile = useSelector((state) => state.auth.profile);
   const authUser = useSelector((state) => state.auth.user);
   const currentRole = authProfile?.role ?? authUser?.role;
-  const canAddToHistory = currentRole === "admin";
+  // Guest / Crew tab. Crew is staff: their entries are listed separately and
+  // can never be added to Event History (no tick boxes, no button).
+  const [entryType, setEntryType] = useState("guest");
+  const canAddToHistory = currentRole === "admin" && entryType === "guest";
 
   const [selectedIds, setSelectedIds] = useState([]);
   const [selectAllEntries, setSelectAllEntries] = useState(false);
@@ -240,6 +243,7 @@ export default function EntryReport() {
   // Number inputs, and the debounced toolbar Search box) and can therefore
   // hold edits the user hasn't actually applied yet via Search/Reset/etc.
   const appliedFiltersRef = useRef({
+    type: "guest",
     eventId: "",
     bookingId: "",
     invitationId: "",
@@ -259,6 +263,7 @@ export default function EntryReport() {
     const params = {
       page: targetPage,
       limit: customLimit,
+      type: entryType,
     };
 
     // eventId is a required query param for the entry-report API (see the
@@ -279,6 +284,7 @@ export default function EntryReport() {
     // with exactly these params right after calling it, so this is the
     // single place to record the "last applied" snapshot Export relies on.
     appliedFiltersRef.current = {
+      type: entryType,
       eventId: eventId || "",
       bookingId: bookingId || "",
       invitationId: invitationId || "",
@@ -303,7 +309,7 @@ export default function EntryReport() {
   useEffect(() => {
     setSelectedIds([]);
     setSelectAllEntries(false);
-  }, [eventId]);
+  }, [eventId, entryType]);
 
   const hasActiveFilters = Boolean(
     bookingId ||
@@ -407,7 +413,7 @@ export default function EntryReport() {
 
     dispatch(getAllEntryReport(buildEntryReportParams(1)));
 
-  }, [eventId, hasSelectedEvent, dispatch]);
+  }, [eventId, hasSelectedEvent, entryType, dispatch]);
 
   // If the selected event disappears from the dropdown's own list (goes
   // Inactive/Expired) while the user is already on this page, deselect it
@@ -698,6 +704,7 @@ export default function EntryReport() {
       getAllEntryReport({
         page: 1,
         limit: pageSize,
+        type: entryType,
         ...(eventId ? { eventId } : {}),
       })
     );
@@ -707,6 +714,7 @@ export default function EntryReport() {
     // here explicitly too — otherwise Export would keep using whatever
     // filters were applied before Reset was clicked.
     appliedFiltersRef.current = {
+      type: entryType,
       eventId: eventId || "",
       bookingId: "",
       invitationId: "",
@@ -992,6 +1000,29 @@ export default function EntryReport() {
 
       {/* Table Card */}
       <div className="erPage__card erPage__tableCard appCard">
+        <div className="erPage__typeTabs" role="tablist" aria-label="Entry type">
+          {[
+            { value: "guest", label: "Guest" },
+            { value: "crew", label: "Crew" },
+          ].map((tab) => (
+            <button
+              key={tab.value}
+              type="button"
+              role="tab"
+              aria-selected={entryType === tab.value}
+              className={`erPage__typeTab erPage__typeTab--${tab.value} ${entryType === tab.value ? "erPage__typeTab--active" : ""}`}
+              disabled={loading}
+              onClick={() => {
+                if (entryType === tab.value) return;
+                setPage(1);
+                setEntryType(tab.value);
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
         <div className="erPage__tableToolbar">
           <div className="erPage__toolbarLeft">
             <CommonSelect

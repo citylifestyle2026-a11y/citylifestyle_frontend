@@ -20,7 +20,8 @@
   grid-column: span 8;
 }
 
-.dashboardPage .dashSection--attendance {
+.dashboardPage .dashSection--attendance,
+.dashboardPage .dashSection--crew {
   grid-column: 1 / -1;
 }
 

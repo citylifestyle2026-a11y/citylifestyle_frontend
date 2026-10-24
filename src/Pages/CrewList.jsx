@@ -19,6 +19,7 @@ import CommonSelect from "../Components/CommonSelect";
 import CommonTable from "../Components/CommonTable";
 import CommonPagination from "../Components/CommonPagination";
 import CommonEmptyState from "../Components/CommonEmptyState";
+import { ContactPerson } from "../Components/ContactAvatar";
 import CreateCrewModal from "../Components/CreateCrewModal";
 import ImportCrewModal from "../Components/ImportCrewModal";
 import SendPassModal from "../Components/SendPassModal";
@@ -46,6 +47,8 @@ const ROWS_PER_PAGE_OPTIONS = [10, 20, 50, 100].map((n) => ({ value: n, label: S
 
 const PASS_TABS = [
   { value: "", label: "All", countKey: "all", tone: "all" },
+  // New crew start as Pending until an admin approves them.
+  { value: "pending", label: "Pending", countKey: "pending", tone: "pending" },
   { value: "notSent", label: "Pass Not Sent", countKey: "passNotSent", tone: "pending" },
   { value: "sent", label: "Pass Sent", countKey: "passSent", tone: "approved" },
   { value: "rejected", label: "Rejected", countKey: "rejected", tone: "rejected" },
@@ -66,6 +69,7 @@ export default function CrewList() {
     passNotSent: 0,
     rejected: 0,
     passCancelled: 0,
+    pending: 0,
   });
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -138,7 +142,7 @@ export default function CrewList() {
         const res = await getAllCrewApi({ ...filters, page: currentPage, limit: rowsPerPage });
         if (cancelled) return;
         setCrew(res.data || []);
-        setCounts(res.counts || { all: 0, passSent: 0, passNotSent: 0, rejected: 0, passCancelled: 0 });
+        setCounts(res.counts || { all: 0, passSent: 0, passNotSent: 0, rejected: 0, passCancelled: 0, pending: 0 });
         setTotal(res.pagination?.total || 0);
         setTotalPages(res.pagination?.totalPages || 1);
         setError(null);
@@ -401,7 +405,13 @@ export default function CrewList() {
           />
         ),
       },
-      { key: "fullName", label: "Full Name", sortable: false, render: (m) => <b>{m.fullName}</b> },
+      {
+        key: "fullName",
+        label: "Full Name",
+        sortable: false,
+        cellClassName: "contactPage__contactName",
+        render: (m) => <ContactPerson name={m.fullName} />,
+      },
       { key: "whatsappNumber", label: "WhatsApp Number", sortable: false, render: (m) => m.whatsappNumber || "-" },
       { key: "category", label: "Crew Category", sortable: false, render: (m) => m.crewCategory?.name || "-" },
       { key: "designation", label: "Designation", sortable: false, render: (m) => m.designation || "-" },
@@ -417,6 +427,14 @@ export default function CrewList() {
               <span className={`contactPage__statusBadge contactPage__statusBadge--${status}`}>
                 {STATUS_LABELS[status]}
               </span>
+              {m.passSentAt && (
+                <span
+                  className="contactPage__passSentTag"
+                  title={`Pass sent on ${new Date(m.passSentAt).toLocaleString("en-GB")}`}
+                >
+                  <FaWhatsapp /> Pass sent{m.passQuantity > 1 ? ` (${m.passQuantity})` : ""}
+                </span>
+              )}
               {status === "rejected" && m.passCancelledAt && (
                 <span
                   className="contactPage__passCancelledTag"
@@ -430,25 +448,29 @@ export default function CrewList() {
         },
       },
       {
-        key: "pass",
-        label: "Pass",
-        sortable: false,
-        render: (m) => (
-          <span
-            className={`contactPage__hamperTag ${m.passSentAt ? "contactPage__hamperTag--sent" : ""}`}
-            title={m.passSentAt ? `Sent on ${new Date(m.passSentAt).toLocaleString("en-GB")}` : "Pass not sent yet"}
-          >
-            {m.passSentAt ? `Pass sent (${m.passQuantity || 1})` : "Not sent"}
-          </span>
-        ),
-      },
-      {
         key: "action",
         label: "Actions",
         sortable: false,
-        cellStyle: { position: "relative" },
+        // Pinned to the right edge, same as Guest List.
+        headerClassName: "contactPage__actionCol",
+        cellClassName: "contactPage__actionCol",
         render: (m) => (
           <div className="contactAction__wrapper" ref={openActionMenuId === m._id ? actionMenuRef : null}>
+            {getApprovalStatus(m) === "approved" && !m.passSentAt && (
+              <button
+                type="button"
+                className="contactAction__whatsapp"
+                title="Send pass on WhatsApp"
+                aria-label={`Send pass to ${m.fullName} on WhatsApp`}
+                onClick={() => {
+                  setOpenActionMenuId(null);
+                  setPassCrew([m]);
+                }}
+              >
+                <FaWhatsapp />
+              </button>
+            )}
+
             <button
               type="button"
               className="contactAction__button"

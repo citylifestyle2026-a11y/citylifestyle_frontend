@@ -76,6 +76,7 @@ export const getAllBookings = createAsyncThunk(
       fromDate = "",
       toDate = "",
       search = "",
+      type = "guest",
     } = {},
     thunkAPI
   ) => {
@@ -92,6 +93,7 @@ export const getAllBookings = createAsyncThunk(
         fromDate,
         toDate,
         search,
+        type,
       });
 
       return response;

@@ -200,6 +200,49 @@ export default function DashboardPage() {
     [dashboardData]
   );
 
+  // Crew (event staff, not guests) - kept apart from the guest numbers above.
+  const crewCards = useMemo(
+    () => [
+      {
+        key: "crewTotal",
+        title: "Total Crew",
+        amountValue: String(dashboardData?.crew?.total ?? 0),
+        infoText: "All crew members in the Crew list (any status). Deleted crew are not counted.",
+      },
+      {
+        key: "crewPending",
+        title: "Pending",
+        amountValue: String(dashboardData?.crew?.pending ?? 0),
+        infoText: "New crew members start as Pending until an admin approves them. Only approved crew can receive a pass.",
+      },
+      {
+        key: "crewApproved",
+        title: "Approved",
+        amountValue: String(dashboardData?.crew?.approved ?? 0),
+        infoText: "Crew members who are approved and can be sent a pass.",
+      },
+      {
+        key: "crewPassSent",
+        title: "Pass Sent",
+        amountValue: String(dashboardData?.crew?.passSent ?? 0),
+        infoText: "Crew members whose pass for this event is live (cancelled passes are not counted).",
+      },
+      {
+        key: "crewCheckedIn",
+        title: "Crew Checked In",
+        amountValue: String(dashboardData?.crew?.checkedIn ?? 0),
+        infoText: "Crew passes scanned at the gate for this event.",
+      },
+      {
+        key: "crewNotCheckedIn",
+        title: "Crew Not Checked In",
+        amountValue: String(dashboardData?.crew?.notCheckedIn ?? 0),
+        infoText: "Crew passes sent for this event that have not been scanned yet.",
+      },
+    ],
+    [dashboardData]
+  );
+
   const sections = [
     {
       key: "booking",
@@ -224,6 +267,14 @@ export default function DashboardPage() {
       to: "/gust-list",
       linkLabel: "View Guest List",
       cards: attendanceCards,
+    },
+    {
+      key: "crew",
+      title: "Crew",
+      subtitle: "Event staff - separate from guests",
+      to: "/crew",
+      linkLabel: "View Crew",
+      cards: crewCards,
     },
   ];
 
@@ -276,7 +327,7 @@ export default function DashboardPage() {
                   <div className="skeletonBlock skeletonRow" style={{ marginTop: 14 }} />
                 </section>
                 <div className="dashSections">
-                  {["booking", "entry", "attendance"].map((k) => (
+                  {["booking", "entry", "attendance", "crew"].map((k) => (
                     <section className={`dashSection dashSection--${k}`} key={k}>
                       <DashboardCardSkeleton />
                     </section>

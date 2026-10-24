@@ -19,6 +19,7 @@ import CommonEmptyState from "./CommonEmptyState";
  *   key: string;                       // unique column id (used as React key)
  *   label: React.ReactNode;            // header text/content
  *   sortable?: boolean;                // shows the sort icon in the header (default: true)
+ *   hideSortIcon?: boolean;            // force-hide the icon on a plain-text column
  *   headerClassName?: string;          // className applied to the <th>
  *   cellClassName?: string;            // className applied to every <td> in this column
  *   cellStyle?: React.CSSProperties;   // inline style applied to every <td> in this column
@@ -59,6 +60,20 @@ import CommonEmptyState from "./CommonEmptyState";
  * data array, primitive/string values for the rest) — it never changes
  * what gets rendered, only skips redundant re-renders of identical output.
  */
+// Every plain-text data column shows the sort icon beside its label (like the
+// Event page). Columns that already draw their own header (label is a React
+// element, e.g. a clickable sortable header) and the checkbox / action
+// columns are left alone, so nothing gets a double or a useless icon.
+const NO_ICON_KEYS = new Set(["select", "action", "actions", "checkbox"]);
+const shouldShowSortIcon = (col) => {
+  if (col.sortable !== false) return true;
+  if (col.hideSortIcon) return false;
+  if (NO_ICON_KEYS.has(String(col.key).toLowerCase())) return false;
+  if (typeof col.label !== "string") return false;
+  const label = col.label.trim();
+  return label !== "" && label !== "#";
+};
+
 function CommonTable({
   columns = [],
   data = [],
@@ -99,7 +114,7 @@ function CommonTable({
           {columns.map((col) => (
             <th key={col.key} className={col.headerClassName}>
               <span className={thContentClassName}>
-                {col.sortable !== false && (
+                {shouldShowSortIcon(col) && (
                   <FaSort className={sortIconClassName} />
                 )}
                 {col.label}

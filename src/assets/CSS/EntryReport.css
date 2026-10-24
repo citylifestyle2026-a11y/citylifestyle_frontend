@@ -788,3 +788,59 @@
     justify-content: center;
   }
 }
+
+/* Guest / Crew tabs - same look as the Guest List status tabs */
+.erPage__typeTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+  font-family: "Poppins", sans-serif;
+}
+
+.erPage__typeTab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #f2f3f6;
+  color: #4a4d5e;
+  border: none;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-family: "Poppins", sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.erPage__typeTab::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #b8bcc9;
+  flex-shrink: 0;
+}
+
+.erPage__typeTab--guest::before { background: #25b562; }
+.erPage__typeTab--crew::before { background: #8e44ad; }
+
+.erPage__typeTab:hover {
+  background: #e7e9ef;
+}
+
+.erPage__typeTab--active,
+.erPage__typeTab--active:hover {
+  background: var(--admin-accent, #5a93c7);
+  color: #ffffff;
+}
+
+.erPage__typeTab--active::before {
+  background: #ffffff !important;
+}
+
+.erPage__typeTab:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
