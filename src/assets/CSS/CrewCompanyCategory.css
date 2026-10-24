@@ -1,0 +1,442 @@
+/* Crew Company Category list page — mirrors the structure/scale of
+   ContactList.css (contactPage__ / contactAction__) under the
+   crewCompanyCategoryPage__ / crewCompanyCategoryAction__ prefixes, so this page
+   matches the existing admin list pages exactly. Pagination is
+   intentionally NOT styled here: CommonPagination's default
+   permissionPagePagination* classes are already styled globally in
+   index.css, same as on every other list page. */
+
+.crewCompanyCategoryPage__page {
+  min-height: 100vh;
+  background-color: #f7f7f9;
+}
+
+.crewCompanyCategoryPage__mainArea {
+  margin-left: 240px;
+  min-height: 100vh;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.crewCompanyCategoryPage__content {
+  flex: 1;
+  min-width: 0;
+  padding: 28px 36px 50px 36px;
+}
+
+.crewCompanyCategoryPage__topRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.crewCompanyCategoryPage__pageTitle {
+  color: #1b2a4e;
+  font-size: 24px;
+  font-weight: 800;
+  margin: 0 0 4px 0;
+}
+
+.crewCompanyCategoryPage__breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: #9a9ca8;
+}
+
+.crewCompanyCategoryPage__breadcrumbActive {
+  color: var(--admin-accent);
+}
+
+.crewCompanyCategoryPage__createButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--admin-accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+  white-space: nowrap;
+}
+
+.crewCompanyCategoryPage__createButton:hover {
+  background-color: var(--admin-accent-strong);
+  transform: translateY(-1px);
+}
+
+.crewCompanyCategoryPage__tableCard {
+  background-color: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+  min-width: 0;
+  overflow: visible;
+}
+
+.crewCompanyCategoryPage__tableControls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+
+.crewCompanyCategoryPage__rowsSelect {
+  padding: 10px 14px;
+  border: none;
+  background-color: #f2f3f6;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #1b2a4e;
+  outline: none;
+  cursor: pointer;
+  min-width: 90px;
+}
+
+.crewCompanyCategoryPage__searchBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #f2f3f6;
+  border-radius: 8px;
+  padding: 10px 16px;
+  width: 260px;
+}
+
+.crewCompanyCategoryPage__searchBox svg {
+  color: #9a9ca8;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.crewCompanyCategoryPage__searchInput {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 13.5px;
+  color: #1b2a4e;
+  width: 100%;
+}
+
+.crewCompanyCategoryPage__searchInput::placeholder {
+  color: #a7abbd;
+}
+
+/* Only this element scrolls horizontally on mobile */
+.crewCompanyCategoryPage__tableWrapper {
+  width: 100%;
+  position: relative;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  min-height: fit-content;
+  height: auto;
+  padding-bottom: 72px; /* dropdown mate space */
+  box-sizing: border-box;
+}
+
+.crewCompanyCategoryPage__table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+
+.crewCompanyCategoryPage__table thead th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9a9ca8;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #eef0f2;
+  white-space: nowrap;
+}
+
+.crewCompanyCategoryPage__thContent {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.crewCompanyCategoryPage__sortIcon {
+  font-size: 10px;
+  color: #c4c6d2;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* The active sort column's arrow picks up the accent colour so the
+   current ordering is readable at a glance. */
+.crewCompanyCategoryPage__sortIconActive {
+  color: var(--admin-accent);
+}
+
+/* Interactive header for the server-sortable columns. Inherits the th's
+   own typography so a sortable header is visually identical to a plain
+   one apart from the cursor and the arrow state. */
+.crewCompanyCategoryPage__sortHeader {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+}
+
+.crewCompanyCategoryPage__sortHeader:hover {
+  color: #1b2a4e;
+}
+
+.crewCompanyCategoryPage__sortHeader:focus-visible {
+  outline: 2px solid var(--admin-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.crewCompanyCategoryPage__table tbody td {
+  padding: 16px 14px;
+  font-size: 14px;
+  color: #3a3d4d;
+  border-bottom: 1px solid #f2f3f6;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.crewCompanyCategoryPage__table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.crewCompanyCategoryPage__categoryName {
+  font-weight: 600;
+  color: #1b2a4e;
+}
+
+/* Description is the one free-text column long enough to need wrapping —
+   without this it would stretch the row far past the viewport. */
+.crewCompanyCategoryPage__descriptionCell {
+  white-space: normal;
+  max-width: 320px;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+@media (max-width: 1023px) {
+  .crewCompanyCategoryPage__mainArea {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 1200px) {
+  .crewCompanyCategoryPage__content {
+    padding: 24px 24px 40px 24px;
+  }
+}
+
+@media (max-width: 992px) {
+  .crewCompanyCategoryPage__pageTitle {
+    font-size: 22px;
+  }
+
+  .crewCompanyCategoryPage__tableCard {
+    padding: 20px;
+  }
+
+  .crewCompanyCategoryPage__table thead th,
+  .crewCompanyCategoryPage__table tbody td {
+    padding: 12px 12px;
+  }
+}
+
+/* Tablet: 768px - 1024px */
+@media (max-width: 1024px) and (min-width: 768px) {
+  .crewCompanyCategoryPage__tableControls {
+    flex-wrap: wrap;
+    row-gap: 12px;
+  }
+
+  .crewCompanyCategoryPage__rowsSelect {
+    flex: 0 1 140px;
+  }
+
+  .crewCompanyCategoryPage__searchBox {
+    flex: 1 1 220px;
+    min-width: 0;
+  }
+}
+
+/* Mobile: below 768px */
+@media (max-width: 767px) {
+  .crewCompanyCategoryPage__content {
+    padding: 22px 18px 40px 18px;
+  }
+
+  .crewCompanyCategoryPage__pageTitle {
+    font-size: 19px;
+  }
+
+  .crewCompanyCategoryPage__breadcrumb {
+    font-size: 12px;
+  }
+
+  .crewCompanyCategoryPage__tableCard {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .crewCompanyCategoryPage__table thead th {
+    font-size: 11px;
+    padding: 10px 10px;
+  }
+
+  .crewCompanyCategoryPage__table tbody td {
+    font-size: 13px;
+    padding: 11px 10px;
+  }
+
+  .crewCompanyCategoryPage__topRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .crewCompanyCategoryPage__createButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .crewCompanyCategoryPage__pageTitle,
+  .crewCompanyCategoryPage__breadcrumb {
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  .crewCompanyCategoryPage__tableControls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .crewCompanyCategoryPage__rowsSelect {
+    width: 100%;
+  }
+
+  .crewCompanyCategoryPage__searchBox {
+    width: 100%;
+  }
+
+  .crewCompanyCategoryPage__table td,
+  .crewCompanyCategoryPage__table th {
+    overflow-wrap: break-word;
+  }
+}
+
+@media (max-width: 380px) {
+  .crewCompanyCategoryPage__content {
+    padding: 18px 14px 32px 14px;
+  }
+
+  .crewCompanyCategoryPage__tableCard {
+    padding: 14px;
+  }
+}
+
+/* ===== Action Dropdown (crewCompanyCategoryAction__ prefix) ===== */
+
+.crewCompanyCategoryAction__wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.crewCompanyCategoryAction__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #ffffff;
+  color: #3a3d4d;
+  border: 1px solid #e2e5eb;
+  border-radius: 8px;
+  height: 38px;
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.crewCompanyCategoryAction__button:hover {
+  background-color: #f8fafc;
+  border-color: #d7dae1;
+}
+
+.crewCompanyCategoryAction__icon {
+  font-size: 11px;
+  color: #9a9ca8;
+}
+
+.crewCompanyCategoryAction__menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 140px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 6px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+  z-index: 99999;
+}
+
+.crewCompanyCategoryAction__menuOpen {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.crewCompanyCategoryAction__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 9px 10px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #3a3d4d;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  white-space: nowrap;
+}
+
+.crewCompanyCategoryAction__item:hover {
+  background-color: #f8fafc;
+}
+
+/* The generic `.crewCompanyCategoryPage__table tbody td { white-space: nowrap }`
+   rule is more specific than `.crewCompanyCategoryPage__descriptionCell`, so a
+   long description never wrapped and ran over the next column. */
+.crewCompanyCategoryPage__table tbody td.crewCompanyCategoryPage__descriptionCell {
+  white-space: normal;
+  min-width: 220px;
+  max-width: 320px;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  line-height: 1.5;
+}

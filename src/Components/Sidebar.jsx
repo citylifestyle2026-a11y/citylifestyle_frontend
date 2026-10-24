@@ -8,7 +8,7 @@ import {
   MdKeyboardArrowDown,
 } from 'react-icons/md';
 
-import { FaUsers, FaAddressBook, FaUserFriends, FaEnvelopeOpenText, FaLink } from 'react-icons/fa';
+import { FaUsers, FaIdBadge, FaAddressBook, FaUserFriends, FaEnvelopeOpenText, FaLink } from 'react-icons/fa';
 
 import {
   BsCalendarEventFill,
@@ -53,6 +53,14 @@ const menuItems = [
       // Event History is its own standalone page — "Add Details" picks
       // the Contact itself from a dropdown inside the modal.
       { label: 'Event History', path: '/event-history' },
+    ],
+  },
+  {
+    label: 'Crew',
+    icon: <FaIdBadge />,
+    submenu: [
+      { label: 'Crew List', path: '/crew' },
+      { label: 'Crew Category', path: '/crew-categories' },
     ],
   },
   {

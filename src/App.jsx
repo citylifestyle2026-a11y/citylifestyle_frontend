@@ -36,6 +36,8 @@ const MemberList = lazy(() => import("./Pages/MemberList"));
 const FormLinks = lazy(() => import("./Pages/FormLinks"));
 const EventHistory = lazy(() => import("./Pages/EventHistory"));
 const CompanyCategory = lazy(() => import("./Pages/CompanyCategory"));
+const CrewList = lazy(() => import("./Pages/CrewList"));
+const CrewCategory = lazy(() => import("./Pages/CrewCategory"));
 import TopProgressLoader from "./Components/TopProgressLoader";
 
 // Public home page (City Lifestyle)
@@ -61,6 +63,8 @@ const privateRoutes = [
   "/form-links",
   "/event-history",
   "/company-categories",
+  "/crew",
+  "/crew-categories",
   // Staff login page — City Lifestyle branding too.
   "/login",
   // Public ticket-registration link opened from WhatsApp (/r/:token).
@@ -166,6 +170,8 @@ function App() {
             <Route path="/form-links" element={<FormLinks />} />
             <Route path="/event-history" element={<EventHistory />} />
             <Route path="/company-categories" element={<CompanyCategory />} />
+            <Route path="/crew" element={<CrewList />} />
+            <Route path="/crew-categories" element={<CrewCategory />} />
           </Route>
 
           <Route element={<ProtectedRoute adminOnly />}>

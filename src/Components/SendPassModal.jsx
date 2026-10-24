@@ -23,6 +23,9 @@ const MAX_GUESTS = 10;
 export default function SendPassModal({
   contacts = [],
   defaultEventId = "",
+  // Optional: async (payload) => response. Lets other lists (Crew) reuse
+  // this dialog with their own API; Guest List keeps its default.
+  sendPass,
   onClose,
   onDone,
 }) {
@@ -137,21 +140,22 @@ export default function SendPassModal({
 
     setSending(true);
     try {
-      const res = await dispatch(
-        sendContactPass({
-          ids: contacts.map((contact) => contact._id),
-          eventId,
-          ticketTypeId,
-          quantities: Object.fromEntries(
-            contacts.map((contact) => [contact._id, guestsFor(contact)])
-          ),
-        })
-      ).unwrap();
+      const payload = {
+        ids: contacts.map((contact) => contact._id),
+        eventId,
+        ticketTypeId,
+        quantities: Object.fromEntries(
+          contacts.map((contact) => [contact._id, guestsFor(contact)])
+        ),
+      };
+      const res = sendPass
+        ? await sendPass(payload)
+        : await dispatch(sendContactPass(payload)).unwrap();
 
       setReport(res.data);
       onDone?.(res);
     } catch (err) {
-      showError(err || "Failed to send pass");
+      showError(typeof err === "string" ? err : err?.response?.data?.message || err?.message || "Failed to send pass");
     } finally {
       setSending(false);
     }
