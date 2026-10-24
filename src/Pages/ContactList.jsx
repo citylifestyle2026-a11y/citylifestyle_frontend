@@ -1260,8 +1260,12 @@ const sortedReferenceFilterOptions = useMemo(
       sortableColumn("instagramId", "Instagram Link", {
         render: (contact) => <InstagramLink id={contact.instagramId} />,
       }),
-      sortableColumn("relationship", "Entry Type", {
-        render: (contact) => contact.entryType || contact.relationship || "-",
+      // Entry Type = what the form asked; Relationship = Contact Book data.
+      sortableColumn("entryType", "Entry Type", {
+        render: (contact) => contact.entryType || "-",
+      }),
+      sortableColumn("relationship", "Relationship", {
+        render: (contact) => contact.relationship || "-",
       }),
       sortableColumn("spouseName", "Spouse Name", {
         render: (contact) => (
