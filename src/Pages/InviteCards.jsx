@@ -51,7 +51,7 @@ const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, 100].map((n) => ({ value: n, label: S
 
 const SAMPLE_CSV = "name,mobile\nRahul Shah,9876543210\nPooja Patel,9123456780\n";
 
-const DEFAULT_STYLE = { topPct: 48, centerXPct: 50, fontSizePct: 5.2, color: "#C9A24B" };
+const DEFAULT_STYLE = { topPct: 33.5, centerXPct: 50, fontSizePct: 4.2, color: "#FFFFFF" };
 const MAX_DESIGN_MB = 15;
 const DESIGN_EXTS = [".jpg", ".jpeg", ".png", ".webp"];
 
