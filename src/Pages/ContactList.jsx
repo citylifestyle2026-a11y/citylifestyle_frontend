@@ -1648,6 +1648,7 @@ const sortedReferenceFilterOptions = useMemo(
               <DeleteUserModal
                 userName={deleteContactName}
                 entityLabel="contact"
+                note="Its booking (pass) in Manual Booking will also be deleted."
                 onClose={handleCloseDeleteModal}
                 onDelete={handleDeleteConfirm}
               />

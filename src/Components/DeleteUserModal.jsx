@@ -9,6 +9,8 @@ export default function DeleteUserModal({
   // its existing behavior for User Management, which never passes this
   // prop and keeps getting "user" exactly as before.
   entityLabel = "user",
+  // Optional extra line under the question (e.g. "its booking is deleted too").
+  note = "",
 }) {
   return (
     <div className="userDelete__overlay" onClick={onClose}>
@@ -39,6 +41,11 @@ export default function DeleteUserModal({
             {userName}
           </span>{" "} {entityLabel}?
         </p>
+        {note && (
+          <p className="userDelete__message" style={{ color: "#5b5f73", fontSize: 13, marginTop: 6 }}>
+            {note}
+          </p>
+        )}
          
         <div className="userDelete__actions">
           <button type="button" className="userDelete__cancelBtn" onClick={onClose}>

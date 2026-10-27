@@ -17,6 +17,10 @@
 .pass__state--error { color: #ff9aa8; }
 
 .pass__icon { color: #ec2f86; flex-shrink: 0; }
+/* on the white ticket use the Parv logo's maroon */
+.pass__ticket .pass__icon { color: #8b0609; }
+.pass__ticket .pass__chip:not(.pass__chip--grey) { background: #efefef; color: #333; }
+.pass__ticket .pass__chipIcon { color: #8b0609; }
 
 /* ---------- the ticket: two halves joined at the dashed tear line ---------- */
 .pass__ticket {
@@ -50,7 +54,7 @@
     radial-gradient(circle var(--r-br) at 100% 100%, transparent 98%, #000) bottom right / 51% 51% no-repeat;
 }
 
-.pass__top { padding: 26px 24px 17px; }
+.pass__top { padding: 26px 24px 34px; }
 
 .pass__bottom {
   --r-tl: 24px;
@@ -75,8 +79,25 @@
 }
 .pass__chipIcon { font-size: 10px; }
 
-.pass__logo { display: block; width: 100px; height: auto; margin: 8px auto 0; }
+/* grey section labels ("IN ASSOCIATION WITH" / "SUPPORTED BY") */
+.pass__chip--grey { background: #efefef; color: #333; font-size: 9px; letter-spacing: 0.6px; }
+.pass__chip--block { margin-top: 16px; }
+.pass__chip--supported { margin-top: 24px; }
+.pass__partners { display: block; width: 100%; height: auto; margin: 12px auto 0; }
+
+.pass__logo { display: block; width: 108px; height: auto; margin: 8px auto 2px; }
 .pass__title { margin: 2px 0 4px; font-size: 22px; font-weight: 700; line-height: 1.2; }
+.pass__srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 .pass__sub {
   display: flex;
   align-items: center;
@@ -121,8 +142,8 @@
   display: inline-block;
   padding: 3px 10px;
   border-radius: 999px;
-  background: #fde8f2;
-  color: #b81d62;
+  background: #f6e3e3;
+  color: #8b0609;
   font-size: 12px;
   font-weight: 600;
   line-height: 1.3;
@@ -134,7 +155,7 @@
   margin: 14px auto 12px;
   width: 194px;
   padding: 12px;
-  border: 1.5px solid #ec2f86;
+  border: 1.5px solid #8b0609;
   border-radius: 18px;
   box-sizing: border-box;
 }
@@ -146,9 +167,9 @@
   display: inline-block;
   margin: 8px 0 10px;
   padding: 6px 30px;
-  border: 1.5px dashed #ec2f86;
+  border: 1.5px dashed #8b0609;
   border-radius: 999px;
-  color: #ec2f86;
+  color: #8b0609;
   font-size: 24px;
   font-weight: 700;
   letter-spacing: 2px;

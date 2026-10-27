@@ -21,7 +21,9 @@ import {
 } from "react-icons/fa";
 
 import { getPublicInvitationApi } from "../services/publicInvitationService";
-import parvLogo from "../assets/images/parv-logo.png";
+import parvLogo from "../assets/images/pass/parv-logo-maroon.png";
+import associationLogos from "../assets/images/pass/association-logos.png";
+import supporterLogos from "../assets/images/pass/supporter-logos.png";
 import "../assets/CSS/Ticket.css";
 
 // The guest pass. Used in two places:
@@ -38,7 +40,7 @@ export default function GuestPass({ invitationId: rawInvitationId, embedded = fa
   const [invite, setInvite] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [helpOpen, setHelpOpen] = useState(true);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -131,11 +133,20 @@ export default function GuestPass({ invitationId: rawInvitationId, embedded = fa
             OFFICIAL GUEST PASS
           </span>
           <img className="pass__logo" src={parvLogo} alt="Parv" />
-          <h1 className="pass__title">{event.title}</h1>
+          {/* The Parv logo already spells the event name, so the title is only
+              kept for screen readers / SEO. */}
+          <h1 className="pass__title pass__srOnly">{event.title}</h1>
           <p className="pass__sub">
             <FaCalendarCheck className="pass__icon" />
             Event Entry Pass
           </p>
+
+          <span className="pass__chip pass__chip--grey pass__chip--block">IN ASSOCIATION WITH</span>
+          <img
+            className="pass__partners"
+            src={associationLogos}
+            alt="Luxury automobile partner Navjivan Luxury Cars, Tanishq, Tri Stone, Taneira, Outzidr, Amansara"
+          />
 
           <div className="pass__tear" />
         </div>
@@ -195,6 +206,11 @@ export default function GuestPass({ invitationId: rawInvitationId, embedded = fa
             <FaShieldAlt className="pass__badgeIcon" />
             {badge}
           </p>
+
+          <span className="pass__chip pass__chip--grey pass__chip--block pass__chip--supported">
+            SUPPORTED BY
+          </span>
+          <img className="pass__partners" src={supporterLogos} alt="Event supporters" />
         </div>
       </div>
 
