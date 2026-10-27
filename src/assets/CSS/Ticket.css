@@ -111,6 +111,24 @@
 .pass__rows dt { display: flex; align-items: center; gap: 10px; color: #5b5f73; }
 .pass__rows dd { margin: 0; font-weight: 600; text-align: right; word-break: break-word; }
 
+/* "Invited By": label stays on the left, the names wrap on the right so a long
+   list (3, 4, 5 ... names) never gets cut off or pushes the layout. */
+.pass__rows > .pass__row--refs { align-items: flex-start; }
+.pass__rows > .pass__row--refs dt { flex-shrink: 0; padding-top: 3px; }
+.pass__rows > .pass__row--refs dd { min-width: 0; max-width: 68%; }
+.pass__refs { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 5px; }
+.pass__refChip {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #fde8f2;
+  color: #b81d62;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
 /* ---------- QR ---------- */
 .pass__qrBox {
   margin: 14px auto 12px;

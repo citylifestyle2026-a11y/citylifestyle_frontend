@@ -16,6 +16,7 @@ import {
   FaShareAlt,
   FaShieldAlt,
   FaUser,
+  FaUserFriends,
   FaUsers,
 } from "react-icons/fa";
 
@@ -112,6 +113,7 @@ export default function GuestPass({ invitationId: rawInvitationId, embedded = fa
 
   const { event } = invite;
   const guests = invite.numberOfGuests;
+  const references = Array.isArray(invite.references) ? invite.references : [];
   const valid = !invite.isUsed && !invite.isCancelled;
   const badge = invite.isCancelled
     ? "Cancelled Pass"
@@ -155,6 +157,24 @@ export default function GuestPass({ invitationId: rawInvitationId, embedded = fa
               <dt><FaPhoneAlt className="pass__icon" />Mobile</dt>
               <dd>{invite.mobileNumber}</dd>
             </div>
+            {references.length > 0 && (
+              <div className="pass__row--refs">
+                <dt><FaUserFriends className="pass__icon" />Invited By</dt>
+                <dd>
+                  {/* One name: plain text. 2+ names: small chips that wrap onto
+                      as many lines as needed, so every name stays visible. */}
+                  {references.length === 1 ? (
+                    references[0]
+                  ) : (
+                    <span className="pass__refs">
+                      {references.map((name) => (
+                        <span className="pass__refChip" key={name}>{name}</span>
+                      ))}
+                    </span>
+                  )}
+                </dd>
+              </div>
+            )}
             <div>
               <dt><FaUsers className="pass__icon" />Allowed Entry</dt>
               <dd> {guests}</dd>
