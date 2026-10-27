@@ -287,14 +287,8 @@ export default function CreateContactModal({
     setter({ file: null, preview: "", remove: Boolean(isEditMode && saved) });
   };
 
-  // No "Select Category" placeholder on a new contact: the first category is
-  // selected by default (it is filled in as soon as the list has loaded).
-  useEffect(() => {
-    if (isEditMode || categories.length === 0) return;
-    setFormData((prev) =>
-      prev.companyCategory ? prev : { ...prev, companyCategory: categories[0]._id }
-    );
-  }, [categories, isEditMode, formData.companyCategory]);
+  // Company Category is optional now, so nothing is pre-selected: the
+  // dropdown starts on "No category".
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -452,18 +446,6 @@ export default function CreateContactModal({
     } else if (!isValidWhatsappNumber(formData.whatsappNumber)) {
       errors.whatsappNumber =
         "Enter a valid 10-digit WhatsApp number (with or without 91).";
-    }
-
-    if (req && !formData.companyName.trim()) {
-      errors.companyName = "Company Name is required.";
-    }
-
-    if (req && !formData.designation.trim()) {
-      errors.designation = "Designation is required.";
-    }
-
-    if (req && !formData.companyCategory) {
-      errors.companyCategory = "Company Category is required.";
     }
 
     if (req && !formData.area.trim()) {
@@ -865,7 +847,7 @@ export default function CreateContactModal({
 
           <div className="contactFieldGroup">
             <label className="contactFieldLabel">
-              Company Name {!isEditMode && <span className="contactRequired">*</span>}
+              Company Name
             </label>
             <input
               type="text"
@@ -882,7 +864,7 @@ export default function CreateContactModal({
 
           <div className="contactFieldGroup">
             <label className="contactFieldLabel">
-              Designation {!isEditMode && <span className="contactRequired">*</span>}
+              Designation
             </label>
             <input
               type="text"
@@ -899,7 +881,7 @@ export default function CreateContactModal({
 
           <div className="contactFieldGroup contactFieldGroupFull">
             <label className="contactFieldLabel">
-              Company Category {!isEditMode && <span className="contactRequired">*</span>}
+              Company Category
             </label>
             <select
               className="contactFieldSelect"
@@ -907,7 +889,7 @@ export default function CreateContactModal({
               value={formData.companyCategory}
               onChange={handleChange}
             >
-              {isEditMode && <option value="">No category</option>}
+              <option value="">No category</option>
               {categories.map((category) => (
                 <option key={category._id} value={category._id}>
                   {category.name}

@@ -114,10 +114,6 @@ export default function EditBookingModal({ booking, onClose, onSuccess }) {
 
     if (!isValidMobileNumber(formData.mobile)) errors.mobile = MOBILE_ERROR_MESSAGE;
 
-    // Company / Brand is compulsory (same rule + message as CreateBookingModal).
-    if (!formData.companyName.trim())
-      errors.companyName = "Please enter company / brand name.";
-
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
       errors.email = "Please enter a valid email.";
 
@@ -311,7 +307,7 @@ export default function EditBookingModal({ booking, onClose, onSuccess }) {
 
           <div className="bookingCreateFieldGroup">
             <label className="bookingCreateLabel">
-              Company / Brand <span className="bookingCreateRequired">*</span>
+              Company / Brand
             </label>
             <input
               type="text"

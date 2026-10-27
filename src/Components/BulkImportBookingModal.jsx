@@ -186,7 +186,7 @@ export default function BulkImportBookingModal({ onClose, onSuccess }) {
           <code>ticketTypeId</code> or <code>ticketTypeName</code>,{" "}
           <code>quantity, amount, name, mobileNumber, companyName, email, discount, remark</code>.
           Event/Ticket names must match exactly (not case-sensitive).{" "}
-          <code>companyName</code> (Company / Brand) is required for every row.{" "}
+          <code>companyName</code> (Company / Brand) is optional.{" "}
           <code>mobileNumber</code> can be 10 digits or with 91 (e.g.{" "}
           <code>9876543210</code> or <code>919876543210</code>).{" "}
           <code>amount</code>, <code>email</code>, <code>discount</code> and{" "}

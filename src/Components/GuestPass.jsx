@@ -158,12 +158,10 @@ export default function GuestPass({ invitationId: rawInvitationId, embedded = fa
               <dt><FaUser className="pass__icon" />Guest Name</dt>
               <dd>{invite.guestName}</dd>
             </div>
-            {invite.companyName && (
-              <div>
-                <dt><FaBuilding className="pass__icon" />Company/ Brand</dt>
-                <dd>{invite.companyName}</dd>
-              </div>
-            )}
+            <div>
+              <dt><FaBuilding className="pass__icon" />Company/ Brand</dt>
+              <dd>{invite.companyName?.trim() || "-"}</dd>
+            </div>
             <div>
               <dt><FaPhoneAlt className="pass__icon" />Mobile</dt>
               <dd>{invite.mobileNumber}</dd>

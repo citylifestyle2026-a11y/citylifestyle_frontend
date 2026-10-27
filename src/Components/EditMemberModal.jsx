@@ -25,11 +25,11 @@ const normalizeStatus = (value) =>
  * Add a contact (Contact Book -> Add Contact) or, when `member` is passed,
  * edit one (Contact Book -> Action -> Edit).
  *
- * Required: Name, Mobile, Company / Brand, Profession, at least one Reference.
+ * Required: Name, Mobile, at least one Reference.
  * Status is a dropdown: Active / Inactive.
  * Profession is a dropdown of the Company Categories (Guest List -> Company
  * Category) — the same list the Guest List uses — so the two always match.
- * There is no "No category" option: Profession is required.
+ * "No category" is allowed: Company Name / Company Category are optional.
  * The modal loads the categories itself (all of them, A-Z), so it never
  * depends on whatever page/search the Company Category screen was left on.
  */
@@ -222,8 +222,6 @@ export default function EditMemberModal({ member = null, onClose, onSaved }) {
     if (!form.mobile.trim()) next.mobile = "WhatsApp Number is required.";
     else if (!/^[6-9]\d{9}$/.test(local)) next.mobile = "Enter a valid 10-digit mobile number.";
 
-    if (!form.companyName.trim()) next.companyName = "Company Name is required.";
-    if (!form.profession.trim()) next.profession = "Company Category is required.";
     if (finalReferences().length === 0) next.references = "At least one Reference is required.";
 
     if (form.email.trim() && !EMAIL_REGEX.test(form.email.trim())) {
@@ -355,11 +353,11 @@ export default function EditMemberModal({ member = null, onClose, onSaved }) {
             maxLength: 16,
             placeholder: "WhatsApp Number (91 optional)",
           })}
-          {field("companyName", "Company Name", { required: true })}
+          {field("companyName", "Company Name")}
           {field("designation", "Designation")}
           <div className="contactFieldGroup contactFieldGroupFull">
             <label className="contactFieldLabel" htmlFor="member-profession">
-              Company Category <span className="contactRequired">*</span>
+              Company Category
             </label>
             <select
               id="member-profession"
@@ -368,8 +366,8 @@ export default function EditMemberModal({ member = null, onClose, onSaved }) {
               onChange={setField("profession")}
               disabled={categoriesLoading}
             >
-              <option value="" disabled>
-                {categoriesLoading ? "Loading categories..." : "Select Category"}
+              <option value="">
+                {categoriesLoading ? "Loading categories..." : "No category"}
               </option>
               {professionOptions.map((name) => (
                 <option key={name} value={name}>
