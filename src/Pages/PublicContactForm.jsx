@@ -19,6 +19,30 @@ const parvHero = `${IMG}/parav_image.webp`;
 // "Share Form Link": /form?link=<token> opens the same form, but limited to
 // the quantity the admin chose. The link's name is filled in as the Reference
 // (locked) and the form closes after the last place is taken.
+// The plain /form (no ?link=...) is closed. Set to true to open it again
+// (also set PUBLIC_FORM_OPEN=true in the backend .env).
+const PLAIN_FORM_OPEN = false;
+
+// "Registrations Full" / "Registrations Closed" card.
+const renderClosedCard = (isFull) => (
+  <div className="cityFormLinkNote cityFormLinkNote--blocked cityFormLinkNote--closed">
+    <span className="cityFormLinkNote__icon" aria-hidden="true"><FaLock /></span>
+    <h2>{isFull ? "Registrations Full" : "Registrations Closed"}</h2>
+    <p className="cityFormLinkNote__lead">
+      Thank you for your interest in Parv.
+    </p>
+    <p>
+      {isFull
+        ? "All the places have now been filled, and we are no longer able to accept new bookings."
+        : "Registrations through this form are now closed, and we are no longer able to accept new bookings."}
+    </p>
+    <p className="cityFormLinkNote__sub">
+      If you have already submitted your details, our team will contact you on your
+      WhatsApp number. For any other assistance, please reach out to the City Toppers team.
+    </p>
+  </div>
+);
+
 export default function PublicContactForm() {
   const [searchParams] = useSearchParams();
   const token = (searchParams.get("link") || "").trim();
@@ -46,7 +70,11 @@ export default function PublicContactForm() {
   }, [loadLink]);
 
   const renderBody = () => {
-    if (!token) return <CreateContactModal publicMode onClose={() => {}} />;
+    if (!token) {
+      return PLAIN_FORM_OPEN
+        ? <CreateContactModal publicMode onClose={() => {}} />
+        : renderClosedCard(true);
+    }
 
     if (linkLoading) {
       return <p className="cityFormLinkNote">Loading...</p>;
@@ -81,19 +109,7 @@ export default function PublicContactForm() {
         );
       }
 
-      return (
-        <div className="cityFormLinkNote cityFormLinkNote--blocked cityFormLinkNote--closed">
-          <span className="cityFormLinkNote__icon" aria-hidden="true"><FaLock /></span>
-          <h2>Form closed</h2>
-          <p className="cityFormLinkNote__lead">
-            {linkInfo?.message || "This form link is closed."}
-          </p>
-          <p className="cityFormLinkNote__sub">
-            No more registrations are being accepted on this link. Please contact the
-            City Toppers team if you would like to take part in Parv.
-          </p>
-        </div>
-      );
+      return renderClosedCard(linkInfo?.state === "full");
     }
 
     return (
@@ -109,6 +125,8 @@ export default function PublicContactForm() {
             setJustSubmitted(true);
             loadLink();
           }}
+          // The last place was taken while this person was filling the form.
+          onLinkUnavailable={loadLink}
         />
       </>
     );
