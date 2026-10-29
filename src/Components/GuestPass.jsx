@@ -117,11 +117,14 @@ export default function GuestPass({ invitationId: rawInvitationId, embedded = fa
   const guests = invite.numberOfGuests;
   const references = Array.isArray(invite.references) ? invite.references : [];
   const valid = !invite.isUsed && !invite.isCancelled;
+  // Partly used pass (e.g. 2 of 3 guests entered): still valid for the rest.
   const badge = invite.isCancelled
     ? "Cancelled Pass"
     : invite.isUsed
       ? "Pass Already Used"
-      : "Valid Entry Pass";
+      : invite.isPartiallyUsed
+        ? `${invite.enteredGuests} Entered - ${invite.remainingGuests} Remaining`
+        : "Valid Entry Pass";
 
   return (
     <div className={`pass${embedded ? " pass--embedded" : ""}`}>
