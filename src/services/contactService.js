@@ -188,9 +188,60 @@ export const resendContactPassApi = async (data) => {
 // body: { ids: string[], eventId?, includeResponded? } - sends the WhatsApp
 // message with Yes / No buttons to approved guests. Guests who already
 // answered are skipped unless includeResponded is true.
+//
+// Sent in small chunks: the server sends one WhatsApp message per guest (about
+// a second each), so hundreds of guests in ONE request ran past the 30 s
+// browser timeout ("timeout of 30000ms exceeded") while the server kept going.
+// Results of all chunks are merged into ONE response of the same shape, so
+// callers do not change. A guest who already answered is skipped by the
+// server, so re-sending a failed chunk never double-asks anyone.
+const SEND_REMINDER_CHUNK = 20;
+
 export const sendContactReminderApi = async (data) => {
-  const response = await api.post("/contacts/send-reminder", data);
-  return response.data;
+  const ids = Array.isArray(data?.ids) ? data.ids : [];
+  const results = [];
+
+  for (let i = 0; i < ids.length; i += SEND_REMINDER_CHUNK) {
+    const chunk = ids.slice(i, i + SEND_REMINDER_CHUNK);
+
+    try {
+      const response = await api.post(
+        "/contacts/send-reminder",
+        { ...data, ids: chunk },
+        { timeout: 180000 }
+      );
+      results.push(...(response.data?.data?.results || []));
+    } catch (error) {
+      // Request-level error on the first chunk (e.g. 404, "select an event",
+      // template not configured) applies to everyone: show it right away.
+      if (error?.response?.status && error.response.status < 500 && i === 0) {
+        // A 400 that still carries per-guest results (every guest failed)
+        // is reported as results, not thrown, so the reasons are shown.
+        if (!error.response.data?.data?.results?.length) throw error;
+        results.push(...error.response.data.data.results);
+        continue;
+      }
+
+      const message =
+        error?.response?.data?.message ||
+        "No answer from the server - check the Attendance column before sending again.";
+      chunk.forEach((id) => results.push({ id, name: "-", status: "failed", message }));
+    }
+  }
+
+  const sent = results.filter((r) => r.status === "sent").length;
+  const skipped = results.filter((r) => r.status === "skipped").length;
+  const failed = results.filter((r) => r.status === "failed").length;
+
+  const parts = [`Reminder sent to ${sent} guest${sent === 1 ? "" : "s"}`];
+  if (skipped) parts.push(`${skipped} skipped (already answered)`);
+  if (failed) parts.push(`${failed} failed`);
+
+  return {
+    success: true,
+    message: `${parts.join(", ")}.`,
+    data: { sent, skipped, failed, results },
+  };
 };
 
 // ================= IMPORT CONTACTS (CSV) =================

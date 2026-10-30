@@ -53,20 +53,31 @@ import {
   cancelContactPassApi,
   updateContactHamperApi,
   sendContactReminderApi,
+  getAllContactsApi,
 } from "../services/contactService";
 import MergeMemberModal from "../Components/MergeMemberModal";
 import DuplicateTab from "../Components/DuplicateTab";
 import { confirmDialog, noticeDialog } from "../utilits/appSwal";
 import "../assets/CSS/ContactList.css";
 import useClickOutside from "../hooks/useClickOutside";
+import useActionMenuRoom from "../hooks/useActionMenuRoom";
 
 // Options for the "rows per page" select. Lives in the page (not inside
 // CommonSelect) since CommonSelect must never hardcode page-specific
 // options — same as ROWS_PER_PAGE_OPTIONS in Pages/User.jsx.
-const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100].map((n) => ({
-  value: n,
-  label: String(n),
-}));
+//
+// "All" shows every matching guest on ONE page (no page buttons), so Select
+// All ticks every guest of the filter. It is sent to the backend as a very
+// large limit, which is larger than any real guest list.
+const ALL_ROWS = 100000;
+
+const ROWS_PER_PAGE_OPTIONS = [
+  ...[5, 10, 20, 50, 100].map((n) => ({
+    value: n,
+    label: String(n),
+  })),
+  { value: ALL_ROWS, label: "All" },
+];
 
 // The Company Category filter needs the full category list in one go, not
 // a paginated slice — the backend's get-all-categories endpoint is
@@ -297,6 +308,12 @@ export default function ContactList() {
   const actionMenuRef = useRef(null);
   useClickOutside(actionMenuRef, () => setOpenActionMenuId(null));
 
+  // The Action menu has up to ~13 items, so a fixed padding under the table was
+  // not always enough and the last item (Delete) got cut off. This adds exactly
+  // the missing room while a menu is open.
+  const tableWrapperRef = useRef(null);
+  useActionMenuRoom(tableWrapperRef, openActionMenuId, ".contactAction__menuOpen");
+
   const handleToggleActionMenu = useCallback((contactId) => {
     setOpenActionMenuId((prev) => (prev === contactId ? null : contactId));
   }, []);
@@ -519,18 +536,64 @@ export default function ContactList() {
     });
   }, []);
 
-  const handleToggleSelectAll = () => {
-    setSelected((prev) => {
-      const next = { ...prev };
-      if (allOnPageSelected) {
-        contacts.forEach((contact) => delete next[contact._id]);
-      } else {
+  // Header checkbox = select (or clear) EVERY guest that matches the current
+  // search / filters, across all pages - not just the rows on this page. The
+  // other pages are fetched in one request with the same filters the table
+  // uses (limit = ALL_ROWS), so what gets selected is exactly the filtered list.
+  const [selectAllBusy, setSelectAllBusy] = useState(false);
+
+  const handleToggleSelectAll = async () => {
+    if (selectAllBusy) return;
+
+    // Already ticked -> untick everything.
+    if (allOnPageSelected) {
+      setSelected({});
+      return;
+    }
+
+    const params = {
+      page: 1,
+      limit: ALL_ROWS,
+      search,
+      sortBy,
+      sortOrder,
+    };
+
+    if (categoryFilter) params.companyCategory = categoryFilter;
+    if (referenceFilter.length) params.reference = referenceFilter;
+    if (areaFilter.length) params.area = areaFilter;
+    if (statusFilter === "passCancelled") params.passStatus = "cancelled";
+    else if (statusFilter && statusFilter !== "duplicate" && statusFilter !== "hamper") params.approvalStatus = statusFilter;
+    if (statusFilter === "hamper") params.hamper = hamperFilter || "all";
+    if (editionFilter) params.editionEventId = editionFilter;
+    if (rsvpFilter) params.rsvpStatus = rsvpFilter;
+
+    setSelectAllBusy(true);
+
+    try {
+      const res = await getAllContactsApi(params);
+      const rows = Array.isArray(res?.data) ? res.data : [];
+
+      setSelected((prev) => {
+        const next = { ...prev };
+        rows.forEach((contact) => {
+          next[contact._id] = contact;
+        });
+        return next;
+      });
+    } catch (err) {
+      // Could not load the other pages: at least select this page.
+      setSelected((prev) => {
+        const next = { ...prev };
         contacts.forEach((contact) => {
           next[contact._id] = contact;
         });
-      }
-      return next;
-    });
+        return next;
+      });
+      showError("Could not select all pages - only this page was selected.");
+    } finally {
+      setSelectAllBusy(false);
+    }
   };
 
   const clearSelection = () => setSelected({});
@@ -1114,13 +1177,13 @@ const sortedReferenceFilterOptions = useMemo(
           <input
             type="checkbox"
             className="contactPage__checkbox"
-            aria-label="Select all contacts on this page"
+            aria-label="Select all contacts (all pages)"
             checked={allOnPageSelected}
             ref={(el) => {
               if (el) el.indeterminate = someOnPageSelected;
             }}
             onChange={handleToggleSelectAll}
-            disabled={contacts.length === 0}
+            disabled={contacts.length === 0 || selectAllBusy}
           />
         ),
         render: (contact) => (
@@ -1539,6 +1602,8 @@ const sortedReferenceFilterOptions = useMemo(
     selected,
     allOnPageSelected,
     someOnPageSelected,
+    selectAllBusy,
+    handleToggleSelectAll,
     handleToggleSelect,
     handleChangeStatus,
     handleCancelPass,
@@ -1978,7 +2043,7 @@ const sortedReferenceFilterOptions = useMemo(
           />
         </div>
 
-        <div className="contactPage__tableWrapper">
+        <div className="contactPage__tableWrapper" ref={tableWrapperRef}>
           <CommonTable
             columns={contactTableColumns}
             data={contacts}
