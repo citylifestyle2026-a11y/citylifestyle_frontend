@@ -334,6 +334,10 @@ const QRScannerModal = ({ isOpen, onClose, onVerified, onCheckedIn }) => {
   const [activeCameraId, setActiveCameraId] = useState(null);
   const [cameraError, setCameraError] = useState(null);
   const [isScanning, setIsScanning] = useState(false);
+  // Pass with 2+ guests still to enter: how many are entering now, and the
+  // result of the last check-in (to show "2 entered, 1 can enter later").
+  const [pickedGuests, setPickedGuests] = useState(1);
+  const [checkInInfo, setCheckInInfo] = useState(null);
 
   // Instance + lifecycle refs (avoid stale closures / state-after-unmount)
   const scannerRef = useRef(null);
@@ -374,6 +378,19 @@ const QRScannerModal = ({ isOpen, onClose, onVerified, onCheckedIn }) => {
     resultState === "checkedIn";
 
   const resultConfig = resultState ? RESULT_CONFIG[resultState] : null;
+
+  // 2+ guests still to enter on a single-QR pass: staff must say how many
+  // are entering now (instead of everybody being admitted automatically).
+  const needsGuestPick =
+    isValidTicket && !!ticket?.isGroupEntry && Number(ticket?.remaining) > 1;
+
+  const resultMessage =
+    resultState === "checkedIn" && checkInInfo?.isGroupEntry
+      ? `${checkInInfo.guests} guest${Number(checkInInfo.guests) === 1 ? "" : "s"} checked in.` +
+        (Number(checkInInfo.remaining) > 0
+          ? ` ${checkInInfo.remaining} more can enter later with this same QR.`
+          : "")
+      : resultConfig?.message;
 
   // ---------- scanner lifecycle helpers ----------
 
@@ -520,20 +537,32 @@ const QRScannerModal = ({ isOpen, onClose, onVerified, onCheckedIn }) => {
   // the exact same existing checkInQr thunk, just without waiting for a
   // click. Guarded by autoCheckInKeyRef below so it only fires once per
   // verified ticket.
-  const handleAllowEntry = useCallback(() => {
+  const handleAllowEntry = useCallback((guests) => {
     if (!ticket) return;
 
     dispatch(
       checkInQr({
         qrToken: ticket.qrToken,
+        // askGuests: this scanner knows how to ask "how many are entering?"
+        askGuests: true,
+        ...(guests ? { guests } : {}),
       })
     )
       .unwrap()
       .then((result) => {
+        setCheckInInfo(result?.data || null);
         if (onCheckedIn) onCheckedIn(result);
       })
       .catch(() => { });
   }, [dispatch, ticket, onCheckedIn]);
+
+  // Pre-select "everyone left" each time a new pass is verified.
+  useEffect(() => {
+    setCheckInInfo(null);
+    if (ticket?.isGroupEntry && Number(ticket?.remaining) > 1) {
+      setPickedGuests(Number(ticket.remaining));
+    }
+  }, [ticket?.qrToken]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Tracks which ticket (by qrToken) has already had check-in triggered,
   // so the auto-check-in effect below never fires twice for the same
@@ -545,13 +574,15 @@ const QRScannerModal = ({ isOpen, onClose, onVerified, onCheckedIn }) => {
   useEffect(() => {
     if (!isValidTicket || !ticket) return;
     if (checkInLoading || checkInSuccess) return;
+    // 2+ guests left: wait for the staff to choose how many are entering.
+    if (needsGuestPick) return;
 
     const ticketKey = ticket.qrToken || ticket.id;
     if (!ticketKey || autoCheckInKeyRef.current === ticketKey) return;
 
     autoCheckInKeyRef.current = ticketKey;
     handleAllowEntry();
-  }, [isValidTicket, ticket, checkInLoading, checkInSuccess, handleAllowEntry]);
+  }, [isValidTicket, ticket, checkInLoading, checkInSuccess, needsGuestPick, handleAllowEntry]);
 
   // Remembers which result the sound has already been played for, so each
   // scan makes its sound exactly once (not on every re-render while the
@@ -739,7 +770,9 @@ const QRScannerModal = ({ isOpen, onClose, onVerified, onCheckedIn }) => {
             </p>
             <p className="crmQrHeaderSubtitle">
               {isValidTicket
-                ? "Confirming entry automatically..."
+                ? needsGuestPick
+                  ? "Select how many guests are entering"
+                  : "Confirming entry automatically..."
                 : resultState
                   ? "Here's what we found"
                   : "Align the QR code within the frame"}
@@ -823,7 +856,7 @@ const QRScannerModal = ({ isOpen, onClose, onVerified, onCheckedIn }) => {
                 )}
               </div>
               <p className="crmQrResultTitle">{resultConfig.title}</p>
-              <p className="crmQrResultMessage">{resultConfig.message}</p>
+              <p className="crmQrResultMessage">{resultMessage}</p>
             </div>
 
             {isBlockedResult && (
@@ -879,7 +912,9 @@ const QRScannerModal = ({ isOpen, onClose, onVerified, onCheckedIn }) => {
                 <div className="crmQrCardRow">
                   <span className="crmQrCardLabel">Guests</span>
                   <span className="crmQrCardValue">
-                    {ticket?.guests || ticket?.booking?.quantity || 1} (all enter with this QR)
+                    {ticket?.totalGuests || ticket?.guests || ticket?.booking?.quantity || 1} total
+                    {Number(ticket?.alreadyEntered) > 0 ? ` · ${ticket.alreadyEntered} entered` : ""}
+                    {` · ${ticket?.remaining ?? 1} left`}
                   </span>
                 </div>
               )}
@@ -917,6 +952,48 @@ const QRScannerModal = ({ isOpen, onClose, onVerified, onCheckedIn }) => {
                 <span className="crmQrStatusBadge">{ticket?.status || "Valid"}</span>
               </div>
             </div>
+
+            {needsGuestPick && (
+              <div className="crmQrGuestPick">
+                <p className="crmQrGuestPickTitle">How many guests are entering?</p>
+                <div className="crmQrGuestPickStepper">
+                  <button
+                    type="button"
+                    onClick={() => setPickedGuests((n) => Math.max(1, n - 1))}
+                    disabled={pickedGuests <= 1 || checkInLoading}
+                    aria-label="Fewer guests"
+                  >
+                    &minus;
+                  </button>
+                  <b>{pickedGuests}</b>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setPickedGuests((n) => Math.min(Number(ticket.remaining), n + 1))
+                    }
+                    disabled={pickedGuests >= Number(ticket.remaining) || checkInLoading}
+                    aria-label="More guests"
+                  >
+                    +
+                  </button>
+                </div>
+                {Number(ticket.remaining) - pickedGuests > 0 && (
+                  <p className="crmQrGuestPickHint">
+                    {Number(ticket.remaining) - pickedGuests} can scan this QR again later.
+                  </p>
+                )}
+                <button
+                  type="button"
+                  className="crmQrBtn crmQrBtnPrimary crmQrGuestPickOk"
+                  onClick={() => handleAllowEntry(pickedGuests)}
+                  disabled={checkInLoading}
+                >
+                  {checkInLoading
+                    ? "Checking in..."
+                    : `Allow ${pickedGuests} ${pickedGuests === 1 ? "guest" : "guests"}`}
+                </button>
+              </div>
+            )}
 
             {checkInError && (
               <div className="crmQrErrorBox">

@@ -15,6 +15,7 @@ import CommonLoader from "../Components/CommonLoader";
 import CommonEmptyState from "../Components/CommonEmptyState";
 import DeleteEventModal from "../Components/DeleteEventModal";
 import { formatDate, formatDateTime } from "../utilits/dateFormat";
+import { ALL_ROWS_OPTION } from "../utilits/rowsPerPage";
 
 const columns = [
   { key: "title", label: "Title" },
@@ -32,6 +33,7 @@ const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100].map((n) => ({
   value: String(n),
   label: String(n),
 }));
+ROWS_PER_PAGE_OPTIONS.push(ALL_ROWS_OPTION);
 
 // Single source of truth for "has this event's window closed" — compares
 // endDateTime against the current time. Reuse this wherever expiry needs

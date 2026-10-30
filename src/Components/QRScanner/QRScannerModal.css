@@ -679,3 +679,13 @@
     animation: none;
   }
 }
+
+/* ===== "How many guests are entering?" ===== */
+.crmQrGuestPick { margin: 14px 0 4px; padding: 14px; border: 1px solid #e4e7ec; border-radius: 12px; background: #fff8f0; text-align: center; }
+.crmQrGuestPickTitle { margin: 0 0 8px; font-size: 15px; font-weight: 700; color: #1f2233; }
+.crmQrGuestPickStepper { display: flex; align-items: center; justify-content: center; gap: 22px; margin-bottom: 6px; }
+.crmQrGuestPickStepper b { min-width: 44px; font-size: 36px; font-weight: 700; color: #1f2233; }
+.crmQrGuestPickStepper button { width: 46px; height: 46px; border-radius: 50%; border: 0; background: #8b0609; color: #fff; font-size: 26px; line-height: 1; cursor: pointer; }
+.crmQrGuestPickStepper button:disabled { background: #d0d5dd; cursor: not-allowed; }
+.crmQrGuestPickHint { margin: 0 0 10px; font-size: 13px; color: #b54708; }
+.crmQrGuestPickOk { width: 100%; margin-top: 6px; }

@@ -15,8 +15,10 @@ import {
   getFormLinksApi,
   updateFormLinkApi,
   deleteFormLinkApi,
+  exportFormLinkApi,
   buildFormLinkUrl,
 } from "../services/formLinkService";
+import { saveBlob } from "../utilits/download";
 import { formatDate } from "../utilits/dateFormat";
 import { copyText } from "../utilits/copyText";
 import { showError, showSuccess } from "../utilits/toast";
@@ -26,8 +28,11 @@ import { getErrorText } from "../utilits/apiError";
 import "../assets/CSS/CompanyCategory.css";
 import "../assets/CSS/FormLinks.css";
 import useClickOutside from "../hooks/useClickOutside";
+import useActionMenuRoom from "../hooks/useActionMenuRoom";
+import { ALL_ROWS_OPTION } from "../utilits/rowsPerPage";
 
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100].map((n) => ({ value: n, label: String(n) }));
+ROWS_PER_PAGE_OPTIONS.push(ALL_ROWS_OPTION);
 
 const STATE_LABEL = { active: "Open", full: "Full", closed: "Closed" };
 
@@ -57,6 +62,7 @@ export default function FormLinks() {
   const [openActionMenuId, setOpenActionMenuId] = useState(null);
   const [formModal, setFormModal] = useState(null); // { link } -> link null = create
   const [deleteLink, setDeleteLink] = useState(null);
+  const [exportingId, setExportingId] = useState(null);
 
   const refresh = useCallback(() => setRefreshKey((k) => k + 1), []);
 
@@ -105,6 +111,10 @@ export default function FormLinks() {
   const actionMenuRef = useRef(null);
   useClickOutside(actionMenuRef, () => setOpenActionMenuId(null));
 
+  // Keeps the open Action menu fully visible under the last row.
+  const tableWrapperRef = useRef(null);
+  useActionMenuRoom(tableWrapperRef, openActionMenuId, ".companyCategoryAction__menuOpen");
+
   const handleSort = useCallback((field) => {
     setSortBy((prevField) => {
       if (prevField === field) {
@@ -122,6 +132,22 @@ export default function FormLinks() {
     const ok = await copyText(buildFormLinkUrl(link.token));
     if (ok) showSuccess("Link copied.");
     else showError("Could not copy. Please try again.");
+  }, []);
+
+  // Downloads an Excel of everyone who filled this link.
+  const handleExport = useCallback(async (link) => {
+    setOpenActionMenuId(null);
+    setExportingId(link._id);
+    try {
+      const response = await exportFormLinkApi(link._id);
+      const safeName = link.name.replace(/[^A-Za-z0-9]+/g, "_").replace(/^_+|_+$/g, "") || "entries";
+      saveBlob(response.data, `FormLink_${safeName}.xlsx`);
+      showSuccess("Excel downloaded.");
+    } catch (err) {
+      showError(getErrorText(err, "Unable to download the Excel."));
+    } finally {
+      setExportingId(null);
+    }
   }, []);
 
   const handleToggleStatus = useCallback(
@@ -272,6 +298,15 @@ export default function FormLinks() {
               <button
                 type="button"
                 className="companyCategoryAction__item"
+                disabled={exportingId === link._id}
+                onClick={() => handleExport(link)}
+              >
+                {exportingId === link._id ? "Downloading..." : "Download Excel"}
+              </button>
+
+              <button
+                type="button"
+                className="companyCategoryAction__item"
                 onClick={() => {
                   setOpenActionMenuId(null);
                   setFormModal({ link });
@@ -303,7 +338,7 @@ export default function FormLinks() {
         ),
       },
     ];
-  }, [renderSortableHeader, openActionMenuId, handleCopy, handleToggleStatus]);
+  }, [renderSortableHeader, openActionMenuId, handleCopy, handleToggleStatus, handleExport, exportingId]);
 
   const startIndex = total === 0 ? 0 : (currentPage - 1) * rowsPerPage;
   const endIndex = Math.min(currentPage * rowsPerPage, total);
@@ -385,7 +420,7 @@ export default function FormLinks() {
           />
         </div>
 
-        <div className="formLinks__tableWrapper">
+        <div className="formLinks__tableWrapper" ref={tableWrapperRef}>
           <CommonTable
             columns={columns}
             data={links}

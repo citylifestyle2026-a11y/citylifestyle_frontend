@@ -19,6 +19,7 @@ import useEventOptions from "../hooks/useEventOptions";
 import { showError, showSuccess } from "../utilits/toast";
 import { getErrorText } from "../utilits/apiError";
 import "../assets/CSS/EventHistory.css";
+import { ALL_ROWS_OPTION } from "../utilits/rowsPerPage";
 
 // Sidebar -> Event History: a standalone page listing EVERY contact's
 // event history (not scoped to one contact via a URL param anymore —
@@ -30,6 +31,7 @@ const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100].map((n) => ({
   value: n,
   label: String(n),
 }));
+ROWS_PER_PAGE_OPTIONS.push(ALL_ROWS_OPTION);
 
 const formatDateTime = (dateStr) => {
   if (!dateStr) return "-";

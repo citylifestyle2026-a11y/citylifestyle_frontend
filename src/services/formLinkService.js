@@ -1,4 +1,5 @@
 import api from "../api/axios";
+import { normalizeBlobError } from "../utilits/apiError";
 
 // "Form Links" module (sidebar) — admin side.
 // target: "contact" (Guest List) | "member" (Contact Book)
@@ -28,3 +29,14 @@ export const deleteFormLinkApi = async (id) => {
 // The address people open to fill the form.
 export const buildFormLinkUrl = (token) =>
   `${window.location.origin}/form?link=${token}`;
+
+// Excel (.xlsx) of everyone who filled this link. Returns the axios response
+// (blob) - use saveBlob() from utilits/download.js to save it.
+export const exportFormLinkApi = async (id) => {
+  try {
+    return await api.get(`/form-links/${id}/export`, { responseType: "blob" });
+  } catch (error) {
+    // With responseType "blob" the server's JSON error arrives as a Blob.
+    throw await normalizeBlobError(error);
+  }
+};

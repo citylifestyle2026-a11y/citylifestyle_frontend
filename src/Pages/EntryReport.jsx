@@ -39,6 +39,7 @@ import useEventExpiryRefetch from "../hooks/useEventExpiryRefetch";
 import { FaSort } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { saveBlob, XLSX_MIME } from "../utilits/download";
+import { ALL_ROWS_OPTION } from "../utilits/rowsPerPage";
 
 // Options for the "rows per page" select. Lives in the page (not inside
 // CommonSelect) since CommonSelect must never hardcode page-specific options.
@@ -46,6 +47,7 @@ const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100].map((n) => ({
   value: n,
   label: String(n),
 }));
+ROWS_PER_PAGE_OPTIONS.push(ALL_ROWS_OPTION);
 
 // Formats a Date object as "DD-MM-YYYY" — used for all frontend date
 // display (date-range filter input, popup footer, export filename). Does

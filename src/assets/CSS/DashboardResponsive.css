@@ -4,7 +4,10 @@
    prefixed with .dashboardPage so it always wins over the older
    auto-fit(300px) grid, whatever the CSS import order is. */
 
-/* 12-column grid: Booking = 4 cols, Entry Report = 8 cols, Attendance = full row */
+/* 12-column grid, every row filled:
+     Row 1: Booking (4)      + Booking - Quantity Wise (8)
+     Row 2: Entry Report (4) + Attendance Confirmation (8)
+     Row 3: Crew (12) */
 .dashboardPage .dashSections {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -12,17 +15,34 @@
   align-items: stretch;
 }
 
-.dashboardPage .dashSection--booking {
+.dashboardPage .dashSection--booking,
+.dashboardPage .dashSection--entry {
   grid-column: span 4;
 }
 
-.dashboardPage .dashSection--entry {
+.dashboardPage .dashSection--quantity,
+.dashboardPage .dashSection--attendance {
   grid-column: span 8;
 }
 
-.dashboardPage .dashSection--attendance,
 .dashboardPage .dashSection--crew {
   grid-column: 1 / -1;
+}
+
+/* Laptop / tablet / phone: one section per row */
+@media (max-width: 1100px) {
+  .dashboardPage .dashSection--booking,
+  .dashboardPage .dashSection--entry,
+  .dashboardPage .dashSection--quantity,
+  .dashboardPage .dashSection--attendance,
+  .dashboardPage .dashSection--crew {
+    grid-column: 1 / -1;
+  }
+}
+
+.dashboardPage .dashSection {
+  display: flex;
+  flex-direction: column;
 }
 
 .dashboardPage .dashSection__head {
@@ -31,6 +51,8 @@
 }
 
 .dashboardPage .dashSection__cards {
+  flex: 1;
+  align-content: stretch;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 14px;
@@ -59,14 +81,6 @@
   }
 
   .dashboardPage .eventInfoCard__item:nth-child(3) {
-    grid-column: 1 / -1;
-  }
-}
-
-/* Each section on its own full-width row */
-@media (max-width: 760px) {
-  .dashboardPage .dashSection--booking,
-  .dashboardPage .dashSection--entry {
     grid-column: 1 / -1;
   }
 }

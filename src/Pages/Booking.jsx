@@ -22,6 +22,7 @@ import CommonPageHeader from "../Components/CommonPageHeader";
 import CommonListLayout from "../Components/CommonListLayout";
 import CommonLoader from "../Components/CommonLoader";
 import CommonEmptyState from "../Components/CommonEmptyState";
+import { ALL_ROWS_OPTION } from "../utilits/rowsPerPage";
 
 // Formats a createdAt value as "DD-MM-YYYY, <local time>" for the "Created
 // By" column. Returns "-" for missing/invalid values so nothing renders as
@@ -44,6 +45,7 @@ const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100].map((n) => ({
   value: n,
   label: String(n),
 }));
+ROWS_PER_PAGE_OPTIONS.push(ALL_ROWS_OPTION);
 
 // Options for the booking "Status" filter select — same static list the
 // page rendered inline before.

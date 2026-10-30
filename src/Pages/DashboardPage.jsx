@@ -150,6 +150,20 @@ export default function DashboardPage() {
     [dashboardData]
   );
 
+  // Quantity-wise bookings: one card per quantity that really exists in the
+  // data (1 Qty, 2 Qty, 3 Qty ...). The list comes from the backend, so a
+  // booking made with a brand-new quantity gets its own card automatically.
+  const quantityCards = useMemo(
+    () =>
+      (dashboardData?.quantityWiseBookings || []).map((item) => ({
+        key: `qty-${item.quantity}`,
+        title: `${item.quantity} Qty`,
+        amountValue: String(item.bookings),
+        infoText: `Bookings made with quantity ${item.quantity} (${item.bookings} booking${item.bookings === 1 ? "" : "s"} x ${item.quantity} = ${item.tickets} ticket${item.tickets === 1 ? "" : "s"}). Deleted, cancelled and crew bookings are not counted.`,
+      })),
+    [dashboardData]
+  );
+
   const entryCards = useMemo(
     () => [
       {
@@ -235,6 +249,15 @@ export default function DashboardPage() {
       cards: bookingCards,
     },
     {
+      key: "quantity",
+      title: "Booking - Quantity Wise",
+      subtitle: "Number of bookings for each quantity",
+      to: "/booking",
+      linkLabel: "View Bookings",
+      cards: quantityCards,
+      emptyText: "No bookings yet",
+    },
+    {
       key: "entry",
       title: "Entry Report",
       subtitle: "Who came in at the gate",
@@ -309,7 +332,7 @@ export default function DashboardPage() {
                   <div className="skeletonBlock skeletonRow" style={{ marginTop: 14 }} />
                 </section>
                 <div className="dashSections">
-                  {["booking", "entry", "attendance", "crew"].map((k) => (
+                  {["booking", "quantity", "entry", "attendance", "crew"].map((k) => (
                     <section className={`dashSection dashSection--${k}`} key={k}>
                       <DashboardCardSkeleton />
                     </section>
@@ -369,6 +392,9 @@ export default function DashboardPage() {
                       </div>
 
                       <div className="dashSection__cards">
+                        {section.cards.length === 0 && section.emptyText && (
+                          <p className="dashSection__empty">{section.emptyText}</p>
+                        )}
                         {section.cards.map((card) => (
                           <DashboardCard
                             key={card.key}

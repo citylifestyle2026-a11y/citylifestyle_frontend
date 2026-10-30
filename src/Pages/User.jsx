@@ -18,6 +18,7 @@ import { clearUserState } from "../redux/user/userSlice";
 import { Link } from "react-router-dom";
 import { getErrorText } from "../utilits/apiError";
 import useClickOutside from "../hooks/useClickOutside";
+import { ALL_ROWS_OPTION } from "../utilits/rowsPerPage";
 const LOGO_AVATAR = "https://ui-avatars.com/api/?name=SA&background=17a2b8&color=fff&bold=true";
 
 // Options for the "rows per page" select. Lives in the page (not inside
@@ -26,6 +27,7 @@ const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100].map((n) => ({
   value: n,
   label: String(n),
 }));
+ROWS_PER_PAGE_OPTIONS.push(ALL_ROWS_OPTION);
 
 export default function User() {
   const dispatch = useDispatch();

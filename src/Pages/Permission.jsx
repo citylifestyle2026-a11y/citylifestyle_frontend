@@ -149,6 +149,7 @@ export default function Permission() {
                 <option value="10">10</option>
                 <option value="25">25</option>
                 <option value="50">50</option>
+                <option value="100000">All</option>
               </select>
 
               <div className="permissionPageSearchBox">

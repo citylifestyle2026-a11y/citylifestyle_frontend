@@ -46,8 +46,10 @@ import "../assets/CSS/InviteCards.css";
 import { saveCsvText } from "../utilits/download";
 import useClickOutside from "../hooks/useClickOutside";
 import { formatDateTime } from "../utilits/dateFormat";
+import { ALL_ROWS_OPTION } from "../utilits/rowsPerPage";
 
 const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, 100].map((n) => ({ value: n, label: String(n) }));
+ROWS_PER_PAGE_OPTIONS.push(ALL_ROWS_OPTION);
 
 const SAMPLE_CSV = "name,mobile\nRahul Shah,9876543210\nPooja Patel,9123456780\n";
 

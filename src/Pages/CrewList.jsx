@@ -42,8 +42,10 @@ import useClickOutside from "../hooks/useClickOutside";
 
 // Same look as Guest List / Contact Book.
 import "../assets/CSS/ContactList.css";
+import { ALL_ROWS_OPTION } from "../utilits/rowsPerPage";
 
 const ROWS_PER_PAGE_OPTIONS = [10, 20, 50, 100].map((n) => ({ value: n, label: String(n) }));
+ROWS_PER_PAGE_OPTIONS.push(ALL_ROWS_OPTION);
 
 const PASS_TABS = [
   { value: "", label: "All", countKey: "all", tone: "all" },

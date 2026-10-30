@@ -29,6 +29,7 @@ import { clearCrewCategoryState } from "../redux/crewCategory/crewCategorySlice"
 import { showError, showSuccess } from "../utilits/toast";
 import "../assets/CSS/CrewCategory.css";
 import useClickOutside from "../hooks/useClickOutside";
+import { ALL_ROWS_OPTION } from "../utilits/rowsPerPage";
 
 // Options for the "rows per page" select. Lives in the page (not inside
 // CommonSelect) since CommonSelect must never hardcode page-specific
@@ -37,6 +38,7 @@ const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100].map((n) => ({
   value: n,
   label: String(n),
 }));
+ROWS_PER_PAGE_OPTIONS.push(ALL_ROWS_OPTION);
 
 // Only these fields are sortable server-side (see SORTABLE_FIELDS in
 // services/crewcategory.service.js). Columns outside this list render

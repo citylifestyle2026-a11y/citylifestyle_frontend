@@ -41,11 +41,13 @@ import { getErrorText } from "../utilits/apiError";
 import "../assets/CSS/ContactList.css";
 import "../assets/CSS/MemberList.css";
 import useClickOutside from "../hooks/useClickOutside";
+import { ALL_ROWS_OPTION } from "../utilits/rowsPerPage";
 
 const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, 100, 200].map((n) => ({
   value: n,
   label: String(n),
 }));
+ROWS_PER_PAGE_OPTIONS.push(ALL_ROWS_OPTION);
 
 // Tabs on top of the table. "" = every member.
 const MOVED_TABS = [

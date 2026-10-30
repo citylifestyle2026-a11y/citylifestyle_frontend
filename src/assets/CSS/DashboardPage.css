@@ -347,12 +347,13 @@
   }
 }
 
-/* ===== Dashboard: Booking + Entry Report sections ===== */
-/* 12-column grid so the three sections always fill the row:
-     Booking (1 card) = 4 cols, Entry Report (2 cards) = 8 cols,
-     Attendance (3 cards) = full width.
-   (The old auto-fit(300px) grid kept 5 empty tracks on wide screens, so
-   Booking / Entry Report stayed ~300px wide with blank space on the right.) */
+/* ===== Dashboard sections layout =====
+   12-column grid. Every row is filled completely (no empty gaps):
+     Row 1: Booking (4)          + Booking - Quantity Wise (8)
+     Row 2: Entry Report (4)     + Attendance Confirmation (8)
+     Row 3: Crew (12)
+   The order in DashboardPage.jsx is Booking, Quantity, Entry, Attendance,
+   Crew, so the pairs above sit side by side. */
 .dashSections {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -360,23 +361,27 @@
   align-items: stretch;
 }
 
-.dashSection--booking {
+.dashSection--booking,
+.dashSection--entry {
   grid-column: span 4;
 }
 
-.dashSection--entry {
+.dashSection--quantity,
+.dashSection--attendance {
   grid-column: span 8;
 }
 
-.dashSection--attendance,
 .dashSection--crew {
   grid-column: 1 / -1;
 }
 
-/* Below ~760px each section gets its own full-width row */
-@media (max-width: 760px) {
+/* Laptop / tablet: one section per row */
+@media (max-width: 1100px) {
   .dashSection--booking,
-  .dashSection--entry {
+  .dashSection--entry,
+  .dashSection--quantity,
+  .dashSection--attendance,
+  .dashSection--crew {
     grid-column: 1 / -1;
   }
 }
@@ -387,6 +392,10 @@
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   padding: 18px 20px 20px;
   min-width: 0;
+  /* section = column: header on top, stat cards fill the rest, so cards in
+     side-by-side sections end at the same height */
+  display: flex;
+  flex-direction: column;
 }
 
 .dashSection__head {
@@ -427,6 +436,8 @@
 }
 
 .dashSection__cards {
+  flex: 1;
+  align-content: stretch;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 14px;
@@ -455,4 +466,11 @@
   .dashSection__cards > .card--compact:last-child:nth-child(odd) {
     grid-column: 1 / -1;
   }
+}
+
+
+.dashSection__empty {
+  margin: 0;
+  color: #9a9ca8;
+  font-size: 13px;
 }
