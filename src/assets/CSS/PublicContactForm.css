@@ -3,7 +3,7 @@
 .cityForm {
   min-height: 100vh;
   color: #ffffff;
-  font-family: "Poppins", "Montserrat", sans-serif;
+  font-family: "Poppins", sans-serif;
   background-color: #000000;
   /* grid artwork from /public (bgImg.png) on a black page */
   background-image: url("/assets/images/site/bgImg.png");
@@ -173,7 +173,7 @@
   padding: 48px 52px 44px;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
   color: #ffffff;
-  font-family: "Montserrat", "Poppins", sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
 .cityForm .contactModalHeader {

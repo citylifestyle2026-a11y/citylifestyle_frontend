@@ -1325,7 +1325,10 @@ const sortedReferenceFilterOptions = useMemo(
       }),
       // Entry Type = what the form asked; Relationship = Contact Book data.
       sortableColumn("entryType", "Entry Type", {
-        render: (contact) => contact.entryType || "-",
+        render: (contact) =>
+          contact.entryType === "Manual"
+            ? `Manual (${contact.persons || 1})`
+            : contact.entryType || "-",
       }),
       sortableColumn("relationship", "Relationship", {
         render: (contact) => contact.relationship || "-",
@@ -1830,6 +1833,14 @@ const sortedReferenceFilterOptions = useMemo(
             <div className="contactPage__bulkButtons">
               <button
                 type="button"
+                className="contactPage__bulkBtn contactPage__bulkBtn--pending"
+                disabled={statusBusy}
+                onClick={() => handleChangeStatus(selectedContacts, "pending")}
+              >
+                <FaClock /> Pending
+              </button>
+              <button
+                type="button"
                 className="contactPage__bulkBtn contactPage__bulkBtn--approve"
                 disabled={statusBusy}
                 onClick={() => handleChangeStatus(selectedContacts, "approved")}
@@ -1862,19 +1873,19 @@ const sortedReferenceFilterOptions = useMemo(
                   <FaTimes /> Cancel Pass ({selectedCancellable.length})
                 </button>
               )}
-              {selectedRemindable.length > 0 && (
+              {selectedApproved.length > 0 && (
                 <button
                   type="button"
-                  className="contactPage__bulkBtn contactPage__bulkBtn--reminder"
-                  disabled={statusBusy || reminderBusy}
+                  className="contactPage__bulkBtn contactPage__bulkBtn--whatsapp"
+                  disabled={statusBusy}
                   title={
-                    selectedRemindable.length < selectedCount
-                      ? "Only approved guests will get the reminder"
-                      : "Ask the selected guests to confirm attendance"
+                    selectedApproved.length < selectedCount
+                      ? "Only approved contacts will receive the pass"
+                      : "Send pass on WhatsApp"
                   }
-                  onClick={() => handleSendReminder(selectedRemindable)}
+                  onClick={() => handleOpenPass(selectedApproved)}
                 >
-                  <FaBell /> {reminderBusy ? "Sending..." : `Send Reminder (${selectedRemindable.length})`}
+                  <FaWhatsapp /> Send Pass ({selectedApproved.length})
                 </button>
               )}
               {selectedHamperAddable.length > 0 && (
@@ -1918,27 +1929,19 @@ const sortedReferenceFilterOptions = useMemo(
                   <FaTimes /> Remove from Hamper ({selectedInHamper.length})
                 </button>
               )}
-              <button
-                type="button"
-                className="contactPage__bulkBtn contactPage__bulkBtn--pending"
-                disabled={statusBusy}
-                onClick={() => handleChangeStatus(selectedContacts, "pending")}
-              >
-                <FaClock /> Pending
-              </button>
-              {selectedApproved.length > 0 && (
+              {selectedRemindable.length > 0 && (
                 <button
                   type="button"
-                  className="contactPage__bulkBtn contactPage__bulkBtn--whatsapp"
-                  disabled={statusBusy}
+                  className="contactPage__bulkBtn contactPage__bulkBtn--reminder"
+                  disabled={statusBusy || reminderBusy}
                   title={
-                    selectedApproved.length < selectedCount
-                      ? "Only approved contacts will receive the pass"
-                      : "Send pass on WhatsApp"
+                    selectedRemindable.length < selectedCount
+                      ? "Only approved guests will get the reminder"
+                      : "Ask the selected guests to confirm attendance"
                   }
-                  onClick={() => handleOpenPass(selectedApproved)}
+                  onClick={() => handleSendReminder(selectedRemindable)}
                 >
-                  <FaWhatsapp /> Send Pass ({selectedApproved.length})
+                  <FaBell /> {reminderBusy ? "Sending..." : `Send Reminder (${selectedRemindable.length})`}
                 </button>
               )}
               <button

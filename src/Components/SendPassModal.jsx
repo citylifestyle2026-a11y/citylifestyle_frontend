@@ -9,11 +9,16 @@ import { sendContactPass } from "../redux/contact/contactThunk";
 import { showError } from "../utilits/toast";
 import "../assets/CSS/SendPassModal.css";
 
-// Default guests per pass: a Couple gets 2, Single gets 1. The admin can
-// change it per contact in the list below (1 - MAX_GUESTS).
-const defaultGuestsFor = (contact) =>
-  (contact.entryType || contact.relationship) === "Couple" ? 2 : 1;
-const MAX_GUESTS = 10;
+// Default guests per pass = the guest's persons: Single 1, Couple 2, Manual =
+// the typed number. The admin can tick "Change guests" on a row to change it
+// (1 - MAX_GUESTS). For a guest from a form link, asking for more than the
+// link holds is refused by the server: edit the form link first.
+const defaultGuestsFor = (contact) => {
+  const saved = Number(contact.persons);
+  if (Number.isInteger(saved) && saved >= 1) return saved;
+  return (contact.entryType || contact.relationship) === "Couple" ? 2 : 1;
+};
+const MAX_GUESTS = 1000;
 
 /**
  * SendPassModal
@@ -27,6 +32,9 @@ export default function SendPassModal({
   // Optional: async (payload) => response. Lets other lists (Crew) reuse
   // this dialog with their own API; Guest List keeps its default.
   sendPass,
+  // Most guests one pass can take (Guest List: only the form link / ticket
+  // stock limits it; Crew passes stay at 10).
+  maxGuests = MAX_GUESTS,
   onClose,
   onDone,
 }) {
@@ -49,12 +57,23 @@ export default function SendPassModal({
     Object.fromEntries(contacts.map((c) => [c._id, defaultGuestsFor(c)]))
   );
 
+  // One "Change guests" box under Ticket: plus / minus show only when ticked.
+  const [changeGuests, setChangeGuests] = useState(false);
+
   const guestsFor = (contact) => quantities[contact._id] ?? defaultGuestsFor(contact);
 
-  const changeGuests = (contact, delta) =>
+  const toggleChangeGuests = (checked) => {
+    setChangeGuests(checked);
+    // Un-ticking puts every guest count back to the default.
+    if (!checked) {
+      setQuantities(Object.fromEntries(contacts.map((c) => [c._id, defaultGuestsFor(c)])));
+    }
+  };
+
+  const changeGuestsBy = (contact, delta) =>
     setQuantities((prev) => {
       const current = prev[contact._id] ?? defaultGuestsFor(contact);
-      const next = Math.min(MAX_GUESTS, Math.max(1, current + delta));
+      const next = Math.min(maxGuests, Math.max(1, current + delta));
       return { ...prev, [contact._id]: next };
     });
 
@@ -201,28 +220,16 @@ export default function SendPassModal({
                 <li key={contact._id} className="sendPass__guestRow">
                   <span className="sendPass__guestName" title={contact.fullName}>
                     {contact.fullName}
-                    <small>{contact.relationship}</small>
+                    <small>
+                      {contact.entryType === "Manual"
+                        ? `Manual (${defaultGuestsFor(contact)})`
+                        : contact.entryType || contact.relationship}
+                    </small>
                   </span>
 
-                  <span className="sendPass__stepper">
-                    <button
-                      type="button"
-                      aria-label={`Fewer guests for ${contact.fullName}`}
-                      onClick={() => changeGuests(contact, -1)}
-                      disabled={sending || guestsFor(contact) <= 1}
-                    >
-                      &minus;
-                    </button>
-                    <b>{guestsFor(contact)}</b>
-                    <button
-                      type="button"
-                      aria-label={`More guests for ${contact.fullName}`}
-                      onClick={() => changeGuests(contact, 1)}
-                      disabled={sending || guestsFor(contact) >= MAX_GUESTS}
-                    >
-                      +
-                    </button>
-                  </span>
+                  <b className="sendPass__guestCount">
+                    {guestsFor(contact)} guest{guestsFor(contact) === 1 ? "" : "s"}
+                  </b>
                 </li>
               ))}
             </ul>
@@ -261,6 +268,48 @@ export default function SendPassModal({
               }))}
             />
 
+            <label className="sendPass__changeCheck sendPass__changeCheck--main">
+              <input
+                type="checkbox"
+                checked={changeGuests}
+                disabled={sending}
+                onChange={(e) => toggleChangeGuests(e.target.checked)}
+              />
+              Change guests
+            </label>
+
+            {changeGuests && (
+              <ul className="sendPass__guestList sendPass__guestList--edit">
+                {contacts.map((contact) => (
+                  <li key={contact._id} className="sendPass__guestRow">
+                    <span className="sendPass__guestName" title={contact.fullName}>
+                      {contact.fullName}
+                    </span>
+
+                    <span className="sendPass__stepper">
+                      <button
+                        type="button"
+                        aria-label={`Fewer guests for ${contact.fullName}`}
+                        onClick={() => changeGuestsBy(contact, -1)}
+                        disabled={sending || guestsFor(contact) <= 1}
+                      >
+                        &minus;
+                      </button>
+                      <b>{guestsFor(contact)}</b>
+                      <button
+                        type="button"
+                        aria-label={`More guests for ${contact.fullName}`}
+                        onClick={() => changeGuestsBy(contact, 1)}
+                        disabled={sending || guestsFor(contact) >= maxGuests}
+                      >
+                        +
+                      </button>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+
             {notEnoughStock && (
               <p className="sendPass__warn">
                 Only {selectedTicket.availableCount} ticket(s) left, but{" "}
@@ -269,9 +318,11 @@ export default function SendPassModal({
             )}
 
             <p className="sendPass__hint">
-              Starts at 1 guest for Single and 2 for Couple - change it above if
-              they are bringing more (max {MAX_GUESTS}). One pass is sent to each
-              contact&apos;s WhatsApp number.
+              Guests start at the guest&apos;s persons (Single 1, Couple 2, Manual = typed
+              number). Tick &quot;Change guests&quot; to use plus / minus; a form link guest&apos;s link progress goes up or down with it. If a
+              guest from a form link needs more than the link holds, first edit that form
+              link and increase its quantity. One pass is sent to each contact&apos;s WhatsApp
+              number.
             </p>
 
             <div className="sendPass__actions">

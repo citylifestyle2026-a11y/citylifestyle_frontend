@@ -193,9 +193,6 @@
   accent-color: var(--admin-accent);
   color-scheme: light;
 }
-.roleTable input[type="checkbox" i] {
-   background-color: #dddee0;
-}
 .roleName {
   font-weight: 600;
   color: #1b2a4e;

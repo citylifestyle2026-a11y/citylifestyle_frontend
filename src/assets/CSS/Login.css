@@ -227,6 +227,16 @@
   color: var(--login-accent) !important;
 }
 
+/* Remember-me checkbox on the dark card: lighter outline + faint fill so
+   the empty box is clearly visible; checked state uses the accent. */
+.emsLogin__optionRow input[type="checkbox"] {
+  --cb-border: rgba(255, 255, 255, 0.45);
+  --cb-bg: rgba(255, 255, 255, 0.04);
+  --cb-hover-border: var(--login-accent);
+  --cb-checked-bg: #2F6F9E;
+  --cb-checked-border: var(--login-accent);
+}
+
 /* Forgot Password link row (login form) and Back-to-Sign-In row
    (forgot-password screens). */
 .emsLogin__optionRow--end {

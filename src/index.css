@@ -24,6 +24,7 @@
   src: url('./assets/Font/Poppins/Poppins-Regular.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
+  font-display: swap;
 }
 
 /* Medium */
@@ -32,6 +33,7 @@
   src: url('./assets/Font/Poppins/Poppins-Medium.ttf') format('truetype');
   font-weight: 500;
   font-style: normal;
+  font-display: swap;
 }
 
 /* SemiBold */
@@ -40,6 +42,7 @@
   src: url('./assets/Font/Poppins/Poppins-SemiBold.ttf') format('truetype');
   font-weight: 600;
   font-style: normal;
+  font-display: swap;
 }
 
 /* Bold */
@@ -48,7 +51,140 @@
   src: url('./assets/Font/Poppins/Poppins-Bold.ttf') format('truetype');
   font-weight: 700;
   font-style: normal;
+  font-display: swap;
 }
+/* Light */
+@font-face {
+  font-family: 'Poppins';
+  src: url('./assets/Font/Poppins/Poppins-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ExtraBold */
+@font-face {
+  font-family: 'Poppins';
+  src: url('./assets/Font/Poppins/Poppins-ExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Italic */
+@font-face {
+  font-family: 'Poppins';
+  src: url('./assets/Font/Poppins/Poppins-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* Poppins everywhere: form controls and third-party widgets (MUI, toasts,
+   date pickers, QR scanner) ship their own font stacks and ignore body's
+   font, so they are pointed back at it here. */
+button,
+input,
+select,
+textarea,
+optgroup {
+  font-family: inherit;
+}
+
+body [class*="Mui"],
+body .Toastify,
+body .swal2-popup,
+body .rdrCalendarWrapper,
+body .rdrDateDisplayWrapper,
+body .rdp {
+  font-family: inherit;
+}
+
+.Toastify {
+  --toastify-font-family: 'Poppins', sans-serif;
+}
+
+.crmQrOverlay {
+  --crmQr-font: 'Poppins', sans-serif;
+}
+
+/* ============================================================
+   Checkboxes — one custom design for every <input type="checkbox">
+   in the app (login, tables, modals, filters, forms).
+   Colors come from CSS variables so a dark card can override them
+   (see Login.css) without redefining the whole control.
+   ============================================================ */
+:root {
+  --cb-size: 18px;
+  --cb-radius: 5px;
+  --cb-border: #9aa5b4;
+  --cb-bg: #ffffff;
+  --cb-hover-border: var(--admin-accent, #4A90C2);
+  --cb-checked-bg: var(--admin-accent, #4A90C2);
+  --cb-checked-border: var(--admin-accent, #4A90C2);
+  --cb-ring: var(--admin-focus-ring, rgba(74, 144, 194, 0.35));
+}
+
+input[type="checkbox"]:not(.PrivateSwitchBase-input) {
+  -webkit-appearance: none;
+  appearance: none;
+  position: relative;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  width: var(--cb-size);
+  height: var(--cb-size);
+  min-width: var(--cb-size);
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  vertical-align: middle;
+  cursor: pointer;
+  border: 1.5px solid var(--cb-border);
+  border-radius: var(--cb-radius);
+  background-color: var(--cb-bg);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 76% 76%;
+  transition: background-color 0.15s ease, border-color 0.15s ease,
+    box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+input[type="checkbox"]:not(.PrivateSwitchBase-input):hover:not(:disabled) {
+  border-color: var(--cb-hover-border);
+}
+
+input[type="checkbox"]:not(.PrivateSwitchBase-input):active:not(:disabled) {
+  transform: scale(0.92);
+}
+
+input[type="checkbox"]:not(.PrivateSwitchBase-input):focus-visible {
+  outline: none;
+  border-color: var(--cb-hover-border);
+  box-shadow: 0 0 0 3px var(--cb-ring);
+}
+
+input[type="checkbox"]:not(.PrivateSwitchBase-input):checked {
+  background-color: var(--cb-checked-bg);
+  border-color: var(--cb-checked-border);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23fff' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 8.5l3 3 6-7'/%3E%3C/svg%3E");
+}
+
+/* "Select all" boxes that are only partly selected */
+input[type="checkbox"]:not(.PrivateSwitchBase-input):indeterminate {
+  background-color: var(--cb-checked-bg);
+  border-color: var(--cb-checked-border);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23fff' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M4 8h8'/%3E%3C/svg%3E");
+}
+
+input[type="checkbox"]:not(.PrivateSwitchBase-input):disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  :root { --cb-size: 20px; }
+}
+
 #root {
   width: 100%;
   max-width: 100%;

@@ -342,3 +342,46 @@
   color: #1b2a4e;
   font-size: 14px;
 }
+
+/* Guests per pass: "Change guests" checkbox under each name; plus / minus
+   appear only when it is ticked. */
+.sendPass__guestRow--stack {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+.sendPass__guestTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.sendPass__guestCount {
+  white-space: nowrap;
+  font-size: 13px;
+}
+.sendPass__changeCheck {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
+}
+.sendPass__guestRow--stack .sendPass__stepper {
+  align-self: flex-start;
+}
+
+.sendPass__changeCheck--main {
+  margin-top: 12px;
+}
+.sendPass__guestList--edit {
+  margin-top: 8px;
+}
+
+.sendPass__changeCheck--main {
+  margin-top: 12px;
+}
+.sendPass__guestList--edit {
+  margin-top: 8px;
+}

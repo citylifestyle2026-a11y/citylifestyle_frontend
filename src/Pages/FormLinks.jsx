@@ -227,7 +227,7 @@ export default function FormLinks() {
         cellClassName: "companyCategoryPage__categoryName",
         render: (link) => link.name,
       }),
-      col("quantity", "Quantity", { render: (link) => link.quantity }),
+      col("quantity", "Persons", { render: (link) => link.quantity }),
       col("usedCount", "Filled", {
         render: (link) => {
           const percent = Math.min(100, Math.round((link.usedCount / link.quantity) * 100));

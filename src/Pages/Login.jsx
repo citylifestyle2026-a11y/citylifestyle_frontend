@@ -49,9 +49,28 @@ const Login = () => {
     api.get("/health", { silent: true }).catch(() => {});
   }, []);
 
+  // "Remember me": the saved id + password are filled in on the next visit.
+  const REMEMBER_KEY = "cl_remember_login";
+  const readRemembered = () => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(REMEMBER_KEY) || "null");
+      if (saved && typeof saved.login === "string") {
+        return {
+          login: saved.login,
+          password: saved.password ? atob(saved.password) : "",
+        };
+      }
+    } catch {
+      /* ignore broken saved value */
+    }
+    return null;
+  };
+  const remembered = readRemembered();
+  const [rememberMe, setRememberMe] = useState(Boolean(remembered));
+
   const [formData, setFormData] = useState({
-    login: "",
-    password: "",
+    login: remembered?.login || "",
+    password: remembered?.password || "",
   });
 
   // Field-level validation errors (client-side + backend field-specific).
@@ -299,6 +318,18 @@ const Login = () => {
     );
 
     if (login.fulfilled.match(result)) {
+      try {
+        if (rememberMe) {
+          localStorage.setItem(
+            REMEMBER_KEY,
+            JSON.stringify({ login: formData.login, password: btoa(formData.password) })
+          );
+        } else {
+          localStorage.removeItem(REMEMBER_KEY);
+        }
+      } catch {
+        /* storage blocked: login still works */
+      }
       navigate("/dashboard");
       return;
     }
@@ -499,7 +530,20 @@ const Login = () => {
                 </div>
 
                 {/* Forgot Password */}
-                <div className="emsLogin__optionRow emsLogin__optionRow--end">
+                <div
+                  className="emsLogin__optionRow"
+                  style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                >
+                  <label
+                    style={{ display: "inline-flex", alignItems: "center", gap: 10, cursor: "pointer", fontSize: 14, fontWeight: 500, userSelect: "none", color: "var(--login-text-muted)" }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                    />
+                    Remember me
+                  </label>
                   <button
                     type="button"
                     className="emsLogin__forgotLink"

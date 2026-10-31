@@ -1,5 +1,4 @@
 /* City Lifestyle home page (converted from Tailwind CDN markup). Scoped to .cl-home. */
-@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap");
 
 .cl-home {
   --brand-blue: #3e5872;
@@ -7,7 +6,7 @@
   min-height: 100vh;
   background: #000;
   color: #fff;
-  font-family: "Montserrat", sans-serif;
+  font-family: "Poppins", sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 .cl-home *, .cl-home *::before, .cl-home *::after { box-sizing: border-box; }

@@ -12,14 +12,15 @@ import "../assets/CSS/FormLinks.css";
  * Create / Edit a form link (Form Links page).
  *
  * Name     = the Reference every person who fills the form gets.
- * Quantity = how many people may fill the form with this link.
+ * Quantity = how many PERSONS the link accepts (Single = 1, Couple = 2).
  * Edit     = a new Name is used for people who fill the form AFTER the edit.
  */
 export default function FormLinkModal({ onClose, onSaved, link = null }) {
   const isEdit = Boolean(link);
 
   const [name, setName] = useState(link?.name || "");
-  const [quantity, setQuantity] = useState(link ? String(link.quantity) : "");
+  // The admin types COUPLES; the link itself stores PERSONS (couples x 2).
+  const [quantity, setQuantity] = useState(link ? String(link.quantity / 2) : "");
   const [status, setStatus] = useState(link?.status || "active");
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
@@ -34,16 +35,17 @@ export default function FormLinkModal({ onClose, onSaved, link = null }) {
   const validate = () => {
     const next = {};
     const cleanName = name.replace(/\s+/g, " ").trim();
-    const qty = Number(quantity);
+    const couples = Number(quantity);
+    const qty = couples * 2; // persons
 
     if (!cleanName) next.name = "Name is required.";
     else if (cleanName.length > 60) next.name = "Name is too long (max 60 characters).";
 
-    if (!quantity) next.quantity = "Quantity is required.";
-    else if (!Number.isInteger(qty) || qty < 1) next.quantity = "Enter a whole number of at least 1.";
-    else if (qty > 1000) next.quantity = "Quantity cannot be more than 1000.";
+    if (!quantity) next.quantity = "Couples is required.";
+    else if (!Number.isInteger(qty) || qty < 1) next.quantity = "Enter a number of couples (at least 1).";
+    else if (qty > 1000) next.quantity = "Cannot be more than 500 couples (1000 persons).";
     else if (isEdit && qty < link.usedCount) {
-      next.quantity = `${link.usedCount} people have already filled it, so quantity cannot be less than ${link.usedCount}.`;
+      next.quantity = `${link.usedCount} persons are already filled, so quantity cannot be less than ${link.usedCount}.`;
     }
 
     setErrors(next);
@@ -56,7 +58,7 @@ export default function FormLinkModal({ onClose, onSaved, link = null }) {
 
     const payload = {
       name: name.replace(/\s+/g, " ").trim(),
-      quantity: Number(quantity),
+      quantity: Number(quantity) * 2, // persons
     };
 
     setSaving(true);
@@ -124,28 +126,37 @@ export default function FormLinkModal({ onClose, onSaved, link = null }) {
 
           <div className="fieldGroup fieldGroupFull">
             <label className="fieldLabel" htmlFor="flQty">
-              Quantity <span className="required">*</span>
+              Quantity (couples) <span className="required">*</span>
             </label>
             <input
               id="flQty"
               type="number"
-              min="1"
-              max="1000"
-              inputMode="numeric"
+              min="0.5"
+              max="500"
+              step="0.5"
+              inputMode="decimal"
               className="fieldInput"
               placeholder="e.g. 15"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
             />
             {errors.quantity && <p className="fieldError">{errors.quantity}</p>}
-            <p className="formLinks__note">How many people can fill the form with this link.</p>
+            <p className="formLinks__note">
+              <b>
+                {Number(quantity) > 0
+                  ? `${Number(quantity)} couple${Number(quantity) === 1 ? "" : "s"} = ${Number(quantity) * 2} persons`
+                  : "1 couple = 2 persons"}
+              </b>
+              . A Single entry uses 1 person, a Couple uses 2. To let a guest bring more later,
+              increase this quantity first.
+            </p>
           </div>
 
           <div className="fieldGroup fieldGroupFull">
             <p className="formLinks__note">
               Everyone who fills this form is added to the Guest List and the Contact Book (if the
-              number is not already in the Contact Book). A number already in the Guest List is
-              refused as "already exists".
+              number is not already in the Contact Book). A number already in the Guest List goes to
+              the Duplicate tab.
             </p>
           </div>
 

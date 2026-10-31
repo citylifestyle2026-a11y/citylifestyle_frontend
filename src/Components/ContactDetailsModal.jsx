@@ -162,7 +162,7 @@ export default function ContactDetailsModal({ contact, onClose }) {
             <span className="contactDetailsLabel">Entry Type</span>
             <span className="contactDetailsColon">:</span>
             <span className="contactDetailsValue">
-              {contact.entryType || "-"}
+              {contact.entryType === "Manual" ? `Manual (${contact.persons || 1})` : contact.entryType || "-"}
             </span>
           </div>
 

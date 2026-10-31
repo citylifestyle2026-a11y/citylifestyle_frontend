@@ -42,6 +42,7 @@ const EMPTY_FORM = {
   companyCategory: "",
   relationship: "",
   entryType: "Single", // first option is selected by default
+  persons: "", // only used when Entry Type is Manual (1 - 1000)
   spouseName: "",
   spouseMobile: "",
   spouseInstagramId: "",
@@ -98,6 +99,9 @@ export default function CreateContactModal({
   // count of that pass can be changed here too.
   const [passInfo, setPassInfo] = useState(null); // { quantity, editable, maxGuests }
   const [passGuests, setPassGuests] = useState("");
+  // Error from the server on the public / form-link page. Kept on the form
+  // (the toast alone disappears after a few seconds).
+  const [submitError, setSubmitError] = useState("");
   const [passResend, setPassResend] = useState(false);
   const [publicCategories, setPublicCategories] = useState([]);
   const [publicSaving, setPublicSaving] = useState(false);
@@ -205,6 +209,7 @@ export default function CreateContactModal({
         relationship: editContactData.relationship || "",
         // Old contacts only have relationship - it is their entry type.
         entryType: editContactData.entryType || editContactData.relationship || "Single",
+        persons: editContactData.entryType === "Manual" ? String(editContactData.persons || "") : "",
         spouseName: editContactData.spouseName || "",
         spouseMobile: editContactData.spouseMobile || "",
         spouseInstagramId: getInstagramUrl(editContactData.spouseInstagramId),
@@ -474,6 +479,14 @@ export default function CreateContactModal({
       errors.entryType = "Entry Type is required.";
     }
 
+    // Manual = the admin types how many persons this entry is.
+    if (formData.entryType === "Manual") {
+      const n = Number(formData.persons);
+      if (!Number.isInteger(n) || n < 1 || n > 1000) {
+        errors.persons = "Enter persons as a whole number from 1 to 1000.";
+      }
+    }
+
     if (SHOW_SPOUSE_FIELDS && req && !formData.relationship) {
       errors.relationship = "Relationship is required.";
     }
@@ -521,6 +534,7 @@ export default function CreateContactModal({
       spouseInstagramId: errors.spouseInstagramId,
       relationship: errors.relationship,
       entryType: errors.entryType,
+      persons: errors.persons,
       spouseName: errors.spouseName,
       spouseMobile: errors.spouseMobile,
       professionCategory: errors.professionCategory,
@@ -547,6 +561,7 @@ export default function CreateContactModal({
     const payload = new FormData();
     const fields = {
       entryType: formData.entryType,
+      persons: formData.entryType === "Manual" ? String(Number(formData.persons)) : "",
       fullName: formData.fullName.trim(),
       whatsappNumber: toLocalMobileNumber(formData.whatsappNumber),
       companyName: formData.companyName.trim(),
@@ -620,14 +635,16 @@ export default function CreateContactModal({
 
     if (publicMode) {
       setPublicSaving(true);
+      setSubmitError("");
       try {
         await submitPublicContactApi(payload, formLink?.token);
         setSubmitted(true);
         if (onLinkSubmitted) onLinkSubmitted();
       } catch (err) {
-        showError(
-          err?.response?.data?.message || "Something went wrong. Please try again."
-        );
+        const message =
+          err?.response?.data?.message || "Something went wrong. Please try again.";
+        setSubmitError(message);
+        showError(message);
       } finally {
         setPublicSaving(false);
       }
@@ -1005,16 +1022,47 @@ export default function CreateContactModal({
               value={formData.entryType}
               onChange={(e) => {
                 handleChange(e);
+                setSubmitError("");
                 setFormErrors((prev) => ({ ...prev, entryType: undefined }));
               }}
             >
               <option value="Single">Single</option>
               <option value="Couple">Couple</option>
+              <option value="Manual">Manual</option>
             </select>
             {formErrors.entryType && (
               <p className="contactFieldError">{formErrors.entryType}</p>
             )}
           </div>
+
+          {formData.entryType === "Manual" && (
+            <div className="contactFieldGroup contactFieldGroupFull">
+              <label className="contactFieldLabel">
+                Persons <span className="contactRequired">*</span>
+              </label>
+              <input
+                type="number"
+                className="contactFieldInput"
+                name="persons"
+                min={1}
+                max={10}
+                step={1}
+                placeholder="e.g. 3"
+                value={formData.persons}
+                onChange={(e) => {
+                  handleChange(e);
+                  setSubmitError("");
+                  setFormErrors((prev) => ({ ...prev, persons: undefined }));
+                }}
+              />
+              {formErrors.persons && (
+                <p className="contactFieldError">{formErrors.persons}</p>
+              )}
+              <p className="contactPassNote">
+                How many persons are coming in total (1 - 1000).
+              </p>
+            </div>
+          )}
 
           {/* OFF for now (SHOW_SPOUSE_FIELDS) - Relationship + spouse details.
               Set SHOW_SPOUSE_FIELDS = true at the top of this file to use it. */}
@@ -1257,6 +1305,12 @@ export default function CreateContactModal({
             </>
           )}
         </div>
+
+        {publicMode && submitError && (
+          <p className="contactFieldError" role="alert" style={{ margin: "0 0 12px" }}>
+            {submitError}
+          </p>
+        )}
 
         <div className="contactModalFooter">
           {!publicMode && (

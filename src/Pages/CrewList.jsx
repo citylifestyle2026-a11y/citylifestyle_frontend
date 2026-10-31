@@ -570,6 +570,7 @@ export default function CrewList() {
             <SendPassModal
               contacts={passCrew}
               sendPass={sendCrewPassApi}
+              maxGuests={10}
               onClose={() => setPassCrew(null)}
               onDone={() => {
                 clearSelection();

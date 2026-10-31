@@ -115,7 +115,7 @@ export default function PublicContactForm() {
     return (
       <>
         <p className="cityFormLinkNote cityFormLinkNote--places">
-          <span>{linkInfo.remaining} of {linkInfo.quantity} places left</span>
+          <span>{linkInfo.remaining} of {linkInfo.quantity} places left (Single = 1, Couple = 2)</span>
         </p>
         <CreateContactModal
           publicMode
