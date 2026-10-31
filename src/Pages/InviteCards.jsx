@@ -556,20 +556,6 @@ export default function InviteCards() {
             <div className={`contactAction__menu ${openActionMenuId === g._id ? "contactAction__menuOpen" : ""}`}>
               <button
                 type="button"
-                className="contactAction__item contactAction__itemApprove"
-                disabled={busy || g.status === "sending" || counts.sending > 0}
-                onClick={() =>
-                  doSend(
-                    { ids: [g._id], includeSent: true },
-                    `${g.status === "sent" ? "Re-send" : "Send"} to ${g.name}?`
-                  )
-                }
-              >
-                {g.status === "sent" ? "Resend" : g.status === "failed" ? "Retry" : "Send"}
-              </button>
-
-              <button
-                type="button"
                 className="contactAction__item contactAction__itemEdit"
                 disabled={g.status === "sending"}
                 onClick={() => openEdit(g)}
@@ -584,6 +570,20 @@ export default function InviteCards() {
                 onClick={() => handleDelete([g._id])}
               >
                 Delete
+              </button>
+
+              <button
+                type="button"
+                className="contactAction__item contactAction__itemApprove"
+                disabled={busy || g.status === "sending" || counts.sending > 0}
+                onClick={() =>
+                  doSend(
+                    { ids: [g._id], includeSent: true },
+                    `${g.status === "sent" ? "Re-send" : "Send"} to ${g.name}?`
+                  )
+                }
+              >
+                {g.status === "sent" ? "Resend" : g.status === "failed" ? "Retry" : "Send"}
               </button>
             </div>
           </div>

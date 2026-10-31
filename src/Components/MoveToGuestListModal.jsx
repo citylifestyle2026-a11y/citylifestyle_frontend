@@ -6,6 +6,7 @@ import CommonSelect from "./CommonSelect";
 import useEditionOptions from "../hooks/useEditionOptions";
 import { moveMembersToGuestListApi } from "../services/memberService";
 import { showError } from "../utilits/toast";
+import { confirmDialog } from "../utilits/appSwal";
 import { getErrorText } from "../utilits/apiError";
 import "../assets/CSS/MoveToGuestListModal.css";
 
@@ -27,6 +28,21 @@ export default function MoveToGuestListModal({ payload, count, label, onClose, o
 
   const handleMove = async () => {
     if (!eventId || moving) return;
+
+    // Bulk move: ask once before anything is changed.
+    if (count > 1) {
+      const editionName = editions.find((e) => e.value === eventId)?.label || "the selected edition";
+      const ok = await confirmDialog({
+        title: `Move ${count} contacts to Guest List?`,
+        text: `${count} contacts will be added to ${editionName} as Pending guests.`,
+        points: [
+          { icon: "👥", text: "Anyone already in that edition's Guest List is skipped." },
+        ],
+        confirmText: `Yes, Move ${count}`,
+        tone: "info",
+      });
+      if (!ok) return;
+    }
 
     setMoving(true);
     try {

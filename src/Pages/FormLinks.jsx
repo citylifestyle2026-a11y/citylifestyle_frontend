@@ -280,6 +280,36 @@ export default function FormLinks() {
               <button
                 type="button"
                 className="companyCategoryAction__item"
+                onClick={() => {
+                  setOpenActionMenuId(null);
+                  setFormModal({ link });
+                }}
+              >
+                Edit
+              </button>
+
+              <button
+                type="button"
+                className="companyCategoryAction__item"
+                onClick={() => {
+                  setOpenActionMenuId(null);
+                  setDeleteLink(link);
+                }}
+              >
+                Delete
+              </button>
+
+              <button
+                type="button"
+                className="companyCategoryAction__item"
+                onClick={() => handleToggleStatus(link)}
+              >
+                {link.status === "closed" ? "Re-open" : "Close"}
+              </button>
+
+              <button
+                type="button"
+                className="companyCategoryAction__item"
                 onClick={() => handleCopy(link)}
               >
                 Copy Link
@@ -302,36 +332,6 @@ export default function FormLinks() {
                 onClick={() => handleExport(link)}
               >
                 {exportingId === link._id ? "Downloading..." : "Download Excel"}
-              </button>
-
-              <button
-                type="button"
-                className="companyCategoryAction__item"
-                onClick={() => {
-                  setOpenActionMenuId(null);
-                  setFormModal({ link });
-                }}
-              >
-                Edit
-              </button>
-
-              <button
-                type="button"
-                className="companyCategoryAction__item"
-                onClick={() => handleToggleStatus(link)}
-              >
-                {link.status === "closed" ? "Re-open" : "Close"}
-              </button>
-
-              <button
-                type="button"
-                className="companyCategoryAction__item"
-                onClick={() => {
-                  setOpenActionMenuId(null);
-                  setDeleteLink(link);
-                }}
-              >
-                Delete
               </button>
             </div>
           </div>

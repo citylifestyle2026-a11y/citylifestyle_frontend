@@ -760,6 +760,33 @@ const Booking = () => {
                                     View Booking
                                   </button>
 
+                                  <button
+                                    type="button"
+                                    className="bookingPage-actionMenuItem"
+                                    onClick={() => {
+                                      closeActionMenu();
+                                      setEditTarget(row);
+                                    }}
+                                  >
+                                    Edit Booking
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    className="bookingPage-actionMenuItem"
+                                    onClick={() => {
+                                      closeActionMenu();
+                                      setDeleteTarget({
+                                        id: row._id,
+                                        name: row.name,
+                                        mobileNumber: row.mobileNumber,
+                                        bookingNumber: row.bookingNumber,
+                                      });
+                                    }}
+                                  >
+                                    Delete Booking
+                                  </button>
+
                                   {/* Single-QR bookings have no guest registration, so
                                       "Register Users" is only for old per-ticket bookings. */}
                                   {row.entryMode !== "single_qr" && (
@@ -780,37 +807,10 @@ const Booking = () => {
                                     className="bookingPage-actionMenuItem"
                                     onClick={() => {
                                       closeActionMenu();
-                                      setEditTarget(row);
-                                    }}
-                                  >
-                                    Edit Booking
-                                  </button>
-
-                                  <button
-                                    type="button"
-                                    className="bookingPage-actionMenuItem"
-                                    onClick={() => {
-                                      closeActionMenu();
                                       setResendTarget(row._id);
                                     }}
                                   >
                                     Resend Ticket
-                                  </button>
-
-                                  <button
-                                    type="button"
-                                    className="bookingPage-actionMenuItem"
-                                    onClick={() => {
-                                      closeActionMenu();
-                                      setDeleteTarget({
-                                        id: row._id,
-                                        name: row.name,
-                                        mobileNumber: row.mobileNumber,
-                                        bookingNumber: row.bookingNumber,
-                                      });
-                                    }}
-                                  >
-                                    Delete Booking
                                   </button>
                                 </div>
                               )}

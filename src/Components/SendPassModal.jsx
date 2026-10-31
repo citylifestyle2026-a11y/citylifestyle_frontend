@@ -7,6 +7,7 @@ import { getAllEventsApi } from "../services/eventService";
 import { getAllTicketTypesApi } from "../services/ticketTypeService";
 import { sendContactPass } from "../redux/contact/contactThunk";
 import { showError } from "../utilits/toast";
+import { confirmDialog } from "../utilits/appSwal";
 import "../assets/CSS/SendPassModal.css";
 
 // Default guests per pass = the guest's persons: Single 1, Couple 2, Manual =
@@ -157,6 +158,21 @@ export default function SendPassModal({
 
   const handleSend = async () => {
     if (!eventId || !ticketTypeId || sending) return;
+
+    // Bulk send: a WhatsApp message cannot be taken back, so ask first.
+    if (contacts.length > 1) {
+      const ok = await confirmDialog({
+        title: `Send pass to ${contacts.length} guests?`,
+        text: "The pass is sent on WhatsApp to each selected guest.",
+        points: [
+          { icon: "📲", text: `${contacts.length} WhatsApp messages will be sent.` },
+          { icon: "🎟️", text: `${totalGuests} guest${totalGuests === 1 ? "" : "s"} in total will be booked.` },
+        ],
+        confirmText: `Yes, Send to ${contacts.length}`,
+        tone: "info",
+      });
+      if (!ok) return;
+    }
 
     setSending(true);
     try {

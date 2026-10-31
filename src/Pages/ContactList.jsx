@@ -110,6 +110,34 @@ const HAMPER_TABS = [
   { value: "sent", label: "Sent", countKey: "hamperSent", tone: "approved" },
 ];
 
+// Wording of the permission popup for each Hamper action.
+const HAMPER_CONFIRM = {
+  add: {
+    title: "Add to Hamper",
+    text: (one) => `${one ? "This guest" : "These guests"} will appear in the Hamper tab.`,
+    confirmText: "Yes, Add to Hamper",
+    tone: "info",
+  },
+  sent: {
+    title: "Mark Hamper Sent",
+    text: (one) => `The hamper will be marked as sent to ${one ? "this guest" : "these guests"}.`,
+    confirmText: "Yes, Mark Sent",
+    tone: "info",
+  },
+  notSent: {
+    title: "Mark Hamper Not Sent",
+    text: (one) => `The hamper will be marked as NOT sent to ${one ? "this guest" : "these guests"}.`,
+    confirmText: "Yes, Mark Not Sent",
+    tone: "warning",
+  },
+  remove: {
+    title: "Remove from Hamper",
+    text: (one) => `${one ? "This guest" : "These guests"} will be removed from the Hamper tab.`,
+    confirmText: "Yes, Remove",
+    tone: "danger",
+  },
+};
+
 const STATUS_LABELS = {
   pending: "Pending",
   approved: "Approved",
@@ -482,6 +510,12 @@ export default function ContactList() {
     [selectedContacts]
   );
 
+  // Guests who already have a pass (any status): their booking can be deleted.
+  const selectedWithPass = useMemo(
+    () => selectedContacts.filter((contact) => contact.passSentAt),
+    [selectedContacts]
+  );
+
   const selectedApproved = useMemo(
     () =>
       selectedContacts.filter(
@@ -605,10 +639,43 @@ export default function ContactList() {
 
       setOpenActionMenuId(null);
 
-      // Themed (SweetAlert) confirmation before cancelling a pass that was
-      // already sent, and before the automatic "next Parv" WhatsApp message
-      // goes out on Reject.
-      if (status !== "approved") {
+      // Permission popup (SweetAlert) for EVERY status change - from the row
+      // Action menu and from the bulk bar alike. It lists what will happen
+      // (pass cancelled / restored, WhatsApp message sent) when that applies.
+      const one = targets.length === 1;
+      const who = one ? targets[0].fullName : `${targets.length} contacts`;
+      let dialog;
+
+      if (status === "approved") {
+        // Approving a guest whose pass was cancelled brings the SAME pass back
+        // and sends it again on WhatsApp.
+        const restorable = targets.filter(
+          (contact) =>
+            contact.passCancelledBookingId && getApprovalStatus(contact) !== "approved"
+        );
+
+        if (restorable.length) {
+          const oneRestore = restorable.length === 1;
+          dialog = {
+            title: `Approve Pass: ${oneRestore ? restorable[0].fullName : `${restorable.length} guests`}?`,
+            text: "The pass that was cancelled is brought back.",
+            points: [
+              { icon: "🎟️", text: "The same pass (same QR code) works again at the gate." },
+              { icon: "📲", text: `The pass is sent again on WhatsApp to ${oneRestore ? "the guest" : "each guest"}.` },
+            ],
+            confirmText: "Yes, Approve Pass",
+            tone: "info",
+          };
+        } else {
+          dialog = {
+            title: `Approve: ${who}?`,
+            text: `${one ? "This contact" : "These contacts"} will be marked as Approved.`,
+            points: [],
+            confirmText: "Yes, Approve",
+            tone: "info",
+          };
+        }
+      } else {
         const withPass = targets.filter((contact) => contact.passSentAt);
         const newlyRejected =
           status === "rejected"
@@ -630,44 +697,18 @@ export default function ContactList() {
           });
         }
 
-        if (points.length) {
-          const one = targets.length === 1;
-          const confirmed = await confirmDialog({
-            title: `${status === "rejected" ? "Reject" : "Move to Pending"}: ${one ? targets[0].fullName : `${targets.length} contacts`}?`,
-            text: "Please check before you continue.",
-            points,
-            confirmText: status === "rejected" ? "Yes, Reject" : "Yes, Move to Pending",
-            tone: status === "rejected" ? "danger" : "warning",
-          });
-
-          if (!confirmed) return;
-        }
+        dialog = {
+          title: `${status === "rejected" ? "Reject" : "Move to Pending"}: ${who}?`,
+          text: points.length
+            ? "Please check before you continue."
+            : `${one ? "This contact" : "These contacts"} will be marked as ${STATUS_LABELS[status]}.`,
+          points,
+          confirmText: status === "rejected" ? "Yes, Reject" : "Yes, Move to Pending",
+          tone: status === "rejected" ? "danger" : "warning",
+        };
       }
 
-      // Approving a guest whose pass was cancelled brings the SAME pass back
-      // and sends it again on WhatsApp.
-      if (status === "approved") {
-        const restorable = targets.filter(
-          (contact) =>
-            contact.passCancelledBookingId && getApprovalStatus(contact) !== "approved"
-        );
-
-        if (restorable.length) {
-          const one = restorable.length === 1;
-          const confirmed = await confirmDialog({
-            title: `Approve Pass: ${one ? restorable[0].fullName : `${restorable.length} guests`}?`,
-            text: "The pass that was cancelled is brought back.",
-            points: [
-              { icon: "🎟️", text: "The same pass (same QR code) works again at the gate." },
-              { icon: "📲", text: `The pass is sent again on WhatsApp to ${one ? "the guest" : "each guest"}.` },
-            ],
-            confirmText: "Yes, Approve Pass",
-            tone: "info",
-          });
-
-          if (!confirmed) return;
-        }
-      }
+      if (!(await confirmDialog(dialog))) return;
 
       setStatusBusy(true);
 
@@ -718,10 +759,27 @@ export default function ContactList() {
   }, []);
 
   // Hamper: add to the Hamper tab / remove / mark sent / mark not sent.
+  // Asks permission first, from the row menu and the bulk bar alike.
   const handleHamper = useCallback(
     async (targets, action) => {
       if (!targets.length || statusBusy) return;
       setOpenActionMenuId(null);
+
+      const one = targets.length === 1;
+      const who = one ? targets[0].fullName : `${targets.length} guests`;
+      const copy = HAMPER_CONFIRM[action];
+
+      if (copy) {
+        const confirmed = await confirmDialog({
+          title: `${copy.title}: ${who}?`,
+          text: copy.text(one),
+          confirmText: copy.confirmText,
+          tone: copy.tone,
+        });
+
+        if (!confirmed) return;
+      }
+
       setStatusBusy(true);
 
       try {
@@ -902,21 +960,46 @@ export default function ContactList() {
     [statusBusy]
   );
 
-  // Re-sends the same pass (same QR link) to a contact who already has one.
+  // Re-sends the same pass (same QR link) to guest(s) who already have one -
+  // one contact from the row menu, or many from the bulk bar.
   const handleResendPass = useCallback(
-    async (contact) => {
-      if (resendBusyId) return;
+    async (targets) => {
+      if (!targets.length || resendBusyId) return;
 
       setOpenActionMenuId(null);
-      setResendBusyId(contact._id);
+
+      const one = targets.length === 1;
+      const confirmed = await confirmDialog({
+        title: `Resend pass to ${one ? targets[0].fullName : `${targets.length} guests`}?`,
+        text: "The same pass is sent again on WhatsApp.",
+        points: [
+          { icon: "📲", text: `A WhatsApp message with the pass is sent to ${one ? "the guest" : "each guest"} again.` },
+          { icon: "🎟️", text: "It is the SAME pass and QR code - nothing new is created." },
+        ],
+        confirmText: "Yes, Resend Pass",
+        tone: "info",
+      });
+
+      if (!confirmed) return;
+
+      setResendBusyId(one ? targets[0]._id : "bulk");
 
       try {
-        const res = await resendContactPassApi({ ids: [contact._id] });
+        const res = await resendContactPassApi({ ids: targets.map((contact) => contact._id) });
         showSuccess(res.message || "Pass sent again.");
+
+        setSelected((prev) => {
+          const next = { ...prev };
+          targets.forEach((contact) => delete next[contact._id]);
+          return next;
+        });
       } catch (err) {
-        showError(
-          err?.response?.data?.message || err?.message || "Failed to resend pass"
-        );
+        const body = err?.response?.data;
+        await noticeDialog({
+          icon: "error",
+          title: "Pass not sent",
+          text: body?.message || err?.message || "Failed to resend pass",
+        });
       } finally {
         setResendBusyId(null);
       }
@@ -1449,6 +1532,9 @@ const sortedReferenceFilterOptions = useMemo(
                   : ""
               }`}
             >
+              {/* Menu order (same for every guest, items only appear when they apply):
+                  View, Edit, Delete, Mark Pending, Approve, Reject, Resend Pass,
+                  Cancel Pass, Delete Booking, Hamper, Merge & Sync, Send Reminder (last). */}
               <button
                 type="button"
                 className="contactAction__item contactAction__itemView"
@@ -1457,24 +1543,30 @@ const sortedReferenceFilterOptions = useMemo(
                 View
               </button>
 
-              {getApprovalStatus(contact) === "approved" && contact.passSentAt && (
-                <button
-                  type="button"
-                  className="contactAction__item contactAction__itemApprove"
-                  disabled={resendBusyId === contact._id}
-                  onClick={() => handleResendPass(contact)}
-                >
-                  {resendBusyId === contact._id ? "Sending..." : "Resend Pass"}
-                </button>
-              )}
+              <button
+                type="button"
+                className="contactAction__item contactAction__itemEdit"
+                onClick={() => handleEditClick(contact)}
+              >
+                Edit
+              </button>
 
-              {contact.passSentAt && (
+
+              <button
+                type="button"
+                className="contactAction__item contactAction__itemDelete"
+                onClick={() => handleDeleteClick(contact)}
+              >
+                Delete
+              </button>
+
+              {getApprovalStatus(contact) !== "pending" && (
                 <button
                   type="button"
-                  className="contactAction__item contactAction__itemReject"
-                  onClick={() => handleDeleteBooking([contact])}
+                  className="contactAction__item contactAction__itemPending"
+                  onClick={() => handleChangeStatus([contact], "pending")}
                 >
-                  Delete Booking
+                  Mark Pending
                 </button>
               )}
 
@@ -1485,6 +1577,50 @@ const sortedReferenceFilterOptions = useMemo(
                   onClick={() => handleChangeStatus([contact], "approved")}
                 >
                   {contact.passCancelledBookingId ? "Approve Pass" : "Approve"}
+                </button>
+              )}
+
+              {/* Reject: Pending or Approved guests WITHOUT a pass. Once a pass
+                  is sent, only "Cancel Pass" is offered (it cancels the pass
+                  and moves the guest to Rejected). */}
+              {getApprovalStatus(contact) !== "rejected" && !contact.passSentAt && (
+                <button
+                  type="button"
+                  className="contactAction__item contactAction__itemReject"
+                  onClick={() => handleChangeStatus([contact], "rejected")}
+                >
+                  Reject
+                </button>
+              )}
+
+              {getApprovalStatus(contact) === "approved" && contact.passSentAt && (
+                <button
+                  type="button"
+                  className="contactAction__item contactAction__itemApprove"
+                  disabled={!!resendBusyId}
+                  onClick={() => handleResendPass([contact])}
+                >
+                  {resendBusyId === contact._id ? "Sending..." : "Resend Pass"}
+                </button>
+              )}
+
+              {getApprovalStatus(contact) === "approved" && contact.passSentAt && (
+                <button
+                  type="button"
+                  className="contactAction__item contactAction__itemReject"
+                  onClick={() => handleCancelPass([contact])}
+                >
+                  Cancel Pass
+                </button>
+              )}
+
+              {contact.passSentAt && (
+                <button
+                  type="button"
+                  className="contactAction__item contactAction__itemReject"
+                  onClick={() => handleDeleteBooking([contact])}
+                >
+                  Delete Booking
                 </button>
               )}
 
@@ -1517,50 +1653,6 @@ const sortedReferenceFilterOptions = useMemo(
                 </>
               )}
 
-              {getApprovalStatus(contact) === "approved" && (
-                <button
-                  type="button"
-                  className="contactAction__item contactAction__itemApprove"
-                  disabled={reminderBusy}
-                  onClick={() => handleSendReminder([contact])}
-                >
-                  {contact.rsvpReminderSentAt ? "Resend Reminder" : "Send Reminder"}
-                </button>
-              )}
-
-              {/* Reject: Pending or Approved guests WITHOUT a pass. Once a pass
-                  is sent, only "Cancel Pass" is offered (it cancels the pass
-                  and moves the guest to Rejected). */}
-              {getApprovalStatus(contact) !== "rejected" && !contact.passSentAt && (
-                <button
-                  type="button"
-                  className="contactAction__item contactAction__itemReject"
-                  onClick={() => handleChangeStatus([contact], "rejected")}
-                >
-                  Reject
-                </button>
-              )}
-
-              {getApprovalStatus(contact) === "approved" && contact.passSentAt && (
-                <button
-                  type="button"
-                  className="contactAction__item contactAction__itemReject"
-                  onClick={() => handleCancelPass([contact])}
-                >
-                  Cancel Pass
-                </button>
-              )}
-
-              {getApprovalStatus(contact) !== "pending" && (
-                <button
-                  type="button"
-                  className="contactAction__item contactAction__itemPending"
-                  onClick={() => handleChangeStatus([contact], "pending")}
-                >
-                  Mark Pending
-                </button>
-              )}
-
               {contact.memberMatch && (
                 <button
                   type="button"
@@ -1571,21 +1663,16 @@ const sortedReferenceFilterOptions = useMemo(
                 </button>
               )}
 
-              <button
-                type="button"
-                className="contactAction__item contactAction__itemEdit"
-                onClick={() => handleEditClick(contact)}
-              >
-                Edit
-              </button>
-
-              <button
-                type="button"
-                className="contactAction__item contactAction__itemDelete"
-                onClick={() => handleDeleteClick(contact)}
-              >
-                Delete
-              </button>
+              {getApprovalStatus(contact) === "approved" && (
+                <button
+                  type="button"
+                  className="contactAction__item contactAction__itemApprove"
+                  disabled={reminderBusy}
+                  onClick={() => handleSendReminder([contact])}
+                >
+                  {contact.rsvpReminderSentAt ? "Resend Reminder" : "Send Reminder"}
+                </button>
+              )}
             </div>
           </div>
         ),
@@ -1871,6 +1958,28 @@ const sortedReferenceFilterOptions = useMemo(
                   onClick={() => handleCancelPass(selectedCancellable)}
                 >
                   <FaTimes /> Cancel Pass ({selectedCancellable.length})
+                </button>
+              )}
+              {selectedCancellable.length > 0 && (
+                <button
+                  type="button"
+                  className="contactPage__bulkBtn contactPage__bulkBtn--approve"
+                  disabled={statusBusy || !!resendBusyId}
+                  title="Send the same pass again on WhatsApp"
+                  onClick={() => handleResendPass(selectedCancellable)}
+                >
+                  <FaWhatsapp /> {resendBusyId === "bulk" ? "Sending..." : `Resend Pass (${selectedCancellable.length})`}
+                </button>
+              )}
+              {selectedWithPass.length > 0 && (
+                <button
+                  type="button"
+                  className="contactPage__bulkBtn contactPage__bulkBtn--reject"
+                  disabled={statusBusy}
+                  title="Delete the booking (pass) of the selected guests"
+                  onClick={() => handleDeleteBooking(selectedWithPass)}
+                >
+                  <FaTimes /> Delete Booking ({selectedWithPass.length})
                 </button>
               )}
               {selectedApproved.length > 0 && (

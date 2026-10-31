@@ -652,18 +652,18 @@ export default function MemberList() {
 
               <button
                 type="button"
-                className="contactAction__item contactAction__itemApprove"
-                onClick={() => openMove([member])}
-              >
-                Move to Guest List
-              </button>
-
-              <button
-                type="button"
                 className="contactAction__item contactAction__itemDelete"
                 onClick={() => handleDelete(member)}
               >
                 Delete
+              </button>
+
+              <button
+                type="button"
+                className="contactAction__item contactAction__itemApprove"
+                onClick={() => openMove([member])}
+              >
+                Move to Guest List
               </button>
             </div>
           </div>

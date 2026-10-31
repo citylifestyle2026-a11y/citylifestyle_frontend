@@ -239,7 +239,7 @@
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: 160px; /* room for the Action dropdown, same as the other list pages */
+  padding-bottom: 24px; /* extra room for the open Action menu is added by useActionMenuRoom */
   box-sizing: border-box;
 }
 
@@ -832,6 +832,11 @@
 
 .eventHistoryAction__itemAttend {
   color: #2e9e4f;
+  font-weight: 600;
+}
+
+.eventHistoryAction__itemNotAttend {
+  color: #c92a2a;
   font-weight: 600;
 }
 

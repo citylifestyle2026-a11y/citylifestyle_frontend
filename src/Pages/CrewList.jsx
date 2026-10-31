@@ -220,6 +220,17 @@ export default function CrewList() {
     async (targets) => {
       setOpenActionMenuId(null);
       if (!targets.length || busy) return;
+
+      const one = targets.length === 1;
+      const confirmed = await confirmDialog({
+        title: `Resend pass: ${one ? targets[0].fullName : `${targets.length} crew members`}?`,
+        text: `The pass is sent again on WhatsApp to ${one ? "this crew member" : "each crew member"}.`,
+        points: one ? [] : [{ icon: "📲", text: `${targets.length} WhatsApp messages will be sent.` }],
+        confirmText: "Yes, Resend",
+        tone: "info",
+      });
+      if (!confirmed) return;
+
       setBusy(true);
       try {
         const res = await resendCrewPassApi(targets.map((c) => c._id));
@@ -262,8 +273,27 @@ export default function CrewList() {
         if (!confirmed) return;
       }
 
+      if (status === "pending") {
+        const confirmed = await confirmDialog({
+          title: `Move to Pending: ${label}?`,
+          text: `${one ? "This crew member" : "These crew members"} will be marked as Pending.`,
+          confirmText: "Yes, Move to Pending",
+          tone: "warning",
+        });
+        if (!confirmed) return;
+      }
+
       if (status === "approved") {
         const restorable = targets.filter((c) => c.passCancelledBookingId);
+        if (!restorable.length) {
+          const confirmed = await confirmDialog({
+            title: `Approve: ${label}?`,
+            text: `${one ? "This crew member" : "These crew members"} will be marked as Approved.`,
+            confirmText: "Yes, Approve",
+            tone: "info",
+          });
+          if (!confirmed) return;
+        }
         if (restorable.length) {
           const confirmed = await confirmDialog({
             title: `Approve Pass: ${restorable.length === 1 ? restorable[0].fullName : `${restorable.length} crew members`}?`,
@@ -481,6 +511,28 @@ export default function CrewList() {
             </button>
 
             <div className={`contactAction__menu ${openActionMenuId === m._id ? "contactAction__menuOpen" : ""}`}>
+              <button
+                type="button"
+                className="contactAction__item"
+                onClick={() => {
+                  setOpenActionMenuId(null);
+                  setFormCrew(m);
+                }}
+              >
+                Edit
+              </button>
+              <button type="button" className="contactAction__item contactAction__itemReject" onClick={() => handleDelete([m])}>
+                Delete
+              </button>
+              {getApprovalStatus(m) !== "pending" && (
+                <button
+                  type="button"
+                  className="contactAction__item contactAction__itemPending"
+                  onClick={() => handleChangeStatus([m], "pending")}
+                >
+                  Mark Pending
+                </button>
+              )}
               {getApprovalStatus(m) !== "approved" && (
                 <button
                   type="button"
@@ -490,9 +542,9 @@ export default function CrewList() {
                   {m.passCancelledBookingId ? "Approve Pass" : "Approve"}
                 </button>
               )}
-              {getApprovalStatus(m) === "approved" && m.passSentAt && (
-                <button type="button" className="contactAction__item contactAction__itemApprove" onClick={() => handleResend([m])}>
-                  Resend Pass
+              {getApprovalStatus(m) !== "rejected" && !m.passSentAt && (
+                <button type="button" className="contactAction__item contactAction__itemReject" onClick={() => handleChangeStatus([m], "rejected")}>
+                  Reject
                 </button>
               )}
               {getApprovalStatus(m) === "approved" && !m.passSentAt && (
@@ -508,28 +560,15 @@ export default function CrewList() {
                 </button>
               )}
               {getApprovalStatus(m) === "approved" && m.passSentAt && (
+                <button type="button" className="contactAction__item contactAction__itemApprove" onClick={() => handleResend([m])}>
+                  Resend Pass
+                </button>
+              )}
+              {getApprovalStatus(m) === "approved" && m.passSentAt && (
                 <button type="button" className="contactAction__item contactAction__itemReject" onClick={() => handleCancelPass([m])}>
                   Cancel Pass
                 </button>
               )}
-              {getApprovalStatus(m) !== "rejected" && !m.passSentAt && (
-                <button type="button" className="contactAction__item contactAction__itemReject" onClick={() => handleChangeStatus([m], "rejected")}>
-                  Reject
-                </button>
-              )}
-              <button
-                type="button"
-                className="contactAction__item"
-                onClick={() => {
-                  setOpenActionMenuId(null);
-                  setFormCrew(m);
-                }}
-              >
-                Edit
-              </button>
-              <button type="button" className="contactAction__item contactAction__itemReject" onClick={() => handleDelete([m])}>
-                Delete
-              </button>
             </div>
           </div>
         ),

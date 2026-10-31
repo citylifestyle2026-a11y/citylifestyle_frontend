@@ -30,6 +30,7 @@ import { getErrorText } from "../utilits/apiError";
 import "../assets/CSS/EventHistory.css";
 import { formatDateTime } from "../utilits/dateFormat";
 import useClickOutside from "../hooks/useClickOutside";
+import useActionMenuRoom from "../hooks/useActionMenuRoom";
 import { ALL_ROWS_OPTION } from "../utilits/rowsPerPage";
 
 // Sidebar -> Event History: a standalone page listing EVERY contact's
@@ -179,6 +180,8 @@ export default function EventHistory() {
   }, [loadStats, history]);
 
   const actionMenuRef = useRef(null);
+  const tableWrapperRef = useRef(null);
+  useActionMenuRoom(tableWrapperRef, openActionMenuId, ".eventHistoryAction__menuOpen");
   useClickOutside(actionMenuRef, () => setOpenActionMenuId(null));
 
   const handleToggleActionMenu = useCallback((entryId) => {
@@ -255,18 +258,18 @@ export default function EventHistory() {
     const edition = editionLabel(entry.eventId);
 
     const ok = await confirmDialog({
-      title: attended ? "Mark as Attended?" : "Change back to Not Attended?",
+      title: attended ? "Mark as Attended?" : "Mark as Not Attended?",
       text: attended
-        ? `${person} will be shown as Attended for ${edition}, even though the pass was not scanned.`
-        : `${person} will be shown as Not Attended for ${edition} again.`,
-      confirmText: attended ? "Yes, mark Attended" : "Yes, change",
+        ? `${person} will be shown as Attended for ${edition}.`
+        : `${person} will be shown as Not Attended for ${edition}.`,
+      confirmText: attended ? "Yes, mark Attended" : "Yes, mark Not Attended",
       tone: "info",
     });
     if (!ok) return;
 
     try {
       await markEventHistoryAttendanceApi(entry._id, attended);
-      showSuccess(attended ? "Marked as Attended" : "Changed back to Not Attended");
+      showSuccess(attended ? "Marked as Attended" : "Marked as Not Attended");
       dispatch(getAllEventHistory(currentQuery));
       loadStats();
     } catch (err) {
@@ -513,37 +516,6 @@ export default function EventHistory() {
                 openActionMenuId === entry._id ? "eventHistoryAction__menuOpen" : ""
               }`}
             >
-              {/* Manual attendance: one item per edition that is not green yet
-                  (and an undo for the ones marked by hand). */}
-              {(() => {
-                const entries = entry.entries || [];
-                const many = entries.length > 1;
-                return entries.map((e) => {
-                  if (e.status === "Attended" && e.markedManually) {
-                    return (
-                      <button
-                        key={`undo-${e._id}`}
-                        type="button"
-                        className="eventHistoryAction__item"
-                        onClick={() => handleMarkAttendance(entry, e, false)}
-                      >
-                        {many ? `Undo Attended (${editionLabel(e.eventId)})` : "Undo Attended"}
-                      </button>
-                    );
-                  }
-                  if (e.status === "Attended") return null;
-                  return (
-                    <button
-                      key={`mark-${e._id}`}
-                      type="button"
-                      className="eventHistoryAction__item eventHistoryAction__itemAttend"
-                      onClick={() => handleMarkAttendance(entry, e, true)}
-                    >
-                      {many ? `Mark Attended (${editionLabel(e.eventId)})` : "Mark as Attended"}
-                    </button>
-                  );
-                });
-              })()}
               {/* Edit only for rows added from the "Add Details" modal; rows
                   that came from Entry Report can only be deleted. */}
               {!isContactDeleted(entry) &&
@@ -563,6 +535,37 @@ export default function EventHistory() {
               >
                 Delete
               </button>
+              {/* Attendance: one item per edition. Not Attended -> "Mark as
+                  Attended"; Attended -> "Mark as Not Attended". */}
+              {(() => {
+                const entries = entry.entries || [];
+                const many = entries.length > 1;
+                return entries.map((e) => {
+                  const suffix = many ? ` (${editionLabel(e.eventId)})` : "";
+                  if (e.status === "Attended") {
+                    return (
+                      <button
+                        key={`notattend-${e._id}`}
+                        type="button"
+                        className="eventHistoryAction__item eventHistoryAction__itemNotAttend"
+                        onClick={() => handleMarkAttendance(entry, e, false)}
+                      >
+                        {`Mark as Not Attended${suffix}`}
+                      </button>
+                    );
+                  }
+                  return (
+                    <button
+                      key={`attend-${e._id}`}
+                      type="button"
+                      className="eventHistoryAction__item eventHistoryAction__itemAttend"
+                      onClick={() => handleMarkAttendance(entry, e, true)}
+                    >
+                      {`Mark as Attended${suffix}`}
+                    </button>
+                  );
+                });
+              })()}
             </div>
           </div>
         ),
@@ -774,7 +777,7 @@ export default function EventHistory() {
           </div>
         )}
 
-        <div className="eventHistoryPage__tableWrapper">
+        <div className="eventHistoryPage__tableWrapper" ref={tableWrapperRef}>
           <CommonTable
             columns={historyTableColumns}
             data={history}

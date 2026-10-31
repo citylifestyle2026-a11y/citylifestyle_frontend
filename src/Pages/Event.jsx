@@ -388,21 +388,6 @@ const Event = () => {
                                     View
                                   </button>
                                 </Link>
-                                <Link
-                                  to={`/ticket-type/${event._id}`}
-                                  state={{
-                                    eventName: event.title,
-                                    eventId: event._id,
-                                  }}
-                                >
-                                  <button
-                                    type="button"
-                                    className="eventList__actionItem"
-                                    onClick={closeActionMenu}
-                                  >
-                                    Ticket Type
-                                  </button>
-                                </Link>
                                 <button
                                   type="button"
                                   className="eventList__actionItem"
@@ -427,6 +412,21 @@ const Event = () => {
                                 >
                                   Delete
                                 </button>
+                                <Link
+                                  to={`/ticket-type/${event._id}`}
+                                  state={{
+                                    eventName: event.title,
+                                    eventId: event._id,
+                                  }}
+                                >
+                                  <button
+                                    type="button"
+                                    className="eventList__actionItem"
+                                    onClick={closeActionMenu}
+                                  >
+                                    Ticket Type
+                                  </button>
+                                </Link>
                               </div>,
                               document.body
                             )}
