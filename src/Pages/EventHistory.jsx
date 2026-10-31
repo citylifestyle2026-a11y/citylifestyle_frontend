@@ -70,14 +70,11 @@ const personOf = (row) => {
 const isContactDeleted = (row) => !row?.contactId;
 const DELETED_LABEL = "Deleted guest";
 
-// Status filter. Values must match the backend's STATUS_VALUES.
-const STATUS_OPTIONS = [
-  "Attended",
-  "Not Attended",
-  "Invited",
-  "Confirmed",
-  "Cancelled",
-].map((v) => ({ value: v, label: v }));
+// Status filter: only the two results that matter on this page.
+const STATUS_OPTIONS = ["Attended", "Not Attended"].map((v) => ({
+  value: v,
+  label: v,
+}));
 
 // Event badges shown per row before "+N more".
 const MAX_VISIBLE_EVENTS = 3;
