@@ -70,6 +70,15 @@ const personOf = (row) => {
 const isContactDeleted = (row) => !row?.contactId;
 const DELETED_LABEL = "Deleted guest";
 
+// Status filter. Values must match the backend's STATUS_VALUES.
+const STATUS_OPTIONS = [
+  "Attended",
+  "Not Attended",
+  "Invited",
+  "Confirmed",
+  "Cancelled",
+].map((v) => ({ value: v, label: v }));
+
 // Event badges shown per row before "+N more".
 const MAX_VISIBLE_EVENTS = 3;
 
@@ -86,6 +95,7 @@ export default function EventHistory() {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [eventFilter, setEventFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
 
   const loadEditions = useCallback(async () => {
     try {
@@ -146,9 +156,10 @@ export default function EventHistory() {
   const currentQuery = useMemo(() => {
     const q = { page: currentPage, limit: rowsPerPage };
     if (eventFilter) q.eventId = eventFilter;
+    if (statusFilter) q.status = statusFilter;
     if (search) q.search = search;
     return q;
-  }, [currentPage, rowsPerPage, eventFilter, search]);
+  }, [currentPage, rowsPerPage, eventFilter, statusFilter, search]);
 
   useEffect(() => {
     dispatch(getAllEventHistory(currentQuery));
@@ -205,6 +216,13 @@ export default function EventHistory() {
     setModalMode("create");
   };
 
+  // Clicking a summary card filters the table to that status; clicking it
+  // again clears the filter.
+  const toggleStatusFilter = (status) => {
+    setStatusFilter((prev) => (prev === status ? "" : status));
+    setCurrentPage(1);
+  };
+
   // Excel download of everything the page is filtered to (edition + search),
   // across ALL pages — not just the rows currently visible.
   const [exportLoading, setExportLoading] = useState(false);
@@ -214,6 +232,7 @@ export default function EventHistory() {
     try {
       const params = {};
       if (eventFilter) params.eventId = eventFilter;
+      if (statusFilter) params.status = statusFilter;
       if (search) params.search = search;
 
       const response = await exportEventHistoryApi(params);
@@ -665,11 +684,46 @@ export default function EventHistory() {
             placeholder="All Editions"
             options={editionOptions.map((ed) => ({ value: ed.value, label: ed.label }))}
           />
+
+          <CommonSelect
+            className="eventHistoryPage__filterSelect eventHistoryPage__statusSelect"
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            placeholder="All Status"
+            options={STATUS_OPTIONS}
+          />
+
+          {(eventFilter || statusFilter || searchTerm) && (
+            <button
+              type="button"
+              className="eventHistoryPage__clearFilters"
+              onClick={() => {
+                setEventFilter("");
+                setStatusFilter("");
+                setSearchTerm("");
+                setSearch("");
+                setCurrentPage(1);
+              }}
+            >
+              Clear filters
+            </button>
+          )}
         </div>
 
         {/* Attended vs Not Attended for the current edition / search. */}
         <div className="eventHistoryPage__stats" aria-label="Attendance summary">
-          <div className="eventHistoryPage__statCard">
+          <button
+            type="button"
+            className={`eventHistoryPage__statCard ${statusFilter === "" ? "eventHistoryPage__statCard--active" : ""}`}
+            onClick={() => {
+              setStatusFilter("");
+              setCurrentPage(1);
+            }}
+            title="Show all"
+          >
             <span className="eventHistoryPage__statIcon eventHistoryPage__statIcon--total">
               <FaUsers />
             </span>
@@ -677,8 +731,13 @@ export default function EventHistory() {
               <div className="eventHistoryPage__statValue">{stats.total}</div>
               <div className="eventHistoryPage__statLabel">Total</div>
             </div>
-          </div>
-          <div className="eventHistoryPage__statCard eventHistoryPage__statCard--attended">
+          </button>
+          <button
+            type="button"
+            className={`eventHistoryPage__statCard eventHistoryPage__statCard--attended ${statusFilter === "Attended" ? "eventHistoryPage__statCard--active" : ""}`}
+            onClick={() => toggleStatusFilter("Attended")}
+            title="Show only Attended"
+          >
             <span className="eventHistoryPage__statIcon eventHistoryPage__statIcon--attended">
               <FaCheckCircle />
             </span>
@@ -686,8 +745,13 @@ export default function EventHistory() {
               <div className="eventHistoryPage__statValue">{stats.attended}</div>
               <div className="eventHistoryPage__statLabel">Attended</div>
             </div>
-          </div>
-          <div className="eventHistoryPage__statCard eventHistoryPage__statCard--notAttended">
+          </button>
+          <button
+            type="button"
+            className={`eventHistoryPage__statCard eventHistoryPage__statCard--notAttended ${statusFilter === "Not Attended" ? "eventHistoryPage__statCard--active" : ""}`}
+            onClick={() => toggleStatusFilter("Not Attended")}
+            title="Show only Not Attended"
+          >
             <span className="eventHistoryPage__statIcon eventHistoryPage__statIcon--notAttended">
               <FaTimesCircle />
             </span>
@@ -695,7 +759,7 @@ export default function EventHistory() {
               <div className="eventHistoryPage__statValue">{stats.notAttended}</div>
               <div className="eventHistoryPage__statLabel">Not Attended</div>
             </div>
-          </div>
+          </button>
         </div>
 
         {/* Colour legend only makes sense when there are rows to colour. */}
@@ -727,7 +791,7 @@ export default function EventHistory() {
                 wrapperClassName="eventHistoryPage__stateWrap"
                 textClassName="eventHistoryPage__stateText"
                 message={
-                  search ? `No event history found for "${search}".` : "No event history found."
+                  search ? `No event history found for "${search}".` : statusFilter || eventFilter ? "No event history found for the selected filters." : "No event history found."
                 }
               />
             }
