@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { FaPlus, FaChevronDown, FaSearch } from "react-icons/fa";
+import { FaPlus, FaChevronDown, FaSearch, FaCheckCircle, FaTimesCircle, FaUsers } from "react-icons/fa";
 
 import CommonListLayout from "../Components/CommonListLayout";
 import CommonPageHeader from "../Components/CommonPageHeader";
@@ -10,12 +10,20 @@ import CommonSelect from "../Components/CommonSelect";
 import CommonTable from "../Components/CommonTable";
 import CommonEmptyState from "../Components/CommonEmptyState";
 import CommonPagination from "../Components/CommonPagination";
+import CommonExportButton from "../Components/CommonExportButton";
 import CreateEventHistoryModal from "../Components/CreateEventHistoryModal";
 import DeleteUserModal from "../Components/DeleteUserModal";
 
 import { getAllEventHistory, deleteEventHistory } from "../redux/contactEventHistory/contactEventHistoryThunk";
 import { clearContactEventHistoryState } from "../redux/contactEventHistory/contactEventHistorySlice";
-import { getHistoryEditionsApi } from "../services/contactEventHistoryService";
+import {
+  getHistoryEditionsApi,
+  getEventHistoryStatsApi,
+  markEventHistoryAttendanceApi,
+  exportEventHistoryApi,
+} from "../services/contactEventHistoryService";
+import { confirmDialog } from "../utilits/appSwal";
+import { saveBlob, XLSX_MIME } from "../utilits/download";
 
 import { showError, showSuccess } from "../utilits/toast";
 import { getErrorText } from "../utilits/apiError";
@@ -93,6 +101,10 @@ export default function EventHistory() {
     loadEditions();
   }, [loadEditions, history]);
 
+  // Attended / Not Attended counts for whatever is filtered on screen
+  // (edition + search). Reloaded whenever the list reloads.
+  const [stats, setStats] = useState({ total: 0, attended: 0, notAttended: 0, other: 0 });
+
   // searchTerm tracks the raw input value; search is the debounced value
   // actually sent to the API — same pattern as ContactList.jsx.
   const [searchTerm, setSearchTerm] = useState("");
@@ -142,6 +154,22 @@ export default function EventHistory() {
     dispatch(getAllEventHistory(currentQuery));
   }, [dispatch, currentQuery]);
 
+  const loadStats = useCallback(async () => {
+    try {
+      const params = {};
+      if (eventFilter) params.eventId = eventFilter;
+      if (search) params.search = search;
+      const res = await getEventHistoryStatsApi(params);
+      setStats(res?.data || { total: 0, attended: 0, notAttended: 0, other: 0 });
+    } catch {
+      // counts are a convenience only - the table still works without them
+    }
+  }, [eventFilter, search]);
+
+  useEffect(() => {
+    loadStats();
+  }, [loadStats, history]);
+
   const actionMenuRef = useRef(null);
   useClickOutside(actionMenuRef, () => setOpenActionMenuId(null));
 
@@ -175,6 +203,59 @@ export default function EventHistory() {
     setIsModalOpen(false);
     setEditingEntry(null);
     setModalMode("create");
+  };
+
+  // Excel download of everything the page is filtered to (edition + search),
+  // across ALL pages — not just the rows currently visible.
+  const [exportLoading, setExportLoading] = useState(false);
+  const handleExport = async () => {
+    if (exportLoading) return;
+    setExportLoading(true);
+    try {
+      const params = {};
+      if (eventFilter) params.eventId = eventFilter;
+      if (search) params.search = search;
+
+      const response = await exportEventHistoryApi(params);
+      saveBlob(
+        new Blob([response.data], { type: XLSX_MIME }),
+        `EventHistory_${Date.now()}.xlsx`
+      );
+      showSuccess("Event history exported successfully");
+    } catch (err) {
+      showError(getErrorText(err, "Failed to export event history"));
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  // Guest came but the pass was never scanned: tick them Attended (green)
+  // by hand. A manually marked entry can be put back to Not Attended.
+  const handleMarkAttendance = async (row, entry, attended) => {
+    setOpenActionMenuId(null);
+
+    const person =
+      (row.isSpouse ? personOf(row).spouseName : personOf(row).fullName) || "this guest";
+    const edition = editionLabel(entry.eventId);
+
+    const ok = await confirmDialog({
+      title: attended ? "Mark as Attended?" : "Change back to Not Attended?",
+      text: attended
+        ? `${person} will be shown as Attended for ${edition}, even though the pass was not scanned.`
+        : `${person} will be shown as Not Attended for ${edition} again.`,
+      confirmText: attended ? "Yes, mark Attended" : "Yes, change",
+      tone: "info",
+    });
+    if (!ok) return;
+
+    try {
+      await markEventHistoryAttendanceApi(entry._id, attended);
+      showSuccess(attended ? "Marked as Attended" : "Changed back to Not Attended");
+      dispatch(getAllEventHistory(currentQuery));
+      loadStats();
+    } catch (err) {
+      showError(getErrorText(err, "Failed to update attendance"));
+    }
   };
 
   const handleDeleteClick = (row) => {
@@ -277,7 +358,7 @@ export default function EventHistory() {
               {shown.map((entry) => (
                 <span
                   key={entry._id}
-                  title={entry.status || ""}
+                  title={entry.markedManually ? `${entry.status} (marked manually)` : entry.status || ""}
                   className={`eventHistoryPage__eventBadge eventHistoryPage__status--${(
                     entry.status || ""
                   ).replace(/\s+/g, "")}`}
@@ -416,6 +497,37 @@ export default function EventHistory() {
                 openActionMenuId === entry._id ? "eventHistoryAction__menuOpen" : ""
               }`}
             >
+              {/* Manual attendance: one item per edition that is not green yet
+                  (and an undo for the ones marked by hand). */}
+              {(() => {
+                const entries = entry.entries || [];
+                const many = entries.length > 1;
+                return entries.map((e) => {
+                  if (e.status === "Attended" && e.markedManually) {
+                    return (
+                      <button
+                        key={`undo-${e._id}`}
+                        type="button"
+                        className="eventHistoryAction__item"
+                        onClick={() => handleMarkAttendance(entry, e, false)}
+                      >
+                        {many ? `Undo Attended (${editionLabel(e.eventId)})` : "Undo Attended"}
+                      </button>
+                    );
+                  }
+                  if (e.status === "Attended") return null;
+                  return (
+                    <button
+                      key={`mark-${e._id}`}
+                      type="button"
+                      className="eventHistoryAction__item eventHistoryAction__itemAttend"
+                      onClick={() => handleMarkAttendance(entry, e, true)}
+                    >
+                      {many ? `Mark Attended (${editionLabel(e.eventId)})` : "Mark as Attended"}
+                    </button>
+                  );
+                });
+              })()}
               {/* Edit only for rows added from the "Add Details" modal; rows
                   that came from Entry Report can only be deleted. */}
               {!isContactDeleted(entry) &&
@@ -501,6 +613,15 @@ export default function EventHistory() {
         }
         actions={
           <div className="eventHistoryPage__headerActions">
+            <CommonExportButton
+              onClick={handleExport}
+              loading={exportLoading}
+              disabled={exportLoading || total === 0}
+              label="Export Excel"
+              className="eventHistoryPage__exportButton"
+              iconClassName="eventHistoryPage__exportIcon"
+              iconLoadingClassName="eventHistoryPage__exportIcon eventHistoryPage__exportIcon--spinning"
+            />
             <button type="button" className="eventHistoryPage__createButton" onClick={handleAddClick}>
               <FaPlus />
               Add Details
@@ -544,6 +665,37 @@ export default function EventHistory() {
             placeholder="All Editions"
             options={editionOptions.map((ed) => ({ value: ed.value, label: ed.label }))}
           />
+        </div>
+
+        {/* Attended vs Not Attended for the current edition / search. */}
+        <div className="eventHistoryPage__stats" aria-label="Attendance summary">
+          <div className="eventHistoryPage__statCard">
+            <span className="eventHistoryPage__statIcon eventHistoryPage__statIcon--total">
+              <FaUsers />
+            </span>
+            <div>
+              <div className="eventHistoryPage__statValue">{stats.total}</div>
+              <div className="eventHistoryPage__statLabel">Total</div>
+            </div>
+          </div>
+          <div className="eventHistoryPage__statCard eventHistoryPage__statCard--attended">
+            <span className="eventHistoryPage__statIcon eventHistoryPage__statIcon--attended">
+              <FaCheckCircle />
+            </span>
+            <div>
+              <div className="eventHistoryPage__statValue">{stats.attended}</div>
+              <div className="eventHistoryPage__statLabel">Attended</div>
+            </div>
+          </div>
+          <div className="eventHistoryPage__statCard eventHistoryPage__statCard--notAttended">
+            <span className="eventHistoryPage__statIcon eventHistoryPage__statIcon--notAttended">
+              <FaTimesCircle />
+            </span>
+            <div>
+              <div className="eventHistoryPage__statValue">{stats.notAttended}</div>
+              <div className="eventHistoryPage__statLabel">Not Attended</div>
+            </div>
+          </div>
         </div>
 
         {/* Colour legend only makes sense when there are rows to colour. */}

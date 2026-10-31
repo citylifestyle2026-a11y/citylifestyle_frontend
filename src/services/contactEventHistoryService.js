@@ -1,4 +1,5 @@
 import api from "../api/axios";
+import { normalizeBlobError } from "../utilits/apiError";
 
 // ================= GET ALL EVENT HISTORY (ALL CONTACTS) =================
 // params supports: contactId, editionId, status, page, limit — powers
@@ -61,4 +62,39 @@ export const getEventHistorySyncSummaryApi = async (eventId) => {
 export const syncEventHistoryFromEventApi = async (data) => {
   const response = await api.post("/contact-event-history/sync-from-event", data);
   return response.data;
+};
+
+// ================= ATTENDANCE COUNTS =================
+// params: eventId, search — same filters as the list, so the numbers always
+// match what is on screen.
+export const getEventHistoryStatsApi = async (params) => {
+  const response = await api.get("/contact-event-history/stats", { params });
+  return response.data;
+};
+
+// ================= MARK ATTENDANCE BY HAND =================
+// attended: true  -> Attended (green)
+// attended: false -> back to Not Attended (only for manually marked entries)
+export const markEventHistoryAttendanceApi = async (id, attended) => {
+  const response = await api.patch(`/contact-event-history/${id}/attendance`, {
+    attended,
+  });
+  return response.data;
+};
+
+// ================= EXPORT TO EXCEL =================
+// params: eventId, search — same filters as the list; every matching entry is
+// exported, not just the current page. Must stay in sync with the backend's
+// GET /contact-event-history/export route.
+export const exportEventHistoryApi = async (params) => {
+  try {
+    return await api.get("/contact-event-history/export", {
+      params,
+      responseType: "blob",
+    });
+  } catch (error) {
+    // With responseType "blob" the server's JSON error arrives as a Blob —
+    // unwrap it so the real message reaches the page.
+    throw await normalizeBlobError(error);
+  }
 };
