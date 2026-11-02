@@ -4,7 +4,8 @@ import "../assets/CSS/Header.css";
 import QRScannerModal from "./QRScanner/QRScannerModal";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import GlobalEventSelect from "./GlobalEventSelect";
 import { clearAuth, getProfile } from "../redux/auth/authSlice";
 import Swal from "sweetalert2";
 
@@ -17,6 +18,12 @@ export default function Header({ title = "Dashboard" }) {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+
+  // Pages whose data belongs to ONE event. Company Category, Form Links and
+  // the rest are the same for every event, so they have no event dropdown.
+  const EVENT_WISE_PAGES = ["/dashboard", "/contact-book", "/gust-list", "/entry-report", "/booking", "/crew"];
+  const showEventSelect = EVENT_WISE_PAGES.includes(pathname);
 
   // Current logged-in user
   // Prefer profile API data, otherwise use login data
@@ -122,6 +129,9 @@ export default function Header({ title = "Dashboard" }) {
         <span className="pageTitle">{title}</span>
 
         <div className="headerRight">
+          {/* Event: same dropdown on every event-wise page */}
+          {showEventSelect && <GlobalEventSelect />}
+
           {/* Scan QR */}
           {canScanQr && (
             <button

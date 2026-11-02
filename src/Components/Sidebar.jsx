@@ -8,7 +8,7 @@ import {
   MdKeyboardArrowDown,
 } from 'react-icons/md';
 
-import { FaUsers, FaIdBadge, FaAddressBook, FaUserFriends, FaEnvelopeOpenText, FaLink } from 'react-icons/fa';
+import { FaUsers, FaIdBadge, FaAddressBook, FaUserFriends, FaEnvelopeOpenText, FaLink, FaBan } from 'react-icons/fa';
 
 import {
   BsCalendarEventFill,
@@ -61,9 +61,19 @@ const menuItems = [
     path: '/form-links',
   },
   {
+    label: 'Ghost List',
+    icon: <FaBan />,
+    path: '/ghost-list',
+  },
+  {
     label: 'Invitation Cards',
     icon: <FaEnvelopeOpenText />,
-    path: '/invite-cards',
+    submenu: [
+      // WhatsApp invitation cards (name only).
+      { label: 'Invitation Cards', path: '/invite-cards' },
+      // Guest card link design (guest adds own photo + name).
+      { label: 'Guest Card', path: '/guest-card-design' },
+    ],
   },
   {
     label: 'Entry Report',
@@ -136,6 +146,12 @@ export default function Sidebar() {
 
     if (item.label === 'Entry Report') {
       return hasPermission('Entry Report');
+    }
+
+    // The Block List page (shown as "Ghost List" in the menu) is for Admin accounts only.
+    // Matched by path, not by label.
+    if (item.path === '/ghost-list') {
+      return role === 'admin';
     }
 
     return true;
@@ -296,7 +312,7 @@ export default function Sidebar() {
             // =========================
             return (
               <NavLink
-                key={item.label}
+                key={item.path}
                 to={item.path}
                 className={({ isActive }) =>
                   `navItem ${isActive ? 'active' : ''}`
@@ -312,4 +328,4 @@ export default function Sidebar() {
       </aside>
     </>
   );
-}
+} 

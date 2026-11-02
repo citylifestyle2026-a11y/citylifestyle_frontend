@@ -1,0 +1,104 @@
+/* Public guest card page (/guest-card): the card itself is the page. */
+.gc-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 20px 14px 40px;
+  background: linear-gradient(180deg, #fff3ea 0%, #f6f7fb 60%);
+  font-family: "Poppins", system-ui, sans-serif;
+  color: #1f2a44;
+}
+.gc-wrap { width: 100%; max-width: 480px; }
+.gc-head { text-align: center; margin-bottom: 14px; }
+.gc-head h1 { margin: 0 0 4px; font-size: 20px; font-weight: 600; }
+.gc-head p { margin: 0; font-size: 13.5px; color: #5d6479; }
+
+/* ---- live card ---- */
+.gc-card {
+  position: relative;
+  width: 100%;
+  container-type: inline-size; /* lets the name size scale with the card (cqw) */
+  border-radius: 14px;
+  overflow: hidden;
+  background: #e9e9ee;
+  box-shadow: 0 10px 30px rgba(30, 40, 70, 0.18);
+  user-select: none;
+}
+.gc-card > img.gc-design { display: block; width: 100%; height: auto; }
+
+.gc-photo {
+  position: absolute;
+  overflow: hidden;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.75);
+  border: 2px dashed #e0782f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.gc-photo.circle { border-radius: 50%; }
+.gc-photo.has-photo { border: 0; background: transparent; }
+.gc-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gc-photo-hint {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  color: #c45d16; font-weight: 600; font-size: 3.2cqw; line-height: 1.2; text-align: center;
+}
+.gc-photo-hint svg { width: 9cqw; height: 9cqw; }
+
+.gc-name {
+  position: absolute;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-weight: 600;
+  line-height: 1.5;
+  pointer-events: none;
+  max-width: 90%;
+  overflow: hidden;
+  text-overflow: clip;
+}
+.gc-name.placeholder { opacity: 0.45; }
+
+/* ---- form ---- */
+.gc-form { margin-top: 16px; background: #fff; border-radius: 14px; padding: 16px; box-shadow: 0 4px 16px rgba(30, 40, 70, 0.07); }
+.gc-form label { display: block; margin: 0 0 6px; font-size: 13px; font-weight: 600; color: #3a3f55; }
+.gc-input {
+  width: 100%; box-sizing: border-box; padding: 12px 14px; font-size: 16px;
+  border: 1px solid #d5d8e3; border-radius: 10px; font-family: inherit;
+}
+.gc-input:focus { outline: 2px solid #f2a46b; border-color: #e0782f; }
+.gc-row { display: flex; gap: 10px; margin-top: 12px; }
+.gc-btn {
+  flex: 1; padding: 13px; border: 0; border-radius: 10px; font-size: 15px; font-weight: 600;
+  cursor: pointer; font-family: inherit; text-align: center; text-decoration: none; box-sizing: border-box;
+}
+.gc-btn.primary { background: #e0782f; color: #fff; }
+.gc-btn.ghost { background: #f1f2f7; color: #3a3f55; }
+.gc-btn:disabled { opacity: 0.65; cursor: default; }
+.gc-error { margin-top: 10px; color: #d63a3a; font-size: 13.5px; }
+.gc-note { margin: 10px 0 0; font-size: 12.5px; color: #6b7085; text-align: center; }
+.gc-msg { text-align: center; color: #5d6479; padding: 30px 10px; }
+
+/* ---- admin editor (Guest Card page) ---- */
+.gcd-layout { display: grid; grid-template-columns: minmax(280px, 400px) 1fr; gap: 24px; margin-top: 20px; align-items: start; }
+.gcd-stage { position: sticky; top: 16px; }
+.gcd-panel { border: 1px solid #e5e8f0; border-radius: 12px; padding: 16px 18px; background: #fff; margin-bottom: 16px; }
+.gcd-panel h3 { margin: 0 0 4px; font-size: 15px; color: #1f2a44; }
+.gcd-panel > p { margin: 0 0 14px; font-size: 12.5px; color: #6b7085; }
+.gcd-field { display: grid; grid-template-columns: 110px 1fr 52px; align-items: center; gap: 10px; margin-bottom: 12px; font-size: 13px; color: #3a3f55; }
+.gcd-field input[type="range"] { width: 100%; }
+.gcd-val { font-size: 12px; color: #6b7085; text-align: right; }
+.gcd-btnrow { display: flex; flex-wrap: wrap; gap: 8px; }
+.gcd-small { padding: 7px 14px; font-size: 13px; border-radius: 8px; border: 0; cursor: pointer; font-weight: 600; font-family: inherit; }
+.gcd-small.main { background: #4a7fc1; color: #fff; }
+.gcd-small.soft { background: #f1f2f7; color: #3a3f55; }
+.gcd-small.on { background: #e0782f; color: #fff; }
+.gcd-small:disabled { opacity: 0.6; cursor: default; }
+.gcd-nudge { display: grid; grid-template-columns: repeat(3, 38px); grid-template-rows: repeat(3, 38px); gap: 4px; }
+.gcd-nudge button { border: 1px solid #d5d8e3; background: #fff; border-radius: 8px; cursor: pointer; font-size: 15px; }
+.gcd-nudge button:hover { background: #f1f2f7; }
+.gcd-photo-sample { position: absolute; overflow: hidden; border: 2px dashed #2f80ed; pointer-events: none; box-sizing: border-box; }
+.gcd-photo-sample img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gcd-savebar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.gcd-savebar .hint { font-size: 12.5px; color: #c45d16; }
+@media (max-width: 900px) { .gcd-layout { grid-template-columns: 1fr; } .gcd-stage { position: static; max-width: 400px; } .gcd-field { grid-template-columns: 90px 1fr 44px; } }

@@ -43,6 +43,7 @@ import useClickOutside from "../hooks/useClickOutside";
 // Same look as Guest List / Contact Book.
 import "../assets/CSS/ContactList.css";
 import { ALL_ROWS_OPTION } from "../utilits/rowsPerPage";
+import { useGlobalEvent } from "../context/EventContext";
 
 const ROWS_PER_PAGE_OPTIONS = [10, 20, 50, 100].map((n) => ({ value: n, label: String(n) }));
 ROWS_PER_PAGE_OPTIONS.push(ALL_ROWS_OPTION);
@@ -125,13 +126,16 @@ export default function CrewList() {
     })();
   }, [refreshKey]);
 
+  const { effectiveEventId } = useGlobalEvent();
   const filters = useMemo(
     () => ({
       search,
       crewCategory: categoryFilter || undefined,
       passStatus: passFilter || undefined,
+      // Pass tabs follow the event picked in the header dropdown.
+      eventId: effectiveEventId || undefined,
     }),
-    [search, categoryFilter, passFilter]
+    [search, categoryFilter, passFilter, effectiveEventId]
   );
 
   // List.

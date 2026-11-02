@@ -7,6 +7,7 @@ import CommonListLayout from "../Components/CommonListLayout";
 import CommonPageHeader from "../Components/CommonPageHeader";
 import CommonSearch from "../Components/CommonSearch";
 import CommonSelect from "../Components/CommonSelect";
+import MultiSelect from "../Components/MultiSelect";
 import CommonTable from "../Components/CommonTable";
 import CommonEmptyState from "../Components/CommonEmptyState";
 import CommonPagination from "../Components/CommonPagination";
@@ -18,6 +19,7 @@ import { getAllEventHistory, deleteEventHistory } from "../redux/contactEventHis
 import { clearContactEventHistoryState } from "../redux/contactEventHistory/contactEventHistorySlice";
 import {
   getHistoryEditionsApi,
+  getHistoryFilterOptionsApi,
   getEventHistoryStatsApi,
   markEventHistoryAttendanceApi,
   exportEventHistoryApi,
@@ -71,12 +73,6 @@ const personOf = (row) => {
 const isContactDeleted = (row) => !row?.contactId;
 const DELETED_LABEL = "Deleted guest";
 
-// Status filter: only the two results that matter on this page.
-const STATUS_OPTIONS = ["Attended", "Not Attended"].map((v) => ({
-  value: v,
-  label: v,
-}));
-
 // Event badges shown per row before "+N more".
 const MAX_VISIBLE_EVENTS = 3;
 
@@ -93,7 +89,13 @@ export default function EventHistory() {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [eventFilter, setEventFilter] = useState("");
+  // Status is filtered with the Attended / Not Attended cards (no dropdown).
   const [statusFilter, setStatusFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  // Several references can be ticked; a person matches when they have ANY.
+  const [referenceFilter, setReferenceFilter] = useState([]);
+  const [categoryOptions, setCategoryOptions] = useState([]);
+  const [referenceOptions, setReferenceOptions] = useState([]);
 
   const loadEditions = useCallback(async () => {
     try {
@@ -104,14 +106,26 @@ export default function EventHistory() {
     }
   }, []);
 
+  const loadFilterOptions = useCallback(async () => {
+    try {
+      const res = await getHistoryFilterOptionsApi();
+      setCategoryOptions(res?.data?.categories || []);
+      setReferenceOptions(res?.data?.references || []);
+    } catch {
+      setCategoryOptions([]);
+      setReferenceOptions([]);
+    }
+  }, []);
+
   // Reload when the list changes (an entry added / deleted).
   useEffect(() => {
     loadEditions();
-  }, [loadEditions, history]);
+    loadFilterOptions();
+  }, [loadEditions, loadFilterOptions, history]);
 
   // Attended / Not Attended counts for whatever is filtered on screen
   // (edition + search). Reloaded whenever the list reloads.
-  const [stats, setStats] = useState({ total: 0, attended: 0, notAttended: 0, other: 0 });
+  const [stats, setStats] = useState({ total: 0, attended: 0, notAttended: 0, other: 0, persons: { total: 0, attended: 0, notAttended: 0 } });
 
   // searchTerm tracks the raw input value; search is the debounced value
   // actually sent to the API — same pattern as ContactList.jsx.
@@ -155,9 +169,11 @@ export default function EventHistory() {
     const q = { page: currentPage, limit: rowsPerPage };
     if (eventFilter) q.eventId = eventFilter;
     if (statusFilter) q.status = statusFilter;
+    if (categoryFilter) q.category = categoryFilter;
+    if (referenceFilter.length) q.reference = referenceFilter;
     if (search) q.search = search;
     return q;
-  }, [currentPage, rowsPerPage, eventFilter, statusFilter, search]);
+  }, [currentPage, rowsPerPage, eventFilter, statusFilter, categoryFilter, referenceFilter, search]);
 
   useEffect(() => {
     dispatch(getAllEventHistory(currentQuery));
@@ -167,13 +183,15 @@ export default function EventHistory() {
     try {
       const params = {};
       if (eventFilter) params.eventId = eventFilter;
+      if (categoryFilter) params.category = categoryFilter;
+      if (referenceFilter.length) params.reference = referenceFilter;
       if (search) params.search = search;
       const res = await getEventHistoryStatsApi(params);
-      setStats(res?.data || { total: 0, attended: 0, notAttended: 0, other: 0 });
+      setStats(res?.data || { total: 0, attended: 0, notAttended: 0, other: 0, persons: { total: 0, attended: 0, notAttended: 0 } });
     } catch {
       // counts are a convenience only - the table still works without them
     }
-  }, [eventFilter, search]);
+  }, [eventFilter, categoryFilter, referenceFilter, search]);
 
   useEffect(() => {
     loadStats();
@@ -233,6 +251,8 @@ export default function EventHistory() {
       const params = {};
       if (eventFilter) params.eventId = eventFilter;
       if (statusFilter) params.status = statusFilter;
+      if (categoryFilter) params.category = categoryFilter;
+      if (referenceFilter.length) params.reference = referenceFilter;
       if (search) params.search = search;
 
       const response = await exportEventHistoryApi(params);
@@ -318,6 +338,12 @@ export default function EventHistory() {
     }
   };
 
+  // Ticked references (lower case) - the matching chips are highlighted.
+  const referenceFilterKeys = useMemo(
+    () => new Set(referenceFilter.map((r) => String(r).trim().toLowerCase())),
+    [referenceFilter]
+  );
+
   const historyTableColumns = useMemo(
     () => [
       {
@@ -357,6 +383,48 @@ export default function EventHistory() {
           (entry.isSpouse
             ? personOf(entry).spouseMobile
             : personOf(entry).whatsappNumber) || "-",
+      },
+      {
+        key: "category",
+        label: "Category",
+        // Highlighted when this row's category is the one filtered on.
+        render: (row) => {
+          if (!row.category) return "-";
+          const hit = categoryFilter && row.categoryId === categoryFilter;
+          return (
+            <span
+              className={`eventHistoryPage__categoryTag${hit ? " eventHistoryPage__hit" : ""}`}
+            >
+              {row.category}
+            </span>
+          );
+        },
+      },
+      {
+        key: "reference",
+        label: "Reference",
+        // One chip per reference; the ticked ones are highlighted.
+        render: (row) => {
+          const refs = (row.references || [])
+            .slice()
+            .sort((a, b) => a.trim().toLowerCase().localeCompare(b.trim().toLowerCase()));
+          if (refs.length === 0) return "-";
+          return (
+            <span className="eventHistoryPage__referenceCell">
+              {refs.map((ref) => {
+                const hit = referenceFilterKeys.has(ref.trim().toLowerCase());
+                return (
+                  <span
+                    key={ref}
+                    className={`eventHistoryPage__referenceChip${hit ? " eventHistoryPage__hit" : ""}`}
+                  >
+                    {ref}
+                  </span>
+                );
+              })}
+            </span>
+          );
+        },
       },
       {
         key: "event",
@@ -496,6 +564,8 @@ export default function EventHistory() {
         key: "action",
         label: "Actions",
         sortable: false,
+        headerClassName: "appActionCol",
+        cellClassName: "appActionCol",
         cellStyle: { position: "relative" },
         render: (entry) => (
           <div
@@ -571,7 +641,7 @@ export default function EventHistory() {
         ),
       },
     ],
-    [openActionMenuId, handleToggleActionMenu, expandedRowIds]
+    [openActionMenuId, handleToggleActionMenu, expandedRowIds, categoryFilter, referenceFilterKeys]
   );
 
   return (
@@ -686,23 +756,36 @@ export default function EventHistory() {
           />
 
           <CommonSelect
-            className="eventHistoryPage__filterSelect eventHistoryPage__statusSelect"
-            value={statusFilter}
+            className="eventHistoryPage__filterSelect"
+            value={categoryFilter}
             onChange={(e) => {
-              setStatusFilter(e.target.value);
+              setCategoryFilter(e.target.value);
               setCurrentPage(1);
             }}
-            placeholder="All Status"
-            options={STATUS_OPTIONS}
+            placeholder="All Categories"
+            options={categoryOptions}
           />
 
-          {(eventFilter || statusFilter || searchTerm) && (
+          <MultiSelect
+            value={referenceFilter}
+            onChange={(next) => {
+              setReferenceFilter(next);
+              setCurrentPage(1);
+            }}
+            placeholder="All References"
+            searchPlaceholder="Search reference..."
+            options={referenceOptions}
+          />
+
+          {(eventFilter || statusFilter || categoryFilter || referenceFilter.length > 0 || searchTerm) && (
             <button
               type="button"
               className="eventHistoryPage__clearFilters"
               onClick={() => {
                 setEventFilter("");
                 setStatusFilter("");
+                setCategoryFilter("");
+                setReferenceFilter([]);
                 setSearchTerm("");
                 setSearch("");
                 setCurrentPage(1);
@@ -762,6 +845,33 @@ export default function EventHistory() {
           </button>
         </div>
 
+        {/* Qty-wise totals: PERSONS (a couple = 2), not entries. */}
+        <div
+          aria-label="Qty wise total"
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            gap: "8px 24px",
+            margin: "12px 0",
+            padding: "10px 16px",
+            borderRadius: 10,
+            background: "#f4f6fb",
+            fontSize: 14,
+          }}
+        >
+          <strong>Qty wise total:</strong>
+          <span>
+            Total Persons: <strong>{stats.persons?.total ?? 0}</strong>
+          </span>
+          <span style={{ color: "#1e7b3a" }}>
+            Attended: <strong>{stats.persons?.attended ?? 0}</strong>
+          </span>
+          <span style={{ color: "#b42323" }}>
+            Not Attended: <strong>{stats.persons?.notAttended ?? 0}</strong>
+          </span>
+        </div>
+
         {/* Colour legend only makes sense when there are rows to colour. */}
         {!loading && !error && (history || []).length > 0 && (
           <div className="eventHistoryPage__legend" aria-label="Colour meaning">
@@ -791,7 +901,7 @@ export default function EventHistory() {
                 wrapperClassName="eventHistoryPage__stateWrap"
                 textClassName="eventHistoryPage__stateText"
                 message={
-                  search ? `No event history found for "${search}".` : statusFilter || eventFilter ? "No event history found for the selected filters." : "No event history found."
+                  search ? `No event history found for "${search}".` : statusFilter || eventFilter || categoryFilter || referenceFilter.length > 0 ? "No event history found for the selected filters." : "No event history found."
                 }
               />
             }

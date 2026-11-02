@@ -51,6 +51,10 @@ export const uploadInviteDesignApi = async (file) => {
 export const saveInviteNameStyleApi = async (style) =>
   (await api.put("/invite-guests/design/style", style)).data;
 
+// Where the guest's own photo goes: { xPct, yPct, wPct, hPct, shape: "circle" | "rect" }
+export const saveInvitePhotoBoxApi = async (box) =>
+  (await api.put("/invite-guests/design/photo-box", box)).data;
+
 export const removeInviteDesignApi = async () => (await api.delete("/invite-guests/design")).data;
 
 export const createInviteGuestApi = async (data) =>

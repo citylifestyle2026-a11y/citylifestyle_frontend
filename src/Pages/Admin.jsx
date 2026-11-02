@@ -160,6 +160,8 @@ export default function Admin() {
       key: "action",
       label: "Action",
       sortable: false,
+      headerClassName: "appActionCol",
+      cellClassName: "appActionCol",
       cellStyle: { position: "relative" },
       render: (admin) => {
         const isOwnRow = String(admin._id) === String(currentAdminId);

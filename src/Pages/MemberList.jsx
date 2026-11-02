@@ -24,6 +24,7 @@ import MoveToGuestListModal from "../Components/MoveToGuestListModal";
 import EditMemberModal from "../Components/EditMemberModal";
 import MultiSelect from "../Components/MultiSelect";
 import { ContactPerson, InstagramLink } from "../Components/ContactAvatar";
+import BlockedBadge from "../Components/BlockedBadge";
 
 import {
   getAllMembersApi,
@@ -42,6 +43,7 @@ import "../assets/CSS/ContactList.css";
 import "../assets/CSS/MemberList.css";
 import useClickOutside from "../hooks/useClickOutside";
 import { ALL_ROWS_OPTION } from "../utilits/rowsPerPage";
+import { useGlobalEvent } from "../context/EventContext";
 
 const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, 100, 200].map((n) => ({
   value: n,
@@ -105,6 +107,7 @@ export default function MemberList() {
   const [editMember, setEditMember] = useState(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
 
+  const { effectiveEventId } = useGlobalEvent();
   const filters = useMemo(
     () => ({
       search: search || undefined,
@@ -119,8 +122,10 @@ export default function MemberList() {
           : referenceFilter.join("|"),
       moved: movedFilter || undefined,
       fixType: movedFilter === "needsFix" && fixType ? fixType : undefined,
+      // "In Guest List" is counted for the event picked in the header dropdown.
+      eventId: effectiveEventId || undefined,
     }),
-    [search, professionFilter, referenceFilter, references, movedFilter, fixType]
+    [search, professionFilter, referenceFilter, references, movedFilter, fixType, effectiveEventId]
   );
 
   // Debounced search box.
@@ -472,7 +477,10 @@ export default function MemberList() {
       sortableColumn("name", "Full Name", {
         cellClassName: "contactPage__contactName",
         render: (member) => (
-          <ContactPerson name={member.name} image={member.profileImage} />
+          <>
+            <ContactPerson name={member.name} image={member.profileImage} />
+            <BlockedBadge blocked={member.blocked} />
+          </>
         ),
       }),
       {

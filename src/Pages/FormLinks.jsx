@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FaSearch, FaPlus, FaChevronDown, FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
+import { FaSearch, FaPlus, FaChevronDown, FaSort, FaSortUp, FaSortDown, FaTimes, FaUnlock } from "react-icons/fa";
 
 import CommonListLayout from "../Components/CommonListLayout";
 import CommonPageHeader from "../Components/CommonPageHeader";
@@ -26,6 +26,7 @@ import { getErrorText } from "../utilits/apiError";
 
 // The table, header and search box reuse the Company Category page styles.
 import "../assets/CSS/CompanyCategory.css";
+import "../assets/CSS/ContactList.css"; // checkbox + bulk bar styles
 import "../assets/CSS/FormLinks.css";
 import useClickOutside from "../hooks/useClickOutside";
 import useActionMenuRoom from "../hooks/useActionMenuRoom";
@@ -65,6 +66,59 @@ export default function FormLinks() {
   const [exportingId, setExportingId] = useState(null);
 
   const refresh = useCallback(() => setRefreshKey((k) => k + 1), []);
+
+  // Checkbox selection (id -> link). Kept across pages.
+  const [selected, setSelected] = useState({});
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const selectedList = Object.values(selected);
+  const selectedCount = selectedList.length;
+  const clearSelection = () => setSelected({});
+
+  const allOnPageSelected = links.length > 0 && links.every((l) => selected[l._id]);
+  const someOnPageSelected = !allOnPageSelected && links.some((l) => selected[l._id]);
+
+  const toggleOne = useCallback((link) => {
+    setSelected((prev) => {
+      const next = { ...prev };
+      if (next[link._id]) delete next[link._id];
+      else next[link._id] = link;
+      return next;
+    });
+  }, []);
+
+  const toggleAllOnPage = useCallback(() => {
+    setSelected((prev) => {
+      const next = { ...prev };
+      if (links.length > 0 && links.every((l) => prev[l._id])) {
+        links.forEach((l) => delete next[l._id]);
+      } else {
+        links.forEach((l) => {
+          next[l._id] = l;
+        });
+      }
+      return next;
+    });
+  }, [links]);
+
+  // Close (or re-open) every selected link in one go.
+  const handleBulkStatus = async (targets, status) => {
+    if (targets.length === 0) return;
+    setBulkBusy(true);
+    try {
+      const results = await Promise.allSettled(
+        targets.map((l) => updateFormLinkApi(l._id, { status }))
+      );
+      const failed = results.filter((r) => r.status === "rejected").length;
+      const done = targets.length - failed;
+      const verb = status === "closed" ? "closed" : "re-opened";
+      if (done > 0) showSuccess(`${done} link${done === 1 ? "" : "s"} ${verb}.`);
+      if (failed > 0) showError(`${failed} link${failed === 1 ? "" : "s"} could not be updated.`);
+      clearSelection();
+      refresh();
+    } finally {
+      setBulkBusy(false);
+    }
+  };
 
   // Debounce the search box.
   useEffect(() => {
@@ -223,10 +277,38 @@ export default function FormLinks() {
     };
 
     return [
+      {
+        key: "select",
+        sortable: false,
+        cellClassName: "contactPage__checkCol",
+        label: (
+          <input
+            type="checkbox"
+            className="contactPage__checkbox"
+            aria-label="Select all form links on this page"
+            checked={allOnPageSelected}
+            ref={(el) => {
+              if (el) el.indeterminate = someOnPageSelected;
+            }}
+            onChange={toggleAllOnPage}
+            disabled={links.length === 0}
+          />
+        ),
+        render: (link) => (
+          <input
+            type="checkbox"
+            className="contactPage__checkbox"
+            aria-label={`Select ${link.name}`}
+            checked={!!selected[link._id]}
+            onChange={() => toggleOne(link)}
+          />
+        ),
+      },
       col("name", "Name (Reference)", {
         cellClassName: "companyCategoryPage__categoryName",
         render: (link) => link.name,
       }),
+      col("editionName", "Edition", { sortable: false, render: (link) => link.editionName || "-" }),
       col("quantity", "Persons", { render: (link) => link.quantity }),
       col("usedCount", "Filled", {
         render: (link) => {
@@ -257,6 +339,8 @@ export default function FormLinks() {
         key: "action",
         label: "Actions",
         sortable: false,
+        headerClassName: "appActionCol",
+        cellClassName: "appActionCol",
         cellStyle: { position: "relative" },
         render: (link) => (
           <div
@@ -338,7 +422,10 @@ export default function FormLinks() {
         ),
       },
     ];
-  }, [renderSortableHeader, openActionMenuId, handleCopy, handleToggleStatus, handleExport, exportingId]);
+  }, [renderSortableHeader, openActionMenuId, handleCopy, handleToggleStatus, handleExport, exportingId, links, selected, allOnPageSelected, someOnPageSelected, toggleOne, toggleAllOnPage]);
+
+  const closableSelected = selectedList.filter((l) => l.status !== "closed");
+  const reopenableSelected = selectedList.filter((l) => l.status === "closed");
 
   const startIndex = total === 0 ? 0 : (currentPage - 1) * rowsPerPage;
   const endIndex = Math.min(currentPage * rowsPerPage, total);
@@ -395,6 +482,41 @@ export default function FormLinks() {
       />
 
       <div className="companyCategoryPage__tableCard appCard">
+        {selectedCount > 0 && (
+          <div className="contactPage__bulkBar">
+            <span className="contactPage__bulkCount">{selectedCount} selected</span>
+            <div className="contactPage__bulkButtons">
+              {closableSelected.length > 0 && (
+                <button
+                  type="button"
+                  className="contactPage__bulkBtn contactPage__bulkBtn--reject"
+                  disabled={bulkBusy}
+                  onClick={() => handleBulkStatus(closableSelected, "closed")}
+                >
+                  <FaTimes /> Close ({closableSelected.length})
+                </button>
+              )}
+              {reopenableSelected.length > 0 && (
+                <button
+                  type="button"
+                  className="contactPage__bulkBtn contactPage__bulkBtn--approve"
+                  disabled={bulkBusy}
+                  onClick={() => handleBulkStatus(reopenableSelected, "active")}
+                >
+                  <FaUnlock /> Re-open ({reopenableSelected.length})
+                </button>
+              )}
+              <button
+                type="button"
+                className="contactPage__bulkBtn contactPage__bulkBtn--clear"
+                onClick={clearSelection}
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="companyCategoryPage__tableControls">
           <CommonSelect
             className="companyCategoryPage__rowsSelect"

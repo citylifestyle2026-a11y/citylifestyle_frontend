@@ -13,6 +13,7 @@ import {
 } from "react-icons/fa";
 
 import CommonListLayout from "../Components/CommonListLayout";
+import BlockedBadge from "../Components/BlockedBadge";
 import CommonPageHeader from "../Components/CommonPageHeader";
 import CommonSearch from "../Components/CommonSearch";
 import CommonSelect from "../Components/CommonSelect";
@@ -113,13 +114,16 @@ export default function InviteCards() {
   const [savedStyle, setSavedStyle] = useState(DEFAULT_STYLE);
   const [savingStyle, setSavingStyle] = useState(false);
 
+
   const applyDesign = useCallback((info) => {
     setDesign(info);
     const next = { ...DEFAULT_STYLE, ...(info?.nameStyle || {}) };
     setStyle(next);
     setSavedStyle(next);
   }, []);
-  const styleChanged = JSON.stringify(style) !== JSON.stringify(savedStyle);
+  const nameChanged = JSON.stringify(style) !== JSON.stringify(savedStyle);
+  const styleChanged = nameChanged;
+
   const [previewName, setPreviewName] = useState("Rahul Shah");
   const [previewUrl, setPreviewUrl] = useState("");
   const [previewLoading, setPreviewLoading] = useState(false);
@@ -511,7 +515,12 @@ export default function InviteCards() {
         label: "Full Name",
         sortable: false,
         cellClassName: "contactPage__contactName",
-        render: (g) => g.name,
+        render: (g) => (
+          <>
+            {g.name}
+            <BlockedBadge blocked={g.blocked} />
+          </>
+        ),
       },
       { key: "mobile", label: "Mobile", sortable: false, render: (g) => shortMobile(g.mobileNumber) },
       {
@@ -701,19 +710,17 @@ export default function InviteCards() {
                   />
                 </div>
 
-                <p className="inviteCards__note">
-                  Click on the card where the guest&apos;s name should appear.
-                </p>
-
                 <div className="inviteCards__previewBox">
                   {previewUrl ? (
-                    <img
-                      src={previewUrl}
-                      alt="Invitation card preview"
-                      className="inviteCards__previewImg"
-                      onClick={placeNameOnCard}
-                      draggable={false}
-                    />
+                    <div style={{ position: "relative", width: "100%" }}>
+                      <img
+                        src={previewUrl}
+                        alt="Invitation card preview"
+                        className="inviteCards__previewImg"
+                        onClick={placeNameOnCard}
+                        draggable={false}
+                      />
+                    </div>
                   ) : previewLoading ? (
                     "Loading..."
                   ) : (
@@ -746,7 +753,9 @@ export default function InviteCards() {
                     type="button"
                     className="modalCloseButton"
                     disabled={savingStyle}
-                    onClick={() => setStyle({ ...DEFAULT_STYLE })}
+                    onClick={() => {
+                      setStyle({ ...DEFAULT_STYLE });
+                    }}
                   >
                     Reset
                   </button>

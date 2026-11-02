@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import BlockedBadge from "./BlockedBadge";
 import { FaSearch, FaCodeBranch, FaTrashAlt, FaChevronDown } from "react-icons/fa";
 
 import DuplicateFixModal from "./DuplicateFixModal";
@@ -261,7 +262,7 @@ export default function DuplicateTab({ onChanged }) {
               <th>Area</th>
               <th>Existing Guest</th>
               <th>Submitted</th>
-              <th>Actions</th>
+              <th className="dupTab__actionCol">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -289,7 +290,10 @@ export default function DuplicateTab({ onChanged }) {
                     aria-label={`Select ${row.fullName || row.whatsappNumber}`}
                   />
                 </td>
-                <td className="dupTab__name">{row.fullName || "-"}</td>
+                <td className="dupTab__name">
+                  {row.fullName || "-"}
+                  <BlockedBadge blocked={row.blocked} />
+                </td>
                 <td>{row.whatsappNumber || "-"}</td>
                 <td>{row.companyName || "-"}</td>
                 <td>{row.designation || "-"}</td>

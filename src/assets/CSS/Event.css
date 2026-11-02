@@ -517,3 +517,12 @@ a{
   word-break: normal;
   line-height: 1.5;
 }
+
+/* Delete row in the Action menu */
+.eventList__actionItem--danger {
+  color: #dc3545;
+}
+
+.eventList__actionItem--danger:hover {
+  background-color: #fdecee;
+}

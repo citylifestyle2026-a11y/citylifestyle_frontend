@@ -293,3 +293,24 @@
 .dupAction__item--ignore:hover {
   background: #fdecec;
 }
+
+/* Actions column frozen on the right edge while the table scrolls. */
+.dupTab__table th.dupTab__actionCol,
+.dupTab__table td.dupTab__actionCol {
+  position: sticky;
+  right: 0;
+  background: #ffffff;
+  box-shadow: -8px 0 10px -8px rgba(0, 0, 0, 0.14);
+}
+
+.dupTab__table th.dupTab__actionCol {
+  z-index: 4;
+}
+
+.dupTab__table td.dupTab__actionCol {
+  z-index: 2;
+}
+
+.dupTab__table tbody tr:hover td.dupTab__actionCol {
+  background-color: #fafbfd;
+}

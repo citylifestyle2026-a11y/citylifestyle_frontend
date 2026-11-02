@@ -5,8 +5,10 @@ import { normalizeBlobError } from "../utilits/apiError";
 // params supports: contactId, editionId, status, page, limit — powers
 // the standalone Sidebar "Event History" page.
 export const getAllEventHistoryApi = async (params) => {
+  // paramsSerializer: reference=a&reference=b (several ticked references).
   const response = await api.get("/contact-event-history/get-all-event-history", {
     params,
+    paramsSerializer: { indexes: null },
   });
 
   return response.data;
@@ -16,6 +18,13 @@ export const getAllEventHistoryApi = async (params) => {
 // Includes editions whose event was deleted (kept from the saved snapshot).
 export const getHistoryEditionsApi = async () => {
   const response = await api.get("/contact-event-history/editions");
+  return response.data;
+};
+
+// ================= CATEGORY + REFERENCE FILTER OPTIONS =================
+// -> { data: { categories: [{value,label}], references: [{value,label}] } }
+export const getHistoryFilterOptionsApi = async () => {
+  const response = await api.get("/contact-event-history/filter-options");
   return response.data;
 };
 
@@ -68,7 +77,10 @@ export const syncEventHistoryFromEventApi = async (data) => {
 // params: eventId, search — same filters as the list, so the numbers always
 // match what is on screen.
 export const getEventHistoryStatsApi = async (params) => {
-  const response = await api.get("/contact-event-history/stats", { params });
+  const response = await api.get("/contact-event-history/stats", {
+    params,
+    paramsSerializer: { indexes: null },
+  });
   return response.data;
 };
 
@@ -90,6 +102,7 @@ export const exportEventHistoryApi = async (params) => {
   try {
     return await api.get("/contact-event-history/export", {
       params,
+      paramsSerializer: { indexes: null },
       responseType: "blob",
     });
   } catch (error) {

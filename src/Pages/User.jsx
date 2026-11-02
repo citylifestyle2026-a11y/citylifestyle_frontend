@@ -245,6 +245,8 @@ export default function User() {
       key: "action",
       label: "Action",
       sortable: false,
+      headerClassName: "appActionCol",
+      cellClassName: "appActionCol",
       cellStyle: { position: "relative" },
       render: (user) => (
         <div

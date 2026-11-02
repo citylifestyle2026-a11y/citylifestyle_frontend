@@ -13,6 +13,7 @@ import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import { exportBookingReport, getAllBookings } from "../redux/booking/bookingThunk";
 import { getAllEvents } from "../redux/event/eventThunk";
+import { useGlobalEvent } from "../context/EventContext";
 import { FaSort, FaChevronDown } from "react-icons/fa";
 import CommonSearch from "../Components/CommonSearch";
 import CommonSelect from "../Components/CommonSelect";
@@ -114,6 +115,14 @@ const Booking = () => {
   // a request on every keystroke.
   const [filters, setFilters] = useState(defaultFilters);
   const [appliedFilters, setAppliedFilters] = useState(defaultFilters);
+
+  // The event is the one picked in the header dropdown (same on every page).
+  const { effectiveEventId } = useGlobalEvent();
+  useEffect(() => {
+    setFilters((prev) => ({ ...prev, eventId: effectiveEventId || "" }));
+    setAppliedFilters((prev) => ({ ...prev, eventId: effectiveEventId || "" }));
+    setActivePage(1);
+  }, [effectiveEventId]);
   // Single source of truth for fetching the list: every handler below only
   // updates state (activePage / rowsPerPage / appliedFilters); this effect
   // is the only place that dispatches getAllBookings, so no handler needs
@@ -300,8 +309,8 @@ const Booking = () => {
     // debounced search effect and fire a second, redundant request.
     skipToolbarSearchEffectRef.current = true;
 
-    setFilters(defaultFilters);
-    setAppliedFilters(defaultFilters);
+    setFilters({ ...defaultFilters, eventId: effectiveEventId || "" });
+    setAppliedFilters({ ...defaultFilters, eventId: effectiveEventId || "" });
 
     setRange([
       {
@@ -452,20 +461,6 @@ const Booking = () => {
                   placeholder="Name"
                   value={filters.name}
                   onChange={handleFilterChange("name")}
-                />
-
-                {/* Event */}
-                <CommonSelect
-                  className="bookingPage-filterSelect"
-                  value={filters.eventId}
-                  onChange={handleImmediateFilterChange("eventId")}
-                  placeholder="All Events"
-                  options={events
-                    ?.filter((event) => event.isActive === true)
-                    .map((event) => ({
-                      value: event._id,
-                      label: event.title,
-                    }))}
                 />
 
                 {/* Date Range */}

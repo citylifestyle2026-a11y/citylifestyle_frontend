@@ -9,6 +9,7 @@ import { updateSiteMeta } from "./utilits/updateSiteMeta";
 import useIdleLogout from "./hooks/useIdleLogout";
 
 import ProtectedRoute from "./routes/ProtectedRoute";
+import { EventProvider } from "./context/EventContext";
 
 const Login = lazy(() => import("./Pages/Login"));
 const DashboardPage = lazy(() => import("./Pages/DashboardPage"));
@@ -21,6 +22,7 @@ const RegisterUsers = lazy(() => import("./Components/RegisterUsers"));
 const PublicRegisterUser = lazy(() => import("./Components/PublicRegisterUser"));
 const PublicContactForm = lazy(() => import("./Pages/PublicContactForm"));
 const Ticket = lazy(() => import("./Pages/Ticket"));
+const GuestCard = lazy(() => import("./Pages/GuestCard"));
 const PublicRsvp = lazy(() => import("./Pages/PublicRsvp"));
 const EntryReport = lazy(() => import("./Pages/EntryReport"));
 const CreateEvent = lazy(() => import("./Pages/CreateEvent"));
@@ -32,8 +34,10 @@ const Profile = lazy(() => import("./Pages/Profile"));
 const Admin = lazy(() => import("./Pages/Admin"));
 const ContactList = lazy(() => import("./Pages/ContactList"));
 const InviteCards = lazy(() => import("./Pages/InviteCards"));
+const GuestCardDesign = lazy(() => import("./Pages/GuestCardDesign"));
 const MemberList = lazy(() => import("./Pages/MemberList"));
 const FormLinks = lazy(() => import("./Pages/FormLinks"));
+const BlockList = lazy(() => import("./Pages/BlockList"));
 const EventHistory = lazy(() => import("./Pages/EventHistory"));
 const CompanyCategory = lazy(() => import("./Pages/CompanyCategory"));
 const CrewList = lazy(() => import("./Pages/CrewList"));
@@ -59,8 +63,11 @@ const privateRoutes = [
   "/admin",
   "/gust-list",
   "/invite-cards",
+  "/guest-card-design",
   "/contact-book",
   "/form-links",
+  "/ghost-list",
+  "/block-list", // old address, redirects to /ghost-list
   "/event-history",
   "/company-categories",
   "/crew",
@@ -76,6 +83,8 @@ const privateRoutes = [
   "/ticket",
   // Public contact form (type /city-lifestyle in the URL) — City Lifestyle branding.
   "/city-lifestyle",
+  // Public guest card page (/guest-card): photo + name -> downloadable card.
+  "/guest-card",
   // Attendance reminder Yes / No pages opened from WhatsApp (/rsvp/yes/:token).
   "/rsvp",
 ];
@@ -132,6 +141,7 @@ function App() {
       />
 
       <BrowserRouter>
+       <EventProvider>
         <SiteMetaHandler />
         <IdleLogoutHandler />
 
@@ -142,6 +152,8 @@ function App() {
           <Route path="/" element={<Home />} />
 
           <Route path="/home" element={<Navigate to="/" replace />} />
+          {/* old Block List address -> Ghost List (keeps old bookmarks working) */}
+          <Route path="/block-list" element={<Navigate to="/ghost-list" replace />} />
 
           <Route path="/login" element={<Login />} />
 
@@ -150,6 +162,8 @@ function App() {
           <Route path="/ticket" element={<Ticket />} />
           {/* NEW: public contact form (no login, no button - open by URL) */}
           <Route path="/form" element={<PublicContactForm />} />
+          {/* Guest card link: guest uploads a photo + types a name, downloads the card */}
+          <Route path="/guest-card" element={<GuestCard />} />
           {/* Attendance reminder: Yes / No pages opened from the WhatsApp buttons.
               Not linked anywhere on the website and set to noindex. */}
           <Route path="/rsvp/:answer/:token" element={<PublicRsvp />} />
@@ -178,6 +192,8 @@ function App() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/invite-cards" element={<InviteCards />} />
+            <Route path="/guest-card-design" element={<GuestCardDesign />} />
+            <Route path="/ghost-list" element={<BlockList />} />
           </Route>
 
           <Route element={<ProtectedRoute permission="Entry Report" />}>
@@ -185,6 +201,7 @@ function App() {
           </Route>
         </Routes>
         </Suspense>
+       </EventProvider>
       </BrowserRouter>
     </>
   );

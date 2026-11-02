@@ -4,6 +4,7 @@ import { FaTimes } from "react-icons/fa";
 import { newReferencesFrom } from "../utilits/references";
 import { createContact, updateContact, getAllContacts, getUniqueReferences, getReferenceSummary } from "../redux/contact/contactThunk";
 import { getContactPassApi, updateContactPassApi } from "../services/contactService";
+import { useGlobalEvent } from "../context/EventContext";
 import { clearContactState } from "../redux/contact/contactSlice";
 import "../assets/CSS/CreateContactModal.css";
 import { showError, showSuccess } from "../utilits/toast";
@@ -162,6 +163,9 @@ export default function CreateContactModal({
       document.body.style.overflow = "";
     };
   }, [publicMode]);
+
+  // A new guest belongs to the event picked in the header dropdown.
+  const { effectiveEventId } = useGlobalEvent();
 
   useEffect(() => {
     if (!publicMode) dispatch(clearContactState());
@@ -611,6 +615,9 @@ export default function CreateContactModal({
     Object.entries(fields).forEach(([key, value]) => payload.append(key, value));
 
     if (publicMode) payload.append("website", honeypot); // honeypot (bots only)
+    if (!publicMode && !editContactData && effectiveEventId) {
+      payload.append("editionEventId", effectiveEventId);
+    }
 
     if (formData.companyCategory) {
       payload.append("companyCategory", formData.companyCategory);
@@ -658,6 +665,13 @@ export default function CreateContactModal({
         ).unwrap();
 
         showSuccess(res?.message || "Contact updated successfully");
+        // The edit changed a number to one that is on the Block List.
+        if (res?.blocked) {
+          showError(
+            `Blocked number: ${res.blocked.name} — ${res.blocked.reason}` +
+              (res.blocked.blockedByName ? ` (blocked by ${res.blocked.blockedByName})` : "")
+          );
+        }
 
         // Pass guest count (only when it was changed). The contact itself
         // is already saved above, so a failure here is just reported.
@@ -679,6 +693,12 @@ export default function CreateContactModal({
         const res = await dispatch(createContact(payload)).unwrap();
 
         showSuccess(res?.message || "Contact created successfully");
+        if (res?.blocked) {
+          showError(
+            `Blocked number: ${res.blocked.name} — ${res.blocked.reason}` +
+              (res.blocked.blockedByName ? ` (blocked by ${res.blocked.blockedByName})` : "")
+          );
+        }
       }
 
       // Refetch using the list's actual current page/limit/search/sort/

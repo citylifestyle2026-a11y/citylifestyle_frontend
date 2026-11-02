@@ -13,9 +13,10 @@ import CommonPageHeader from "../Components/CommonPageHeader";
 import CommonListLayout from "../Components/CommonListLayout";
 import CommonLoader from "../Components/CommonLoader";
 import CommonEmptyState from "../Components/CommonEmptyState";
-import DeleteEventModal from "../Components/DeleteEventModal";
 import { formatDate, formatDateTime } from "../utilits/dateFormat";
 import { ALL_ROWS_OPTION } from "../utilits/rowsPerPage";
+import { confirmDialog } from "../utilits/appSwal";
+import DeleteEventModal from "../Components/DeleteEventModal";
 
 const columns = [
   { key: "title", label: "Title" },
@@ -52,8 +53,7 @@ const Event = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [openActionId, setOpenActionId] = useState(null);
   const [actionMenuPos, setActionMenuPos] = useState(null);
-  // Holds { id, title } of the event awaiting admin-credential
-  // confirmation (Step 4's secure delete). Null = modal closed.
+  // Event waiting for the admin email + password step of the delete flow.
   const [deleteTarget, setDeleteTarget] = useState(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -156,6 +156,38 @@ const Event = () => {
     setActionMenuPos(null);
   };
 
+  // Delete flow: 1) "Are you sure?" -> 2) admin email + password modal ->
+  // 3) backend verifies the credentials and deletes the event.
+  const handleDeleteClick = async (event) => {
+    closeActionMenu();
+
+    const confirmed = await confirmDialog({
+      title: "Delete this event?",
+      text: `"${event.title}" and all its bookings, tickets and guests will be permanently deleted. This cannot be undone.`,
+      confirmText: "Yes, Delete",
+      tone: "danger",
+    });
+
+    if (!confirmed) return;
+
+    setDeleteTarget(event);
+  };
+
+  const refreshEvents = () => {
+    // If the last row of a page was removed, step back one page.
+    if (events.length <= 1 && currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+      return;
+    }
+    dispatch(
+      getAllEvents({
+        page: currentPage,
+        limit: rowsPerPage,
+        search,
+      })
+    );
+  };
+
   // status changes
   const handleStatusChange = async (event) => {
     // Expired events can never be (re)activated from the frontend — block
@@ -197,30 +229,6 @@ const Event = () => {
         text: error || "Failed to update status.",
       });
     }
-  };
-
-  // delete event
-  // Step 4 flow: existing "Are you sure?" confirmation (unchanged) runs
-  // first; only on confirm does this open DeleteEventModal, which
-  // collects the admin's own email + password and calls the secure
-  // DELETE /events/:id/delete API itself. Cancelling the confirmation
-  // here takes no action at all, same as before.
-  const handleDeleteEvent = async (event) => {
-    closeActionMenu();
-
-    const result = await Swal.fire({
-      icon: "warning",
-      title: "Are you sure?",
-      text: `Do you want to delete "${event.title}"? This action cannot be undone.`,
-      showCancelButton: true,
-      confirmButtonText: "Yes, Delete it!",
-      cancelButtonText: "Cancel",
-      confirmButtonColor: "#dc3545",
-    });
-
-    if (!result.isConfirmed) return;
-
-    setDeleteTarget({ id: event._id, title: event.title });
   };
 
   return (
@@ -405,13 +413,6 @@ const Event = () => {
                                 >
                                   Edit
                                 </button>
-                                <button
-                                  type="button"
-                                  className="eventList__actionItem"
-                                  onClick={() => handleDeleteEvent(event)}
-                                >
-                                  Delete
-                                </button>
                                 <Link
                                   to={`/ticket-type/${event._id}`}
                                   state={{
@@ -427,6 +428,13 @@ const Event = () => {
                                     Ticket Type
                                   </button>
                                 </Link>
+                                <button
+                                  type="button"
+                                  className="eventList__actionItem eventList__actionItem--danger"
+                                  onClick={() => handleDeleteClick(event)}
+                                >
+                                  Delete
+                                </button>
                               </div>,
                               document.body
                             )}
@@ -467,24 +475,14 @@ const Event = () => {
             </div>
           </div> */}
 
-          {deleteTarget && (
-            <div
-              tabIndex={-1}
-              autoFocus
-              onKeyDown={(e) => {
-                if (e.key === "Escape") {
-                  setDeleteTarget(null);
-                }
-              }}
-            >
-              <DeleteEventModal
-                eventId={deleteTarget.id}
-                eventTitle={deleteTarget.title}
-                onClose={() => setDeleteTarget(null)}
-                onSuccess={() => setDeleteTarget(null)}
-              />
-            </div>
-          )}
+      {deleteTarget && (
+        <DeleteEventModal
+          eventId={deleteTarget._id}
+          eventTitle={deleteTarget.title}
+          onClose={() => setDeleteTarget(null)}
+          onSuccess={refreshEvents}
+        />
+      )}
     </CommonListLayout>
   );
 };

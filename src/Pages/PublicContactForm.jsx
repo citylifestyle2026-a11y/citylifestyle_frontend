@@ -8,7 +8,7 @@ import "../assets/CSS/PublicContactForm.css";
 // Images live in /public/assets/images/site (same folder the marketing site uses).
 const IMG = "/assets/images/site";
 const cityToppersLogo = `${IMG}/logo__1_-removebg-preview.png`;
-const parvHero = `${IMG}/parav_image.webp`;
+const parvHero = `${IMG}/parav_image.png`;
 
 // Public contact form, opened by typing /city-lifestyle in the address bar
 // (no login, no button). The form itself is the same one as Contact List ->
@@ -115,6 +115,7 @@ export default function PublicContactForm() {
     return (
       <>
         <p className="cityFormLinkNote cityFormLinkNote--places">
+          {linkInfo.editionName && <b>{linkInfo.editionName} - </b>}
           <span>{linkInfo.remaining} of {linkInfo.quantity} places left (Single = 1, Couple = 2)</span>
         </p>
         <CreateContactModal

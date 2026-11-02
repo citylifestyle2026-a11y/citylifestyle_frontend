@@ -287,6 +287,8 @@ export default function CrewCategory() {
         key: "action",
         label: "Actions",
         sortable: false,
+        headerClassName: "appActionCol",
+        cellClassName: "appActionCol",
         cellStyle: { position: "relative" },
         render: (category) => (
           <div

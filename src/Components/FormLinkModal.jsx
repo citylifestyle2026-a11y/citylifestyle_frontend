@@ -4,6 +4,8 @@ import { createFormLinkApi, updateFormLinkApi } from "../services/formLinkServic
 import { showError, showSuccess } from "../utilits/toast";
 import { getErrorText } from "../utilits/apiError";
 import { copyText } from "../utilits/copyText";
+import useEditionOptions from "../hooks/useEditionOptions";
+import { useGlobalEvent } from "../context/EventContext";
 import { buildFormLinkUrl } from "../services/formLinkService";
 import "../assets/CSS/CreateCompanyCategoryModal.css";
 import "../assets/CSS/FormLinks.css";
@@ -22,6 +24,14 @@ export default function FormLinkModal({ onClose, onSaved, link = null }) {
   // The admin types COUPLES; the link itself stores PERSONS (couples x 2).
   const [quantity, setQuantity] = useState(link ? String(link.quantity / 2) : "");
   const [status, setStatus] = useState(link?.status || "active");
+
+  // Edition (event) the people who fill this link are saved under. New link =
+  // the event currently picked in the header dropdown (or the default one).
+  const { editions, loading: editionsLoading } = useEditionOptions();
+  const { effectiveEventId } = useGlobalEvent();
+  const [editionEventId, setEditionEventId] = useState(
+    link ? link.editionEventId || "" : effectiveEventId || ""
+  );
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
 
@@ -37,6 +47,8 @@ export default function FormLinkModal({ onClose, onSaved, link = null }) {
     const cleanName = name.replace(/\s+/g, " ").trim();
     const couples = Number(quantity);
     const qty = couples * 2; // persons
+
+    if (!editionEventId) next.edition = "Please select an edition.";
 
     if (!cleanName) next.name = "Name is required.";
     else if (cleanName.length > 60) next.name = "Name is too long (max 60 characters).";
@@ -59,6 +71,7 @@ export default function FormLinkModal({ onClose, onSaved, link = null }) {
     const payload = {
       name: name.replace(/\s+/g, " ").trim(),
       quantity: Number(quantity) * 2, // persons
+      editionEventId,
     };
 
     setSaving(true);
@@ -122,6 +135,35 @@ export default function FormLinkModal({ onClose, onSaved, link = null }) {
                 A new name is used only for people who fill the form after this edit.
               </p>
             )}
+          </div>
+
+          <div className="fieldGroup fieldGroupFull">
+            <label className="fieldLabel" htmlFor="flEdition">
+              Edition <span className="required">*</span>
+            </label>
+            <select
+              id="flEdition"
+              className="fieldInput"
+              value={editionEventId}
+              onChange={(e) => setEditionEventId(e.target.value)}
+              disabled={editionsLoading}
+            >
+              <option value="">{editionsLoading ? "Loading..." : "Select edition"}</option>
+              {editions.map((edition) => (
+                <option key={edition.value} value={edition.value}>
+                  {edition.label}
+                </option>
+              ))}
+              {/* An old link's edition that is no longer in the list. */}
+              {editionEventId &&
+                !editions.some((edition) => edition.value === editionEventId) && (
+                  <option value={editionEventId}>{link?.editionName || "Current edition"}</option>
+                )}
+            </select>
+            {errors.edition && <p className="fieldError">{errors.edition}</p>}
+            <p className="formLinks__note">
+              Everyone who fills this link is added to the Guest List of this edition.
+            </p>
           </div>
 
           <div className="fieldGroup fieldGroupFull">

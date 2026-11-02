@@ -197,3 +197,35 @@ section.appCard {
 .appBreadcrumbLink:hover {
   color: #1b2a4e;
 }
+
+
+/* ───────────── Frozen (sticky) Actions column ─────────────
+   Add `appActionCol` as headerClassName + cellClassName on a table's
+   Action column and it stays pinned to the right edge while the table
+   scrolls sideways — same behaviour as Contact List. `!important` on
+   position because those cells also carry an inline `position: relative`. */
+
+.appCard table thead th.appActionCol,
+.appCard table tbody td.appActionCol {
+  position: sticky !important;
+  right: 0;
+  background: #ffffff;
+  box-shadow: -8px 0 10px -8px rgba(0, 0, 0, 0.14);
+}
+
+.appCard table thead th.appActionCol {
+  z-index: 4;
+}
+
+.appCard table tbody td.appActionCol {
+  z-index: 2;
+}
+
+/* The row whose Action menu is open must paint above the rows below it. */
+.appCard table tbody td.appActionCol:has([class*="Action__menuOpen"]) {
+  z-index: 6;
+}
+
+.appCard table tbody tr:hover td.appActionCol {
+  background-color: #fafbfd;
+}

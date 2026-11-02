@@ -155,7 +155,7 @@ function CommonTable({
         {!loading && !error && data.map((row, rowIndex) => (
           <tr key={getRowKey(row, rowIndex)} className={getRowClassName(row, rowIndex)}>
             {columns.map((col) => (
-              <td key={col.key} className={col.cellClassName} style={col.cellStyle}>
+              <td key={col.key} className={col.cellClassName} style={col.cellStyle} data-label={typeof col.label === "string" ? col.label : undefined}>
                 {col.render ? col.render(row, rowIndex) : row?.[col.key]}
               </td>
             ))}

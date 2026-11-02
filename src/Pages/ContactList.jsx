@@ -30,7 +30,7 @@ import ContactDetailsModal from "../Components/ContactDetailsModal";
 import CommonExportButton from "../Components/CommonExportButton";
 import SendPassModal from "../Components/SendPassModal";
 import ImportContactsModal from "../Components/ImportContactsModal";
-import useEditionOptions from "../hooks/useEditionOptions";
+import { useGlobalEvent } from "../context/EventContext";
 import MultiSelect from "../Components/MultiSelect";
 import { ContactPerson, InstagramLink } from "../Components/ContactAvatar";
 
@@ -56,8 +56,10 @@ import {
   getAllContactsApi,
 } from "../services/contactService";
 import MergeMemberModal from "../Components/MergeMemberModal";
+import BlockedBadge from "../Components/BlockedBadge";
 import DuplicateTab from "../Components/DuplicateTab";
 import { confirmDialog, noticeDialog } from "../utilits/appSwal";
+import { confirmBlockedContacts } from "../utilits/blockedConfirm";
 import "../assets/CSS/ContactList.css";
 import useClickOutside from "../hooks/useClickOutside";
 import useActionMenuRoom from "../hooks/useActionMenuRoom";
@@ -101,6 +103,8 @@ const STATUS_TABS = [
   { value: "passCancelled", label: "Pass Cancelled", countKey: "passCancelled" },
   // Form submissions whose WhatsApp number is already in the Guest List.
   { value: "duplicate", label: "Duplicate", countKey: "duplicate" },
+  // Guests whose number is on the Block List.
+  { value: "blocked", label: "Blocked", countKey: "blocked" },
 ];
 
 // Inside the Hamper tab: every guest in the hamper, or only sent / not sent.
@@ -197,13 +201,15 @@ export default function ContactList() {
 
   // Edition (event) the guests were moved into from Contact Book. Can be
   // preset with /gust-list?edition=<eventId>.
+  // The Guest List always shows ONE event: the one picked in the header
+  // dropdown. /gust-list?edition=<eventId> (from Move to Guest List) picks it.
   const [searchParams] = useSearchParams();
-  const [editionFilter, setEditionFilter] = useState(
-    searchParams.get("edition") || ""
-  );
-  // Only editions of active events (the selected one always stays listed).
-  const { editions: editionOptions, loading: editionsLoading } =
-    useEditionOptions({ activeOnly: true, include: editionFilter });
+  const { effectiveEventId: editionFilter, setSelectedEventId } = useGlobalEvent();
+  useEffect(() => {
+    const fromLink = searchParams.get("edition");
+    if (fromLink) setSelectedEventId(fromLink);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Checkbox selection (id -> contact). Kept across pages so many contacts
   // can be approved / rejected / sent a pass in one go.
@@ -280,6 +286,7 @@ export default function ContactList() {
     if (referenceFilter.length) params.reference = referenceFilter;
     if (areaFilter.length) params.area = areaFilter;
     if (statusFilter === "passCancelled") params.passStatus = "cancelled";
+    else if (statusFilter === "blocked") params.blocked = "true";
     else if (statusFilter && statusFilter !== "duplicate" && statusFilter !== "hamper") params.approvalStatus = statusFilter;
     if (statusFilter === "hamper") params.hamper = hamperFilter || "all";
     if (editionFilter) params.editionEventId = editionFilter;
@@ -387,6 +394,7 @@ export default function ContactList() {
     if (referenceFilter.length) params.reference = referenceFilter;
     if (areaFilter.length) params.area = areaFilter;
     if (statusFilter === "passCancelled") params.passStatus = "cancelled";
+    else if (statusFilter === "blocked") params.blocked = "true";
     else if (statusFilter && statusFilter !== "duplicate" && statusFilter !== "hamper") params.approvalStatus = statusFilter;
     if (statusFilter === "hamper") params.hamper = hamperFilter || "all";
     if (editionFilter) params.editionEventId = editionFilter;
@@ -459,6 +467,7 @@ export default function ContactList() {
       if (referenceFilter.length) params.reference = referenceFilter;
       if (areaFilter.length) params.area = areaFilter;
       if (statusFilter === "passCancelled") params.passStatus = "cancelled";
+    else if (statusFilter === "blocked") params.blocked = "true";
     else if (statusFilter && statusFilter !== "duplicate" && statusFilter !== "hamper") params.approvalStatus = statusFilter;
     if (statusFilter === "hamper") params.hamper = hamperFilter || "all";
       if (editionFilter) params.editionEventId = editionFilter;
@@ -597,6 +606,7 @@ export default function ContactList() {
     if (referenceFilter.length) params.reference = referenceFilter;
     if (areaFilter.length) params.area = areaFilter;
     if (statusFilter === "passCancelled") params.passStatus = "cancelled";
+    else if (statusFilter === "blocked") params.blocked = "true";
     else if (statusFilter && statusFilter !== "duplicate" && statusFilter !== "hamper") params.approvalStatus = statusFilter;
     if (statusFilter === "hamper") params.hamper = hamperFilter || "all";
     if (editionFilter) params.editionEventId = editionFilter;
@@ -710,6 +720,17 @@ export default function ContactList() {
 
       if (!(await confirmDialog(dialog))) return;
 
+      // Approving a blocked number: show the reason and ask once more.
+      let confirmBlocked = false;
+      if (status === "approved") {
+        const blockedCheck = await confirmBlockedContacts(
+          targets.filter((contact) => getApprovalStatus(contact) !== "approved"),
+          { action: "approve", confirmText: "Yes, Approve anyway" }
+        );
+        if (!blockedCheck.ok) return;
+        confirmBlocked = blockedCheck.confirmBlocked;
+      }
+
       setStatusBusy(true);
 
       try {
@@ -717,6 +738,7 @@ export default function ContactList() {
           bulkUpdateContactStatus({
             ids: targets.map((contact) => contact._id),
             status,
+            ...(confirmBlocked ? { confirmBlocked: true } : {}),
           })
         ).unwrap();
 
@@ -982,10 +1004,19 @@ export default function ContactList() {
 
       if (!confirmed) return;
 
+      const blockedCheck = await confirmBlockedContacts(targets, {
+        action: "resend the pass",
+        confirmText: "Yes, Resend anyway",
+      });
+      if (!blockedCheck.ok) return;
+
       setResendBusyId(one ? targets[0]._id : "bulk");
 
       try {
-        const res = await resendContactPassApi({ ids: targets.map((contact) => contact._id) });
+        const res = await resendContactPassApi({
+          ids: targets.map((contact) => contact._id),
+          ...(blockedCheck.confirmBlocked ? { confirmBlocked: true } : {}),
+        });
         showSuccess(res.message || "Pass sent again.");
 
         setSelected((prev) => {
@@ -1282,7 +1313,10 @@ const sortedReferenceFilterOptions = useMemo(
       sortableColumn("fullName", "Full Name", {
         cellClassName: "contactPage__contactName",
         render: (contact) => (
-          <ContactPerson name={contact.fullName} image={contact.profileImage} />
+          <>
+            <ContactPerson name={contact.fullName} image={contact.profileImage} />
+            <BlockedBadge blocked={contact.blocked} />
+          </>
         ),
       }),
       {
@@ -2126,21 +2160,6 @@ const sortedReferenceFilterOptions = useMemo(
             searchPlaceholder="Search area..."
             loading={uniqueAreasLoading}
             options={areaFilterOptions}
-          />
-
-          <CommonSelect
-            className="contactPage__filterSelect"
-            value={editionFilter}
-            onChange={(e) => {
-              setEditionFilter(e.target.value);
-              setCurrentPage(1);
-            }}
-            placeholder="All Editions"
-            loading={editionsLoading}
-            options={editionOptions.map((e) => ({
-              value: e.value,
-              label: e.label,
-            }))}
           />
 
           <CommonSelect

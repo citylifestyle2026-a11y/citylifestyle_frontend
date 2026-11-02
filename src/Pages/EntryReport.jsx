@@ -6,6 +6,7 @@ import "react-date-range/dist/theme/default.css";
 import "../assets/CSS/EntryReport.css";
 import CommonSearch from "../Components/CommonSearch";
 import CommonSelect from "../Components/CommonSelect";
+import { useGlobalEvent } from "../context/EventContext";
 import CommonPagination from "../Components/CommonPagination";
 import CommonExportButton from "../Components/CommonExportButton";
 import CommonPageHeader from "../Components/CommonPageHeader";
@@ -155,7 +156,9 @@ export default function EntryReport() {
   // The event the user has picked from the Event dropdown. Starts empty
   // on purpose — the report is never auto-locked to the first/only event
   // returned by the API; the user must actively select one.
-  const [selectedEventId, setSelectedEventId] = useState("");
+  // The event is the one picked in the header dropdown (same on every page).
+  const { effectiveEventId: selectedEventId } = useGlobalEvent();
+  const setSelectedEventId = () => {};
   const eventId = selectedEventId;
 
   // Tracks whether an event selection is "in effect" — either the user
@@ -887,20 +890,6 @@ export default function EntryReport() {
                   and the report loads every active event's entries for
                   that default automatically — the user isn't required to
                   pick a specific event or click Search first. */}
-          <CommonSelect
-            className="erPage__input erPage__eventSelect"
-            value={selectedEventId}
-            onChange={handleEventChange}
-            disabled={activeEventsLoading}
-            placeholder={activeEventsLoading ? "Loading events..." : "All Events"}
-            options={activeEvents.map((evt) => ({
-              value: evt._id,
-              label:
-                (evt.title || evt.name || "Event") +
-                (evt.eventCode ? ` - ${evt.eventCode}` : ""),
-            }))}
-          />
-
           <div className="erPage__dateRangeWrapper">
             <input
               type="text"
