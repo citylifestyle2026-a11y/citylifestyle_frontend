@@ -1,17 +1,34 @@
+import { useEffect, useMemo, useState } from "react";
 import "../assets/CSS/ContactAvatar.css";
 import { getInstagramUrl } from "../utilits/instagram";
+import { imageUrlCandidates } from "../utilits/imageUrl";
 
 // Round profile photo, or the person's first letter when no photo was
 // uploaded. Shared by the Contact List table and the Contact Details modal.
 export function ContactAvatar({ src, name, size = 36 }) {
   const initial = String(name || "?").trim().charAt(0).toUpperCase() || "?";
 
+  // Tries the corrected URL first, then the saved one. If none loads (file
+  // missing / wrong host) the first letter is shown instead of a broken image.
+  const candidates = useMemo(() => imageUrlCandidates(src), [src]);
+  const [attempt, setAttempt] = useState(0);
+  useEffect(() => setAttempt(0), [candidates]);
+  const current = candidates[attempt];
+
   return (
     <span
       className="contactAvatar"
       style={{ width: size, height: size, fontSize: Math.round(size * 0.42) }}
     >
-      {src ? <img src={src} alt={name || "Profile"} /> : initial}
+      {current ? (
+        <img
+          src={current}
+          alt={name || "Profile"}
+          onError={() => setAttempt((n) => n + 1)}
+        />
+      ) : (
+        initial
+      )}
     </span>
   );
 }
