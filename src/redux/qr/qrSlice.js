@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import {
   verifyQr,
   checkInQr,
+  faceCheckInQr,
 } from "./qrThunk";
 
 /**
@@ -124,6 +125,28 @@ const qrSlice = createSlice({
         state.checkIn.error = action.payload || {
           type: "SERVER",
           message: "Failed to check-in QR",
+        };
+      });
+
+    // ================= FACE CHECK-IN (same "checkIn" flags) =================
+    builder
+      .addCase(faceCheckInQr.pending, (state) => {
+        state.checkIn.loading = true;
+        state.checkIn.success = false;
+        state.checkIn.error = null;
+      })
+      .addCase(faceCheckInQr.fulfilled, (state, action) => {
+        state.checkIn.loading = false;
+        state.checkIn.success = true;
+        state.message = action.payload.message ?? "";
+      })
+      .addCase(faceCheckInQr.rejected, (state, action) => {
+        if (action.meta.aborted) return;
+        state.checkIn.loading = false;
+        state.checkIn.success = false;
+        state.checkIn.error = action.payload || {
+          type: "SERVER",
+          message: "Failed to check-in face",
         };
       });
   },

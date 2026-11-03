@@ -19,6 +19,7 @@ import {
   selectQrTicket,
 } from "../../redux/qr/qrSlice";
 
+import FaceScanPanel from "./FaceScanPanel";
 import "./QRScannerModal.css";
 
 const SCANNER_ELEMENT_ID = "qr-scanner-region";
@@ -334,6 +335,9 @@ const QRScannerModal = ({ isOpen, onClose, onVerified, onCheckedIn }) => {
   const [activeCameraId, setActiveCameraId] = useState(null);
   const [cameraError, setCameraError] = useState(null);
   const [isScanning, setIsScanning] = useState(false);
+  // "qr" = scan the ticket QR (original), "face" = recognise the guest's face
+  // from the photo they uploaded at registration.
+  const [mode, setMode] = useState("qr");
   // Pass with 2+ guests still to enter: how many are entering now, and the
   // result of the last check-in (to show "2 entered, 1 can enter later").
   const [pickedGuests, setPickedGuests] = useState(1);
@@ -522,8 +526,27 @@ const QRScannerModal = ({ isOpen, onClose, onVerified, onCheckedIn }) => {
   const handleClose = useCallback(async () => {
     await enqueueCameraOperation(() => stopScanner());
     resetVerificationState();
+    setMode("qr");
     if (onClose) onClose();
   }, [enqueueCameraOperation, stopScanner, resetVerificationState, onClose]);
+
+  // QR <-> Face tab. Only one of them may use the camera at a time: the QR
+  // camera effect below stops itself when the Face tab is open. Clearing the
+  // verification state also clears the "check-in success" flag a face entry
+  // leaves behind, so the next QR scan is not shown as already checked in.
+  const switchMode = useCallback(
+    (next) => {
+      if (next === mode) return;
+      resetVerificationState();
+      setMode(next);
+    },
+    [mode, resetVerificationState]
+  );
+
+  const playFaceSound = useCallback((ok) => {
+    if (ok) playSound(SUCCESS_SOUND_URL, 880);
+    else playSound(WRONG_SOUND_URL, 220);
+  }, []);
 
   // "Scan Next": clear current result and restart the camera.
   // Used to recover from every non-valid result state as well.
@@ -634,7 +657,9 @@ const QRScannerModal = ({ isOpen, onClose, onVerified, onCheckedIn }) => {
   // ---------- lifecycle: camera init, scoped to isOpen ----------
 
   useEffect(() => {
-    if (!isOpen) return undefined;
+    // The QR camera is only needed on the QR tab; the Face tab owns the
+    // camera while it is open (two screens can not use it at once).
+    if (!isOpen || mode !== "qr") return undefined;
 
     let cancelled = false;
 
@@ -717,7 +742,7 @@ const QRScannerModal = ({ isOpen, onClose, onVerified, onCheckedIn }) => {
         setCameraError(null);
       }
     };
-  }, [isOpen, enqueueCameraOperation, startScanner, stopScanner]);
+  }, [isOpen, mode, enqueueCameraOperation, startScanner, stopScanner]);
 
   // ---------- lifecycle: focus trap + restore, Escape to close ----------
 
@@ -766,7 +791,9 @@ const QRScannerModal = ({ isOpen, onClose, onVerified, onCheckedIn }) => {
                 ? "Ticket Details"
                 : resultState
                   ? "Scan Result"
-                  : "Scan Ticket QR"}
+                  : mode === "face"
+                    ? "Scan Face"
+                    : "Scan Ticket QR"}
             </p>
             <p className="crmQrHeaderSubtitle">
               {isValidTicket
@@ -775,7 +802,9 @@ const QRScannerModal = ({ isOpen, onClose, onVerified, onCheckedIn }) => {
                   : "Confirming entry automatically..."
                 : resultState
                   ? "Here's what we found"
-                  : "Align the QR code within the frame"}
+                  : mode === "face"
+                    ? "Show the guest's face to the camera"
+                    : "Align the QR code within the frame"}
             </p>
           </div>
           <button
@@ -788,8 +817,37 @@ const QRScannerModal = ({ isOpen, onClose, onVerified, onCheckedIn }) => {
           </button>
         </div>
 
-        {/* ---------------- Scanner view (idle / actively scanning) ---------------- */}
+        {/* ---------------- QR | Face tabs ---------------- */}
         {!resultState && (
+          <div className="crmQrTabs" role="tablist" aria-label="Scan type">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === "qr"}
+              className={`crmQrTab${mode === "qr" ? " crmQrTabActive" : ""}`}
+              onClick={() => switchMode("qr")}
+            >
+              QR Scan
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === "face"}
+              className={`crmQrTab${mode === "face" ? " crmQrTabActive" : ""}`}
+              onClick={() => switchMode("face")}
+            >
+              Face Scan
+            </button>
+          </div>
+        )}
+
+        {/* ---------------- Face Scan ---------------- */}
+        {!resultState && mode === "face" && (
+          <FaceScanPanel onCheckedIn={onCheckedIn} onSound={playFaceSound} />
+        )}
+
+        {/* ---------------- Scanner view (idle / actively scanning) ---------------- */}
+        {!resultState && mode === "qr" && (
           <>
             {cameras.length > 1 && (
               <div className="crmQrCameraBar">

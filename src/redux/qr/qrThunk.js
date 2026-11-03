@@ -3,6 +3,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import {
   verifyQrApi,
   checkInQrApi,
+  faceCheckInApi,
 } from "../../services/qrService";
 import { getApiErrorMessage } from "../../utilits/apiError";
 
@@ -76,6 +77,33 @@ export const checkInQr = createAsyncThunk(
   },
   {
     // Prevent double check-in taps from firing duplicate requests
+    condition: (_data, { getState }) => {
+      const { qr } = getState();
+      if (qr?.checkIn?.loading) return false;
+      return true;
+    },
+  }
+);
+
+// ================= FACE CHECK-IN =================
+// Staff confirmed a Face Scan match -> check that exact ticket in. Shares the
+// "checkIn" state with the QR check-in, so screens that refresh after a
+// check-in (e.g. Entry Report) also refresh after a face check-in.
+export const faceCheckInQr = createAsyncThunk(
+  "qr/faceCheckInQr",
+  async (data, thunkAPI) => {
+    try {
+      return await faceCheckInApi(data, { signal: thunkAPI.signal });
+    } catch (error) {
+      if (thunkAPI.signal.aborted) {
+        return thunkAPI.rejectWithValue(null);
+      }
+      return thunkAPI.rejectWithValue(
+        buildQrError(error, "Failed to check-in face")
+      );
+    }
+  },
+  {
     condition: (_data, { getState }) => {
       const { qr } = getState();
       if (qr?.checkIn?.loading) return false;

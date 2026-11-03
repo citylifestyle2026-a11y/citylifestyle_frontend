@@ -689,3 +689,99 @@
 .crmQrGuestPickStepper button:disabled { background: #d0d5dd; cursor: not-allowed; }
 .crmQrGuestPickHint { margin: 0 0 10px; font-size: 13px; color: #b54708; }
 .crmQrGuestPickOk { width: 100%; margin-top: 6px; }
+
+/* =========================================================
+   Face Scan tab
+   ========================================================= */
+.crmQrTabs {
+  display: flex;
+  gap: 8px;
+  margin: 14px 20px 0;
+  padding: 4px;
+  background: var(--crmQr-surface-soft);
+  border-radius: var(--crmQr-radius-sm);
+  flex-shrink: 0;
+}
+.crmQrTab {
+  flex: 1;
+  padding: 9px 0;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--crmQr-text-muted);
+  cursor: pointer;
+}
+.crmQrTabActive {
+  background: var(--crmQr-surface);
+  color: var(--crmQr-text-primary);
+  box-shadow: 0 2px 6px rgba(15, 15, 20, 0.12);
+}
+.crmQrFaceWrapper {
+  position: relative;
+  margin: 14px 20px 0;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--crmQr-radius-md);
+  overflow: hidden;
+  background: var(--crmQr-bg-dark);
+  flex-shrink: 0;
+}
+.crmQrFaceVideo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.crmQrFaceVideoMirror { transform: scaleX(-1); }
+.crmQrFaceOval {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 86%;
+  aspect-ratio: 3 / 4;
+  border: 4px solid var(--crmQr-invalid);
+  border-radius: 50%;
+  box-shadow: 0 0 0 2000px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  transition: border-color 0.2s ease;
+}
+.crmQrFaceOvalBlue { border-color: var(--crmQr-accent-blue); }
+.crmQrFaceOvalGreen { border-color: var(--crmQr-accent-green); }
+.crmQrFaceOvalAmber { border-color: var(--crmQr-used); }
+.crmQrFaceOvalRed { border-color: var(--crmQr-invalid); }
+.crmQrFaceTools { display: flex; justify-content: flex-end; margin: 8px 20px 0; }
+.crmQrFaceFlip {
+  padding: 5px 10px;
+  font-size: 12px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  background: var(--crmQr-surface);
+  color: var(--crmQr-text-primary);
+  cursor: pointer;
+}
+.crmQrFaceMessage { font-weight: 600; }
+.crmQrFaceConfirm { padding-top: 4px; }
+.crmQrFaceCompare { display: flex; gap: 12px; margin: 10px 20px 0; }
+.crmQrFaceCompare figure { flex: 1; margin: 0; text-align: center; }
+.crmQrFaceCompare img,
+.crmQrFaceNoPhoto {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: var(--crmQr-radius-sm);
+  background: var(--crmQr-surface-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--crmQr-text-muted);
+}
+.crmQrFaceCompare figcaption { margin-top: 4px; font-size: 12px; color: var(--crmQr-text-muted); }
+.crmQrFaceCard { margin-top: 12px; }
+.crmQrFaceLevel { font-size: 13px; font-weight: 700; }
+.crmQrFaceLevel-high { color: #027a48; }
+.crmQrFaceLevel-good { color: #b54708; }
+.crmQrFaceLevel-check { color: #b42318; }
