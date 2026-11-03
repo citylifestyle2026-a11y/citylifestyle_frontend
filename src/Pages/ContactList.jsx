@@ -1005,18 +1005,11 @@ export default function ContactList() {
 
       if (!confirmed) return;
 
-      const blockedCheck = await confirmBlockedContacts(targets, {
-        action: "resend the pass",
-        confirmText: "Yes, Resend anyway",
-      });
-      if (!blockedCheck.ok) return;
-
       setResendBusyId(one ? targets[0]._id : "bulk");
 
       try {
         const res = await resendContactPassApi({
           ids: targets.map((contact) => contact._id),
-          ...(blockedCheck.confirmBlocked ? { confirmBlocked: true } : {}),
         });
         showSuccess(res.message || "Pass sent again.");
 

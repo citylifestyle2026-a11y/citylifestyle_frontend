@@ -10,7 +10,7 @@ const DEFAULT_LABEL = "Active Event (Default)";
 // A custom (styled) dropdown instead of the browser's native <select>, so the
 // open list matches the admin theme. Same context values as before.
 export default function GlobalEventSelect() {
-  const { selectedEventId, setSelectedEventId, eventOptions } = useGlobalEvent();
+  const { selectedEventId, setSelectedEventId, eventOptions, defaultEvent } = useGlobalEvent();
   const [open, setOpen] = useState(false);
   const wrapRef = useRef(null);
 
@@ -25,7 +25,15 @@ export default function GlobalEventSelect() {
     return () => document.removeEventListener("keydown", onKey);
   }, [open]);
 
-  const items = [{ value: "", label: DEFAULT_LABEL }, ...eventOptions];
+  // The default entry shows the real name of the event it stands for,
+  // e.g. "Test Event 1 (Default)"; the generic text only while it is unknown.
+  const defaultLabel = defaultEvent?.title ? `${defaultEvent.title} (Default)` : DEFAULT_LABEL;
+  const defaultExpired = Boolean(defaultEvent?.endDateTime) && new Date(defaultEvent.endDateTime).getTime() < Date.now();
+  // An event that has ended shows "Expired" next to its name.
+  const items = [
+    { value: "", label: defaultLabel, expired: defaultExpired },
+    ...eventOptions,
+  ].map((o) => ({ ...o, text: o.expired ? `${o.label} (Expired)` : o.label }));
   const current = items.find((o) => o.value === selectedEventId) || items[0];
 
   const pick = (value) => {
@@ -44,9 +52,9 @@ export default function GlobalEventSelect() {
           onClick={() => setOpen((v) => !v)}
           aria-haspopup="listbox"
           aria-expanded={open}
-          title={current.label}
+          title={current.text}
         >
-          <span className="globalEventSelect__value">{current.label}</span>
+          <span className="globalEventSelect__value">{current.text}</span>
           <FaChevronDown className="globalEventSelect__chevron" />
         </button>
 
@@ -60,9 +68,9 @@ export default function GlobalEventSelect() {
                     type="button"
                     className={`globalEventSelect__option${selected ? " is-selected" : ""}`}
                     onClick={() => pick(opt.value)}
-                    title={opt.label}
+                    title={opt.text}
                   >
-                    <span className="globalEventSelect__optionText">{opt.label}</span>
+                    <span className="globalEventSelect__optionText">{opt.text}</span>
                     {selected && <FaCheck className="globalEventSelect__check" />}
                   </button>
                 </li>

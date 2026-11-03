@@ -21,6 +21,7 @@ const STORAGE_KEY = "cl_selected_event";
 const EventContext = createContext({
   selectedEventId: "",
   effectiveEventId: "",
+  defaultEvent: null,
   setSelectedEventId: () => {},
   events: [],
   eventOptions: [],
@@ -34,6 +35,10 @@ const readStored = () => {
     return "";
   }
 };
+
+// An event whose end date/time has passed.
+export const isEnded = (e) =>
+  Boolean(e?.endDateTime) && new Date(e.endDateTime).getTime() < Date.now();
 
 // Same rule as the dashboard: running event first, else the last ended one.
 const pickDefaultEvent = (events) => {
@@ -95,7 +100,7 @@ export function EventProvider({ children }) {
     () =>
       events
         .filter((e) => e.isActive === true)
-        .map((e) => ({ value: e._id, label: e.title })),
+        .map((e) => ({ value: e._id, label: e.title, expired: isEnded(e) })),
     [events]
   );
 
@@ -105,11 +110,21 @@ export function EventProvider({ children }) {
     if (!eventOptions.some((o) => o.value === selectedEventId)) setSelectedEventId("");
   }, [loading, events, eventOptions, selectedEventId, setSelectedEventId]);
 
-  const effectiveEventId = selectedEventId || pickDefaultEvent(events)?._id || "";
+  // The event "Active Event (Default)" stands for (shown by its name in the header).
+  const defaultEvent = useMemo(() => pickDefaultEvent(events), [events]);
+  const effectiveEventId = selectedEventId || defaultEvent?._id || "";
 
   const value = useMemo(
-    () => ({ selectedEventId, effectiveEventId, setSelectedEventId, events, eventOptions, loading }),
-    [selectedEventId, effectiveEventId, setSelectedEventId, events, eventOptions, loading]
+    () => ({
+      selectedEventId,
+      effectiveEventId,
+      defaultEvent,
+      setSelectedEventId,
+      events,
+      eventOptions,
+      loading,
+    }),
+    [selectedEventId, effectiveEventId, defaultEvent, setSelectedEventId, events, eventOptions, loading]
   );
 
   return <EventContext.Provider value={value}>{children}</EventContext.Provider>;
