@@ -484,7 +484,10 @@ export default function EventHistory() {
           return (
             <div className="eventHistoryPage__statusSummary">
               {[...counts.entries()].map(([status, count]) => (
-                <span key={status} className="eventHistoryPage__statusCount">
+                <span
+                  key={status}
+                  className={`eventHistoryPage__statusCount eventHistoryPage__statusCount--${status.replace(/\s+/g, "")}`}
+                >
                   {entries.length > 1 ? `${count} ${status}` : status}
                 </span>
               ))}

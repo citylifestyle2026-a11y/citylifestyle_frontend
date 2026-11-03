@@ -681,6 +681,19 @@
   white-space: nowrap;
 }
 
+/* Status summary text: green = Attended, red = Not Attended */
+.eventHistoryPage__statusCount {
+  font-weight: 700;
+}
+
+.eventHistoryPage__statusCount--Attended {
+  color: #1e8a3c;
+}
+
+.eventHistoryPage__statusCount--NotAttended {
+  color: #c92a2a;
+}
+
 .eventHistoryPage__stackedCell {
   display: flex;
   flex-direction: column;

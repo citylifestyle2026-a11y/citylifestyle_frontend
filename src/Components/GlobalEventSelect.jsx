@@ -28,12 +28,13 @@ export default function GlobalEventSelect() {
   // The default entry shows the real name of the event it stands for,
   // e.g. "Test Event 1 (Default)"; the generic text only while it is unknown.
   const defaultLabel = defaultEvent?.title ? `${defaultEvent.title} (Default)` : DEFAULT_LABEL;
-  const defaultExpired = Boolean(defaultEvent?.endDateTime) && new Date(defaultEvent.endDateTime).getTime() < Date.now();
-  // An event that has ended shows "Expired" next to its name.
-  const items = [
-    { value: "", label: defaultLabel, expired: defaultExpired },
-    ...eventOptions,
-  ].map((o) => ({ ...o, text: o.expired ? `${o.label} (Expired)` : o.label }));
+  // The default event is already the first entry, so it is not listed a second
+  // time (picking it again would mean the same thing).
+  const defaultId = defaultEvent?._id ? String(defaultEvent._id) : "";
+  const otherEvents = defaultId
+    ? eventOptions.filter((o) => String(o.value) !== defaultId)
+    : eventOptions;
+  const items = [{ value: "", label: defaultLabel }, ...otherEvents];
   const current = items.find((o) => o.value === selectedEventId) || items[0];
 
   const pick = (value) => {
@@ -52,9 +53,9 @@ export default function GlobalEventSelect() {
           onClick={() => setOpen((v) => !v)}
           aria-haspopup="listbox"
           aria-expanded={open}
-          title={current.text}
+          title={current.label}
         >
-          <span className="globalEventSelect__value">{current.text}</span>
+          <span className="globalEventSelect__value">{current.label}</span>
           <FaChevronDown className="globalEventSelect__chevron" />
         </button>
 
@@ -68,9 +69,9 @@ export default function GlobalEventSelect() {
                     type="button"
                     className={`globalEventSelect__option${selected ? " is-selected" : ""}`}
                     onClick={() => pick(opt.value)}
-                    title={opt.text}
+                    title={opt.label}
                   >
-                    <span className="globalEventSelect__optionText">{opt.text}</span>
+                    <span className="globalEventSelect__optionText">{opt.label}</span>
                     {selected && <FaCheck className="globalEventSelect__check" />}
                   </button>
                 </li>
