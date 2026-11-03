@@ -12,8 +12,17 @@ import { useLayoutEffect } from "react";
 //   wrapperRef   - ref of the scroll wrapper around the table
 //   openKey      - id of the row whose menu is open (null = none)
 //   openSelector - CSS selector of the open menu, e.g. ".contactAction__menuOpen"
+//
+// NOTE: superseded by hooks/useFloatingActionMenus.js, which now keeps every
+// open Action menu fully visible on every page (position: fixed, flips up when
+// there is no room below). This hook is kept so existing pages do not break,
+// but it no longer adds any extra padding (SKIP_PADDING).
+const SKIP_PADDING = true;
+
 export default function useActionMenuRoom(wrapperRef, openKey, openSelector) {
   useLayoutEffect(() => {
+    if (SKIP_PADDING) return undefined;
+
     const wrapper = wrapperRef.current;
     if (!wrapper) return undefined;
 

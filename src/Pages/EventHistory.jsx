@@ -14,6 +14,7 @@ import CommonPagination from "../Components/CommonPagination";
 import CommonExportButton from "../Components/CommonExportButton";
 import CreateEventHistoryModal from "../Components/CreateEventHistoryModal";
 import DeleteUserModal from "../Components/DeleteUserModal";
+import ReferenceDetailsModal from "../Components/ReferenceDetailsModal";
 
 import { getAllEventHistory, deleteEventHistory } from "../redux/contactEventHistory/contactEventHistoryThunk";
 import { clearContactEventHistoryState } from "../redux/contactEventHistory/contactEventHistorySlice";
@@ -75,6 +76,8 @@ const DELETED_LABEL = "Deleted guest";
 
 // Event badges shown per row before "+N more".
 const MAX_VISIBLE_EVENTS = 3;
+// Editions whose reference is shown per row before "+N more".
+const MAX_VISIBLE_REFERENCE_EDITIONS = 2;
 
 export default function EventHistory() {
   const dispatch = useDispatch();
@@ -88,7 +91,8 @@ export default function EventHistory() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [eventFilter, setEventFilter] = useState("");
+  // Several editions can be ticked (array of event ids; [] = all editions).
+  const [eventFilter, setEventFilter] = useState([]);
   // Status is filtered with the Attended / Not Attended cards (no dropdown).
   const [statusFilter, setStatusFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
@@ -142,6 +146,8 @@ export default function EventHistory() {
   const [deleteEntryIds, setDeleteEntryIds] = useState([]);
   const [deleteEntryName, setDeleteEntryName] = useState("");
   const [openActionMenuId, setOpenActionMenuId] = useState(null);
+  // Row whose full "Reference by Edition" list is open in the modal.
+  const [referenceModalRow, setReferenceModalRow] = useState(null);
   // Rows whose full event list / notes are expanded. Collapsed rows stay
   // one line high no matter how many events a person has.
   const [expandedRowIds, setExpandedRowIds] = useState([]);
@@ -167,7 +173,7 @@ export default function EventHistory() {
 
   const currentQuery = useMemo(() => {
     const q = { page: currentPage, limit: rowsPerPage };
-    if (eventFilter) q.eventId = eventFilter;
+    if (eventFilter.length) q.eventId = eventFilter;
     if (statusFilter) q.status = statusFilter;
     if (categoryFilter) q.category = categoryFilter;
     if (referenceFilter.length) q.reference = referenceFilter;
@@ -182,7 +188,7 @@ export default function EventHistory() {
   const loadStats = useCallback(async () => {
     try {
       const params = {};
-      if (eventFilter) params.eventId = eventFilter;
+      if (eventFilter.length) params.eventId = eventFilter;
       if (categoryFilter) params.category = categoryFilter;
       if (referenceFilter.length) params.reference = referenceFilter;
       if (search) params.search = search;
@@ -249,7 +255,7 @@ export default function EventHistory() {
     setExportLoading(true);
     try {
       const params = {};
-      if (eventFilter) params.eventId = eventFilter;
+      if (eventFilter.length) params.eventId = eventFilter;
       if (statusFilter) params.status = statusFilter;
       if (categoryFilter) params.category = categoryFilter;
       if (referenceFilter.length) params.reference = referenceFilter;
@@ -403,26 +409,67 @@ export default function EventHistory() {
       {
         key: "reference",
         label: "Reference",
-        // One chip per reference; the ticked ones are highlighted.
+        // Reference PER EDITION (Parv 6 -> Mukund, Parv 7 -> Rahul). Only the
+        // first MAX_VISIBLE_REFERENCE_EDITIONS editions show; "+N more" opens a
+        // modal listing every edition, so the row stays compact. Ticked references
+        // are highlighted.
         render: (row) => {
-          const refs = (row.references || [])
-            .slice()
-            .sort((a, b) => a.trim().toLowerCase().localeCompare(b.trim().toLowerCase()));
-          if (refs.length === 0) return "-";
+          const sortRefs = (list) =>
+            (list || [])
+              .slice()
+              .sort((x, y) => x.trim().toLowerCase().localeCompare(y.trim().toLowerCase()));
+
+          const perEdition = (row.entries || [])
+            .map((entry) => ({
+              id: entry._id,
+              edition: editionLabel(entry.eventId),
+              refs: sortRefs(entry.references),
+            }))
+            .filter((item) => item.refs.length > 0);
+
+          // Old rows without per-edition data: fall back to the merged list.
+          if (perEdition.length === 0) {
+            const merged = sortRefs(row.references);
+            if (merged.length === 0) return "-";
+            perEdition.push({ id: "all", edition: "", refs: merged });
+          }
+
+          const shown = perEdition.slice(0, MAX_VISIBLE_REFERENCE_EDITIONS);
+          const hidden = perEdition.length - MAX_VISIBLE_REFERENCE_EDITIONS;
+
           return (
-            <span className="eventHistoryPage__referenceCell">
-              {refs.map((ref) => {
-                const hit = referenceFilterKeys.has(ref.trim().toLowerCase());
-                return (
-                  <span
-                    key={ref}
-                    className={`eventHistoryPage__referenceChip${hit ? " eventHistoryPage__hit" : ""}`}
-                  >
-                    {ref}
+            <div className="eventHistoryPage__referenceByEdition">
+              {shown.map((item) => (
+                <div key={item.id} className="eventHistoryPage__referenceLine">
+                  {item.edition && (
+                    <span className="eventHistoryPage__referenceEdition">{item.edition}</span>
+                  )}
+                  <span className="eventHistoryPage__referenceCell">
+                    {item.refs.map((ref) => {
+                      const hit = referenceFilterKeys.has(ref.trim().toLowerCase());
+                      return (
+                        <span
+                          key={ref}
+                          className={`eventHistoryPage__referenceChip${hit ? " eventHistoryPage__hit" : ""}`}
+                        >
+                          {ref}
+                        </span>
+                      );
+                    })}
                   </span>
-                );
-              })}
-            </span>
+                </div>
+              ))}
+              {hidden > 0 && (
+                <button
+                  type="button"
+                  className="eventHistoryPage__moreBtn"
+                  onClick={() => setReferenceModalRow(row)}
+                  title="Show every edition's reference"
+                >
+                  {`+${hidden} more`}
+                </button>
+              )}
+            </div>
           );
         },
       },
@@ -672,6 +719,26 @@ export default function EventHistory() {
             </div>
           )}
 
+          {referenceModalRow && (() => {
+            const person = personOf(referenceModalRow);
+            return (
+              <ReferenceDetailsModal
+                personName={referenceModalRow.isSpouse ? person.spouseName : person.fullName}
+                mobile={referenceModalRow.isSpouse ? person.spouseMobile : person.whatsappNumber}
+                rows={(referenceModalRow.entries || []).map((entry) => ({
+                  id: entry._id,
+                  edition: editionLabel(entry.eventId),
+                  references: (entry.references || [])
+                    .slice()
+                    .sort((x, y) => x.trim().toLowerCase().localeCompare(y.trim().toLowerCase())),
+                  status: entry.status,
+                }))}
+                highlightKeys={referenceFilterKeys}
+                onClose={() => setReferenceModalRow(null)}
+              />
+            );
+          })()}
+
           {isDeleteOpen && (
             <div
               tabIndex={-1}
@@ -747,14 +814,14 @@ export default function EventHistory() {
             }}
           />
 
-          <CommonSelect
-            className="eventHistoryPage__filterSelect"
+          <MultiSelect
             value={eventFilter}
-            onChange={(e) => {
-              setEventFilter(e.target.value);
+            onChange={(next) => {
+              setEventFilter(next);
               setCurrentPage(1);
             }}
             placeholder="All Editions"
+            searchPlaceholder="Search edition..."
             options={editionOptions.map((ed) => ({ value: ed.value, label: ed.label }))}
           />
 
@@ -780,12 +847,12 @@ export default function EventHistory() {
             options={referenceOptions}
           />
 
-          {(eventFilter || statusFilter || categoryFilter || referenceFilter.length > 0 || searchTerm) && (
+          {(eventFilter.length > 0 || statusFilter || categoryFilter || referenceFilter.length > 0 || searchTerm) && (
             <button
               type="button"
               className="eventHistoryPage__clearFilters"
               onClick={() => {
-                setEventFilter("");
+                setEventFilter([]);
                 setStatusFilter("");
                 setCategoryFilter("");
                 setReferenceFilter([]);
@@ -799,81 +866,63 @@ export default function EventHistory() {
           )}
         </div>
 
-        {/* Attended vs Not Attended for the current edition / search. */}
-        <div className="eventHistoryPage__stats" aria-label="Attendance summary">
-          <button
-            type="button"
-            className={`eventHistoryPage__statCard ${statusFilter === "" ? "eventHistoryPage__statCard--active" : ""}`}
-            onClick={() => {
-              setStatusFilter("");
-              setCurrentPage(1);
-            }}
-            title="Show all"
-          >
-            <span className="eventHistoryPage__statIcon eventHistoryPage__statIcon--total">
-              <FaUsers />
-            </span>
-            <div>
-              <div className="eventHistoryPage__statValue">{stats.total}</div>
-              <div className="eventHistoryPage__statLabel">Total</div>
+        {/* Box 1: BOOKINGS (one entry = one person at one edition).
+            Box 2: PERSON-WISE (qty: a couple = 2). Same cards, same filter. */}
+        {[
+          { key: "bookings", title: "Total Bookings", totalLabel: "Total Bookings", data: stats },
+          { key: "persons", title: "Person Wise Bookings (Qty)", totalLabel: "Total Persons", data: stats.persons || {} },
+        ].map((box) => (
+          <div key={box.key} className="eventHistoryPage__statsBox">
+            <div className="eventHistoryPage__statsTitle">{box.title}</div>
+            <div className="eventHistoryPage__stats" aria-label={box.title}>
+              <button
+                type="button"
+                className={`eventHistoryPage__statCard ${statusFilter === "" ? "eventHistoryPage__statCard--active" : ""}`}
+                onClick={() => {
+                  setStatusFilter("");
+                  setCurrentPage(1);
+                }}
+                title="Show all"
+              >
+                <span className="eventHistoryPage__statIcon eventHistoryPage__statIcon--total">
+                  <FaUsers />
+                </span>
+                <div>
+                  <div className="eventHistoryPage__statValue">{box.data.total ?? 0}</div>
+                  <div className="eventHistoryPage__statLabel">{box.totalLabel}</div>
+                </div>
+              </button>
+              <button
+                type="button"
+                className={`eventHistoryPage__statCard eventHistoryPage__statCard--attended ${statusFilter === "Attended" ? "eventHistoryPage__statCard--active" : ""}`}
+                onClick={() => toggleStatusFilter("Attended")}
+                title="Show only Attended"
+              >
+                <span className="eventHistoryPage__statIcon eventHistoryPage__statIcon--attended">
+                  <FaCheckCircle />
+                </span>
+                <div>
+                  <div className="eventHistoryPage__statValue">{box.data.attended ?? 0}</div>
+                  <div className="eventHistoryPage__statLabel">Attended</div>
+                </div>
+              </button>
+              <button
+                type="button"
+                className={`eventHistoryPage__statCard eventHistoryPage__statCard--notAttended ${statusFilter === "Not Attended" ? "eventHistoryPage__statCard--active" : ""}`}
+                onClick={() => toggleStatusFilter("Not Attended")}
+                title="Show only Not Attended"
+              >
+                <span className="eventHistoryPage__statIcon eventHistoryPage__statIcon--notAttended">
+                  <FaTimesCircle />
+                </span>
+                <div>
+                  <div className="eventHistoryPage__statValue">{box.data.notAttended ?? 0}</div>
+                  <div className="eventHistoryPage__statLabel">Not Attended</div>
+                </div>
+              </button>
             </div>
-          </button>
-          <button
-            type="button"
-            className={`eventHistoryPage__statCard eventHistoryPage__statCard--attended ${statusFilter === "Attended" ? "eventHistoryPage__statCard--active" : ""}`}
-            onClick={() => toggleStatusFilter("Attended")}
-            title="Show only Attended"
-          >
-            <span className="eventHistoryPage__statIcon eventHistoryPage__statIcon--attended">
-              <FaCheckCircle />
-            </span>
-            <div>
-              <div className="eventHistoryPage__statValue">{stats.attended}</div>
-              <div className="eventHistoryPage__statLabel">Attended</div>
-            </div>
-          </button>
-          <button
-            type="button"
-            className={`eventHistoryPage__statCard eventHistoryPage__statCard--notAttended ${statusFilter === "Not Attended" ? "eventHistoryPage__statCard--active" : ""}`}
-            onClick={() => toggleStatusFilter("Not Attended")}
-            title="Show only Not Attended"
-          >
-            <span className="eventHistoryPage__statIcon eventHistoryPage__statIcon--notAttended">
-              <FaTimesCircle />
-            </span>
-            <div>
-              <div className="eventHistoryPage__statValue">{stats.notAttended}</div>
-              <div className="eventHistoryPage__statLabel">Not Attended</div>
-            </div>
-          </button>
-        </div>
-
-        {/* Qty-wise totals: PERSONS (a couple = 2), not entries. */}
-        <div
-          aria-label="Qty wise total"
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "center",
-            gap: "8px 24px",
-            margin: "12px 0",
-            padding: "10px 16px",
-            borderRadius: 10,
-            background: "#f4f6fb",
-            fontSize: 14,
-          }}
-        >
-          <strong>Qty wise total:</strong>
-          <span>
-            Total Persons: <strong>{stats.persons?.total ?? 0}</strong>
-          </span>
-          <span style={{ color: "#1e7b3a" }}>
-            Attended: <strong>{stats.persons?.attended ?? 0}</strong>
-          </span>
-          <span style={{ color: "#b42323" }}>
-            Not Attended: <strong>{stats.persons?.notAttended ?? 0}</strong>
-          </span>
-        </div>
+          </div>
+        ))}
 
         {/* Colour legend only makes sense when there are rows to colour. */}
         {!loading && !error && (history || []).length > 0 && (
@@ -904,7 +953,7 @@ export default function EventHistory() {
                 wrapperClassName="eventHistoryPage__stateWrap"
                 textClassName="eventHistoryPage__stateText"
                 message={
-                  search ? `No event history found for "${search}".` : statusFilter || eventFilter || categoryFilter || referenceFilter.length > 0 ? "No event history found for the selected filters." : "No event history found."
+                  search ? `No event history found for "${search}".` : statusFilter || eventFilter.length > 0 || categoryFilter || referenceFilter.length > 0 ? "No event history found for the selected filters." : "No event history found."
                 }
               />
             }

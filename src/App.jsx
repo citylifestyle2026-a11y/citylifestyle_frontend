@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux";
 import { getProfile } from "./redux/auth/authSlice";
 import { updateSiteMeta } from "./utilits/updateSiteMeta";
 import useIdleLogout from "./hooks/useIdleLogout";
+import useFloatingActionMenus from "./hooks/useFloatingActionMenus";
 
 import ProtectedRoute from "./routes/ProtectedRoute";
 import { EventProvider } from "./context/EventContext";
@@ -112,6 +113,12 @@ function IdleLogoutHandler() {
   return null;
 }
 
+// Keeps every row "Action" dropdown fully visible (see hooks/useFloatingActionMenus.js).
+function FloatingActionMenusHandler() {
+  useFloatingActionMenus();
+  return null;
+}
+
 function App() {
   const dispatch = useDispatch();
 
@@ -144,6 +151,7 @@ function App() {
        <EventProvider>
         <SiteMetaHandler />
         <IdleLogoutHandler />
+        <FloatingActionMenusHandler />
 
         <TopProgressLoader />
 

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { FaCheck, FaExclamation, FaLock } from "react-icons/fa";
+import { FaCheck, FaExclamation, FaLock, FaCalendarCheck } from "react-icons/fa";
 import CreateContactModal from "../Components/CreateContactModal";
 import { getPublicFormLinkApi } from "../services/publicContactService";
 import "../assets/CSS/PublicContactForm.css";
@@ -43,6 +43,25 @@ const renderClosedCard = (isFull) => (
   </div>
 );
 
+// Plain /form (no link): registrations for this event are over - invite the
+// person to the next event instead of showing "Registrations Full".
+const renderNextEventCard = () => (
+  <div className="cityFormLinkNote cityFormLinkNote--blocked cityFormLinkNote--success">
+    <span className="cityFormLinkNote__icon" aria-hidden="true"><FaCalendarCheck /></span>
+    <h2>See You at the Next Event</h2>
+    <p className="cityFormLinkNote__lead">
+      Thank you for your interest in Parv.
+    </p>
+    <p>
+      Registrations for this event are now closed. We look forward to meeting you at our next event!
+    </p>
+    <p className="cityFormLinkNote__sub">
+      If you have already submitted your details, our team will contact you on your
+      WhatsApp number. For any other assistance, please reach out to the City Toppers team.
+    </p>
+  </div>
+);
+
 export default function PublicContactForm() {
   const [searchParams] = useSearchParams();
   const token = (searchParams.get("link") || "").trim();
@@ -73,7 +92,7 @@ export default function PublicContactForm() {
     if (!token) {
       return PLAIN_FORM_OPEN
         ? <CreateContactModal publicMode onClose={() => {}} />
-        : renderClosedCard(true);
+        : renderNextEventCard();
     }
 
     if (linkLoading) {

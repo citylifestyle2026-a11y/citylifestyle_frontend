@@ -480,7 +480,7 @@ export default function MemberList() {
         render: (member) => (
           <>
             <ContactPerson name={member.name} image={member.profileImage} />
-            <BlockedBadge blocked={member.blocked} />
+            <BlockedBadge blocked={member.blocked} personName={member.name} />
           </>
         ),
       }),
@@ -632,7 +632,10 @@ export default function MemberList() {
         // Pinned to the right edge, like Guest List.
         headerClassName: "contactPage__actionCol",
         cellClassName: "contactPage__actionCol",
-        render: (member) => (
+        // A guest / contact on the Block List gets NO action menu at all.
+        render: (member) => member.blocked ? (
+          <span className="contactAction__blockedDash" title="Blocked">-</span>
+        ) : (
           <div
             className="contactAction__wrapper"
             ref={openActionMenuId === member._id ? actionMenuRef : null}

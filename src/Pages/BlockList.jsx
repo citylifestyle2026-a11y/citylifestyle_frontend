@@ -16,6 +16,7 @@ import { showError, showSuccess } from "../utilits/toast";
 import { getErrorText } from "../utilits/apiError";
 import { confirmDialog } from "../utilits/appSwal";
 import useClickOutside from "../hooks/useClickOutside";
+import useActionMenuRoom from "../hooks/useActionMenuRoom";
 
 // Reuses the Company Category page styling so this page looks like the rest
 // of the admin; BlockList.css only adds the block-specific bits.
@@ -74,6 +75,10 @@ export default function BlockList() {
   }, [currentPage, rowsPerPage, search, reloadKey]);
 
   const actionMenuRef = useRef(null);
+  // Gives the open Action menu room inside the scrolling table wrapper, so
+  // Edit / Unblock are never cut off (even when there is only one row).
+  const tableWrapperRef = useRef(null);
+  useActionMenuRoom(tableWrapperRef, openActionMenuId, ".companyCategoryAction__menuOpen");
   useClickOutside(actionMenuRef, () => setOpenActionMenuId(null));
 
   const handleToggleActionMenu = useCallback((id) => {
@@ -259,7 +264,7 @@ export default function BlockList() {
           />
         </div>
 
-        <div className="companyCategoryPage__tableWrapper">
+        <div className="companyCategoryPage__tableWrapper companyCategoryPage__tableWrapper--ghost" ref={tableWrapperRef}>
           <CommonTable
             columns={columns}
             data={items}

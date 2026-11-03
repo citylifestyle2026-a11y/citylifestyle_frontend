@@ -9,9 +9,10 @@ export const createFormLinkApi = async (data) => {
   return response.data;
 };
 
-// params: { page, limit, search, target, sortBy, sortOrder }
+// params: { page, limit, search, target, editionEventId (id or [ids]), sortBy, sortOrder }
 export const getFormLinksApi = async (params) => {
-  const response = await api.get("/form-links", { params });
+  // editionEventId=a&editionEventId=b (several ticked editions)
+  const response = await api.get("/form-links", { params, paramsSerializer: { indexes: null } });
   return response.data;
 };
 

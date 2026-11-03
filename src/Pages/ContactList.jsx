@@ -1309,7 +1309,7 @@ const sortedReferenceFilterOptions = useMemo(
         render: (contact) => (
           <>
             <ContactPerson name={contact.fullName} image={contact.profileImage} />
-            <BlockedBadge blocked={contact.blocked} />
+            <BlockedBadge blocked={contact.blocked} personName={contact.fullName} />
           </>
         ),
       }),
@@ -1528,7 +1528,10 @@ const sortedReferenceFilterOptions = useMemo(
         // WhatsApp icon + Action menu are always visible without scrolling.
         headerClassName: "contactPage__actionCol",
         cellClassName: "contactPage__actionCol",
-        render: (contact) => (
+        // A guest / contact on the Block List gets NO action menu at all.
+        render: (contact) => contact.blocked ? (
+          <span className="contactAction__blockedDash" title="Blocked">-</span>
+        ) : (
           <div
             className="contactAction__wrapper"
             ref={openActionMenuId === contact._id ? actionMenuRef : null}

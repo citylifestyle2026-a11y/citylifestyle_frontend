@@ -6,6 +6,7 @@ import CommonListLayout from "../Components/CommonListLayout";
 import CommonPageHeader from "../Components/CommonPageHeader";
 import CommonSearch from "../Components/CommonSearch";
 import CommonSelect from "../Components/CommonSelect";
+import MultiSelect from "../Components/MultiSelect";
 import CommonTable from "../Components/CommonTable";
 import CommonPagination from "../Components/CommonPagination";
 import DeleteUserModal from "../Components/DeleteUserModal";
@@ -29,6 +30,7 @@ import "../assets/CSS/CompanyCategory.css";
 import "../assets/CSS/ContactList.css"; // checkbox + bulk bar styles
 import "../assets/CSS/FormLinks.css";
 import useClickOutside from "../hooks/useClickOutside";
+import useEditionOptions from "../hooks/useEditionOptions";
 import useActionMenuRoom from "../hooks/useActionMenuRoom";
 import { ALL_ROWS_OPTION } from "../utilits/rowsPerPage";
 
@@ -56,6 +58,9 @@ export default function FormLinks() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [search, setSearch] = useState("");
+  // Several editions can be ticked ([] = all editions).
+  const [editionFilter, setEditionFilter] = useState([]);
+  const { editions: editionOptions } = useEditionOptions();
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("desc");
   const [refreshKey, setRefreshKey] = useState(0);
@@ -140,6 +145,7 @@ export default function FormLinks() {
       search,
       sortBy,
       sortOrder,
+      ...(editionFilter.length ? { editionEventId: editionFilter } : {}),
     })
       .then((res) => {
         if (cancelled) return;
@@ -159,7 +165,7 @@ export default function FormLinks() {
     return () => {
       cancelled = true;
     };
-  }, [currentPage, rowsPerPage, search, sortBy, sortOrder, refreshKey]);
+  }, [currentPage, rowsPerPage, search, sortBy, sortOrder, editionFilter, refreshKey]);
 
   // Close the Action dropdown on an outside click.
   const actionMenuRef = useRef(null);
@@ -540,6 +546,30 @@ export default function FormLinks() {
               if (e.key === "Enter") e.preventDefault();
             }}
           />
+
+          <MultiSelect
+            value={editionFilter}
+            onChange={(next) => {
+              setEditionFilter(next);
+              setCurrentPage(1);
+            }}
+            placeholder="All Editions"
+            searchPlaceholder="Search edition..."
+            options={editionOptions.map((ed) => ({ value: ed.value, label: ed.label }))}
+          />
+
+          {editionFilter.length > 0 && (
+            <button
+              type="button"
+              className="formLinks__clearFilters"
+              onClick={() => {
+                setEditionFilter([]);
+                setCurrentPage(1);
+              }}
+            >
+              Clear filters
+            </button>
+          )}
         </div>
 
         <div className="formLinks__tableWrapper" ref={tableWrapperRef}>
@@ -551,7 +581,11 @@ export default function FormLinks() {
             loadingMessage="Loading form links..."
             error={listError}
             errorMessage="Failed to load form links."
-            emptyMessage="No form links yet. Click Create Form Link."
+            emptyMessage={
+              editionFilter.length > 0 || search
+                ? "No form links found for the selected filters."
+                : "No form links yet. Click Create Form Link."
+            }
             tableClassName="companyCategoryPage__table"
             thContentClassName="companyCategoryPage__thContent"
             sortIconClassName="companyCategoryPage__sortIcon"

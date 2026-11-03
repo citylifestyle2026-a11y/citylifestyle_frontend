@@ -5,9 +5,11 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 3px;
-  margin-top: 6px;
-  max-width: 280px;
+  gap: 6px;
+  margin-top: 8px;
+  width: 100%;
+  min-width: 230px;
+  max-width: 320px;
   white-space: normal;
 }
 
@@ -26,6 +28,40 @@
   line-height: 1.5;
 }
 
+/* Details sit in one tidy box: label + value on one line, wraps only the value. */
+.blockedFlag__box {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 10px;
+  border-left: 3px solid #e05252;
+  border-radius: 6px;
+  background: #fff6f6;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.blockedFlag__row {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #6b7080;
+  word-break: break-word;
+}
+
+.blockedFlag__row b {
+  font-weight: 700;
+  color: #8a2f2f;
+  margin-right: 2px;
+}
+
+.blockedFlag__warn {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #a35a00;
+}
+
+/* kept for older markup */
 .blockedFlag__reason {
   font-size: 12px;
   font-weight: 500;
@@ -38,6 +74,15 @@
   font-size: 11.5px;
   font-weight: 500;
   color: #9a9ca8;
+}
+
+/* Actions cell of a blocked row (no menu) */
+.contactAction__blockedDash {
+  display: inline-block;
+  min-width: 60px;
+  text-align: center;
+  color: #9a9ca8;
+  font-weight: 600;
 }
 
 /* Modal */

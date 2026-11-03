@@ -75,3 +75,17 @@
 .formLinks__menu a.companyCategoryAction__item {
   text-decoration: none;
 }
+/* Edition filter: "Clear filters" link next to the dropdown */
+.formLinks__clearFilters {
+  background: none;
+  border: none;
+  padding: 8px 4px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--admin-accent);
+  cursor: pointer;
+}
+
+.formLinks__clearFilters:hover {
+  text-decoration: underline;
+}
