@@ -57,6 +57,7 @@ const MOVED_TABS = [
   { value: "notInGuestList", label: "Not in Guest List", countKey: "notInGuestList", tone: "pending" },
   { value: "inGuestList", label: "In Guest List", countKey: "inGuestList", tone: "approved" },
   { value: "needsFix", label: "Needs Fix", countKey: "needsFix", tone: "rejected" },
+  { value: "blocked", label: "Blocked", countKey: "blocked", tone: "blocked" },
 ];
 
 // Inside the Needs Fix tab: show every problem row, or only one kind.
@@ -87,7 +88,7 @@ export default function MemberList() {
   const [bulkBusy, setBulkBusy] = useState(false);
   const [professions, setProfessions] = useState([]);
   const [references, setReferences] = useState([]);
-  const [counts, setCounts] = useState({ all: 0, inGuestList: 0, notInGuestList: 0, needsFix: 0, invalid: 0, duplicate: 0 });
+  const [counts, setCounts] = useState({ all: 0, inGuestList: 0, notInGuestList: 0, needsFix: 0, blocked: 0, invalid: 0, duplicate: 0 });
 
   const [sortBy, setSortBy] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
@@ -412,7 +413,7 @@ export default function MemberList() {
     setExporting(true);
     try {
       const ids = !selectAllMatching && selectedCount > 0 ? Object.keys(selected).join(",") : undefined;
-      const tab = { needsFix: "needs-fix", inGuestList: "in-guest-list", notInGuestList: "not-in-guest-list" }[movedFilter];
+      const tab = { needsFix: "needs-fix", inGuestList: "in-guest-list", notInGuestList: "not-in-guest-list", blocked: "blocked" }[movedFilter];
       const fileName = [
         "contact-book",
         tab,
@@ -488,7 +489,10 @@ export default function MemberList() {
         label: "Status",
         sortable: false,
         render: (m) => (
-          <span className="memberPage__status">{m.memberStatus || "-"}</span>
+          // A member on the Block List always shows as Inactive.
+          <span className={`memberPage__status${m.blocked ? " memberPage__status--inactive" : ""}`}>
+            {m.blocked ? "Inactive" : m.memberStatus || "-"}
+          </span>
         ),
       },
       {

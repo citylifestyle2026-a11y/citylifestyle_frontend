@@ -21,6 +21,11 @@
   font-family: "Poppins", sans-serif;
 }
 
+.memberPage__status--inactive {
+  background: #fdecec;
+  color: #d63a3a;
+}
+
 .memberPage__movedTag {
   display: inline-block;
   background: #eaf0ff;

@@ -146,6 +146,7 @@ const STATUS_LABELS = {
   pending: "Pending",
   approved: "Approved",
   rejected: "Rejected",
+  blocked: "Blocked",
 };
 
 // Contacts created before approval existed have no approvalStatus -> approved.
@@ -1324,7 +1325,8 @@ const sortedReferenceFilterOptions = useMemo(
         label: "Status",
         sortable: false,
         render: (contact) => {
-          const status = getApprovalStatus(contact);
+          // A guest on the Block List shows "Blocked" as the status.
+          const status = contact.blocked ? "blocked" : getApprovalStatus(contact);
           return (
             <span className="contactPage__statusCell">
               <span

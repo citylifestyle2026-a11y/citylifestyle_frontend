@@ -711,6 +711,7 @@
 .contactPage__statusBadge--pending { background: #fff4e5; color: #b36a00; }
 .contactPage__statusBadge--approved { background: #e8f8ee; color: #1a9b4b; }
 .contactPage__statusBadge--rejected { background: #fdecec; color: #d63a3a; }
+.contactPage__statusBadge--blocked { background: #3a3a3a; color: #ffffff; }
 
 .contactAction__wrapper {
   display: inline-flex;
