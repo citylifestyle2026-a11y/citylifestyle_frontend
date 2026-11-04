@@ -121,6 +121,26 @@
   white-space: nowrap;
 }
 
+.globalEventSelect__status {
+  flex-shrink: 0;
+  margin-left: auto;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.globalEventSelect__status.is-active {
+  background: #e6f6ec;
+  color: #1a7f43;
+}
+
+.globalEventSelect__status.is-expired {
+  background: #fdeaea;
+  color: #c0392b;
+}
+
 .globalEventSelect__check {
   flex-shrink: 0;
   font-size: 11px;
@@ -131,9 +151,14 @@
     display: none;
   }
 
+  .globalEventSelect {
+    width: 100%;
+  }
+
   .globalEventSelect__control {
-    min-width: 140px;
-    max-width: 170px;
+    flex: 1;
+    min-width: 0;
+    max-width: none;
   }
 
   .globalEventSelect__trigger {

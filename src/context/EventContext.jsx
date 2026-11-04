@@ -100,7 +100,15 @@ export function EventProvider({ children }) {
     () =>
       events
         .filter((e) => e.isActive === true)
-        .map((e) => ({ value: e._id, label: e.title, expired: isEnded(e) })),
+        .map((e) => {
+          const expired = isEnded(e);
+          return {
+            value: e._id,
+            label: e.title,
+            expired,
+            status: expired ? "Expired" : "Active",
+          };
+        }),
     [events]
   );
 

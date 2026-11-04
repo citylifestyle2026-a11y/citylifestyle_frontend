@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { FaChevronDown, FaCheck } from "react-icons/fa";
-import { useGlobalEvent } from "../context/EventContext";
+import { useGlobalEvent, isEnded } from "../context/EventContext";
 import useClickOutside from "../hooks/useClickOutside";
 import "../assets/CSS/GlobalEventSelect.css";
 
@@ -34,8 +34,29 @@ export default function GlobalEventSelect() {
   const otherEvents = defaultId
     ? eventOptions.filter((o) => String(o.value) !== defaultId)
     : eventOptions;
-  const items = [{ value: "", label: defaultLabel }, ...otherEvents];
+  const defaultExpired = isEnded(defaultEvent);
+  const items = [
+    {
+      value: "",
+      label: defaultLabel,
+      // Status only when the default event is known (not the generic text).
+      status: defaultEvent?._id ? (defaultExpired ? "Expired" : "Active") : "",
+      expired: defaultExpired,
+    },
+    ...otherEvents,
+  ];
   const current = items.find((o) => o.value === selectedEventId) || items[0];
+
+  const renderStatus = (status) =>
+    status ? (
+      <span
+        className={`globalEventSelect__status ${
+          status === "Expired" ? "is-expired" : "is-active"
+        }`}
+      >
+        {status}
+      </span>
+    ) : null;
 
   const pick = (value) => {
     setSelectedEventId(value);
@@ -53,9 +74,10 @@ export default function GlobalEventSelect() {
           onClick={() => setOpen((v) => !v)}
           aria-haspopup="listbox"
           aria-expanded={open}
-          title={current.label}
+          title={current.status ? `${current.label} - ${current.status}` : current.label}
         >
           <span className="globalEventSelect__value">{current.label}</span>
+          {renderStatus(current.status)}
           <FaChevronDown className="globalEventSelect__chevron" />
         </button>
 
@@ -69,9 +91,10 @@ export default function GlobalEventSelect() {
                     type="button"
                     className={`globalEventSelect__option${selected ? " is-selected" : ""}`}
                     onClick={() => pick(opt.value)}
-                    title={opt.label}
+                    title={opt.status ? `${opt.label} - ${opt.status}` : opt.label}
                   >
                     <span className="globalEventSelect__optionText">{opt.label}</span>
+                    {renderStatus(opt.status)}
                     {selected && <FaCheck className="globalEventSelect__check" />}
                   </button>
                 </li>
