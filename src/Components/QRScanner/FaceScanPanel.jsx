@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 
 import { faceMatchApi } from "../../services/qrService";
 import { faceCheckInQr } from "../../redux/qr/qrThunk";
+import { speak } from "../../utilits/speak";
 
 /**
  * FaceScanPanel - Face Scan tab of the QR scanner modal.
@@ -11,8 +12,9 @@ import { faceCheckInQr } from "../../redux/qr/qrThunk";
  *     browser (the picture itself is never sent to the server).
  *  2. The server compares it with the photos people uploaded when they
  *     registered and answers with the best match.
- *  3. The staff see the registered photo next to the live face and press
- *     "Allow entry". Only then is that ticket checked in.
+ *  3. A clear match is let in AUTOMATICALLY (no "Allow entry" button): the
+ *     screen shows "Thank you" and the voice says "Thank you". A face that
+ *     does not match shows "Not recognised" (and says it).
  */
 
 const MODEL_URL = `${import.meta.env.BASE_URL}models`;
@@ -39,16 +41,6 @@ const loadFaceApi = () => {
   return faceapiPromise;
 };
 
-const LEVEL_TEXT = {
-  high: "Strong match",
-  good: "Good match",
-  check: "Please compare carefully",
-};
-
-// Uploaded images are also reachable under /api/uploads (see backend app.js);
-// used as a fallback if the plain /uploads address does not load.
-const toApiUploadsUrl = (url) =>
-  url ? url.replace(/^(https?:\/\/[^/]+)\/uploads\//, "$1/api/uploads/") : "";
 
 const FaceScanPanel = ({ onCheckedIn, onSound }) => {
   const dispatch = useDispatch();
@@ -60,15 +52,12 @@ const FaceScanPanel = ({ onCheckedIn, onSound }) => {
   const resetTimeoutRef = useRef(null);
   const isMountedRef = useRef(true);
 
-  // loading | scanning | checking | confirm | success | notice
+  // loading | scanning | checking | success | notice
   const [status, setStatus] = useState("loading");
   const [message, setMessage] = useState("Loading face scanner...");
   const [facing, setFacing] = useState("user");
   const [cameraError, setCameraError] = useState("");
-  const [match, setMatch] = useState(null); // { ...server match, snapshot }
   const [notice, setNotice] = useState(null); // { tone: "error" | "warning", title, text }
-  const [confirming, setConfirming] = useState(false);
-  const [confirmError, setConfirmError] = useState("");
 
   const go = useCallback((next, text) => {
     statusRef.current = next;
@@ -79,10 +68,7 @@ const FaceScanPanel = ({ onCheckedIn, onSound }) => {
   const resume = useCallback(() => {
     clearTimeout(resetTimeoutRef.current);
     if (!isMountedRef.current) return;
-    setMatch(null);
     setNotice(null);
-    setConfirming(false);
-    setConfirmError("");
     go("scanning", "Show the guest's face to the camera");
   }, [go]);
 
@@ -166,6 +152,41 @@ const FaceScanPanel = ({ onCheckedIn, onSound }) => {
     };
   }, [go]);
 
+  // ---------- matched face -> let the person in by itself ----------
+  const checkInMatched = useCallback(
+    async (data) => {
+      try {
+        const result = await dispatch(faceCheckInQr({ ticketId: data.ticketId })).unwrap();
+        const d = result?.data || {};
+        const name = d.attendee?.name || data.attendee?.name || "";
+        onSound?.(true);
+        speak("Thank you");
+        if (onCheckedIn) onCheckedIn(result);
+        go(
+          "success",
+          `Thank you${name ? `, ${name}` : ""}!${
+            d.isGroupEntry && d.remaining > 0 ? ` ${d.remaining} more can enter on this pass.` : ""
+          }`
+        );
+        clearTimeout(resetTimeoutRef.current);
+        resetTimeoutRef.current = setTimeout(resume, RESET_DELAY_MS);
+      } catch (err) {
+        onSound?.(false);
+        speak("Entry not allowed");
+        setNotice({
+          tone: "error",
+          title: "Entry Not Allowed",
+          text:
+            err?.type === "NETWORK"
+              ? "Unable to connect to server. Check internet or API."
+              : err?.message || "This ticket could not be checked in.",
+        });
+        go("notice", "Entry not allowed");
+      }
+    },
+    [dispatch, go, onCheckedIn, onSound, resume]
+  );
+
   // ---------- one recognition round ----------
   const recognise = useCallback(async () => {
     const faceapi = faceapiRef.current;
@@ -175,38 +196,49 @@ const FaceScanPanel = ({ onCheckedIn, onSound }) => {
     go("checking", "Checking face...");
 
     try {
-      const full = await faceapi
-        .detectSingleFace(
-          video,
-          new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.35 })
-        )
-        .withFaceLandmarks()
-        .withFaceDescriptor();
+      // Read up to 3 frames and average them: glasses / masks / blinking make a
+      // single frame noisy, the average is much more stable.
+      const descriptors = [];
+      for (let i = 0; i < 3; i += 1) {
+        const f = await faceapi
+          .detectSingleFace(
+            video,
+            new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.35 })
+          )
+          .withFaceLandmarks()
+          .withFaceDescriptor();
+        if (f) descriptors.push(f.descriptor);
+        if (i < 2) await new Promise((r) => setTimeout(r, 120));
+      }
 
-      if (!full) {
+      if (descriptors.length === 0) {
         go("scanning", "Face not clear. Hold still and look at the camera");
         return;
       }
 
-      // Small snapshot so the staff can compare it with the registered photo.
-      const canvas = document.createElement("canvas");
-      const scale = 360 / Math.max(video.videoWidth, 1);
-      canvas.width = Math.round(video.videoWidth * scale);
-      canvas.height = Math.round(video.videoHeight * scale);
-      canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
-      const snapshot = canvas.toDataURL("image/jpeg", 0.7);
+      const avg = new Array(128).fill(0);
+      descriptors.forEach((d) => d.forEach((v, idx) => { avg[idx] += v / descriptors.length; }));
+      const full = { descriptor: avg };
 
-      const res = await faceMatchApi({ descriptor: Array.from(full.descriptor) });
+      const res = await faceMatchApi({ descriptor: full.descriptor });
       const data = res?.data || {};
 
-      if (!data.matched) {
+      // Only a clear match (strong / good) is let in. A weak "please compare
+      // carefully" match is treated as NOT recognised - there is no button
+      // for staff to confirm any more.
+      if (!data.matched || data.level === "check") {
         onSound?.(false);
+        speak(data.reason === "no_active_event" ? "No running event" : "Not recognised");
         setNotice({
           tone: "error",
-          title: "Face Not Recognised",
+          title: "Not Recognised",
           text:
             data.reason === "no_faces_enrolled"
-              ? "No registered photos found yet. Please scan the guest's QR instead."
+              ? `No registered photos found yet. Please scan the guest's QR instead.${
+                data.debug
+                  ? ` [events ${data.debug.activeEvents}, tickets ${data.debug.tickets}, photos ${data.debug.withPhoto}, face data ${data.debug.withFaceData}, engine ${data.debug.faceEngine}]`
+                  : ""
+              }`
               : data.reason === "no_active_event"
               ? "There is no running event right now."
               : "This face does not match any registered photo. Please scan the guest's QR instead.",
@@ -216,6 +248,7 @@ const FaceScanPanel = ({ onCheckedIn, onSound }) => {
       }
 
       if (data.alreadyEntered) {
+        speak("Already entered");
         setNotice({
           tone: "warning",
           title: "Ticket Already Used",
@@ -227,11 +260,11 @@ const FaceScanPanel = ({ onCheckedIn, onSound }) => {
         return;
       }
 
-      // Found: staff compare the two faces and confirm.
-      setMatch({ ...data, snapshot });
-      go("confirm", "Check the photo, then allow entry");
+      // Clear match -> check in right away ("Thank you").
+      await checkInMatched(data);
     } catch (err) {
       onSound?.(false);
+      speak("Not recognised");
       const serverMsg = err.response?.data?.message;
       setNotice({
         tone: "error",
@@ -244,7 +277,7 @@ const FaceScanPanel = ({ onCheckedIn, onSound }) => {
       });
       go("notice", "Could not check the face");
     }
-  }, [go, onSound]);
+  }, [go, onSound, checkInMatched]);
 
   // ---------- detection loop (cheap face finder, runs while "scanning") ----------
   useEffect(() => {
@@ -313,44 +346,14 @@ const FaceScanPanel = ({ onCheckedIn, onSound }) => {
     };
   }, [recognise]);
 
-  // ---------- staff action ----------
-  const allowEntry = async () => {
-    if (!match || confirming) return;
-    setConfirming(true);
-    setConfirmError("");
-    try {
-      const result = await dispatch(faceCheckInQr({ ticketId: match.ticketId })).unwrap();
-      const d = result?.data || {};
-      const name = d.attendee?.name || match.attendee?.name || "";
-      onSound?.(true);
-      if (onCheckedIn) onCheckedIn(result);
-      setMatch(null);
-      go(
-        "success",
-        `Entry allowed${name ? ` - ${name}` : ""}${
-          d.isGroupEntry && d.remaining > 0 ? ` - ${d.remaining} more can enter on this pass` : ""
-        }`
-      );
-      clearTimeout(resetTimeoutRef.current);
-      resetTimeoutRef.current = setTimeout(resume, RESET_DELAY_MS);
-    } catch (err) {
-      onSound?.(false);
-      setConfirmError(
-        err?.type === "NETWORK"
-          ? "Unable to connect to server. Check internet or API."
-          : err?.message || "This ticket could not be checked in."
-      );
-    } finally {
-      if (isMountedRef.current) setConfirming(false);
-    }
-  };
-
+  // Oval colour = what is happening: white = waiting for a face, blue =
+  // checking, green = let in, amber = already entered, red = not recognised.
   const ringClass =
     status === "success"
       ? "crmQrFaceOval crmQrFaceOvalGreen"
       : status === "checking"
       ? "crmQrFaceOval crmQrFaceOvalBlue"
-      : status === "confirm" || (status === "notice" && notice?.tone === "warning")
+      : status === "notice" && notice?.tone === "warning"
       ? "crmQrFaceOval crmQrFaceOvalAmber"
       : status === "notice"
       ? "crmQrFaceOval crmQrFaceOvalRed"
@@ -389,77 +392,6 @@ const FaceScanPanel = ({ onCheckedIn, onSound }) => {
         )}
       </div>
 
-      {/* ---------- confirm: registered photo vs live face ---------- */}
-      {status === "confirm" && match && (
-        <div className="crmQrFaceConfirm" aria-live="polite">
-          <p className="crmQrGuestPickTitle">Is this the same person?</p>
-
-          <div className="crmQrFaceCompare">
-            <figure>
-              {match.attendee?.profileImage ? (
-                <img
-                  src={match.attendee.profileImage}
-                  alt="Registered"
-                  onError={(event) => {
-                    const fallback = toApiUploadsUrl(match.attendee.profileImage);
-                    if (fallback && event.currentTarget.src !== fallback) {
-                      event.currentTarget.src = fallback;
-                    }
-                  }}
-                />
-              ) : (
-                <div className="crmQrFaceNoPhoto">No photo</div>
-              )}
-              <figcaption>Registered</figcaption>
-            </figure>
-            <figure>
-              <img src={match.snapshot} alt="Live camera" />
-              <figcaption>Camera now</figcaption>
-            </figure>
-          </div>
-
-          <div className="crmQrCard crmQrFaceCard">
-            <div className="crmQrCardRow">
-              <span className="crmQrCardLabel">Name</span>
-              <span className="crmQrCardValue">{match.attendee?.name || match.booking?.name || "N/A"}</span>
-            </div>
-            <div className="crmQrCardRow">
-              <span className="crmQrCardLabel">Mobile</span>
-              <span className="crmQrCardValue">{match.attendee?.mobileNumber || "N/A"}</span>
-            </div>
-            <div className="crmQrCardRow">
-              <span className="crmQrCardLabel">Ticket</span>
-              <span className="crmQrCardValue">{match.ticketType?.ticketName || "N/A"}</span>
-            </div>
-            <div className="crmQrCardRow">
-              <span className="crmQrCardLabel">Event</span>
-              <span className="crmQrCardValue">{match.event?.title || "N/A"}</span>
-            </div>
-            <div className="crmQrCardRow">
-              <span className="crmQrCardLabel">Match</span>
-              <span className={`crmQrFaceLevel crmQrFaceLevel-${match.level}`}>
-                {LEVEL_TEXT[match.level] || ""}
-              </span>
-            </div>
-          </div>
-
-          {confirmError && (
-            <div className="crmQrErrorBox">
-              <p className="crmQrErrorText">{confirmError}</p>
-            </div>
-          )}
-
-          <div className="crmQrActions">
-            <button type="button" className="crmQrBtn crmQrBtnGhost" onClick={resume} disabled={confirming}>
-              Not this person
-            </button>
-            <button type="button" className="crmQrBtn crmQrBtnPrimary" onClick={allowEntry} disabled={confirming}>
-              {confirming ? "Checking in..." : "Allow entry"}
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* ---------- notice: not recognised / already used / error ---------- */}
       {status === "notice" && notice && (
         <div aria-live="polite">
@@ -476,10 +408,15 @@ const FaceScanPanel = ({ onCheckedIn, onSound }) => {
       )}
 
       {status === "success" && (
-        <div className="crmQrActions">
-          <button type="button" className="crmQrBtn crmQrBtnGhost" onClick={resume}>
-            Scan Next
-          </button>
+        <div aria-live="polite">
+          <div className="crmQrResultState">
+            <p className="crmQrResultTitle">Thank you</p>
+          </div>
+          <div className="crmQrActions">
+            <button type="button" className="crmQrBtn crmQrBtnGhost" onClick={resume}>
+              Scan Next
+            </button>
+          </div>
         </div>
       )}
     </>

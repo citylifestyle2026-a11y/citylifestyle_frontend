@@ -76,6 +76,9 @@ const DELETED_LABEL = "Deleted guest";
 
 // Event badges shown per row before "+N more".
 const MAX_VISIBLE_EVENTS = 3;
+// A guest with MORE editions than this gets ONE "Manage attendance" item in
+// the Action menu (opens a scrollable modal) instead of one item per edition.
+const MAX_INLINE_ATTENDANCE_ITEMS = 3;
 // Editions whose reference is shown per row before "+N more".
 const MAX_VISIBLE_REFERENCE_EDITIONS = 2;
 
@@ -148,6 +151,7 @@ export default function EventHistory() {
   const [openActionMenuId, setOpenActionMenuId] = useState(null);
   // Row whose full "Reference by Edition" list is open in the modal.
   const [referenceModalRow, setReferenceModalRow] = useState(null);
+  const [markingId, setMarkingId] = useState(null); // entry being saved from the modal
   // Rows whose full event list / notes are expanded. Collapsed rows stay
   // one line high no matter how many events a person has.
   const [expandedRowIds, setExpandedRowIds] = useState([]);
@@ -300,6 +304,21 @@ export default function EventHistory() {
       loadStats();
     } catch (err) {
       showError(getErrorText(err, "Failed to update attendance"));
+    }
+  };
+
+  // Same as handleMarkAttendance, but from the "Editions & Attendance" modal.
+  const handleMarkFromModal = async (entryId, attended) => {
+    setMarkingId(entryId);
+    try {
+      await markEventHistoryAttendanceApi(entryId, attended);
+      showSuccess(attended ? "Marked as Attended" : "Marked as Not Attended");
+      dispatch(getAllEventHistory(currentQuery));
+      loadStats();
+    } catch (err) {
+      showError(getErrorText(err, "Failed to update attendance"));
+    } finally {
+      setMarkingId(null);
     }
   };
 
@@ -483,8 +502,7 @@ export default function EventHistory() {
         // height does not grow with the number of events.
         render: (row) => {
           const entries = row.entries || [];
-          const expanded = expandedRowIds.includes(row._id);
-          const shown = expanded ? entries : entries.slice(0, MAX_VISIBLE_EVENTS);
+          const shown = entries.slice(0, MAX_VISIBLE_EVENTS);
           const hidden = entries.length - MAX_VISIBLE_EVENTS;
 
           return (
@@ -504,9 +522,10 @@ export default function EventHistory() {
                 <button
                   type="button"
                   className="eventHistoryPage__moreBtn"
-                  onClick={() => toggleRowExpanded(row._id)}
+                  onClick={() => setReferenceModalRow(row)}
+                  title="Show every edition"
                 >
-                  {expanded ? "Show less" : `+${hidden} more`}
+                  {`+${hidden} more`}
                 </button>
               )}
             </div>
@@ -660,6 +679,20 @@ export default function EventHistory() {
               {(() => {
                 const entries = entry.entries || [];
                 const many = entries.length > 1;
+                if (entries.length > MAX_INLINE_ATTENDANCE_ITEMS) {
+                  return (
+                    <button
+                      type="button"
+                      className="eventHistoryAction__item eventHistoryAction__itemAttend"
+                      onClick={() => {
+                        setOpenActionMenuId(null);
+                        setReferenceModalRow(entry);
+                      }}
+                    >
+                      {`Manage attendance (${entries.length} editions)`}
+                    </button>
+                  );
+                }
                 return entries.map((e) => {
                   const suffix = many ? ` (${editionLabel(e.eventId)})` : "";
                   if (e.status === "Attended") {
@@ -720,12 +753,16 @@ export default function EventHistory() {
           )}
 
           {referenceModalRow && (() => {
-            const person = personOf(referenceModalRow);
+            // Always the latest copy of the row, so a status changes live.
+            const modalRow = (history || []).find((r) => r._id === referenceModalRow._id);
+            if (!modalRow) return null;
+            const person = personOf(modalRow);
             return (
               <ReferenceDetailsModal
-                personName={referenceModalRow.isSpouse ? person.spouseName : person.fullName}
-                mobile={referenceModalRow.isSpouse ? person.spouseMobile : person.whatsappNumber}
-                rows={(referenceModalRow.entries || []).map((entry) => ({
+                title="Editions & Attendance"
+                personName={modalRow.isSpouse ? person.spouseName : person.fullName}
+                mobile={modalRow.isSpouse ? person.spouseMobile : person.whatsappNumber}
+                rows={(modalRow.entries || []).map((entry) => ({
                   id: entry._id,
                   edition: editionLabel(entry.eventId),
                   references: (entry.references || [])
@@ -734,6 +771,8 @@ export default function EventHistory() {
                   status: entry.status,
                 }))}
                 highlightKeys={referenceFilterKeys}
+                onToggleAttendance={handleMarkFromModal}
+                busyId={markingId}
                 onClose={() => setReferenceModalRow(null)}
               />
             );

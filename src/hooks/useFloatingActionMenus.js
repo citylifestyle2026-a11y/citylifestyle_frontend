@@ -33,6 +33,9 @@ const place = (menu) => {
   }
 
   const b = button.getBoundingClientRect();
+  // A very long menu scrolls inside itself instead of running off the screen.
+  menu.style.maxHeight = `${window.innerHeight - EDGE * 2}px`;
+  menu.style.overflowY = "auto";
   const width = menu.offsetWidth;
   const height = menu.offsetHeight;
 
@@ -64,7 +67,7 @@ const place = (menu) => {
 };
 
 const release = (menu) => {
-  ["position", "top", "left", "right", "bottom", "z-index"].forEach((prop) =>
+  ["position", "top", "left", "right", "bottom", "z-index", "max-height", "overflow-y"].forEach((prop) =>
     menu.style.removeProperty(prop)
   );
   menu.removeAttribute(TOUCHED);

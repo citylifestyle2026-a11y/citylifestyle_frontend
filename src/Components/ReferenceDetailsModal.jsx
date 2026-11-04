@@ -12,6 +12,12 @@ import "../assets/CSS/ReferenceDetailsModal.css";
  *  mobile       - the person's number
  *  rows         - [{ id, edition, references: string[], status }]
  *  highlightKeys- Set of lower-case references currently ticked in the filter
+ *  title        - heading (default "Reference by Edition")
+ *  onToggleAttendance - (entryId, attended:boolean) => void. When given, every
+ *                 edition gets a "Mark Attended / Mark Not Attended" button, so
+ *                 a guest with MANY editions is handled here instead of in a
+ *                 very long Action menu.
+ *  busyId       - entry id currently being saved (its button is disabled)
  *  onClose      - () => void
  */
 export default function ReferenceDetailsModal({
@@ -19,6 +25,9 @@ export default function ReferenceDetailsModal({
   mobile = "",
   rows = [],
   highlightKeys = new Set(),
+  title = "Reference by Edition",
+  onToggleAttendance = null,
+  busyId = null,
   onClose,
 }) {
   useEffect(() => {
@@ -40,7 +49,7 @@ export default function ReferenceDetailsModal({
       >
         <div className="refModal__header">
           <div>
-            <h3 className="refModal__title">Reference by Edition</h3>
+            <h3 className="refModal__title">{title}</h3>
             <p className="refModal__sub">
               <strong>{personName || "-"}</strong>
               {mobile ? <span> · {mobile}</span> : null}
@@ -58,6 +67,7 @@ export default function ReferenceDetailsModal({
                 <th>Edition</th>
                 <th>Reference</th>
                 <th>Status</th>
+                {onToggleAttendance && <th>Action</th>}
               </tr>
             </thead>
             <tbody>
@@ -89,6 +99,29 @@ export default function ReferenceDetailsModal({
                       {item.status || "-"}
                     </span>
                   </td>
+                  {onToggleAttendance && (
+                    <td>
+                      {item.status === "Attended" ? (
+                        <button
+                          type="button"
+                          className="refModal__actBtn refModal__actBtn--no"
+                          disabled={busyId === item.id}
+                          onClick={() => onToggleAttendance(item.id, false)}
+                        >
+                          Mark Not Attended
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="refModal__actBtn refModal__actBtn--yes"
+                          disabled={busyId === item.id}
+                          onClick={() => onToggleAttendance(item.id, true)}
+                        >
+                          Mark Attended
+                        </button>
+                      )}
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

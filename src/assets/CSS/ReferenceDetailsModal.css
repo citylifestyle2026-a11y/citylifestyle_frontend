@@ -153,3 +153,35 @@
 .refModal__doneBtn:hover {
   background: #f4f6fb;
 }
+
+/* Attendance buttons (Event History, guest with many editions) */
+.refModal__actBtn {
+  border: 1px solid transparent;
+  border-radius: 7px;
+  padding: 5px 10px;
+  font-size: 12.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.refModal__actBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.refModal__actBtn--yes {
+  background: #e8f6ec;
+  color: #1e7b3a;
+  border-color: #bfe3ca;
+}
+
+.refModal__actBtn--no {
+  background: #fdeaea;
+  color: #b42323;
+  border-color: #f5c2c2;
+}
+
+.refModal__container {
+  max-width: 640px;
+}
