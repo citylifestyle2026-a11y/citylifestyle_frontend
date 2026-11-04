@@ -178,7 +178,7 @@ const FaceScanPanel = ({ onCheckedIn, onSound }) => {
       const full = await faceapi
         .detectSingleFace(
           video,
-          new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.5 })
+          new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.35 })
         )
         .withFaceLandmarks()
         .withFaceDescriptor();
@@ -273,7 +273,7 @@ const FaceScanPanel = ({ onCheckedIn, onSound }) => {
       try {
         const det = await faceapi.detectSingleFace(
           video,
-          new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.6 })
+          new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.4 })
         );
 
         if (det) {
