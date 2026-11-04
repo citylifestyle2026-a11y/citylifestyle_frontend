@@ -36,14 +36,15 @@ import {
   exportMembersExcelApi,
 } from "../services/memberService";
 import { confirmDialog } from "../utilits/appSwal";
+import { removeBlockApi } from "../services/blocklistService";
 import { showError, showSuccess } from "../utilits/toast";
 import { getErrorText } from "../utilits/apiError";
 
 import "../assets/CSS/ContactList.css";
 import "../assets/CSS/MemberList.css";
 import useClickOutside from "../hooks/useClickOutside";
-import { ALL_ROWS_OPTION } from "../utilits/rowsPerPage";
 import { useGlobalEvent } from "../context/EventContext";
+import { ALL_ROWS_OPTION } from "../utilits/rowsPerPage";
 
 const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, 100, 200].map((n) => ({
   value: n,
@@ -99,6 +100,7 @@ export default function MemberList() {
 
   // Checkbox selection: id -> member for the rows picked by hand, or
   // "select all matching" = every member that matches the current filters.
+  const { selectedEventId } = useGlobalEvent();
   const [selected, setSelected] = useState({});
   const [selectAllMatching, setSelectAllMatching] = useState(false);
 
@@ -108,7 +110,6 @@ export default function MemberList() {
   const [editMember, setEditMember] = useState(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
 
-  const { effectiveEventId } = useGlobalEvent();
   const filters = useMemo(
     () => ({
       search: search || undefined,
@@ -123,10 +124,12 @@ export default function MemberList() {
           : referenceFilter.join("|"),
       moved: movedFilter || undefined,
       fixType: movedFilter === "needsFix" && fixType ? fixType : undefined,
-      // "In Guest List" is counted for the event picked in the header dropdown.
-      eventId: effectiveEventId || undefined,
+      // The header Event dropdown only decides which Guest List "In Guest List"
+      // looks at. Every member is still listed in "All" (data is common).
+      // Default entry = no eventId: every running event counts.
+      eventId: selectedEventId || undefined,
     }),
-    [search, professionFilter, referenceFilter, references, movedFilter, fixType, effectiveEventId]
+    [search, professionFilter, referenceFilter, references, movedFilter, fixType, selectedEventId]
   );
 
   // Debounced search box.
@@ -302,6 +305,29 @@ export default function MemberList() {
       count: targets.length,
       label: targets.length === 1 ? targets[0].name : undefined,
     });
+  };
+
+  // Unblock: removes the person from the Ghost List; they show in All again.
+  const handleUnblock = async (member, name) => {
+    setOpenActionMenuId(null);
+    const confirmed = await confirmDialog({
+      title: `Unblock ${name}?`,
+      text:
+        member.blocked?.matchedBy === "name"
+          ? "Only this number will be unblocked. The blocked number stays in the Ghost List."
+          : "This contact will be removed from the Ghost List.",
+      confirmText: "Yes, unblock",
+      tone: "danger",
+    });
+    if (!confirmed) return;
+    try {
+      const res = await removeBlockApi(member.blocked._id, member.mobile);
+      showSuccess(res?.message || "Person unblocked");
+      setSelected({});
+      setRefreshKey((k) => k + 1);
+    } catch (err) {
+      showError(getErrorText(err, "Could not unblock."));
+    }
   };
 
   const handleDelete = async (member) => {
@@ -632,9 +658,34 @@ export default function MemberList() {
         // Pinned to the right edge, like Guest List.
         headerClassName: "contactPage__actionCol",
         cellClassName: "contactPage__actionCol",
-        // A guest / contact on the Block List gets NO action menu at all.
+        // A guest on the Block List only gets "Unblock" in its Action menu.
         render: (member) => member.blocked ? (
-          <span className="contactAction__blockedDash" title="Blocked">-</span>
+          <div
+            className="contactAction__wrapper"
+            ref={openActionMenuId === member._id ? actionMenuRef : null}
+          >
+            <button
+              type="button"
+              className="contactAction__button"
+              onClick={() => handleToggleActionMenu(member._id)}
+            >
+              Action
+              <FaChevronDown className="contactAction__icon" />
+            </button>
+            <div
+              className={`contactAction__menu ${
+                openActionMenuId === member._id ? "contactAction__menuOpen" : ""
+              }`}
+            >
+              <button
+                type="button"
+                className="contactAction__item contactAction__itemEdit"
+                onClick={() => handleUnblock(member, member.name)}
+              >
+                Unblock
+              </button>
+            </div>
+          </div>
         ) : (
           <div
             className="contactAction__wrapper"

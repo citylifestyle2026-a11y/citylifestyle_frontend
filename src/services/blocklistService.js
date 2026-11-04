@@ -16,7 +16,11 @@ export const updateBlockApi = async (id, data) => {
   return response.data;
 };
 
-export const removeBlockApi = async (id) => {
-  const response = await api.delete(`/blocklist/${id}`);
+// `number` (optional): a same-name guest with ANOTHER number - only that number
+// is unblocked; the blocked number stays blocked.
+export const removeBlockApi = async (id, number = "") => {
+  const response = await api.delete(`/blocklist/${id}`, {
+    params: number ? { number } : {},
+  });
   return response.data;
 };

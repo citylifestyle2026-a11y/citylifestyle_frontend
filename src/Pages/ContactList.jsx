@@ -59,6 +59,7 @@ import MergeMemberModal from "../Components/MergeMemberModal";
 import BlockedBadge from "../Components/BlockedBadge";
 import DuplicateTab from "../Components/DuplicateTab";
 import { confirmDialog, noticeDialog } from "../utilits/appSwal";
+import { removeBlockApi } from "../services/blocklistService";
 import { confirmBlockedContacts } from "../utilits/blockedConfirm";
 import "../assets/CSS/ContactList.css";
 import useClickOutside from "../hooks/useClickOutside";
@@ -446,6 +447,30 @@ export default function ContactList() {
     setDeleteContactId(null);
     setDeleteContactName("");
   };
+
+  // Unblock: removes the person from the Ghost List; their guests go back to
+  // Pending (done by the server).
+  const handleUnblock = useCallback(async (contact, name) => {
+    setOpenActionMenuId(null);
+    const confirmed = await confirmDialog({
+      title: `Unblock ${name}?`,
+      text:
+        contact.blocked?.matchedBy === "name"
+          ? "Only this number will be unblocked and moved to Pending. The blocked number stays in the Ghost List."
+          : "This guest will be removed from the Ghost List and moved to Pending.",
+      confirmText: "Yes, unblock",
+      tone: "danger",
+    });
+    if (!confirmed) return;
+    try {
+      const res = await removeBlockApi(contact.blocked._id, contact.whatsappNumber);
+      showSuccess(res?.message || "Person unblocked");
+      setSelected({});
+      setRefreshKey((k) => k + 1);
+    } catch (err) {
+      showError(err?.response?.data?.message || err?.message || "Could not unblock.");
+    }
+  }, []);
 
   const handleDeleteConfirm = async () => {
     try {
@@ -1528,9 +1553,34 @@ const sortedReferenceFilterOptions = useMemo(
         // WhatsApp icon + Action menu are always visible without scrolling.
         headerClassName: "contactPage__actionCol",
         cellClassName: "contactPage__actionCol",
-        // A guest / contact on the Block List gets NO action menu at all.
+        // A guest on the Block List only gets "Unblock" in its Action menu.
         render: (contact) => contact.blocked ? (
-          <span className="contactAction__blockedDash" title="Blocked">-</span>
+          <div
+            className="contactAction__wrapper"
+            ref={openActionMenuId === contact._id ? actionMenuRef : null}
+          >
+            <button
+              type="button"
+              className="contactAction__button"
+              onClick={() => handleToggleActionMenu(contact._id)}
+            >
+              Action
+              <FaChevronDown className="contactAction__icon" />
+            </button>
+            <div
+              className={`contactAction__menu ${
+                openActionMenuId === contact._id ? "contactAction__menuOpen" : ""
+              }`}
+            >
+              <button
+                type="button"
+                className="contactAction__item contactAction__itemEdit"
+                onClick={() => handleUnblock(contact, contact.fullName)}
+              >
+                Unblock
+              </button>
+            </div>
+          </div>
         ) : (
           <div
             className="contactAction__wrapper"

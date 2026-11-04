@@ -22,7 +22,9 @@ export default function Header({ title = "Dashboard" }) {
 
   // Pages whose data belongs to ONE event. Company Category, Form Links and
   // the rest are the same for every event, so they have no event dropdown.
-  const EVENT_WISE_PAGES = ["/dashboard", "/contact-book", "/gust-list", "/entry-report", "/booking", "/crew"];
+  // /contact-book has the dropdown too, but its data is COMMON: the event only
+  // decides which Guest List the "In Guest List" label / tabs look at.
+  const EVENT_WISE_PAGES = ["/dashboard", "/gust-list", "/contact-book", "/entry-report", "/booking", "/crew"];
   const showEventSelect = EVENT_WISE_PAGES.includes(pathname);
 
   // Current logged-in user
