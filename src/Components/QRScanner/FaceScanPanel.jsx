@@ -159,7 +159,6 @@ const FaceScanPanel = ({ onCheckedIn, onSound }) => {
         const result = await dispatch(faceCheckInQr({ ticketId: data.ticketId })).unwrap();
         const d = result?.data || {};
         const name = d.attendee?.name || data.attendee?.name || "";
-        onSound?.(true);
         speak("Thank you");
         if (onCheckedIn) onCheckedIn(result);
         go(
@@ -171,7 +170,6 @@ const FaceScanPanel = ({ onCheckedIn, onSound }) => {
         clearTimeout(resetTimeoutRef.current);
         resetTimeoutRef.current = setTimeout(resume, RESET_DELAY_MS);
       } catch (err) {
-        onSound?.(false);
         speak("Entry not allowed");
         setNotice({
           tone: "error",
@@ -227,7 +225,6 @@ const FaceScanPanel = ({ onCheckedIn, onSound }) => {
       // carefully" match is treated as NOT recognised - there is no button
       // for staff to confirm any more.
       if (!data.matched || data.level === "check") {
-        onSound?.(false);
         speak(data.reason === "no_active_event" ? "No running event" : "Not recognised");
         setNotice({
           tone: "error",
@@ -263,7 +260,6 @@ const FaceScanPanel = ({ onCheckedIn, onSound }) => {
       // Clear match -> check in right away ("Thank you").
       await checkInMatched(data);
     } catch (err) {
-      onSound?.(false);
       speak("Not recognised");
       const serverMsg = err.response?.data?.message;
       setNotice({

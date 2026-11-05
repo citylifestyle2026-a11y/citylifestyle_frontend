@@ -741,8 +741,8 @@
   left: 50%;
   transform: translate(-50%, -50%);
   box-sizing: border-box;
-  height: 88%;
-  aspect-ratio: 3 / 4;
+  height: 68%;
+  aspect-ratio: 4 / 5;
   /* White while waiting for a face (red looked like an error); the colour
      classes below show checking / allowed / already entered / not recognised. */
   border: 3px solid rgba(255, 255, 255, 0.95);
