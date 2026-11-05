@@ -18,7 +18,11 @@ import { speak } from "../../utilits/speak";
  */
 
 const MODEL_URL = `${import.meta.env.BASE_URL}models`;
-const RESET_DELAY_MS = 2500;
+// "Thank you" stays on screen this long before the camera starts again.
+const THANK_YOU_MS = 5000;
+// The same person still standing in front of the camera right after entering
+// is ignored for this long (no repeated "Already entered" popups).
+const SAME_FACE_COOLDOWN_MS = 15000;
 
 // Loaded once, only when the Face tab is opened (the library is large).
 let faceapiPromise = null;
@@ -46,6 +50,7 @@ const FaceScanPanel = ({ onCheckedIn, onSound }) => {
   const dispatch = useDispatch();
 
   const videoRef = useRef(null);
+  const lastEnteredRef = useRef({ ticketId: null, at: 0 });
   const streamRef = useRef(null);
   const statusRef = useRef("loading");
   const faceapiRef = useRef(null);
@@ -159,16 +164,17 @@ const FaceScanPanel = ({ onCheckedIn, onSound }) => {
         const result = await dispatch(faceCheckInQr({ ticketId: data.ticketId })).unwrap();
         const d = result?.data || {};
         const name = d.attendee?.name || data.attendee?.name || "";
+        lastEnteredRef.current = { ticketId: data.ticketId, at: Date.now() };
         speak("Thank you");
         if (onCheckedIn) onCheckedIn(result);
         go(
           "success",
           `Thank you${name ? `, ${name}` : ""}!${
-            d.isGroupEntry && d.remaining > 0 ? ` ${d.remaining} more can enter on this pass.` : ""
+            d.guests > 1 ? ` ${d.guests} guests entered on this pass.` : ""
           }`
         );
         clearTimeout(resetTimeoutRef.current);
-        resetTimeoutRef.current = setTimeout(resume, RESET_DELAY_MS);
+        resetTimeoutRef.current = setTimeout(resume, THANK_YOU_MS);
       } catch (err) {
         speak("Entry not allowed");
         setNotice({
@@ -221,10 +227,36 @@ const FaceScanPanel = ({ onCheckedIn, onSound }) => {
       const res = await faceMatchApi({ descriptor: full.descriptor });
       const data = res?.data || {};
 
-      // Only a clear match (strong / good) is let in. A weak "please compare
-      // carefully" match is treated as NOT recognised - there is no button
-      // for staff to confirm any more.
-      if (!data.matched || data.level === "check") {
+      // Just let in a moment ago and still in front of the camera: stay quiet
+      // and keep scanning (no "Already entered" again and again).
+      if (
+        data.matched &&
+        data.alreadyEntered &&
+        lastEnteredRef.current.ticketId === data.ticketId &&
+        Date.now() - lastEnteredRef.current.at < SAME_FACE_COOLDOWN_MS
+      ) {
+        go("scanning", "Show the guest's face to the camera");
+        return;
+      }
+
+      if (data.alreadyEntered) {
+        speak("Already entered");
+        setNotice({
+          tone: "warning",
+          title: "Ticket Already Used",
+          text: `${data.attendee?.name || "This guest"} has already entered${
+            data.scannedAt ? ` at ${new Date(data.scannedAt).toLocaleTimeString()}` : ""
+          }.`,
+        });
+        go("notice", "Already entered");
+        return;
+      }
+
+      // Only a clear match (data.autoEntry) is let in. An unclear match is
+      // treated as NOT recognised - there is no button for staff any more.
+      // (A face that matches someone who ALREADY entered says "Already
+      // entered" instead, at any match level.)
+      if (!data.matched || (!data.alreadyEntered && !data.autoEntry)) {
         speak(data.reason === "no_active_event" ? "No running event" : "Not recognised");
         setNotice({
           tone: "error",
@@ -241,19 +273,6 @@ const FaceScanPanel = ({ onCheckedIn, onSound }) => {
               : "This face does not match any registered photo. Please scan the guest's QR instead.",
         });
         go("notice", "Face not recognised");
-        return;
-      }
-
-      if (data.alreadyEntered) {
-        speak("Already entered");
-        setNotice({
-          tone: "warning",
-          title: "Ticket Already Used",
-          text: `${data.attendee?.name || "This guest"} has already entered${
-            data.scannedAt ? ` at ${new Date(data.scannedAt).toLocaleTimeString()}` : ""
-          }.`,
-        });
-        go("notice", "Already entered");
         return;
       }
 
