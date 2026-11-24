@@ -39,6 +39,9 @@ const GuestCardDesign = lazy(() => import("./Pages/GuestCardDesign"));
 const MemberList = lazy(() => import("./Pages/MemberList"));
 const FormLinks = lazy(() => import("./Pages/FormLinks"));
 const BlockList = lazy(() => import("./Pages/BlockList"));
+// Run Registration (5 KM / 10 KM): admin page + public page opened from WhatsApp (/run/:token).
+const RunRegistration = lazy(() => import("./Pages/RunRegistration"));
+const PublicRunRegister = lazy(() => import("./Pages/PublicRunRegister"));
 const EventHistory = lazy(() => import("./Pages/EventHistory"));
 const CompanyCategory = lazy(() => import("./Pages/CompanyCategory"));
 const CrewList = lazy(() => import("./Pages/CrewList"));
@@ -88,6 +91,8 @@ const privateRoutes = [
   "/guest-card",
   // Attendance reminder Yes / No pages opened from WhatsApp (/rsvp/yes/:token).
   "/rsvp",
+  // Run Registration: admin page (/run-registration) and the public link (/run/:token).
+  "/run",
 ];
 
 function SiteMetaHandler() {
@@ -175,6 +180,8 @@ function App() {
           {/* Attendance reminder: Yes / No pages opened from the WhatsApp buttons.
               Not linked anywhere on the website and set to noindex. */}
           <Route path="/rsvp/:answer/:token" element={<PublicRsvp />} />
+          {/* Run Registration link opened from WhatsApp: 5 KM / 10 KM + name, mobile, email -> QR */}
+          <Route path="/run/:token" element={<PublicRunRegister />} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/user" element={<User />} />
@@ -202,6 +209,7 @@ function App() {
             <Route path="/invite-cards" element={<InviteCards />} />
             <Route path="/guest-card-design" element={<GuestCardDesign />} />
             <Route path="/ghost-list" element={<BlockList />} />
+            <Route path="/run-registration" element={<RunRegistration />} />
           </Route>
 
           <Route element={<ProtectedRoute permission="Entry Report" />}>

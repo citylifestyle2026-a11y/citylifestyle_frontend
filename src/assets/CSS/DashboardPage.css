@@ -371,7 +371,8 @@
   grid-column: span 8;
 }
 
-.dashSection--crew {
+.dashSection--crew,
+.dashSection--run {
   grid-column: 1 / -1;
 }
 
@@ -381,7 +382,8 @@
   .dashSection--entry,
   .dashSection--quantity,
   .dashSection--attendance,
-  .dashSection--crew {
+  .dashSection--crew,
+  .dashSection--run {
     grid-column: 1 / -1;
   }
 }

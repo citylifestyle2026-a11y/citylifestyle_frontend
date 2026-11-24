@@ -8,7 +8,7 @@ import {
   MdKeyboardArrowDown,
 } from 'react-icons/md';
 
-import { FaUsers, FaIdBadge, FaAddressBook, FaUserFriends, FaEnvelopeOpenText, FaLink, FaBan } from 'react-icons/fa';
+import { FaUsers, FaIdBadge, FaAddressBook, FaUserFriends, FaEnvelopeOpenText, FaLink, FaBan, FaRunning } from 'react-icons/fa';
 
 import {
   BsCalendarEventFill,
@@ -59,6 +59,12 @@ const menuItems = [
     label: 'Form Links',
     icon: <FaLink />,
     path: '/form-links',
+  },
+  {
+    // 5 KM / 10 KM registration: Add Data -> WhatsApp link -> QR -> scan report.
+    label: 'Run Registration',
+    icon: <FaRunning />,
+    path: '/run-registration',
   },
   {
     label: 'Ghost List',

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useCallback } from "react";
+import { useEffect, useMemo, useCallback, useState } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import Sidebar from "../Components/Sidebar";
@@ -7,6 +7,7 @@ import DashboardCard from "../Components/DashboardCard";
 import { useGlobalEvent } from "../context/EventContext";
 import { getDashboardSummary } from "../redux/dashboard/dashboardThunk";
 import { clearDashboardState } from "../redux/dashboard/dashboardSlice";
+import { getRunSummaryApi } from "../services/runRegistrationService";
 import '../assets/CSS/DashboardPage.css';
 import '../assets/CSS/DashboardResponsive.css';
 
@@ -20,6 +21,22 @@ export default function DashboardPage() {
   // other event's numbers.
   // The event comes from the dropdown in the header (same on every page).
   const { selectedEventId } = useGlobalEvent();
+
+  // Run Registration (5 KM / 10 KM) numbers. Independent of the event picker
+  // and of the redux dashboard data, so a problem here can never break the
+  // rest of the dashboard - on failure the section simply shows 0.
+  const [runSummary, setRunSummary] = useState(null);
+  useEffect(() => {
+    let cancelled = false;
+    getRunSummaryApi()
+      .then((res) => {
+        if (!cancelled) setRunSummary(res?.data || null);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Applies immediately on selection — no separate "Search"/"Apply"
   // step needed to see the chosen event's dashboard data.
@@ -213,6 +230,56 @@ export default function DashboardPage() {
     [dashboardData]
   );
 
+  // Run Registration: who registered, who was scanned at the entry and who
+  // registered but has not been scanned yet.
+  const runCards = useMemo(
+    () => [
+      {
+        key: "runTotal",
+        title: "Added (Link Sent)",
+        amountValue: String(runSummary?.total ?? 0),
+        infoText: "People added with Add Data - the registration link was sent to their WhatsApp.",
+      },
+      {
+        key: "runRegistered",
+        title: "Registered",
+        amountValue: String(runSummary?.registered ?? 0),
+        infoText: "People who opened the link, chose 5 KM / 10 KM and completed the registration. Their QR is sent on WhatsApp and email.",
+      },
+      {
+        key: "runScanned",
+        title: "Scanned",
+        amountValue: String(runSummary?.scanned ?? 0),
+        infoText: "Registered people whose QR was scanned at the entry.",
+      },
+      {
+        key: "runNotScanned",
+        title: "Registered, Not Scanned",
+        amountValue: String(runSummary?.notScanned ?? 0),
+        infoText: "People who registered but whose QR has not been scanned at the entry yet.",
+      },
+      {
+        key: "runNotRegistered",
+        title: "Not Registered",
+        amountValue: String(runSummary?.notRegistered ?? 0),
+        infoText: "People who were sent the link but have not completed the registration yet.",
+      },
+      {
+        key: "run5",
+        title: "5 KM Registered",
+        amountValue: String(runSummary?.distance?.[5]?.registered ?? 0),
+        infoText: `Registered for 5 KM (${runSummary?.distance?.[5]?.scanned ?? 0} scanned).`,
+      },
+      {
+        key: "run10",
+        title: "10 KM Registered",
+        amountValue: String(runSummary?.distance?.[10]?.registered ?? 0),
+        infoText: `Registered for 10 KM (${runSummary?.distance?.[10]?.scanned ?? 0} scanned).`,
+      },
+    ],
+    [runSummary]
+  );
+
   const sections = [
     {
       key: "booking",
@@ -272,6 +339,33 @@ export default function DashboardPage() {
             </div>
 
           </div>
+
+          {/* Run Registration - shown on top and independent of the event
+              dashboard data below, so it is always visible. */}
+          <section className="dashSection dashSection--run" style={{ marginBottom: 16 }}>
+            <div className="dashSection__head">
+              <div>
+                <h2 className="dashSection__title">Run Registration</h2>
+                <p className="dashSection__sub">5 KM / 10 KM - registered and scanned at the entry</p>
+              </div>
+              <Link className="dashSection__link" to="/run-registration">
+                View Run Report &rarr;
+              </Link>
+            </div>
+            <div className="dashSection__cards">
+              {runCards.map((card) => (
+                <DashboardCard
+                  key={card.key}
+                  compact
+                  title={card.title}
+                  amountValue={card.amountValue}
+                  amountLabel={card.title}
+                  hideBody
+                  infoText={card.infoText}
+                />
+              ))}
+            </div>
+          </section>
 
           <div className="dashboardPage-body">
             {error && (

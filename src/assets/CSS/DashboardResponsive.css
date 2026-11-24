@@ -25,7 +25,8 @@
   grid-column: span 8;
 }
 
-.dashboardPage .dashSection--crew {
+.dashboardPage .dashSection--crew,
+.dashboardPage .dashSection--run {
   grid-column: 1 / -1;
 }
 
@@ -35,7 +36,8 @@
   .dashboardPage .dashSection--entry,
   .dashboardPage .dashSection--quantity,
   .dashboardPage .dashSection--attendance,
-  .dashboardPage .dashSection--crew {
+  .dashboardPage .dashSection--crew,
+  .dashboardPage .dashSection--run {
     grid-column: 1 / -1;
   }
 }

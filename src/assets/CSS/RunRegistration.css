@@ -1,0 +1,530 @@
+/* =========================================================
+   RUN REGISTRATION - admin page (/run-registration)
+   The table, header, search box and Action menu reuse the
+   Company Category / Form Links styles; only what is new is here.
+   ========================================================= */
+
+.runPage__demo {
+  background: #fff7e0;
+  border: 1px dashed #e0b43c;
+  color: #7a5a00;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+/* summary tiles */
+.runPage__tiles {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.runPage__tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  text-align: left;
+  background: #ffffff;
+  border: 1px solid #e6e8f0;
+  border-radius: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.runPage__tile:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(27, 42, 78, 0.1);
+}
+
+.runPage__tile--active {
+  border-color: var(--admin-accent, #1b2a4e);
+  box-shadow: 0 0 0 2px rgba(27, 42, 78, 0.12);
+}
+
+.runPage__tileValue {
+  font-size: 26px;
+  font-weight: 800;
+  color: #1b2a4e;
+  line-height: 1.1;
+}
+
+.runPage__tileLabel {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1b2a4e;
+}
+
+.runPage__tileHint {
+  font-size: 11.5px;
+  color: #7b7e91;
+}
+
+/* tabs = the report */
+.runPage__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #eceef5;
+}
+
+.runPage__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #f4f5fa;
+  color: #3d4560;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.runPage__tab:hover {
+  background: #e9ecf6;
+}
+
+.runPage__tab--active {
+  background: var(--admin-accent, #1b2a4e);
+  color: #ffffff;
+}
+
+.runPage__tabCount {
+  min-width: 22px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  color: #1b2a4e;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.runPage__distanceSelect {
+  min-width: 150px;
+}
+
+.runPage__exportButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  background: #1a9b4b;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.runPage__exportButton:hover:not(:disabled) {
+  background: #157f3d;
+}
+
+.runPage__exportButton:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* status + distance badges */
+.runPage__badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.runPage__badge--notRegistered {
+  background: #fdecea;
+  color: #b3261e;
+}
+
+.runPage__badge--notScanned {
+  background: #fff4d6;
+  color: #8a6100;
+}
+
+.runPage__badge--scanned {
+  background: #e3f6ea;
+  color: #12713a;
+}
+
+.runPage__km {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  background: #e8edfb;
+  color: #2a3f8f;
+}
+
+.runPage__km--10 {
+  background: #f1e8fb;
+  color: #5b2a8f;
+}
+
+/* Add Data modal */
+.runModal__note {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: #7b7e91;
+}
+
+@media (max-width: 1100px) {
+  .runPage__tiles {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .runPage__tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .runPage__exportButton {
+    width: 100%;
+    justify-content: center;
+    margin-left: 0;
+  }
+
+  .runPage__tab {
+    padding: 7px 12px;
+  }
+}
+
+/* =========================================================
+   RUN REGISTRATION - public page (/run/:token)
+   ========================================================= */
+
+.runPublic {
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 28px 16px;
+  background: linear-gradient(160deg, #f4f5fa 0%, #e9ecf6 100%);
+  font-family: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: #1b2a4e;
+  box-sizing: border-box;
+}
+
+.runPublic__card {
+  width: 100%;
+  max-width: 460px;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 28px 26px 26px;
+  box-shadow: 0 12px 40px rgba(27, 42, 78, 0.12);
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.runPublic__logo {
+  height: 64px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  margin-bottom: 14px;
+}
+
+.runPublic__title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+
+.runPublic__text {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: #3d4560;
+  margin: 0 0 18px;
+}
+
+.runPublic__muted {
+  font-size: 13px;
+  color: #7b7e91;
+  margin: 8px 0 0;
+}
+
+.runPublic__center {
+  padding: 14px 0 6px;
+}
+
+.runPublic__spinner {
+  width: 38px;
+  height: 38px;
+  margin: 0 auto 6px;
+  border: 4px solid #e3e6f2;
+  border-top-color: #1b2a4e;
+  border-radius: 50%;
+  animation: runPublicSpin 0.8s linear infinite;
+}
+
+@keyframes runPublicSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* step indicator */
+.runPublic__steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #9a9db0;
+}
+
+.runPublic__step {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.runPublic__step span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #e3e6f2;
+  color: #6b6f86;
+  font-size: 12px;
+}
+
+.runPublic__step--on {
+  color: #1b2a4e;
+}
+
+.runPublic__step--on span {
+  background: #1b2a4e;
+  color: #ffffff;
+}
+
+.runPublic__stepLine {
+  width: 36px;
+  height: 2px;
+  background: #e3e6f2;
+}
+
+/* form */
+.runPublic__form {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.runPublic__field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #1b2a4e;
+}
+
+.runPublic__field label b {
+  color: #e0331e;
+}
+
+.runPublic__field input,
+.runPublic__field select {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #c9cde0;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 15px;
+  font-family: inherit;
+  color: #1b2a4e;
+  background: #ffffff;
+}
+
+.runPublic__field input:focus,
+.runPublic__field select:focus {
+  outline: none;
+  border-color: #1b2a4e;
+  box-shadow: 0 0 0 3px rgba(27, 42, 78, 0.12);
+}
+
+.runPublic__locked {
+  background: #f1f2f8 !important;
+  color: #5d6479 !important;
+}
+
+.runPublic__hint {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: #7b7e91;
+}
+
+.runPublic__error {
+  margin: 6px 0 0;
+  font-size: 12.5px;
+  color: #d32f2f;
+}
+
+.runPublic__error--box {
+  background: #fdecea;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 0;
+}
+
+.runPublic__chosen {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: #f6f7fb;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+}
+
+.runPublic__chosen button {
+  background: none;
+  border: none;
+  color: #1b2a4e;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.runPublic__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  padding: 14px 18px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  background: #1b2a4e;
+  color: #ffffff;
+  transition: background-color 0.15s ease;
+}
+
+.runPublic__button:hover:not(:disabled) {
+  background: #14203d;
+}
+
+.runPublic__button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.runPublic__button--ghost {
+  background: #ffffff;
+  color: #1b2a4e;
+  border: 1px solid #c9cde0;
+  margin-top: 4px;
+}
+
+.runPublic__button--ghost:hover:not(:disabled) {
+  background: #f1f2f8;
+}
+
+/* success screen */
+.runPublic__tick {
+  font-size: 54px;
+  line-height: 1;
+  color: #1a9b4b;
+  margin: 2px 0 10px;
+}
+
+.runPublic__qrBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  width: 230px;
+  max-width: 100%;
+  min-height: 230px;
+  padding: 10px;
+  border: 1px solid #e3e6f2;
+  border-radius: 14px;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.runPublic__qrBox img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.runPublic__qrPlaceholder {
+  font-size: 12.5px;
+  color: #7b7e91;
+  padding: 10px;
+}
+
+.runPublic__details {
+  margin: 0 0 14px;
+  padding: 12px 16px;
+  background: #f6f7fb;
+  border-radius: 12px;
+  text-align: left;
+  display: grid;
+  gap: 10px;
+}
+
+.runPublic__details dt {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #7b7e91;
+}
+
+.runPublic__details dd {
+  margin: 2px 0 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1b2a4e;
+  word-break: break-word;
+}
+
+.runPublic__sent {
+  margin: 16px 0 0;
+  font-size: 12.5px;
+  line-height: 1.8;
+  color: #5d6479;
+}
+
+.runPublic__sent svg {
+  vertical-align: -2px;
+  margin-right: 4px;
+}
