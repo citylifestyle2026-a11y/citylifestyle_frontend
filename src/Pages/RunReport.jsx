@@ -91,6 +91,7 @@ export default function RunReport() {
   // The backend takes one distance; none / both selected means "all".
   const distance = distances.length === 1 ? distances[0] : "";
   const [exporting, setExporting] = useState(false);
+  const [qrPreview, setQrPreview] = useState(null); // row whose QR is shown big
 
   const setStatus = useCallback(
     (value) => {
@@ -208,6 +209,30 @@ export default function RunReport() {
           ),
       },
       { key: "registrationNumber", label: "Reg. No.", sortable: false, render: (item) => item.registrationNumber || "-" },
+      {
+        key: "qrNumber",
+        label: "QR Number",
+        sortable: false,
+        render: (item) => (item.qrNumber ? <span className="runPage__qrNumber">{item.qrNumber}</span> : "-"),
+      },
+      {
+        key: "qrImage",
+        label: "QR Code",
+        sortable: false,
+        render: (item) =>
+          item.qrImage ? (
+            <button
+              type="button"
+              className="runPage__qrThumb"
+              onClick={() => setQrPreview(item)}
+              title="Click to enlarge"
+            >
+              <img src={item.qrImage} alt={`QR ${item.qrNumber || item.registrationNumber}`} loading="lazy" />
+            </button>
+          ) : (
+            "-"
+          ),
+      },
       {
         key: "state",
         label: "Status",
@@ -379,6 +404,27 @@ export default function RunReport() {
           nextDisabled={currentPage === totalPages}
         />
       </div>
+
+      {qrPreview && (
+        <div className="runPage__qrOverlay" onClick={() => setQrPreview(null)} role="dialog" aria-modal="true">
+          <div className="runPage__qrDialog" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="runPage__qrClose"
+              onClick={() => setQrPreview(null)}
+              aria-label="Close"
+            >
+              &times;
+            </button>
+            <img src={qrPreview.qrImage} alt="QR code" />
+            <p className="runPage__qrDialogNumber">{qrPreview.qrNumber || qrPreview.registrationNumber}</p>
+            <p className="runPage__qrDialogName">
+              {qrPreview.name}
+              {qrPreview.distance ? ` - ${qrPreview.distance} KM` : ""}
+            </p>
+          </div>
+        </div>
+      )}
     </CommonListLayout>
   );
 }

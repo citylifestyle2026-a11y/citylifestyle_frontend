@@ -580,3 +580,83 @@
   font-size: 12px;
   color: #94a3b8;
 }
+
+/* Run Report: QR number + QR thumbnail columns, enlarged QR dialog */
+.runPage__qrNumber {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.runPage__qrThumb {
+  display: block;
+  width: 46px;
+  height: 46px;
+  padding: 2px;
+  border: 1px solid #e3e7f1;
+  border-radius: 6px;
+  background: #ffffff;
+  cursor: zoom-in;
+}
+
+.runPage__qrThumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.runPage__qrOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.runPage__qrDialog {
+  position: relative;
+  width: 300px;
+  max-width: 100%;
+  padding: 26px 22px 20px;
+  border-radius: 16px;
+  background: #ffffff;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.35);
+}
+
+.runPage__qrDialog img {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.runPage__qrClose {
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  border: none;
+  background: none;
+  font-size: 26px;
+  line-height: 1;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.runPage__qrDialogNumber {
+  margin: 12px 0 2px;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #1b2a4e;
+}
+
+.runPage__qrDialogName {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+}
