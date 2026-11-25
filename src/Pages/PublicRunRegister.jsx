@@ -10,19 +10,26 @@ import {
 } from "../services/runRegistrationService";
 import { getErrorText } from "../utilits/apiError";
 import { saveBlob } from "../utilits/download";
+import {
+  isValidMobileNumber,
+  sanitizeMobileInput,
+  toLocalMobileNumber,
+  LOCAL_MOBILE_ERROR_MESSAGE,
+} from "../utilits/mobileNumber";
 import logo from "../assets/images/logo/city-lifestyle-logo.jpg";
 import "../assets/CSS/RunRegistration.css";
 
 // Public page opened from the WhatsApp link:   /run/:token
 //
 //   Step 1  ->  dropdown: 5 KM or 10 KM
-//   Step 2  ->  name, mobile number (locked: the number the link was sent to),
+//   Step 2  ->  name, mobile number (starts as the number the link was sent to,
+//               the person can change it - the QR goes to the number they submit),
 //               email  ->  Register
 //   Done    ->  QR code is shown here, and the backend also sends it on
 //               WhatsApp and by email. The same QR is scanned at the entry.
 //
 // No login. The token in the address is the only thing that identifies the
-// person - nothing else (id, mobile number) is taken from the address.
+// person - nothing else (id) is taken from the address.
 const EMAIL_RX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const displayMobile = (value) => {
@@ -68,7 +75,7 @@ export default function PublicRunRegister() {
         if (cancelled) return;
         const data = res?.data || {};
         setName(data.name || "");
-        setMobile(data.mobileNumber || "");
+        setMobile(toLocalMobileNumber(data.mobileNumber) || "");
         setEmail(data.email || "");
 
         if (data.status === "registered") {
@@ -106,6 +113,9 @@ export default function PublicRunRegister() {
     if (!cleanName) next.name = "Name is required.";
     else if (cleanName.length > 60) next.name = "Name is too long (max 60 characters).";
 
+    if (!mobile) next.mobile = "Mobile number is required.";
+    else if (!isValidMobileNumber(mobile)) next.mobile = LOCAL_MOBILE_ERROR_MESSAGE;
+
     if (!email.trim()) next.email = "Email is required.";
     else if (!EMAIL_RX.test(email.trim())) next.email = "Enter a valid email address.";
 
@@ -123,6 +133,7 @@ export default function PublicRunRegister() {
       const res = await submitPublicRunApi(token, {
         distance: Number(distance),
         name: name.replace(/\s+/g, " ").trim(),
+        mobile,
         email: email.trim(),
       });
       setResult(res?.data || {});
@@ -253,12 +264,15 @@ export default function PublicRunRegister() {
                   <label htmlFor="runPubMobile">Mobile number (WhatsApp)</label>
                   <input
                     id="runPubMobile"
-                    type="text"
-                    value={displayMobile(mobile)}
-                    readOnly
-                    className="runPublic__locked"
+                    type="tel"
+                    inputMode="numeric"
+                    value={mobile}
+                    onChange={(e) => setMobile(sanitizeMobileInput(e.target.value))}
+                    placeholder="10-digit mobile number"
+                    autoComplete="tel-national"
                   />
-                  <p className="runPublic__hint">Your QR is sent on this number.</p>
+                  {errors.mobile && <p className="runPublic__error">{errors.mobile}</p>}
+                  <p className="runPublic__hint">Your QR is sent on this WhatsApp number. You can change it if needed.</p>
                 </div>
 
                 <div className="runPublic__field">

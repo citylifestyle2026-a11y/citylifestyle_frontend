@@ -242,7 +242,7 @@ const publicView = (item) => ({
 
 export const getPublicRun = async (token) => wait({ success: true, data: publicView(findByToken(token)) });
 
-export const submitPublicRun = async (token, { distance, name, email }) => {
+export const submitPublicRun = async (token, { distance, name, email, mobile }) => {
   const items = load();
   const item = items.find((i) => i.token === token);
   if (!item) throw fail("This registration link is not valid.", 404);
@@ -255,6 +255,14 @@ export const submitPublicRun = async (token, { distance, name, email }) => {
     throw fail("Enter a valid email address.");
   }
 
+  if (mobile !== undefined) {
+    const mobileNumber = normalizeMobileNumber(mobile);
+    if (!mobileNumber) throw fail("Enter a valid 10-digit mobile number (with or without 91).");
+    if (items.some((i) => i._id !== item._id && i.mobileNumber === mobileNumber)) {
+      throw fail("This mobile number is already registered.", 409);
+    }
+    item.mobileNumber = mobileNumber;
+  }
   item.name = cleanName;
   item.email = String(email).trim().toLowerCase();
   item.distance = Number(distance);

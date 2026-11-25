@@ -212,11 +212,22 @@ export default function RunRegistration() {
         key: "state",
         label: "Status",
         sortable: false,
-        render: (item) => (
-          <span className={`runPage__badge runPage__badge--${item.state}`}>
-            {STATE_LABEL[item.state] || item.state}
-          </span>
-        ),
+        render: (item) => {
+          // Why the WhatsApp message did not go (shown until it is sent again).
+          const sendError = item.state === "notRegistered" ? item.linkError : item.qrError;
+          return (
+            <>
+              <span className={`runPage__badge runPage__badge--${item.state}`}>
+                {STATE_LABEL[item.state] || item.state}
+              </span>
+              {sendError && (
+                <div className="runPage__sendError" title={sendError}>
+                  {item.state === "notRegistered" ? "Link not sent" : "QR not sent"}: {sendError}
+                </div>
+              )}
+            </>
+          );
+        },
       },
       { key: "createdAt", label: "Added On", sortable: false, render: (item) => formatDateTime(item.createdAt) },
       {

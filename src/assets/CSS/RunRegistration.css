@@ -561,3 +561,16 @@
 .runPage__eventLine strong {
   color: #1e293b;
 }
+
+/* WhatsApp / email delivery problem shown under the status badge */
+.runPage__sendError {
+  margin-top: 4px;
+  max-width: 260px;
+  font-size: 11.5px;
+  line-height: 1.35;
+  color: #c0392b;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
