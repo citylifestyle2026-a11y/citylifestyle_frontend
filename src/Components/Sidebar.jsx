@@ -64,7 +64,11 @@ const menuItems = [
     // 5 KM / 10 KM registration: Add Data -> WhatsApp link -> QR -> scan report.
     label: 'Run Registration',
     icon: <FaRunning />,
-    path: '/run-registration',
+    submenu: [
+      { label: 'Run Registration', path: '/run-registration' },
+      // Registered / Scanned / Not scanned report + Excel.
+      { label: 'Run Report', path: '/run-report' },
+    ],
   },
   {
     label: 'Ghost List',

@@ -1,6 +1,6 @@
-import { Link, useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FaSearch, FaPlus, FaChevronDown, FaFileExcel } from "react-icons/fa";
+import { FaSearch, FaPlus, FaChevronDown, FaChartBar } from "react-icons/fa";
 
 import CommonListLayout from "../Components/CommonListLayout";
 import CommonPageHeader from "../Components/CommonPageHeader";
@@ -11,17 +11,15 @@ import CommonPagination from "../Components/CommonPagination";
 import DeleteUserModal from "../Components/DeleteUserModal";
 import RunRegistrationModal from "../Components/RunRegistrationModal";
 
+import { useGlobalEvent } from "../context/EventContext";
 import {
   RUN_MOCK,
-  RUN_DISTANCES,
   buildRunLink,
   getRunRegistrationsApi,
   resendRunRegistrationApi,
   deleteRunRegistrationApi,
-  exportRunRegistrationsApi,
   markRunScannedApi,
 } from "../services/runRegistrationService";
-import { saveBlob } from "../utilits/download";
 import { formatDateTime } from "../utilits/dateFormat";
 import { copyText } from "../utilits/copyText";
 import { showError, showSuccess } from "../utilits/toast";
@@ -38,31 +36,10 @@ import "../assets/CSS/RunRegistration.css";
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100].map((n) => ({ value: n, label: String(n) }));
 ROWS_PER_PAGE_OPTIONS.push(ALL_ROWS_OPTION);
 
-// The tabs ARE the report: who registered, who was scanned at the gate and
-// who registered but never came. `status` is also the ?status= address
-// parameter, so the Dashboard can link straight to a tab.
-const TABS = [
-  { value: "all", label: "All" },
-  { value: "registered", label: "Registered" },
-  { value: "scanned", label: "Scanned" },
-  { value: "notScanned", label: "Registered, Not Scanned" },
-  { value: "notRegistered", label: "Not Registered" },
-];
-const VALID_STATUS = TABS.map((t) => t.value);
-
 const STATE_LABEL = {
   notRegistered: "Not Registered",
   notScanned: "Not Scanned",
   scanned: "Scanned",
-};
-
-const EMPTY_SUMMARY = {
-  total: 0,
-  registered: 0,
-  scanned: 0,
-  notScanned: 0,
-  notRegistered: 0,
-  distance: { 5: { registered: 0, scanned: 0 }, 10: { registered: 0, scanned: 0 } },
 };
 
 const displayMobile = (value) => {
@@ -70,15 +47,18 @@ const displayMobile = (value) => {
   return digits.length === 12 && digits.startsWith("91") ? `+91 ${digits.slice(2)}` : value || "-";
 };
 
+/**
+ * Run Registration - the DATA page (Add Data, Edit, Delete, Resend).
+ * Shows only the people of the event (edition) picked in the header dropdown
+ * (default = the active event). The numbers / tabs / Excel live on the
+ * separate "Run Report" page (/run-report).
+ */
 export default function RunRegistration() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const rawStatus = searchParams.get("status");
-  const status = VALID_STATUS.includes(rawStatus) ? rawStatus : "all";
+  const { effectiveEventId } = useGlobalEvent();
 
   const [items, setItems] = useState([]);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const [summary, setSummary] = useState(EMPTY_SUMMARY);
   const [loading, setLoading] = useState(true);
   const [listError, setListError] = useState(false);
 
@@ -86,27 +66,20 @@ export default function RunRegistration() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [search, setSearch] = useState("");
-  const [distance, setDistance] = useState(""); // "" = 5 KM + 10 KM
   const [refreshKey, setRefreshKey] = useState(0);
 
   const [openActionMenuId, setOpenActionMenuId] = useState(null);
   const [showAdd, setShowAdd] = useState(false);
+  const [editItem, setEditItem] = useState(null);
   const [deleteItem, setDeleteItem] = useState(null);
-  const [exporting, setExporting] = useState(false);
   const [busyId, setBusyId] = useState(null);
 
   const refresh = useCallback(() => setRefreshKey((k) => k + 1), []);
 
-  const setStatus = useCallback(
-    (value) => {
-      const next = new URLSearchParams(searchParams);
-      if (value === "all") next.delete("status");
-      else next.set("status", value);
-      setSearchParams(next, { replace: true });
-      setCurrentPage(1);
-    },
-    [searchParams, setSearchParams]
-  );
+  // Another event (edition) picked in the header -> start again from page 1.
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [effectiveEventId]);
 
   // Debounce the search box.
   useEffect(() => {
@@ -117,7 +90,7 @@ export default function RunRegistration() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // Load the list (and the summary numbers shown in the tabs / tiles).
+  // Load the list of the selected event.
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
@@ -126,8 +99,7 @@ export default function RunRegistration() {
       page: currentPage,
       limit: rowsPerPage,
       search,
-      status,
-      distance,
+      eventId: effectiveEventId || undefined,
     })
       .then((res) => {
         if (cancelled) return;
@@ -135,7 +107,6 @@ export default function RunRegistration() {
         setItems(data.items || []);
         setTotal(data.total || 0);
         setTotalPages(data.totalPages || 1);
-        if (data.summary) setSummary({ ...EMPTY_SUMMARY, ...data.summary });
         setListError(false);
       })
       .catch(() => {
@@ -148,7 +119,7 @@ export default function RunRegistration() {
     return () => {
       cancelled = true;
     };
-  }, [currentPage, rowsPerPage, search, status, distance, refreshKey]);
+  }, [currentPage, rowsPerPage, search, effectiveEventId, refreshKey]);
 
   // Close the Action dropdown on an outside click.
   const actionMenuRef = useRef(null);
@@ -158,6 +129,15 @@ export default function RunRegistration() {
   const tableWrapperRef = useRef(null);
   useActionMenuRoom(tableWrapperRef, openActionMenuId, ".companyCategoryAction__menuOpen");
 
+  // After "Add Data": clear any filter / search / page so the new person is
+  // always visible at the top of the list, then reload.
+  const handleAdded = useCallback(() => {
+    setSearchTerm("");
+    setSearch("");
+    setCurrentPage(1);
+    refresh();
+  }, [refresh]);
+
   const handleCopy = useCallback(async (item) => {
     setOpenActionMenuId(null);
     const ok = await copyText(buildRunLink(item.token));
@@ -165,25 +145,24 @@ export default function RunRegistration() {
     else showError("Could not copy. Please try again.");
   }, []);
 
-  const handleResend = useCallback(
-    async (item) => {
-      setOpenActionMenuId(null);
-      setBusyId(item._id);
-      try {
-        await resendRunRegistrationApi(item._id);
-        showSuccess(
-          item.state === "notRegistered"
-            ? "Registration link sent again on WhatsApp."
-            : "QR sent again on WhatsApp."
-        );
-      } catch (err) {
-        showError(getErrorText(err, "Unable to send the WhatsApp message."));
-      } finally {
-        setBusyId(null);
-      }
-    },
-    []
-  );
+  const handleResend = useCallback(async (item) => {
+    setOpenActionMenuId(null);
+    setBusyId(item._id);
+    try {
+      await resendRunRegistrationApi(item._id);
+      showSuccess(
+        item.state === "notRegistered"
+          ? "Registration link sent again on WhatsApp."
+          : "QR sent again on WhatsApp."
+      );
+      refresh();
+    } catch (err) {
+      showError(getErrorText(err, "Unable to send the WhatsApp message."));
+      refresh();
+    } finally {
+      setBusyId(null);
+    }
+  }, [refresh]);
 
   // Demo mode only.
   const handleMarkScanned = useCallback(
@@ -213,28 +192,6 @@ export default function RunRegistration() {
     }
   };
 
-  // Excel of whatever tab / distance is currently selected.
-  const handleExport = async () => {
-    setExporting(true);
-    try {
-      const { blob, fileName } = await exportRunRegistrationsApi({ status, distance });
-      saveBlob(blob, fileName);
-      showSuccess("Report downloaded.");
-    } catch (err) {
-      showError(getErrorText(err, "Unable to download the report."));
-    } finally {
-      setExporting(false);
-    }
-  };
-
-  const tabCount = {
-    all: summary.total,
-    registered: summary.registered,
-    scanned: summary.scanned,
-    notScanned: summary.notScanned,
-    notRegistered: summary.notRegistered,
-  };
-
   const columns = useMemo(
     () => [
       {
@@ -251,19 +208,6 @@ export default function RunRegistration() {
         render: (item) => item.name,
       },
       { key: "mobileNumber", label: "Mobile", sortable: false, render: (item) => displayMobile(item.mobileNumber) },
-      { key: "email", label: "Email", sortable: false, render: (item) => item.email || "-" },
-      {
-        key: "distance",
-        label: "Distance",
-        sortable: false,
-        render: (item) =>
-          item.distance ? (
-            <span className={`runPage__km runPage__km--${item.distance}`}>{item.distance} KM</span>
-          ) : (
-            "-"
-          ),
-      },
-      { key: "registrationNumber", label: "Reg. No.", sortable: false, render: (item) => item.registrationNumber || "-" },
       {
         key: "state",
         label: "Status",
@@ -274,8 +218,7 @@ export default function RunRegistration() {
           </span>
         ),
       },
-      { key: "registeredAt", label: "Registered On", sortable: false, render: (item) => formatDateTime(item.registeredAt) },
-      { key: "scannedAt", label: "Scanned On", sortable: false, render: (item) => formatDateTime(item.scannedAt) },
+      { key: "createdAt", label: "Added On", sortable: false, render: (item) => formatDateTime(item.createdAt) },
       {
         key: "action",
         label: "Actions",
@@ -303,6 +246,17 @@ export default function RunRegistration() {
                 openActionMenuId === item._id ? "companyCategoryAction__menuOpen" : ""
               }`}
             >
+              <button
+                type="button"
+                className="companyCategoryAction__item"
+                onClick={() => {
+                  setOpenActionMenuId(null);
+                  setEditItem(item);
+                }}
+              >
+                Edit
+              </button>
+
               <button
                 type="button"
                 className="companyCategoryAction__item"
@@ -349,20 +303,7 @@ export default function RunRegistration() {
 
   const startIndex = total === 0 ? 0 : (currentPage - 1) * rowsPerPage;
   const endIndex = Math.min(currentPage * rowsPerPage, total);
-  const hasFilters = Boolean(search || distance || status !== "all");
-
-  const tiles = [
-    { key: "all", label: "Total Added", value: summary.total, hint: "Link sent on WhatsApp" },
-    {
-      key: "registered",
-      label: "Registered",
-      value: summary.registered,
-      hint: `5 KM: ${summary.distance?.[5]?.registered ?? 0} · 10 KM: ${summary.distance?.[10]?.registered ?? 0}`,
-    },
-    { key: "scanned", label: "Scanned", value: summary.scanned, hint: "Entered at the gate" },
-    { key: "notScanned", label: "Not Scanned", value: summary.notScanned, hint: "Registered, not yet scanned" },
-    { key: "notRegistered", label: "Not Registered", value: summary.notRegistered, hint: "Link opened? Not filled yet" },
-  ];
+  const hasFilters = Boolean(search);
 
   return (
     <CommonListLayout
@@ -372,7 +313,15 @@ export default function RunRegistration() {
       headerTitle="Run Registration"
       outsideMainArea={
         <>
-          {showAdd && <RunRegistrationModal onClose={() => setShowAdd(false)} onSaved={refresh} />}
+          {showAdd && <RunRegistrationModal onClose={() => setShowAdd(false)} onSaved={handleAdded} />}
+
+          {editItem && (
+            <RunRegistrationModal
+              item={editItem}
+              onClose={() => setEditItem(null)}
+              onSaved={refresh}
+            />
+          )}
 
           {deleteItem && (
             <DeleteUserModal
@@ -398,14 +347,20 @@ export default function RunRegistration() {
           </div>
         }
         actions={
-          <button
-            type="button"
-            className="companyCategoryPage__createButton"
-            onClick={() => setShowAdd(true)}
-          >
-            <FaPlus />
-            Add Data
-          </button>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <Link to="/run-report" className="runPage__reportLink">
+              <FaChartBar />
+              Run Report
+            </Link>
+            <button
+              type="button"
+              className="companyCategoryPage__createButton"
+              onClick={() => setShowAdd(true)}
+            >
+              <FaPlus />
+              Add Data
+            </button>
+          </div>
         }
       />
 
@@ -415,39 +370,7 @@ export default function RunRegistration() {
         </div>
       )}
 
-      {/* Summary tiles - click one to open that report tab */}
-      <div className="runPage__tiles">
-        {tiles.map((tile) => (
-          <button
-            key={tile.key}
-            type="button"
-            className={`runPage__tile ${status === tile.key ? "runPage__tile--active" : ""}`}
-            onClick={() => setStatus(tile.key)}
-          >
-            <span className="runPage__tileValue">{tile.value}</span>
-            <span className="runPage__tileLabel">{tile.label}</span>
-            <span className="runPage__tileHint">{tile.hint}</span>
-          </button>
-        ))}
-      </div>
-
       <div className="companyCategoryPage__tableCard appCard">
-        <div className="runPage__tabs" role="tablist" aria-label="Report">
-          {TABS.map((tab) => (
-            <button
-              key={tab.value}
-              type="button"
-              role="tab"
-              aria-selected={status === tab.value}
-              className={`runPage__tab ${status === tab.value ? "runPage__tab--active" : ""}`}
-              onClick={() => setStatus(tab.value)}
-            >
-              {tab.label}
-              <span className="runPage__tabCount">{tabCount[tab.value]}</span>
-            </button>
-          ))}
-        </div>
-
         <div className="companyCategoryPage__tableControls">
           <CommonSelect
             className="companyCategoryPage__rowsSelect"
@@ -464,23 +387,12 @@ export default function RunRegistration() {
             inputClassName="companyCategoryPage__searchInput"
             icon={<FaSearch />}
             type="text"
-            placeholder="Search name, mobile, email, reg. no..."
+            placeholder="Search name or mobile..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") e.preventDefault();
             }}
-          />
-
-          <CommonSelect
-            className="runPage__distanceSelect"
-            value={distance}
-            onChange={(e) => {
-              setDistance(e.target.value);
-              setCurrentPage(1);
-            }}
-            placeholder="All Distances"
-            options={RUN_DISTANCES}
           />
 
           {hasFilters && (
@@ -490,23 +402,12 @@ export default function RunRegistration() {
               onClick={() => {
                 setSearchTerm("");
                 setSearch("");
-                setDistance("");
-                setStatus("all");
+                            setCurrentPage(1);
               }}
             >
               Clear filters
             </button>
           )}
-
-          <button
-            type="button"
-            className="runPage__exportButton"
-            onClick={handleExport}
-            disabled={exporting || total === 0}
-          >
-            <FaFileExcel />
-            {exporting ? "Downloading..." : "Download Report"}
-          </button>
         </div>
 
         <div className="formLinks__tableWrapper" ref={tableWrapperRef}>

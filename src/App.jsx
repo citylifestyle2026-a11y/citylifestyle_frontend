@@ -41,6 +41,7 @@ const FormLinks = lazy(() => import("./Pages/FormLinks"));
 const BlockList = lazy(() => import("./Pages/BlockList"));
 // Run Registration (5 KM / 10 KM): admin page + public page opened from WhatsApp (/run/:token).
 const RunRegistration = lazy(() => import("./Pages/RunRegistration"));
+const RunReport = lazy(() => import("./Pages/RunReport"));
 const PublicRunRegister = lazy(() => import("./Pages/PublicRunRegister"));
 const EventHistory = lazy(() => import("./Pages/EventHistory"));
 const CompanyCategory = lazy(() => import("./Pages/CompanyCategory"));
@@ -210,6 +211,7 @@ function App() {
             <Route path="/guest-card-design" element={<GuestCardDesign />} />
             <Route path="/ghost-list" element={<BlockList />} />
             <Route path="/run-registration" element={<RunRegistration />} />
+            <Route path="/run-report" element={<RunReport />} />
           </Route>
 
           <Route element={<ProtectedRoute permission="Entry Report" />}>

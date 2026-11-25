@@ -41,16 +41,29 @@ export const getRunRegistrationsApi = async (params) => {
 
 // -> { success, data: { total, notRegistered, registered, scanned, notScanned,
 //                       distance: { 5: { registered, scanned }, 10: {...} } } }
-export const getRunSummaryApi = async () => {
+//   params: { eventId }  - the event (edition) picked in the header dropdown.
+//   Every admin call below accepts eventId; without it the backend uses the
+//   active (default) event.
+export const getRunSummaryApi = async (params) => {
   if (RUN_MOCK) return mock.getRunSummary();
-  const response = await api.get("/run-registrations/summary");
+  const response = await api.get("/run-registrations/summary", { params });
   return response.data;
 };
 
-// data: { name, mobile }  -> { success, message, whatsappSent, data: item }
+// data: { name, mobile, eventId }  -> { success, message, whatsappSent, data: item }
 export const createRunRegistrationApi = async (data) => {
   if (RUN_MOCK) return mock.createRun(data);
   const response = await api.post("/run-registrations", data);
+  return response.data;
+};
+
+// Edit. data: { name, mobile }  (+ { email, distance } once the person has registered)
+// -> { success, message, whatsappSent, data: item }
+//   whatsappSent is true/false only when the mobile number of a not-yet-registered
+//   person was changed (the link is then sent to the new number), otherwise null.
+export const updateRunRegistrationApi = async (id, data) => {
+  if (RUN_MOCK) return mock.updateRun(id, data);
+  const response = await api.put(`/run-registrations/${id}`, data);
   return response.data;
 };
 

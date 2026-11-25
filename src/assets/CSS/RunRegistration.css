@@ -528,3 +528,36 @@
   vertical-align: -2px;
   margin-right: 4px;
 }
+
+/* "Run Report" link button next to "Add Data" */
+.runPage__reportLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 18px;
+  border-radius: 8px;
+  border: 1px solid var(--admin-accent);
+  background: transparent;
+  color: var(--admin-accent);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.runPage__reportLink:hover {
+  background: var(--admin-accent);
+  color: #ffffff;
+}
+
+/* the event the report is for (shown under the page title) */
+.runPage__eventLine {
+  margin: 0 0 14px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.runPage__eventLine strong {
+  color: #1e293b;
+}

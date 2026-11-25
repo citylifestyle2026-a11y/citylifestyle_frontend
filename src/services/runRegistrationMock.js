@@ -136,6 +136,39 @@ export const createRun = async ({ name, mobile }) => {
   });
 };
 
+export const updateRun = async (id, { name, mobile, email, distance } = {}) => {
+  const items = load();
+  const item = items.find((i) => i._id === id);
+  if (!item) throw fail("Entry not found.", 404);
+
+  if (name !== undefined) {
+    const cleanName = String(name).replace(/\s+/g, " ").trim();
+    if (!cleanName) throw fail("Name is required.");
+    item.name = cleanName;
+  }
+  let mobileChanged = false;
+  if (mobile !== undefined) {
+    const mobileNumber = normalizeMobileNumber(mobile);
+    if (!mobileNumber) throw fail("Enter a valid 10-digit mobile number (with or without 91).");
+    if (items.some((i) => i._id !== id && i.mobileNumber === mobileNumber)) {
+      throw fail("This mobile number is already added.", 409);
+    }
+    mobileChanged = mobileNumber !== item.mobileNumber;
+    item.mobileNumber = mobileNumber;
+  }
+  if (item.status === "registered") {
+    if (email !== undefined) item.email = String(email).trim().toLowerCase();
+    if (distance) item.distance = Number(distance);
+  }
+  save(items);
+  return wait({
+    success: true,
+    message: "Updated.",
+    whatsappSent: mobileChanged && item.status !== "registered" ? true : null,
+    data: withState(item),
+  });
+};
+
 export const resendRun = async (id) => {
   const item = load().find((i) => i._id === id);
   if (!item) throw fail("Entry not found.", 404);

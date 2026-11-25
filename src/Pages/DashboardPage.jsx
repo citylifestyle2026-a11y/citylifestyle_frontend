@@ -20,23 +20,26 @@ export default function DashboardPage() {
   // admin — its own data is shown on its own, never combined with any
   // other event's numbers.
   // The event comes from the dropdown in the header (same on every page).
-  const { selectedEventId } = useGlobalEvent();
+  const { selectedEventId, effectiveEventId } = useGlobalEvent();
 
-  // Run Registration (5 KM / 10 KM) numbers. Independent of the event picker
-  // and of the redux dashboard data, so a problem here can never break the
-  // rest of the dashboard - on failure the section simply shows 0.
+  // Run Registration (5 KM / 10 KM) numbers of the event picked in the header
+  // (same event as the rest of the dashboard). Independent of the redux
+  // dashboard data, so a problem here can never break the rest of the
+  // dashboard - on failure the section simply shows 0.
   const [runSummary, setRunSummary] = useState(null);
   useEffect(() => {
     let cancelled = false;
-    getRunSummaryApi()
+    getRunSummaryApi({ eventId: effectiveEventId || undefined })
       .then((res) => {
         if (!cancelled) setRunSummary(res?.data || null);
       })
-      .catch(() => {});
+      .catch(() => {
+        if (!cancelled) setRunSummary(null);
+      });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [effectiveEventId]);
 
   // Applies immediately on selection — no separate "Search"/"Apply"
   // step needed to see the chosen event's dashboard data.
@@ -340,33 +343,6 @@ export default function DashboardPage() {
 
           </div>
 
-          {/* Run Registration - shown on top and independent of the event
-              dashboard data below, so it is always visible. */}
-          <section className="dashSection dashSection--run" style={{ marginBottom: 16 }}>
-            <div className="dashSection__head">
-              <div>
-                <h2 className="dashSection__title">Run Registration</h2>
-                <p className="dashSection__sub">5 KM / 10 KM - registered and scanned at the entry</p>
-              </div>
-              <Link className="dashSection__link" to="/run-registration">
-                View Run Report &rarr;
-              </Link>
-            </div>
-            <div className="dashSection__cards">
-              {runCards.map((card) => (
-                <DashboardCard
-                  key={card.key}
-                  compact
-                  title={card.title}
-                  amountValue={card.amountValue}
-                  amountLabel={card.title}
-                  hideBody
-                  infoText={card.infoText}
-                />
-              ))}
-            </div>
-          </section>
-
           <div className="dashboardPage-body">
             {error && (
               <div className="dashboardErrorBar">
@@ -465,6 +441,33 @@ export default function DashboardPage() {
               </>
             )}
           </div>
+
+          {/* Run Registration - last section of the dashboard. Shows the run
+              numbers of the event picked in the header. */}
+          <section className="dashSection dashSection--run" style={{ marginTop: 16 }}>
+            <div className="dashSection__head">
+              <div>
+                <h2 className="dashSection__title">Run Registration</h2>
+                <p className="dashSection__sub">5 KM / 10 KM - registered and scanned at the entry</p>
+              </div>
+              <Link className="dashSection__link" to="/run-report">
+                View Run Report &rarr;
+              </Link>
+            </div>
+            <div className="dashSection__cards">
+              {runCards.map((card) => (
+                <DashboardCard
+                  key={card.key}
+                  compact
+                  title={card.title}
+                  amountValue={card.amountValue}
+                  amountLabel={card.title}
+                  hideBody
+                  infoText={card.infoText}
+                />
+              ))}
+            </div>
+          </section>
         </div>
 
         {/* <div className="footer">
