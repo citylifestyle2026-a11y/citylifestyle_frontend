@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { FaCheckCircle, FaDownload, FaWhatsapp, FaEnvelope } from "react-icons/fa";
+import {
+  FaArrowRight,
+  FaCheck,
+  FaDownload,
+  FaEnvelope,
+  FaExclamationTriangle,
+  FaLock,
+  FaWhatsapp,
+} from "react-icons/fa";
 
 import {
   RUN_MOCK,
@@ -17,7 +25,7 @@ import {
   LOCAL_MOBILE_ERROR_MESSAGE,
 } from "../utilits/mobileNumber";
 import logo from "../assets/images/logo/city-lifestyle-logo.jpg";
-import "../assets/CSS/RunRegistration.css";
+import "../assets/CSS/PublicRunRegister.css";
 
 // Public page opened from the WhatsApp link:   /run/:token
 //
@@ -49,6 +57,7 @@ export default function PublicRunRegister() {
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
   const [email, setEmail] = useState("");
+  const [eventTitle, setEventTitle] = useState("");
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
@@ -77,6 +86,7 @@ export default function PublicRunRegister() {
         setName(data.name || "");
         setMobile(toLocalMobileNumber(data.mobileNumber) || "");
         setEmail(data.email || "");
+        setEventTitle(data.eventTitle || "");
 
         if (data.status === "registered") {
           setResult(data);
@@ -116,8 +126,8 @@ export default function PublicRunRegister() {
     if (!mobile) next.mobile = "Mobile number is required.";
     else if (!isValidMobileNumber(mobile)) next.mobile = LOCAL_MOBILE_ERROR_MESSAGE;
 
-    if (!email.trim()) next.email = "Email is required.";
-    else if (!EMAIL_RX.test(email.trim())) next.email = "Enter a valid email address.";
+    // Email is optional; when given it must be valid.
+    if (email.trim() && !EMAIL_RX.test(email.trim())) next.email = "Enter a valid email address.";
 
     setErrors(next);
     return Object.keys(next).length === 0;
@@ -164,137 +174,183 @@ export default function PublicRunRegister() {
   };
 
   const distanceLabel = (value) => (value ? `${value} KM` : "");
+  const firstName = name.trim().split(" ")[0];
 
   return (
-    <div className="runPublic">
-      <div className="runPublic__card">
-        <img className="runPublic__logo" src={logo} alt="City Lifestyle" />
+    <div className="rr">
+      <header className="rr__hero">
+        <img className="rr__logo" src={logo} alt="City Lifestyle" />
+        <p className="rr__eyebrow">5 KM / 10 KM Run</p>
+        <h1 className="rr__heroTitle">Run Registration</h1>
+        {eventTitle && <span className="rr__heroEvent">{eventTitle}</span>}
+      </header>
 
+      <main className="rr__card">
         {state === "loading" && (
-          <div className="runPublic__center">
-            <div className="runPublic__spinner" aria-label="Loading" />
-            <p className="runPublic__muted">Loading your registration...</p>
+          <div className="rr__center">
+            <div className="rr__spinner" role="status" aria-label="Loading" />
+            <p className="rr__muted">Loading your registration...</p>
           </div>
         )}
 
         {state === "error" && (
-          <div className="runPublic__center">
-            <h1 className="runPublic__title">Link not valid</h1>
-            <p className="runPublic__text">{loadError}</p>
-            <p className="runPublic__muted">Please ask the organiser to send you a new link.</p>
+          <div className="rr__center">
+            <div className="rr__stateIcon">
+              <FaExclamationTriangle />
+            </div>
+            <h2 className="rr__stateTitle">Link not valid</h2>
+            <p className="rr__muted">{loadError}</p>
+            <p className="rr__muted">Please ask the organiser to send you a new link.</p>
           </div>
         )}
 
         {state === "form" && (
           <>
-            <h1 className="runPublic__title">Run Registration</h1>
-            <p className="runPublic__text">
-              Hello{name ? `, ${name.split(" ")[0]}` : ""}! Complete the steps below to get your entry QR.
+            <p className="rr__greeting">
+              Hello{firstName ? <>, <b>{firstName}</b></> : ""}! Choose your distance and confirm your
+              details to get your entry pass.
             </p>
 
             {/* progress */}
-            <ol className="runPublic__steps" aria-label="Progress">
-              <li className={`runPublic__step ${step >= 1 ? "runPublic__step--on" : ""}`}>
-                <span>1</span> Distance
+            <ol className="rr__steps" aria-label="Progress">
+              <li className={`rr__step rr__step--on ${step > 1 ? "rr__step--done" : ""}`}>
+                <span className="rr__stepDot">{step > 1 ? <FaCheck /> : 1}</span> Distance
               </li>
-              <li className="runPublic__stepLine" aria-hidden="true" />
-              <li className={`runPublic__step ${step >= 2 ? "runPublic__step--on" : ""}`}>
-                <span>2</span> Your details
+              <li className={`rr__stepLine ${step > 1 ? "rr__stepLine--on" : ""}`} aria-hidden="true" />
+              <li className={`rr__step ${step >= 2 ? "rr__step--on" : ""}`}>
+                <span className="rr__stepDot">2</span> Your details
               </li>
             </ol>
 
             {step === 1 && (
-              <div className="runPublic__form">
-                <div className="runPublic__field">
-                  <label htmlFor="runDistance">
-                    Select distance <b>*</b>
-                  </label>
-                  <select
-                    id="runDistance"
-                    value={distance}
-                    onChange={(e) => {
-                      setDistance(e.target.value);
-                      setErrors({});
-                    }}
-                  >
-                    <option value="">Select distance</option>
+              <div className="rr__form">
+                <fieldset style={{ border: 0, margin: 0, padding: 0, minWidth: 0 }}>
+                  <legend className="rr__sectionTitle">Select your distance</legend>
+                  <div className="rr__choices" role="radiogroup" aria-label="Distance">
                     {RUN_DISTANCES.map((d) => (
-                      <option key={d.value} value={d.value}>
-                        {d.label}
-                      </option>
+                      <label key={d.value} className="rr__choice">
+                        <input
+                          type="radio"
+                          name="distance"
+                          value={d.value}
+                          checked={distance === d.value}
+                          onChange={() => {
+                            setDistance(d.value);
+                            setErrors({});
+                          }}
+                        />
+                        <span className="rr__choiceBody">
+                          <span className="rr__choiceNum">{d.value}</span>
+                          <span className="rr__choiceUnit">KM</span>
+                        </span>
+                        <span className="rr__choiceTick" aria-hidden="true">
+                          <FaCheck />
+                        </span>
+                      </label>
                     ))}
-                  </select>
-                  {errors.distance && <p className="runPublic__error">{errors.distance}</p>}
-                </div>
+                  </div>
+                  {errors.distance && (
+                    <p className="rr__error" role="alert" style={{ marginTop: 10 }}>
+                      {errors.distance}
+                    </p>
+                  )}
+                </fieldset>
 
-                <button type="button" className="runPublic__button" onClick={goToDetails}>
-                  Continue
+                <button type="button" className="rr__button" onClick={goToDetails}>
+                  Continue <FaArrowRight />
                 </button>
               </div>
             )}
 
             {step === 2 && (
-              <form className="runPublic__form" onSubmit={handleSubmit} noValidate>
-                <div className="runPublic__chosen">
+              <form className="rr__form" onSubmit={handleSubmit} noValidate>
+                <div className="rr__chosen">
                   <span>
                     Distance: <b>{distanceLabel(distance)}</b>
                   </span>
-                  <button type="button" onClick={() => setStep(1)} disabled={submitting}>
+                  <button type="button" className="rr__link" onClick={() => setStep(1)} disabled={submitting}>
                     Change
                   </button>
                 </div>
 
-                <div className="runPublic__field">
-                  <label htmlFor="runPubName">
-                    Name <b>*</b>
+                <div className="rr__field">
+                  <label className="rr__label" htmlFor="runPubName">
+                    Full name <span className="rr__req">*</span>
                   </label>
-                  <input
-                    id="runPubName"
-                    type="text"
-                    maxLength={60}
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Your full name"
-                    autoComplete="name"
-                  />
-                  {errors.name && <p className="runPublic__error">{errors.name}</p>}
+                  <div className={`rr__inputWrap ${errors.name ? "rr__inputWrap--error" : ""}`}>
+                    <input
+                      id="runPubName"
+                      className="rr__input"
+                      type="text"
+                      maxLength={60}
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Your full name"
+                      autoComplete="name"
+                      aria-invalid={Boolean(errors.name)}
+                    />
+                  </div>
+                  {errors.name && <p className="rr__error" role="alert">{errors.name}</p>}
                 </div>
 
-                <div className="runPublic__field">
-                  <label htmlFor="runPubMobile">Mobile number (WhatsApp)</label>
-                  <input
-                    id="runPubMobile"
-                    type="tel"
-                    inputMode="numeric"
-                    value={mobile}
-                    onChange={(e) => setMobile(sanitizeMobileInput(e.target.value))}
-                    placeholder="10-digit mobile number"
-                    autoComplete="tel-national"
-                  />
-                  {errors.mobile && <p className="runPublic__error">{errors.mobile}</p>}
-                  <p className="runPublic__hint">Your QR is sent on this WhatsApp number. You can change it if needed.</p>
-                </div>
-
-                <div className="runPublic__field">
-                  <label htmlFor="runPubEmail">
-                    Email <b>*</b>
+                <div className="rr__field">
+                  <label className="rr__label" htmlFor="runPubMobile">
+                    WhatsApp number <span className="rr__req">*</span>
                   </label>
-                  <input
-                    id="runPubEmail"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    autoComplete="email"
-                  />
-                  {errors.email && <p className="runPublic__error">{errors.email}</p>}
+                  <div className={`rr__inputWrap ${errors.mobile ? "rr__inputWrap--error" : ""}`}>
+                    <span className="rr__prefix">+91</span>
+                    <input
+                      id="runPubMobile"
+                      className="rr__input"
+                      type="tel"
+                      inputMode="numeric"
+                      value={mobile}
+                      onChange={(e) => setMobile(sanitizeMobileInput(e.target.value))}
+                      placeholder="10-digit mobile number"
+                      autoComplete="tel-national"
+                      aria-invalid={Boolean(errors.mobile)}
+                    />
+                  </div>
+                  {errors.mobile && <p className="rr__error" role="alert">{errors.mobile}</p>}
+                  <p className="rr__hint">Your pass is sent on this WhatsApp number. You can change it if needed.</p>
                 </div>
 
-                {submitError && <p className="runPublic__error runPublic__error--box">{submitError}</p>}
+                <div className="rr__field">
+                  <label className="rr__label" htmlFor="runPubEmail">
+                    Email <span className="rr__optional">(optional)</span>
+                  </label>
+                  <div className={`rr__inputWrap ${errors.email ? "rr__inputWrap--error" : ""}`}>
+                    <input
+                      id="runPubEmail"
+                      className="rr__input"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      autoComplete="email"
+                      aria-invalid={Boolean(errors.email)}
+                    />
+                  </div>
+                  {errors.email && <p className="rr__error" role="alert">{errors.email}</p>}
+                </div>
 
-                <button type="submit" className="runPublic__button" disabled={submitting}>
-                  {submitting ? "Registering..." : "Register"}
+                {submitError && <p className="rr__errorBox" role="alert">{submitError}</p>}
+
+                <button type="submit" className="rr__button" disabled={submitting}>
+                  {submitting ? (
+                    <>
+                      <span className="rr__spinnerSm" aria-hidden="true" /> Registering...
+                    </>
+                  ) : (
+                    <>
+                      Complete Registration <FaArrowRight />
+                    </>
+                  )}
                 </button>
+
+                <p className="rr__secure">
+                  <FaLock /> Your details are used only for this event.
+                </p>
               </form>
             )}
           </>
@@ -302,36 +358,34 @@ export default function PublicRunRegister() {
 
         {state === "done" && result && (
           <>
-            <div className="runPublic__tick">
-              <FaCheckCircle />
+            <div className="rr__tick">
+              <FaCheck />
             </div>
-            <h1 className="runPublic__title">
+            <h2 className="rr__doneTitle">
               {alreadyRegistered ? "You are already registered" : "Registration successful!"}
-            </h1>
-            <p className="runPublic__text">
-              Show this QR code at the entry gate.
-            </p>
+            </h2>
+            <p className="rr__doneText">Show this QR code at the entry gate.</p>
 
-            <div className="runPublic__qrBox">
+            <div className="rr__qr">
               {result.qrImage ? (
                 <img src={result.qrImage} alt="Your entry QR code" />
               ) : (
-                <div className="runPublic__qrPlaceholder">
+                <div className="rr__qrPlaceholder">
                   {RUN_MOCK ? "QR appears here once the backend is connected (demo mode)" : "QR is being prepared"}
                 </div>
               )}
             </div>
 
-            <dl className="runPublic__details">
-              <div>
+            <dl className="rr__details">
+              <div className="rr__detailRow">
                 <dt>Name</dt>
                 <dd>{result.name}</dd>
               </div>
-              <div>
+              <div className="rr__detailRow">
                 <dt>Distance</dt>
                 <dd>{distanceLabel(result.distance)}</dd>
               </div>
-              <div>
+              <div className="rr__detailRow">
                 <dt>Registration No.</dt>
                 <dd>{result.registrationNumber || "-"}</dd>
               </div>
@@ -340,7 +394,7 @@ export default function PublicRunRegister() {
             {result.qrImage && (
               <button
                 type="button"
-                className="runPublic__button runPublic__button--ghost"
+                className="rr__button rr__button--ghost"
                 onClick={handleDownloadQr}
                 disabled={downloading}
               >
@@ -348,14 +402,21 @@ export default function PublicRunRegister() {
               </button>
             )}
 
-            <p className="runPublic__sent">
-              <FaWhatsapp /> The QR is also sent on WhatsApp
-              <br />
-              <FaEnvelope /> and to your email.
+            <p className="rr__sent">
+              <span>
+                <FaWhatsapp /> Your pass is also sent on WhatsApp
+              </span>
+              {result.email && (
+                <span>
+                  <FaEnvelope /> and to your email
+                </span>
+              )}
             </p>
           </>
         )}
-      </div>
+      </main>
+
+      <footer className="rr__footer">City Lifestyle</footer>
     </div>
   );
 }

@@ -42,9 +42,10 @@ const STATE_LABEL = {
   scanned: "Scanned",
 };
 
+// 10-digit number, without the 91 / +91 country code.
 const displayMobile = (value) => {
   const digits = String(value || "").replace(/\D/g, "");
-  return digits.length === 12 && digits.startsWith("91") ? `+91 ${digits.slice(2)}` : value || "-";
+  return digits.length === 12 && digits.startsWith("91") ? digits.slice(2) : digits || "-";
 };
 
 /**

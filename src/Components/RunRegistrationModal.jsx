@@ -72,7 +72,8 @@ export default function RunRegistrationModal({ item = null, onClose, onSaved }) 
     else if (!isValidMobileNumber(mobile)) next.mobile = LOCAL_MOBILE_ERROR_MESSAGE;
 
     if (isRegistered) {
-      if (!EMAIL_RX.test(email.trim())) next.email = "Enter a valid email address.";
+      // Email is optional; when given it must be valid.
+      if (email.trim() && !EMAIL_RX.test(email.trim())) next.email = "Enter a valid email address.";
       if (!distance) next.distance = "Please select 5 KM or 10 KM.";
     }
 
@@ -208,7 +209,7 @@ export default function RunRegistrationModal({ item = null, onClose, onSaved }) 
             <>
               <div className="fieldGroup fieldGroupFull">
                 <label className="fieldLabel" htmlFor="runEmail">
-                  Email <span className="required">*</span>
+                  Email <span className="runModal__note">(optional)</span>
                 </label>
                 <input
                   id="runEmail"
