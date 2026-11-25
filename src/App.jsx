@@ -42,6 +42,10 @@ const BlockList = lazy(() => import("./Pages/BlockList"));
 // Run Registration (5 KM / 10 KM): admin page + public page opened from WhatsApp (/run/:token).
 const RunRegistration = lazy(() => import("./Pages/RunRegistration"));
 const PublicRunRegister = lazy(() => import("./Pages/PublicRunRegister"));
+// Public "Let's Run" form (/lets-run): name + mobile -> ticket QR on WhatsApp.
+// Run Report (sidebar): Registered / Registered, Not Scanned / Scanned.
+const RunReportPage = lazy(() => import("./Pages/RunReportPage"));
+const PublicLetsRun = lazy(() => import("./Pages/PublicLetsRun"));
 const EventHistory = lazy(() => import("./Pages/EventHistory"));
 const CompanyCategory = lazy(() => import("./Pages/CompanyCategory"));
 const CrewList = lazy(() => import("./Pages/CrewList"));
@@ -93,6 +97,8 @@ const privateRoutes = [
   "/rsvp",
   // Run Registration: admin page (/run-registration) and the public link (/run/:token).
   "/run",
+  // Public Let's Run form (/lets-run).
+  "/lets-run",
 ];
 
 function SiteMetaHandler() {
@@ -132,7 +138,7 @@ function App() {
     // a slow / cold server can never keep a loader running on the Home page.
     // Every private page still loads the profile as before.
     const path = window.location.pathname;
-    const isPublicSitePage = path === "/" || path === "/city-lifestyle";
+    const isPublicSitePage = path === "/" || path === "/city-lifestyle" || path === "/lets-run";
 
     if (localStorage.getItem("token") && !isPublicSitePage) {
       dispatch(getProfile());
@@ -182,6 +188,8 @@ function App() {
           <Route path="/rsvp/:answer/:token" element={<PublicRsvp />} />
           {/* Run Registration link opened from WhatsApp: 5 KM / 10 KM + name, mobile, email -> QR */}
           <Route path="/run/:token" element={<PublicRunRegister />} />
+          {/* Public Let's Run form: name + mobile -> ticket (QR) on WhatsApp */}
+          <Route path="/lets-run" element={<PublicLetsRun />} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/user" element={<User />} />
@@ -210,6 +218,7 @@ function App() {
             <Route path="/guest-card-design" element={<GuestCardDesign />} />
             <Route path="/ghost-list" element={<BlockList />} />
             <Route path="/run-registration" element={<RunRegistration />} />
+            <Route path="/run-report" element={<RunReportPage />} />
           </Route>
 
           <Route element={<ProtectedRoute permission="Entry Report" />}>

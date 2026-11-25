@@ -28,7 +28,7 @@ export default function DashboardPage() {
   const [runSummary, setRunSummary] = useState(null);
   useEffect(() => {
     let cancelled = false;
-    getRunSummaryApi()
+    getRunSummaryApi(selectedEventId || undefined)
       .then((res) => {
         if (!cancelled) setRunSummary(res?.data || null);
       })
@@ -36,7 +36,7 @@ export default function DashboardPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [selectedEventId]);
 
   // Applies immediately on selection — no separate "Search"/"Apply"
   // step needed to see the chosen event's dashboard data.
@@ -235,22 +235,10 @@ export default function DashboardPage() {
   const runCards = useMemo(
     () => [
       {
-        key: "runTotal",
-        title: "Added (Link Sent)",
-        amountValue: String(runSummary?.total ?? 0),
-        infoText: "People added with Add Data - the registration link was sent to their WhatsApp.",
-      },
-      {
         key: "runRegistered",
         title: "Registered",
         amountValue: String(runSummary?.registered ?? 0),
-        infoText: "People who opened the link, chose 5 KM / 10 KM and completed the registration. Their QR is sent on WhatsApp and email.",
-      },
-      {
-        key: "runScanned",
-        title: "Scanned",
-        amountValue: String(runSummary?.scanned ?? 0),
-        infoText: "Registered people whose QR was scanned at the entry.",
+        infoText: "People who registered for Let's Run (the /lets-run form). Their ticket QR is sent on WhatsApp.",
       },
       {
         key: "runNotScanned",
@@ -259,22 +247,10 @@ export default function DashboardPage() {
         infoText: "People who registered but whose QR has not been scanned at the entry yet.",
       },
       {
-        key: "runNotRegistered",
-        title: "Not Registered",
-        amountValue: String(runSummary?.notRegistered ?? 0),
-        infoText: "People who were sent the link but have not completed the registration yet.",
-      },
-      {
-        key: "run5",
-        title: "5 KM Registered",
-        amountValue: String(runSummary?.distance?.[5]?.registered ?? 0),
-        infoText: `Registered for 5 KM (${runSummary?.distance?.[5]?.scanned ?? 0} scanned).`,
-      },
-      {
-        key: "run10",
-        title: "10 KM Registered",
-        amountValue: String(runSummary?.distance?.[10]?.registered ?? 0),
-        infoText: `Registered for 10 KM (${runSummary?.distance?.[10]?.scanned ?? 0} scanned).`,
+        key: "runScanned",
+        title: "Scanned",
+        amountValue: String(runSummary?.scanned ?? 0),
+        infoText: "Registered people whose QR was scanned at the entry.",
       },
     ],
     [runSummary]
@@ -345,10 +321,10 @@ export default function DashboardPage() {
           <section className="dashSection dashSection--run" style={{ marginBottom: 16 }}>
             <div className="dashSection__head">
               <div>
-                <h2 className="dashSection__title">Run Registration</h2>
-                <p className="dashSection__sub">5 KM / 10 KM - registered and scanned at the entry</p>
+                <h2 className="dashSection__title">Run Report</h2>
+                <p className="dashSection__sub">Let&rsquo;s Run - registered and scanned at the entry</p>
               </div>
-              <Link className="dashSection__link" to="/run-registration">
+              <Link className="dashSection__link" to="/run-report">
                 View Run Report &rarr;
               </Link>
             </div>

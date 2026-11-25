@@ -61,12 +61,6 @@ const menuItems = [
     path: '/form-links',
   },
   {
-    // 5 KM / 10 KM registration: Add Data -> WhatsApp link -> QR -> scan report.
-    label: 'Run Registration',
-    icon: <FaRunning />,
-    path: '/run-registration',
-  },
-  {
     label: 'Ghost List',
     icon: <FaBan />,
     path: '/ghost-list',
@@ -85,6 +79,12 @@ const menuItems = [
     label: 'Entry Report',
     icon: <FaFlag />,
     path: '/entry-report',
+  },
+  {
+    // Let's Run report: Registered / Registered, Not Scanned / Scanned.
+    label: 'Run Report',
+    icon: <FaRunning />,
+    path: '/run-report',
   },
    {
     label: 'User Management',
@@ -157,6 +157,11 @@ export default function Sidebar() {
     // The Block List page (shown as "Ghost List" in the menu) is for Admin accounts only.
     // Matched by path, not by label.
     if (item.path === '/ghost-list') {
+      return role === 'admin';
+    }
+
+    // Run Report: admin accounts only.
+    if (item.path === '/run-report') {
       return role === 'admin';
     }
 

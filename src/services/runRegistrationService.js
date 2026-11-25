@@ -41,9 +41,11 @@ export const getRunRegistrationsApi = async (params) => {
 
 // -> { success, data: { total, notRegistered, registered, scanned, notScanned,
 //                       distance: { 5: { registered, scanned }, 10: {...} } } }
-export const getRunSummaryApi = async () => {
+export const getRunSummaryApi = async (eventId) => {
   if (RUN_MOCK) return mock.getRunSummary();
-  const response = await api.get("/run-registrations/summary");
+  const response = await api.get("/run-registrations/summary", {
+    params: eventId ? { eventId } : {},
+  });
   return response.data;
 };
 

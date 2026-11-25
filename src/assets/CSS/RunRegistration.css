@@ -528,3 +528,46 @@
   vertical-align: -2px;
   margin-right: 4px;
 }
+
+/* =========================================================
+   Entry Report -> "Run" tab (components/RunReport.jsx)
+   ========================================================= */
+.runReport__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 0;
+}
+
+.runReport__tableWrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.runReport__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: "Poppins", sans-serif;
+  font-size: 13.5px;
+}
+
+.runReport__table th,
+.runReport__table td {
+  text-align: left;
+  padding: 11px 12px;
+  border-bottom: 1px solid #eceef4;
+  white-space: nowrap;
+}
+
+.runReport__table th {
+  background: #f6f7fb;
+  color: #4a4d5e;
+  font-weight: 600;
+}
+
+.runReport__empty {
+  text-align: center !important;
+  color: #7a7f93;
+  padding: 28px 12px !important;
+}
