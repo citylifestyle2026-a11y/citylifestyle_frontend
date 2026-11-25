@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FaSearch, FaFileExcel } from "react-icons/fa";
 
 import CommonSearch from "./CommonSearch";
 import CommonSelect from "./CommonSelect";
+import CommonTable from "./CommonTable";
 import CommonPagination from "./CommonPagination";
 import {
   getRunRegistrationsApi,
@@ -13,6 +14,9 @@ import { formatDateTime } from "../utilits/dateFormat";
 import { showError, showSuccess } from "../utilits/toast";
 import { getErrorText } from "../utilits/apiError";
 import { ALL_ROWS_OPTION } from "../utilits/rowsPerPage";
+// Same table / search / tab styles as the other list pages.
+import "../assets/CSS/CompanyCategory.css";
+import "../assets/CSS/FormLinks.css";
 import "../assets/CSS/RunRegistration.css";
 
 // Let's Run report body (page: Pages/RunReportPage.jsx). Who registered, who was scanned at the gate and who registered
@@ -20,12 +24,12 @@ import "../assets/CSS/RunRegistration.css";
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100].map((n) => ({ value: n, label: String(n) }));
 ROWS_PER_PAGE_OPTIONS.push(ALL_ROWS_OPTION);
 
-// Only these three views: everyone who registered, who registered but was not
-// scanned at the gate, and who was scanned.
+// Only these three views, in this order: everyone who registered, who was
+// scanned at the gate, and who registered but was not scanned.
 const TABS = [
   { value: "registered", label: "Registered" },
-  { value: "notScanned", label: "Registered, Not Scanned" },
   { value: "scanned", label: "Scanned" },
+  { value: "notScanned", label: "Registered, Not Scanned" },
 ];
 
 const EMPTY_SUMMARY = { registered: 0, scanned: 0, notScanned: 0 };
@@ -124,8 +128,37 @@ export default function RunReport({ eventId }) {
   const startIndex = total === 0 ? 0 : (page - 1) * rowsPerPage;
   const endIndex = Math.min(page * rowsPerPage, total);
 
+  const columns = useMemo(
+    () => [
+      { key: "sr", label: "#", sortable: false, render: (_item, index) => startIndex + index + 1 },
+      {
+        key: "name",
+        label: "Name",
+        sortable: false,
+        cellClassName: "companyCategoryPage__categoryName",
+        render: (item) => item.name,
+      },
+      { key: "mobileNumber", label: "Mobile Number", sortable: false, render: (item) => displayMobile(item.mobileNumber) },
+      { key: "registrationNumber", label: "Reg. No.", sortable: false, render: (item) => item.registrationNumber || "-" },
+      { key: "qrNumber", label: "Invitation ID", sortable: false, render: (item) => item.qrNumber || "-" },
+      {
+        key: "state",
+        label: "Status",
+        sortable: false,
+        render: (item) => (
+          <span className={`runPage__badge runPage__badge--${item.state}`}>
+            {item.state === "scanned" ? "Scanned" : "Not Scanned"}
+          </span>
+        ),
+      },
+      { key: "registeredAt", label: "Registered On", sortable: false, render: (item) => formatDateTime(item.registeredAt) },
+      { key: "scannedAt", label: "Scanned On", sortable: false, render: (item) => formatDateTime(item.scannedAt) },
+    ],
+    [startIndex]
+  );
+
   return (
-    <div className="runReport">
+    <>
       <div className="runPage__tabs" role="tablist" aria-label="Run report">
         {TABS.map((tab) => (
           <button
@@ -145,8 +178,9 @@ export default function RunReport({ eventId }) {
         ))}
       </div>
 
-      <div className="runReport__toolbar">
+      <div className="companyCategoryPage__tableControls">
         <CommonSelect
+          className="companyCategoryPage__rowsSelect"
           value={rowsPerPage}
           onChange={(e) => {
             setRowsPerPage(Number(e.target.value));
@@ -156,6 +190,8 @@ export default function RunReport({ eventId }) {
         />
 
         <CommonSearch
+          containerClassName="companyCategoryPage__searchBox"
+          inputClassName="companyCategoryPage__searchInput"
           icon={<FaSearch />}
           type="text"
           placeholder="Search name, mobile, reg. no..."
@@ -177,53 +213,20 @@ export default function RunReport({ eventId }) {
         </button>
       </div>
 
-      <div className="runReport__tableWrap">
-        <table className="runReport__table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Name</th>
-              <th>Mobile Number</th>
-              <th>Reg. No.</th>
-              <th>Invitation ID</th>
-              <th>Status</th>
-              <th>Registered On</th>
-              <th>Scanned On</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading && items.length === 0 ? (
-              <tr>
-                <td colSpan={8} className="runReport__empty">Loading...</td>
-              </tr>
-            ) : listError ? (
-              <tr>
-                <td colSpan={8} className="runReport__empty">Failed to load the run report.</td>
-              </tr>
-            ) : items.length === 0 ? (
-              <tr>
-                <td colSpan={8} className="runReport__empty">No entries found.</td>
-              </tr>
-            ) : (
-              items.map((item, index) => (
-                <tr key={item._id}>
-                  <td>{startIndex + index + 1}</td>
-                  <td>{item.name}</td>
-                  <td>{displayMobile(item.mobileNumber)}</td>
-                  <td>{item.registrationNumber || "-"}</td>
-                  <td>{item.qrNumber || "-"}</td>
-                  <td>
-                    <span className={`runPage__badge runPage__badge--${item.state}`}>
-                      {item.state === "scanned" ? "Scanned" : "Not Scanned"}
-                    </span>
-                  </td>
-                  <td>{formatDateTime(item.registeredAt)}</td>
-                  <td>{formatDateTime(item.scannedAt)}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+      <div className="formLinks__tableWrapper">
+        <CommonTable
+          columns={columns}
+          data={items}
+          rowKey="_id"
+          loading={loading && items.length === 0}
+          loadingMessage="Loading..."
+          error={listError}
+          errorMessage="Failed to load the run report."
+          emptyMessage="No entries found."
+          tableClassName="companyCategoryPage__table"
+          thContentClassName="companyCategoryPage__thContent"
+          sortIconClassName="companyCategoryPage__sortIcon"
+        />
       </div>
 
       <CommonPagination
@@ -239,6 +242,6 @@ export default function RunReport({ eventId }) {
         prevDisabled={page === 1}
         nextDisabled={page === totalPages}
       />
-    </div>
+    </>
   );
 }
