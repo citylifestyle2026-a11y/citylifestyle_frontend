@@ -528,3 +528,164 @@
   vertical-align: -2px;
   margin-right: 4px;
 }
+
+/* ---------- Run Report: checkboxes + Action menu ---------- */
+.runPage__controlButtons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.runPage__controlButtons .runPage__exportButton {
+  margin-left: 0;
+}
+
+.runPage__checkCol {
+  width: 44px;
+  min-width: 44px;
+  text-align: center;
+}
+
+.runPage__checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--admin-accent, #4a90c2);
+}
+
+.runPage__actionWrap {
+  position: relative;
+}
+
+.runPage__actionButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  color: #1b2a4e;
+  border: 1px solid #d5d9e4;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.runPage__actionButton svg {
+  font-size: 10px;
+}
+
+.runPage__actionButton:hover:not(:disabled) {
+  background: #f3f5fa;
+}
+
+.runPage__actionButton:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.runPage__menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 30;
+  min-width: 210px;
+  padding: 6px;
+  background: #ffffff;
+  border: 1px solid #e3e6ee;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(20, 30, 60, 0.14);
+}
+
+.runPage__menuItem {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.runPage__menuItem--danger {
+  color: #d63a3a;
+}
+
+.runPage__menuItem--danger:hover {
+  background: #fdecec;
+}
+
+.runPage__selectBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  background: #eef3ff;
+  border: 1px solid #d6e2ff;
+  border-radius: 10px;
+  color: #1b2a4e;
+  font-size: 14px;
+}
+
+.runPage__selectCount {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-weight: 700;
+}
+
+.runPage__selectLink {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--admin-accent-strong, #2f6f9e);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.runPage__selectLink:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+@media (max-width: 720px) {
+  .runPage__controlButtons {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .runPage__controlButtons > * {
+    flex: 1;
+  }
+
+  .runPage__controlButtons .runPage__actionButton,
+  .runPage__controlButtons .runPage__exportButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Run Report: row-wise Action dropdown */
+.runPage__actionButton--row {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+.runPage__menu--row {
+  min-width: 180px;
+  z-index: 1000;
+}

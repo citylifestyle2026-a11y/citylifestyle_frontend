@@ -12,7 +12,7 @@ import adminReducer from "./admin/adminSlice";
 import contactReducer from "./contact/contactSlice";
 import contactEventHistoryReducer from "./contactEventHistory/contactEventHistorySlice";
 import companyCategoryReducer from "./companyCategory/companyCategorySlice";
-import crewCategoryReducer from "./crewCategory/crewCategorySlice";
+// import crewCategoryReducer from "./crewCategory/crewCategorySlice";
 // import editionReducer from "./edition/editionSlice";
 export const store = configureStore({
     reducer: {
@@ -29,7 +29,7 @@ export const store = configureStore({
         contact: contactReducer,
         contactEventHistory: contactEventHistoryReducer,
         companyCategory: companyCategoryReducer,
-        crewCategory: crewCategoryReducer,
+        // crewCategory: crewCategoryReducer,
         // edition: editionReducer,
     }
 

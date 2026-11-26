@@ -70,6 +70,16 @@ export const deleteRunRegistrationApi = async (id) => {
   return response.data;
 };
 
+// Run Report checkboxes -> delete every ticked row at once.
+export const deleteRunRegistrationsApi = async (ids) => {
+  if (RUN_MOCK) {
+    for (const id of ids) await mock.deleteRun(id);
+    return { success: true, message: `${ids.length} entries deleted.`, data: { deleted: ids.length } };
+  }
+  const response = await api.post("/run-registrations/bulk-delete", { ids });
+  return response.data;
+};
+
 // Demo only (mock mode): pretend the QR was scanned at the gate.
 export const markRunScannedApi = async (id) => mock.markScanned(id);
 

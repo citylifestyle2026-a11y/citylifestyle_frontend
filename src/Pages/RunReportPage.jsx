@@ -2,10 +2,8 @@ import CommonListLayout from "../Components/CommonListLayout";
 import CommonPageHeader from "../Components/CommonPageHeader";
 import RunReport from "../Components/RunReport";
 
-// Sidebar -> "Run Report": the Let's Run people of the current active event (the
-// first one when several are active - the same event the /lets-run form
-// registers for), as three views:
-//   Registered | Registered, Not Scanned | Scanned
+// Sidebar -> "Run Report": every Let's Run entry (all runs together), as three views:
+//   Registered | Scanned | Registered, Not Scanned
 import "../assets/CSS/CompanyCategory.css";
 
 export default function RunReportPage() {

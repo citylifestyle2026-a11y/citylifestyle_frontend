@@ -1,18 +1,55 @@
 import { useEffect, useState } from "react";
-import { FaCheckCircle, FaWhatsapp, FaTicketAlt, FaCalendarAlt, FaClock, FaMapMarkerAlt } from "react-icons/fa";
+import { FaArrowRight, FaCheckCircle, FaStar, FaTicketAlt, FaTimes, FaWhatsapp } from "react-icons/fa";
 
 import { getLetsRunInfoApi, submitLetsRunApi } from "../services/letsRunService";
 import { MOBILE_ERROR_MESSAGE, normalizeMobileNumber } from "../utilits/mobileNumber";
 import { getErrorText } from "../utilits/apiError";
-import logo from "../assets/images/logo/city-lifestyle-logo.jpg";
+import cityLogo from "../assets/images/run/city-lifestyle-white.png";
+import socialLogo from "../assets/images/run/social-gathering.png";
+import runLogo from "../assets/images/run/lets-run-white.png";
 import "../assets/CSS/PublicLetsRun.css";
 
 // Public page  <site>/lets-run   (no login)
 //
-//   Name + mobile number  ->  Register
+//   Name + mobile number  ->  Submit Application
 //   The backend registers the person for the CURRENT ACTIVE EVENT (the first
 //   one when several are active) and sends the ticket QR link on WhatsApp.
+// Montserrat (design font) is added as a <link>, so if Google Fonts cannot be
+// reached the page still renders, just with the Poppins fallback.
+const FONT_ID = "montserrat-font";
+const useMontserrat = () => {
+  useEffect(() => {
+    if (document.getElementById(FONT_ID)) return;
+    const link = document.createElement("link");
+    link.id = FONT_ID;
+    link.rel = "stylesheet";
+    link.href = "https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap";
+    document.head.appendChild(link);
+  }, []);
+};
+
+const MONTHS = [
+  "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
+  "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER",
+];
+
+const ordinal = (n) => {
+  const v = n % 100;
+  if (v >= 11 && v <= 13) return `${n}TH`;
+  return `${n}${{ 1: "ST", 2: "ND", 3: "RD" }[n % 10] || "TH"}`;
+};
+
+// info.date comes from the backend as DD-MM-YYYY  ->  "29TH NOVEMBER 2026"
+const prettyDate = (value) => {
+  const m = String(value || "").match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+  if (!m) return String(value || "").toUpperCase();
+  const day = Number(m[1]);
+  const month = MONTHS[Number(m[2]) - 1];
+  return month ? `${ordinal(day)} ${month} ${m[3]}` : String(value).toUpperCase();
+};
+
 export default function PublicLetsRun() {
+  useMontserrat();
   const [info, setInfo] = useState(null);
   const [infoError, setInfoError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -88,37 +125,32 @@ export default function PublicLetsRun() {
     }
   };
 
+  // The X on the card clears what was typed.
+  const handleClear = () => {
+    setName("");
+    setMobile("");
+    setErrors({});
+    setSubmitError("");
+  };
+
   const ticketHref = result?.qrNumber ? `/ticket?qr=${result.qrNumber}` : "";
+  const dateText = info?.date ? prettyDate(info.date) : "";
+  const timeText = info?.time ? `${String(info.time).toUpperCase()} ONWARDS` : "";
 
   return (
     <div className="letsRun">
-      <header className="letsRun__hero">
-        <img className="letsRun__logo" src={logo} alt="City Lifestyle" />
-        <p className="letsRun__kicker">City Lifestyle presents</p>
-        {/* The event name IS the title (e.g. "Let's Run"): it comes from the
-            current active event, nothing is hardcoded here. */}
-        <h1 className="letsRun__title">{info?.eventTitle || "Registration"}</h1>
+      <div className="letsRun__top">
+        <img className="letsRun__cityLogo" src={cityLogo} alt="City Lifestyle" />
+        <img className="letsRun__socialLogo" src={socialLogo} alt="Social Gathering" />
+      </div>
 
-        {info && (
-          <>
-            <ul className="letsRun__chips">
-              {info.date && (
-                <li>
-                  <FaCalendarAlt /> {info.date}
-                </li>
-              )}
-              {info.time && (
-                <li>
-                  <FaClock /> {info.time}
-                </li>
-              )}
-              {info.venueName && (
-                <li>
-                  <FaMapMarkerAlt /> {info.venueName}
-                </li>
-              )}
-            </ul>
-          </>
+      <header className="letsRun__hero">
+        <img className="letsRun__runLogo" src={runLogo} alt={info?.eventTitle || "Let's Run"} />
+        {(dateText || timeText) && (
+          <p className="letsRun__date">
+            {dateText && <span>{dateText}</span>}
+            {timeText && <span>{timeText}</span>}
+          </p>
         )}
       </header>
 
@@ -127,30 +159,36 @@ export default function PublicLetsRun() {
 
         {!loading && infoError && !result && (
           <div className="letsRun__center">
-            <h2 className="letsRun__heading">Registration closed</h2>
+            <h2 className="letsRun__heading letsRun__heading--center">Registration closed</h2>
             <p className="letsRun__text">{infoError}</p>
           </div>
         )}
 
         {!loading && info && !result && (
           <>
-            <h2 className="letsRun__heading">Register for free</h2>
-            <p className="letsRun__text letsRun__text--left">
-              Enter your details and we will send your entry QR on WhatsApp.
-            </p>
+            <button type="button" className="letsRun__close" onClick={handleClear} aria-label="Clear form">
+              <FaTimes />
+            </button>
+
+            <span className="letsRun__star" aria-hidden="true">
+              <FaStar />
+            </span>
+            <h2 className="letsRun__heading">Register Now</h2>
+            <p className="letsRun__sub">Start your journey Let&rsquo;s Run</p>
 
             <form className="letsRun__form" onSubmit={handleSubmit} noValidate>
               <div className="letsRun__field">
-                <label htmlFor="letsRunName">
-                  Name <b>*</b>
+                <label className="letsRun__srOnly" htmlFor="letsRunName">
+                  Name
                 </label>
                 <input
                   id="letsRunName"
+                  className={errors.name ? "letsRun__input letsRun__input--error" : "letsRun__input"}
                   type="text"
                   maxLength={60}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Enter your full name"
+                  placeholder="NAME *"
                   autoComplete="name"
                   aria-invalid={Boolean(errors.name)}
                 />
@@ -158,30 +196,36 @@ export default function PublicLetsRun() {
               </div>
 
               <div className="letsRun__field">
-                <label htmlFor="letsRunMobile">
-                  Mobile number (WhatsApp) <b>*</b>
+                <label className="letsRun__srOnly" htmlFor="letsRunMobile">
+                  Phone number (WhatsApp)
                 </label>
-                <div className={`letsRun__mobile${errors.mobile ? " letsRun__mobile--error" : ""}`}>
-                  <span>+91</span>
-                  <input
-                    id="letsRunMobile"
-                    type="tel"
-                    inputMode="numeric"
-                    value={mobile}
-                    onChange={(e) => setMobile(e.target.value.replace(/[^\d+\s-]/g, ""))}
-                    placeholder="10-digit mobile number"
-                    autoComplete="tel"
-                    aria-invalid={Boolean(errors.mobile)}
-                  />
-                </div>
+                <input
+                  id="letsRunMobile"
+                  className={errors.mobile ? "letsRun__input letsRun__input--error" : "letsRun__input"}
+                  type="tel"
+                  inputMode="numeric"
+                  value={mobile}
+                  onChange={(e) => setMobile(e.target.value.replace(/[^\d+\s-]/g, ""))}
+                  placeholder="PHONE NUMBER *"
+                  autoComplete="tel"
+                  aria-invalid={Boolean(errors.mobile)}
+                />
                 {errors.mobile && <p className="letsRun__error">{errors.mobile}</p>}
               </div>
 
               {submitError && <p className="letsRun__alert">{submitError}</p>}
 
-              <button type="submit" className="letsRun__button" disabled={submitting}>
-                {submitting ? "Registering..." : "Register"}
-              </button>
+              <div className="letsRun__actions">
+                <button type="submit" className="letsRun__button" disabled={submitting}>
+                  {submitting ? (
+                    "Submitting..."
+                  ) : (
+                    <>
+                      Submit Application <FaArrowRight aria-hidden="true" />
+                    </>
+                  )}
+                </button>
+              </div>
             </form>
           </>
         )}
@@ -191,7 +235,7 @@ export default function PublicLetsRun() {
             <div className="letsRun__tick">
               <FaCheckCircle />
             </div>
-            <h2 className="letsRun__heading">
+            <h2 className="letsRun__heading letsRun__heading--center">
               {result.alreadyRegistered ? "You are already registered" : "You're registered!"}
             </h2>
             <p className="letsRun__text">
@@ -211,7 +255,6 @@ export default function PublicLetsRun() {
           </div>
         )}
       </main>
-
     </div>
   );
 }
