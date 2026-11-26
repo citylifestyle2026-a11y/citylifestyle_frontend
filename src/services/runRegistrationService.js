@@ -64,6 +64,17 @@ export const resendRunRegistrationApi = async (id) => {
   return response.data;
 };
 
+// Run Report checkboxes -> send the QR again to every ticked person (max 500 at once).
+// -> { success, message, data: { sent, failed, skipped } }
+export const resendRunRegistrationsApi = async (ids) => {
+  if (RUN_MOCK) {
+    for (const id of ids) await mock.resendRun(id);
+    return { success: true, message: `QR sent to ${ids.length} people.`, data: { sent: ids.length, failed: 0, skipped: 0 } };
+  }
+  const response = await api.post("/run-registrations/bulk-resend", { ids });
+  return response.data;
+};
+
 export const deleteRunRegistrationApi = async (id) => {
   if (RUN_MOCK) return mock.deleteRun(id);
   const response = await api.delete(`/run-registrations/${id}`);

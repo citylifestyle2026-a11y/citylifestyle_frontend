@@ -10,6 +10,7 @@ import {
   exportRunRegistrationsApi,
   deleteRunRegistrationsApi,
   resendRunRegistrationApi,
+  resendRunRegistrationsApi,
 } from "../services/runRegistrationService";
 import { confirmDialog } from "../utilits/appSwal";
 import { saveBlob } from "../utilits/download";
@@ -61,10 +62,9 @@ export default function RunReport({ eventId }) {
   // the search or the event changes (the selection belongs to that list).
   const [selected, setSelected] = useState({});
   const [selectingAll, setSelectingAll] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [resending, setResending] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
-  const menuRef = useRef(null);
 
   // Row-wise "Action" dropdown: { item, top, left } of the open row menu.
   const [rowMenu, setRowMenu] = useState(null);
@@ -113,15 +113,10 @@ export default function RunReport({ eventId }) {
     setSelected({});
   }, [status, search, eventId]);
 
-  // Close the Action menu on an outside click.
+  // Never stay on a page that no longer exists (rows deleted / filter changed).
   useEffect(() => {
-    if (!menuOpen) return undefined;
-    const onDown = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
-    };
-    document.addEventListener("mousedown", onDown);
-    return () => document.removeEventListener("mousedown", onDown);
-  }, [menuOpen]);
+    if (!loading && page > totalPages) setPage(Math.max(1, totalPages));
+  }, [loading, page, totalPages]);
 
   useEffect(() => {
     let cancelled = false;
@@ -234,8 +229,7 @@ export default function RunReport({ eventId }) {
 
   const handleDeleteSelected = async () => {
     const ids = Object.keys(selected);
-    if (ids.length === 0 || deleting) return;
-    setMenuOpen(false);
+    if (ids.length === 0 || deleting || resending) return;
 
     const confirmed = await confirmDialog({
       title: `Delete ${ids.length} ${ids.length === 1 ? "entry" : "entries"}?`,
@@ -261,7 +255,32 @@ export default function RunReport({ eventId }) {
     }
   };
 
-  // Trash icon on a row: delete just that one entry (same effect as Delete Selected).
+  // Resend button (shown when rows are ticked): QR again to every ticked person.
+  const handleResendSelected = async () => {
+    const ids = Object.keys(selected);
+    if (ids.length === 0 || resending || deleting) return;
+
+    const confirmed = await confirmDialog({
+      title: `Resend QR to ${ids.length} ${ids.length === 1 ? "person" : "people"}?`,
+      text: "The ticket message (WhatsApp, and email when available) will be sent again with the same QR.",
+      confirmText: "Yes, resend",
+      tone: "info",
+    });
+    if (!confirmed) return;
+
+    setResending(true);
+    try {
+      const res = await resendRunRegistrationsApi(ids);
+      if (res?.success === false) showError(res?.message || "Some QR codes could not be sent.");
+      else showSuccess(res?.message || "QR sent again.");
+      setReloadKey((k) => k + 1);
+    } catch (err) {
+      showError(getErrorText(err, "Unable to send the QR codes."));
+    } finally {
+      setResending(false);
+    }
+  };
+
   const handleResendOne = async (item) => {
     setRowMenu(null);
     try {
@@ -428,32 +447,28 @@ export default function RunReport({ eventId }) {
         />
 
         <div className="runPage__controlButtons">
-          <div className="runPage__actionWrap" ref={menuRef}>
-            <button
-              type="button"
-              className="runPage__actionButton"
-              onClick={() => setMenuOpen((open) => !open)}
-              disabled={selectedCount === 0 || deleting}
-              aria-haspopup="menu"
-              aria-expanded={menuOpen}
-            >
-              Action
-              <FaChevronDown />
-            </button>
-            {menuOpen && (
-              <div className="runPage__menu" role="menu">
-                <button
-                  type="button"
-                  role="menuitem"
-                  className="runPage__menuItem runPage__menuItem--danger"
-                  onClick={handleDeleteSelected}
-                >
-                  <FaTrash />
-                  Delete Selected ({selectedCount})
-                </button>
-              </div>
-            )}
-          </div>
+          {selectedCount > 0 && (
+            <>
+              <button
+                type="button"
+                className="runPage__bulkButton runPage__bulkButton--resend"
+                onClick={handleResendSelected}
+                disabled={resending || deleting}
+              >
+                <FaPaperPlane />
+                {resending ? "Sending..." : `Resend (${selectedCount})`}
+              </button>
+              <button
+                type="button"
+                className="runPage__bulkButton runPage__bulkButton--delete"
+                onClick={handleDeleteSelected}
+                disabled={resending || deleting}
+              >
+                <FaTrash />
+                {deleting ? "Deleting..." : `Delete (${selectedCount})`}
+              </button>
+            </>
+          )}
 
           <button
             type="button"
@@ -509,8 +524,9 @@ export default function RunReport({ eventId }) {
         onPageSelect={(n) => setPage(n)}
         onPrevious={() => page > 1 && setPage(page - 1)}
         onNext={() => page < totalPages && setPage(page + 1)}
-        prevDisabled={page === 1}
-        nextDisabled={page === totalPages}
+        prevDisabled={page === 1 || loading}
+        nextDisabled={page >= totalPages || loading}
+        pageButtonDisabled={loading}
       />
 
       {rowMenu && (

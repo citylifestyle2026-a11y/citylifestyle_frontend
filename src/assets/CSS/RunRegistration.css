@@ -689,3 +689,54 @@
   min-width: 180px;
   z-index: 1000;
 }
+
+/* Run Report: Resend / Delete buttons shown instead of the Action menu when rows are ticked */
+.runPage__bulkButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+}
+
+.runPage__bulkButton svg {
+  font-size: 12px;
+}
+
+.runPage__bulkButton:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.runPage__bulkButton--resend {
+  background: #eef3ff;
+  color: #2f5fb3;
+  border: 1px solid #c9d8f7;
+}
+
+.runPage__bulkButton--resend:hover:not(:disabled) {
+  background: #dfe9ff;
+}
+
+.runPage__bulkButton--delete {
+  background: #fdecec;
+  color: #d63a3a;
+  border: 1px solid #f5c4c4;
+}
+
+.runPage__bulkButton--delete:hover:not(:disabled) {
+  background: #fadada;
+}
+
+@media (max-width: 720px) {
+  .runPage__controlButtons .runPage__bulkButton {
+    width: 100%;
+  }
+}
