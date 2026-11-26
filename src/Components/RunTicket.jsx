@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import DOMPurify from "dompurify";
 import {
   FaFileDownload,
   FaInfoCircle,
@@ -73,7 +72,6 @@ export default function RunTicket({ invite }) {
     .toUpperCase();
 
   const admit = Math.max(1, Number(invite.numberOfGuests) || 1);
-  const terms = String(event.termsConditions || "").trim();
 
   const handleShare = async () => {
     const url = window.location.href;
@@ -170,16 +168,6 @@ export default function RunTicket({ invite }) {
           <FaShareAlt aria-hidden="true" /> {copied ? "Link Copied" : "Share Link"}
         </button>
       </div>
-
-      {terms && (
-        <section className="runTicket__terms">
-          <h2>Terms and Conditions</h2>
-          <div
-            className="runTicket__termsBody"
-            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(terms) }}
-          />
-        </section>
-      )}
 
       <footer className="runTicket__footer">
         <img src={cityLogo} alt="City Lifestyle" />
