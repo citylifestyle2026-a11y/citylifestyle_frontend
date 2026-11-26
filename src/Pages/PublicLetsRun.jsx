@@ -95,11 +95,12 @@ export default function PublicLetsRun() {
       <header className="letsRun__hero">
         <img className="letsRun__logo" src={logo} alt="City Lifestyle" />
         <p className="letsRun__kicker">City Lifestyle presents</p>
-        <h1 className="letsRun__title">Let&rsquo;s Run</h1>
+        {/* The event name IS the title (e.g. "Let's Run"): it comes from the
+            current active event, nothing is hardcoded here. */}
+        <h1 className="letsRun__title">{info?.eventTitle || "Registration"}</h1>
 
         {info && (
           <>
-            <p className="letsRun__event">{info.eventTitle}</p>
             <ul className="letsRun__chips">
               {info.date && (
                 <li>
@@ -211,7 +212,6 @@ export default function PublicLetsRun() {
         )}
       </main>
 
-      <p className="letsRun__footer">Run. Celebrate. Repeat.</p>
     </div>
   );
 }

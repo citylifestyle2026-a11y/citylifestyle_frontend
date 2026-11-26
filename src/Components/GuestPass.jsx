@@ -21,7 +21,6 @@ import {
 } from "react-icons/fa";
 
 import { getPublicInvitationApi } from "../services/publicInvitationService";
-import RunTicket from "./RunTicket";
 import parvLogo from "../assets/images/pass/parv-logo-maroon.png";
 import associationLogos from "../assets/images/pass/association-logos.png";
 import supporterLogos from "../assets/images/pass/supporter-logos.png";
@@ -113,9 +112,6 @@ export default function GuestPass({ invitationId: rawInvitationId, embedded = fa
       </div>
     );
   }
-
-  // Let's Run registrations have their own ticket (no payment lines, event T&C).
-  if (invite.isRunRegistration && !embedded) return <RunTicket invite={invite} />;
 
   const { event } = invite;
   const guests = invite.numberOfGuests;
