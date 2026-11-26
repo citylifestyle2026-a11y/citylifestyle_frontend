@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FaCheckCircle, FaWhatsapp, FaTicketAlt } from "react-icons/fa";
+import { FaCheckCircle, FaWhatsapp, FaTicketAlt, FaCalendarAlt, FaClock, FaMapMarkerAlt } from "react-icons/fa";
 
 import { getLetsRunInfoApi, submitLetsRunApi } from "../services/letsRunService";
 import { MOBILE_ERROR_MESSAGE, normalizeMobileNumber } from "../utilits/mobileNumber";
@@ -92,24 +92,50 @@ export default function PublicLetsRun() {
 
   return (
     <div className="letsRun">
-      <div className="letsRun__card">
+      <header className="letsRun__hero">
         <img className="letsRun__logo" src={logo} alt="City Lifestyle" />
+        <p className="letsRun__kicker">City Lifestyle presents</p>
+        <h1 className="letsRun__title">Let&rsquo;s Run</h1>
 
+        {info && (
+          <>
+            <p className="letsRun__event">{info.eventTitle}</p>
+            <ul className="letsRun__chips">
+              {info.date && (
+                <li>
+                  <FaCalendarAlt /> {info.date}
+                </li>
+              )}
+              {info.time && (
+                <li>
+                  <FaClock /> {info.time}
+                </li>
+              )}
+              {info.venueName && (
+                <li>
+                  <FaMapMarkerAlt /> {info.venueName}
+                </li>
+              )}
+            </ul>
+          </>
+        )}
+      </header>
+
+      <main className="letsRun__card">
         {loading && <p className="letsRun__muted">Loading...</p>}
 
         {!loading && infoError && !result && (
           <div className="letsRun__center">
-            <h1 className="letsRun__title">Registration closed</h1>
+            <h2 className="letsRun__heading">Registration closed</h2>
             <p className="letsRun__text">{infoError}</p>
           </div>
         )}
 
         {!loading && info && !result && (
           <>
-            <h1 className="letsRun__title">Let&rsquo;s Run</h1>
-            <p className="letsRun__event">{info.eventTitle}</p>
-            <p className="letsRun__meta">
-              {[info.date, info.time, info.venueName].filter(Boolean).join(" | ")}
+            <h2 className="letsRun__heading">Register for free</h2>
+            <p className="letsRun__text letsRun__text--left">
+              Enter your details and we will send your entry QR on WhatsApp.
             </p>
 
             <form className="letsRun__form" onSubmit={handleSubmit} noValidate>
@@ -123,8 +149,9 @@ export default function PublicLetsRun() {
                   maxLength={60}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Your full name"
+                  placeholder="Enter your full name"
                   autoComplete="name"
+                  aria-invalid={Boolean(errors.name)}
                 />
                 {errors.name && <p className="letsRun__error">{errors.name}</p>}
               </div>
@@ -133,7 +160,7 @@ export default function PublicLetsRun() {
                 <label htmlFor="letsRunMobile">
                   Mobile number (WhatsApp) <b>*</b>
                 </label>
-                <div className="letsRun__mobile">
+                <div className={`letsRun__mobile${errors.mobile ? " letsRun__mobile--error" : ""}`}>
                   <span>+91</span>
                   <input
                     id="letsRunMobile"
@@ -143,13 +170,13 @@ export default function PublicLetsRun() {
                     onChange={(e) => setMobile(e.target.value.replace(/[^\d+\s-]/g, ""))}
                     placeholder="10-digit mobile number"
                     autoComplete="tel"
+                    aria-invalid={Boolean(errors.mobile)}
                   />
                 </div>
                 {errors.mobile && <p className="letsRun__error">{errors.mobile}</p>}
-                <p className="letsRun__hint">Your entry QR is sent on this WhatsApp number.</p>
               </div>
 
-              {submitError && <p className="letsRun__error letsRun__error--box">{submitError}</p>}
+              {submitError && <p className="letsRun__alert">{submitError}</p>}
 
               <button type="submit" className="letsRun__button" disabled={submitting}>
                 {submitting ? "Registering..." : "Register"}
@@ -163,13 +190,13 @@ export default function PublicLetsRun() {
             <div className="letsRun__tick">
               <FaCheckCircle />
             </div>
-            <h1 className="letsRun__title">
+            <h2 className="letsRun__heading">
               {result.alreadyRegistered ? "You are already registered" : "You're registered!"}
-            </h1>
+            </h2>
             <p className="letsRun__text">
               {result.whatsappSent ? (
                 <>
-                  <FaWhatsapp /> Your ticket with the entry QR has been sent on WhatsApp.
+                  <FaWhatsapp className="letsRun__wa" /> Your ticket with the entry QR has been sent on WhatsApp.
                 </>
               ) : (
                 "We could not send the WhatsApp message right now. You can open your ticket below."
@@ -182,7 +209,9 @@ export default function PublicLetsRun() {
             )}
           </div>
         )}
-      </div>
+      </main>
+
+      <p className="letsRun__footer">Run. Celebrate. Repeat.</p>
     </div>
   );
 }

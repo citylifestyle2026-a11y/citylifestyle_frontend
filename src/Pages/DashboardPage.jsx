@@ -316,33 +316,6 @@ export default function DashboardPage() {
 
           </div>
 
-          {/* Run Registration - shown on top and independent of the event
-              dashboard data below, so it is always visible. */}
-          <section className="dashSection dashSection--run" style={{ marginBottom: 16 }}>
-            <div className="dashSection__head">
-              <div>
-                <h2 className="dashSection__title">Run Report</h2>
-                <p className="dashSection__sub">Let&rsquo;s Run - registered and scanned at the entry</p>
-              </div>
-              <Link className="dashSection__link" to="/run-report">
-                View Run Report &rarr;
-              </Link>
-            </div>
-            <div className="dashSection__cards">
-              {runCards.map((card) => (
-                <DashboardCard
-                  key={card.key}
-                  compact
-                  title={card.title}
-                  amountValue={card.amountValue}
-                  amountLabel={card.title}
-                  hideBody
-                  infoText={card.infoText}
-                />
-              ))}
-            </div>
-          </section>
-
           <div className="dashboardPage-body">
             {error && (
               <div className="dashboardErrorBar">
@@ -441,6 +414,33 @@ export default function DashboardPage() {
               </>
             )}
           </div>
+
+          {/* Run Report - last section of the dashboard, independent of the
+              event dashboard data above, so it is always visible. */}
+          <section className="dashSection dashSection--run" style={{ marginTop: 16 }}>
+            <div className="dashSection__head">
+              <div>
+                <h2 className="dashSection__title">Run Report</h2>
+                <p className="dashSection__sub">Let&rsquo;s Run - registered and scanned at the entry</p>
+              </div>
+              <Link className="dashSection__link" to="/run-report">
+                View Run Report &rarr;
+              </Link>
+            </div>
+            <div className="dashSection__cards">
+              {runCards.map((card) => (
+                <DashboardCard
+                  key={card.key}
+                  compact
+                  title={card.title}
+                  amountValue={card.amountValue}
+                  amountLabel={card.title}
+                  hideBody
+                  infoText={card.infoText}
+                />
+              ))}
+            </div>
+          </section>
         </div>
 
         {/* <div className="footer">
