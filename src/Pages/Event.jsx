@@ -80,6 +80,9 @@ const Event = () => {
         page: currentPage,
         limit: rowsPerPage,
         search,
+        // The Add Event page also lists the "Let's Run" event (so it can be
+        // edited); every dropdown / report leaves it out.
+        includeRun: true,
       })
     );
   }, [dispatch, currentPage, rowsPerPage, search]);
@@ -184,6 +187,9 @@ const Event = () => {
         page: currentPage,
         limit: rowsPerPage,
         search,
+        // The Add Event page also lists the "Let's Run" event (so it can be
+        // edited); every dropdown / report leaves it out.
+        includeRun: true,
       })
     );
   };

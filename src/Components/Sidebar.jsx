@@ -80,12 +80,6 @@ const menuItems = [
     icon: <FaFlag />,
     path: '/entry-report',
   },
-  {
-    // Let's Run report: Registered / Registered, Not Scanned / Scanned.
-    label: 'Run Report',
-    icon: <FaRunning />,
-    path: '/run-report',
-  },
    {
     label: 'User Management',
     icon: <FaUsers />,
@@ -108,6 +102,12 @@ const menuItems = [
       { label: 'Crew List', path: '/crew' },
       { label: 'Crew Category', path: '/crew-categories' },
     ],
+  },
+  {
+    // Let's Run report: Registered / Registered, Not Scanned / Scanned.
+    label: 'Run Report',
+    icon: <FaRunning />,
+    path: '/run-report',
   },
 ];
 
@@ -339,4 +339,4 @@ export default function Sidebar() {
       </aside>
     </>
   );
-} 
+}
